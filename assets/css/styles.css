@@ -1340,3 +1340,154 @@ html.js .reveal.is-visible{
 @media (max-width: 420px){
   .stay-grid{ grid-template-columns: 1fr; }
 }
+/* =========================================================
+   MOBILE ONLY — correctifs index + compte (NE TOUCHE PAS AU DESKTOP)
+   À coller TOUT EN BAS de styles.css
+========================================================= */
+@media (max-width: 900px){
+
+  /* -----------------------------
+     INDEX — Séjours: texte sur l’image (Camargue + autres stay-band)
+     (desktop inchangé)
+  ------------------------------ */
+  #sejours .stay-band{
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    position: relative !important;
+  }
+
+  #sejours .stay-band .stay-media{
+    height: 72vh !important;
+    min-height: 420px !important;
+    position: relative !important;
+  }
+
+  #sejours .stay-band .stay-copy{
+    position: absolute !important;
+    left: 0; right: 0; bottom: 0;
+    height: auto !important;
+    padding: 18px 18px 22px !important;
+
+    background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0)) !important;
+    color: rgba(255,255,255,.96) !important;
+  }
+
+  #sejours .stay-band .stay-copy .kicker,
+  #sejours .stay-band .stay-copy .sub,
+  #sejours .stay-band .stay-copy .missing{
+    color: rgba(255,255,255,.92) !important;
+  }
+
+  #sejours .stay-band .stay-copy .sep{
+    background: rgba(255,255,255,.48) !important;
+  }
+
+  #sejours .stay-band .stay-copy .btn{
+    color: rgba(255,255,255,.94) !important;
+    border-color: rgba(255,255,255,.70) !important;
+    background: rgba(255,255,255,.08) !important;
+  }
+
+  #sejours .stay-band .stay-copy .btn:hover{
+    background:#fff !important;
+    color:#000 !important;
+  }
+
+  /* si un stay-band reverse existe, on évite les inversions bizarres */
+  #sejours .stay-band.reverse .stay-media{ order: 1 !important; }
+  #sejours .stay-band.reverse .stay-copy{ order: 2 !important; }
+
+
+  /* -----------------------------
+     INDEX — Grille 5 séjours (cards)
+     Sur mobile: pas de hover => overlay toujours visible
+     (desktop hover inchangé)
+  ------------------------------ */
+  .stay-grid .stay-card .card-overlay{
+    opacity: 1 !important;                 /* overlay toujours visible */
+  }
+
+  .stay-grid .stay-card .card-info{
+    opacity: 1 !important;
+    transform: translateY(0) !important;   /* info visible */
+  }
+
+  .stay-grid .stay-card .mini-btn{
+    display: inline-flex !important;
+  }
+
+
+  /* -----------------------------
+     INDEX — À propos: texte tronqué + bouton "Voir la suite"
+     (uniquement mobile)
+  ------------------------------ */
+  .about-text.is-collapsed{
+    max-height: 260px !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .about-text.is-collapsed::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height: 120px;
+    background: linear-gradient(to bottom, rgba(247,244,239,0), rgba(247,244,239,1));
+    pointer-events:none;
+  }
+
+  .about-more{
+    margin-top: 14px !important;
+    display:flex !important;
+    justify-content:center !important;
+  }
+
+
+  /* -----------------------------
+     INDEX — Newsletter (guide cadeau)
+     inputs centrés, pas de débordement à droite
+     (uniquement mobile)
+  ------------------------------ */
+  .newsletter-inner.container{
+    width: min(520px, 92vw) !important;
+  }
+  .form-stack{
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  .form-stack .input,
+  .form-stack .btn{
+    width: 100% !important;
+  }
+
+
+  /* -----------------------------
+     INDEX — Contact: enlever le grand vide + ordre clair
+     (uniquement mobile)
+  ------------------------------ */
+  #contact .contact-grid{
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+    min-height: auto !important;
+    padding: calc(var(--navH) + 18px) 0 36px !important;
+    align-items: start !important;
+  }
+
+  #contact .rightcopy{
+    margin-top: 0 !important;
+  }
+
+  /* évite un padding bas énorme avant le footer */
+  #contact.band.white{
+    padding-bottom: 0 !important;
+  }
+
+
+  /* -----------------------------
+     COMPTE — mettre tout en 1 colonne sur mobile
+     (il faut que ton container ait la classe .account-grid)
+  ------------------------------ */
+  .account-grid{
+    grid-template-columns: 1fr !important;
+  }
+}

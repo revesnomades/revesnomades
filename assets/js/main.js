@@ -128,4 +128,15 @@ document.documentElement.classList.add("js");
     if(e.key === "Escape") closeMenu();
   });
 })();
+// A PROPOS — Voir la suite (uniquement utile sur mobile)
+(() => {
+  const text = document.getElementById("aboutText");
+  const btn = document.getElementById("aboutToggle");
+  if(!text || !btn) return;
+
+  btn.addEventListener("click", () => {
+    const collapsed = text.classList.toggle("is-collapsed");
+    btn.textContent = collapsed ? "Voir la suite" : "Réduire";
+  });
+})();
 
