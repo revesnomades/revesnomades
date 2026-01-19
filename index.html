@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Rêves Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Rêves Nomades — séjours bien-être : Pilates quotidien, randonnées, massages & cuisine saine." />
+
+  <!-- FAVICONS (si tu les as dans /assets/img/) -->
+  <link rel="icon" href="assets/img/favicon-32.png" sizes="32x32">
+  <link rel="icon" href="assets/img/favicon-16.png" sizes="16x16">
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body>
+
+  <!-- NAV (au-dessus des images) -->
+ <header class="nav" id="top">
+  <div class="container nav-inner">
+    <a class="brand" href="index.html" aria-label="Accueil Rêves Nomades">
+      <img src="assets/img/logo-reves-nomades.png" alt="Logo Rêves Nomades" />
+      <span>Rêves Nomades</span>
+    </a>
+
+    <!-- DESKTOP -->
+    <nav class="nav-links nav-links-desktop">
+      <a href="index.html#apropos" data-scroll>À propos</a>
+      <a href="index.html#contact" data-scroll>Contact</a>
+
+      <!-- UNE SEULE icône compte -->
+      <a class="icon-btn" href="compte.html" aria-label="Compte">
+        <svg class="icon" viewBox="0 0 24 24" fill="none">
+          <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </a>
+    </nav>
+
+    <!-- HAMBURGER -->
+    <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- MENU MOBILE -->
+    <div class="mobile-drawer" aria-hidden="true">
+      <div class="mobile-menu">
+        <a href="index.html#apropos" data-scroll>À propos</a>
+        <a href="index.html#contact" data-scroll>Contact</a>
+        <a href="compte.html">Compte</a>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+ <!-- HERO (full height) -->
+<section class="hero hero-left">
+  <div class="hero-bg" style="background-image:url('assets/img/hero-1.jpg');"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <h1 class="reveal" data-delay="0">rêves Nomades</h1>
+    <p class="reveal" data-delay="1">Partir pour mieux se retrouver.</p>
+
+    <div class="actions reveal" data-delay="2">
+      <a href="#sejours" class="btn tiny" data-scroll>Réserver</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLE -->
+<section class="band principle-band">
+  <div class="container">
+    <h2 class="reveal" data-delay="0">L'équilibre entre mouvement et détente.</h2>
+
+    <p class="reveal" data-delay="1">
+      Nos retraites et séjours bien-être sont pensés comme une véritable coupure avec le quotidien, une parenthèse pour ralentir et se ressourcer.
+Ils associent la pratique sportive consciente à des moments de bien-être profond, pour permettre au corps et à l’esprit de se reconnecter.
+Chaque séjour offre un temps pour soi, une pause essentielle pour retrouver énergie, équilibre et sérénité.
+    </p>
+  </div>
+</section>
+
+
+<!-- SÉJOURS -->
+<section class="band white" id="sejours">
+  <div class="stay-band">
+    <div class="stay-media" style="background-image:url('assets/img/sejour-camargue.jpg');"></div>
+
+    <div class="stay-copy">
+      <div class="kicker reveal" data-delay="0">Prochain séjour…</div>
+      <div class="sep reveal" data-delay="1"></div>
+
+      <h2 class="title reveal" data-delay="2">Séjour en Camargue</h2>
+      <p class="sub reveal" data-delay="3"><b>5 jours / 4 nuits</b> · <b>970€</b> / personne</p>
+
+      <p class="sub reveal" data-delay="4" data-date data-stay="5j4n">Chargement…</p>
+      <p class="sub reveal" data-delay="5" data-place data-stay="5j4n"></p>
+
+      <div class="actions reveal" data-delay="6">
+        <a class="btn tiny on-light" href="sejour-camargue.html">Plus d'infos</a>
+      </div>
+
+      <div class="missing reveal" data-delay="7" data-missing data-stay="5j4n"></div>
+      <div class="missing reveal" data-delay="8" style="font-size:12px;">
+        Un email vous sera envoyé dès la confirmation du séjour.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band cream" id="prochains-sejours">
+  <div class="container" style="padding: calc(var(--navH) + 60px) 0 var(--space-lg);">
+    <div class="reveal">
+      <h2 style="margin:0;">Prochains séjours</h2>
+      <p style="margin-top:12px; color:var(--muted);">
+        Survolez un séjour pour découvrir les prochaines dates.
+      </p>
+    </div>
+
+    <div class="stay-grid" style="margin-top:24px;">
+
+  <!-- 1 -->
+  <a class="stay-card reveal" data-delay="0" href="sejour-alentejo.html">
+    <div class="stay-card-media" style="background-image:url('assets/img/sejour-alentejo.jpg');">
+      <div class="stay-card-overlay">
+        <div class="stay-card-hover">
+          <div class="stay-card-line">5 jours / 4 nuits</div>
+          <div class="stay-card-line stay-card-dates" 
+      data-stay-id="alentejo"
+      data-dates-target>
+    Dates à annoncer
+  </div>
+
+          <div class="stay-card-cta">
+            <span class="stay-mini-btn">Plus d’infos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stay-card-title">Alentejo</div>
+  </a>
+
+  <!-- 2 -->
+  <a class="stay-card reveal" data-delay="1" href="sejour-taghazout.html">
+    <div class="stay-card-media" style="background-image:url('assets/img/sejour-taghazout.jpg');">
+      <div class="stay-card-overlay">
+        <div class="stay-card-hover">
+          <div class="stay-card-line">5 jours / 4 nuits</div>
+          <div class="stay-card-line stay-card-dates"
+     data-stay-id="taghazout"
+     data-dates-target>
+  Dates à annoncer
+</div>
+          <div class="stay-card-cta">
+            <span class="stay-mini-btn">Plus d’infos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stay-card-title">Taghazout</div>
+  </a>
+
+  <!-- 3 -->
+  <a class="stay-card reveal" data-delay="2" href="sejour-ile-de-re.html">
+    <div class="stay-card-media" style="background-image:url('assets/img/sejour-ile-de-re.jpg');">
+      <div class="stay-card-overlay">
+        <div class="stay-card-hover">
+          <div class="stay-card-line">5 jours / 4 nuits</div>
+          <div class="stay-card-line stay-card-dates"
+     data-stay-id="ile-de-re"
+     data-dates-target>
+  Dates à annoncer
+</div>
+
+          <div class="stay-card-cta">
+            <span class="stay-mini-btn">Plus d’infos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stay-card-title">Ile de Ré</div>
+  </a>
+
+  <!-- 4 -->
+  <a class="stay-card reveal" data-delay="3" href="sejour-queyras.html">
+    <div class="stay-card-media" style="background-image:url('assets/img/sejour-queyras.jpg');">
+      <div class="stay-card-overlay">
+        <div class="stay-card-hover">
+          <div class="stay-card-line">5 jours / 4 nuits</div>
+          <div class="stay-card-line stay-card-dates"
+     data-stay-id="queyras"
+     data-dates-target>
+  Dates à annoncer
+</div>
+
+          <div class="stay-card-cta">
+            <span class="stay-mini-btn">Plus d’infos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stay-card-title">Le Queyras</div>
+  </a>
+
+  <!-- 5 -->
+  <a class="stay-card reveal" data-delay="4" href="sejour-sardaigne.html">
+    <div class="stay-card-media" style="background-image:url('assets/img/sejour-sardaigne.jpg');">
+      <div class="stay-card-overlay">
+        <div class="stay-card-hover">
+          <div class="stay-card-line">5 jours / 4 nuits</div>
+          <div class="stay-card-line stay-card-dates"
+     data-stay-id="sardaigne"
+     data-dates-target>
+  Dates à annoncer
+</div>
+
+          <div class="stay-card-cta">
+            <span class="stay-mini-btn">Plus d’infos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stay-card-title">Sardaigne</div>
+  </a>
+
+</div>
+</section>
+
+
+
+<!-- À PROPOS -->
+<section class="band cream" id="apropos">
+  <div class="container about-band">
+    <div class="about-inner">
+
+      <h2 class="reveal" data-delay="0">À propos de Rêves Nomades</h2>
+
+      <div class="about-text">
+        <p class="reveal" data-delay="1">"Il y a quelques années, j’ai réalisé que beaucoup de femmes autour de moi étaient épuisées.</p>
+
+        <p class="reveal" data-delay="2">
+          Pas seulement fatiguées… mais vidées de leur élan, de leurs envies, de leur lumière.
+          Et puis j’ai compris que moi aussi, je m’étais oubliée.
+        </p>
+
+        <p class="reveal" data-delay="3">
+          Quelque part entre les obligations, les rêves reportés, la vie de femme, de mère, d’amoureuse…
+          Entre le « je dois » et le « plus tard ».
+          Un jour, j’ai senti un appel intérieur. Celui de m’arrêter.
+          De respirer. De revenir à l’essentiel.
+        </p>
+
+        <p class="reveal" data-delay="4">
+          Comment se reconnecter à soi quand on ne sait même plus ce que l’on ressent ?
+        </p>
+
+        <p class="reveal" data-delay="5">
+          C’est de ces questions qu’est né Rêves Nomades.
+          Une parenthèse hors du temps, une bulle douce où l’on vient se réparer,
+          se réaligner, se réanimer.
+        </p>
+
+        <p class="reveal" data-delay="6">
+          L’envie profonde de créer des espaces où les femmes peuvent déposer leurs armures, s’autoriser à être vulnérables, se sentir portées, nourries, entourées.
+          Des lieux loin du bruit, loin de tout ce qui pèse, et proches de tout ce qui soigne.
+        </p>
+
+        <p class="reveal" data-delay="8">
+          Rêves Nomades, ce n’est pas seulement un séjour. C’est une renaissance guidée.
+          Un espace pour pleurer ce qui doit partir. Pour célébrer ce qui revient. Pour se souvenir de qui l’on est vraiment.
+        </p>
+
+        <p class="reveal" data-delay="9">
+          Ce n’est pas une simple retraite bien-être.
+          C’est un retour à soi. Un retour à la femme que l’on est destinée à devenir.
+        </p>
+
+        <p class="reveal" data-delay="10">
+          Et si, en toi, quelque chose murmure « j’ai besoin de me retrouver »… alors peut-être que Rêves Nomades est ton chemin.
+          Un chemin doux, puissant, transformateur, où tu n’as qu’une seule chose à faire : te laisser porter.""
+        </p>
+      </div>
+
+      <div class="about-founder reveal" data-delay="11">
+        <img
+          src="assets/img/appoline.jpg"
+          alt="Appoline – Fondatrice de Rêves Nomades"
+          class="about-founder-img"
+        />
+        <div class="about-founder-meta">
+          <div class="about-founder-name">Appoline</div>
+          <div class="about-founder-role">Fondatrice de Rêves Nomades</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- NEWSLETTER GUIDE -->
+<section class="newsletter on-photo">
+  <div class="bg" style="background-image:url('assets/img/newsletter-bg.jpg');"></div>
+
+  <div class="newsletter-inner container">
+    <h2 class="reveal" data-delay="0">Recevez votre guide en cadeau !</h2>
+
+    <form id="newsletterForm" class="form-stack reveal" data-delay="1">
+      <input class="input" name="name" placeholder="Votre Nom" required />
+      <input class="input" name="email" type="email" placeholder="Votre Email" required />
+      <button class="btn block" type="submit">Recevoir mon guide</button>
+    </form>
+
+    <div id="newsletterMsg" class="form-msg reveal" data-delay="2"></div>
+  </div>
+</section>
+
+
+<!-- CARTE CADEAU -->
+<section class="gift-band gift-white">
+  <div class="bg" style="background-image:url('assets/img/hero-2.jpg');"></div>
+
+  <div class="inner container">
+    <h2 class="reveal" data-delay="0">Et si vous offriez un moment Rêves Nomades ?</h2>
+    <p class="reveal" data-delay="1">Un bon cadeau pour une parenthèse de mouvement, de douceur et de présence.</p>
+
+    <div class="actions reveal" data-delay="2">
+      <a class="btn tiny" href="bon-cadeau.html">Commander votre bon cadeau</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- CONTACT -->
+<section class="band band-full white" id="contact">
+  <div class="contact-grid">
+
+    <form id="contactForm" class="formbox">
+      <div class="reveal" data-delay="0">
+        <select name="subject" required>
+          <option value="">Ma demande concerne…</option>
+          <option value="reservation">Réservation</option>
+          <option value="sur-mesure">Moment sur mesure</option>
+          <option value="carte-cadeau">Carte cadeau</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+
+      <input class="reveal" data-delay="1" name="name" placeholder="Votre nom" required />
+      <input class="reveal" data-delay="2" name="email" type="email" placeholder="Votre Email" required />
+      <textarea class="reveal" data-delay="3" name="message" placeholder="Votre message" required></textarea>
+
+      <button class="btn on-light reveal" data-delay="4" type="submit">ENVOYER</button>
+      <div id="contactMsg" class="muted small reveal" data-delay="5"></div>
+    </form>
+
+    <div class="rightcopy">
+      <h2 class="reveal" data-delay="0">Partir pour mieux se retrouver.</h2>
+
+      <p class="muted reveal" data-delay="1">
+        Pour vos questions, la création d’un moment sur mesure, commander votre carte cadeau…
+        N’hésitez pas à nous écrire !
+      </p>
+
+      <div class="coords muted reveal" data-delay="2">
+        <div><b>Rêves Nomades</b></div>
+        <div>contact@revesnomades.com</div>
+        <div>06 58 03 87 70</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- BOTTOM IMAGE -->
+<section class="bottom-wide on-photo">
+  <div class="bg" style="background-image:url('assets/img/bottom-wide.jpg');"></div>
+  <div class="content container">
+    <h2 class="reveal" data-delay="0">Partir pour mieux se retrouver.</h2>
+    <p class="reveal" data-delay="1">Rêves Nomades — des échappées pour ralentir, respirer, se retrouver.</p>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="band cream">
+  <div class="container footer">
+
+    <div class="footer-row">
+      <div class="footer-brand reveal" data-delay="0">
+        <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
+        <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
+      </div>
+
+      <div class="footer-social reveal" data-delay="1">
+        <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </a>
+
+        <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+          </svg>
+        </a>
+
+        <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+      </div>
+    </div>
+
+    <div class="legal reveal" data-delay="2">
+      <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>Copyright © 2026 Rêves Nomades</div>
+        <div>
+          <a href="mentions-legales.html">Mentions légales</a> ·
+          <a href="politique-confidentialite.html">Politique de confidentialité</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+  <!-- JS minimal (transitions + nav + slider) -->
+  <script>
+    // Nav style on scroll
+    (function(){
+      const nav = document.querySelector(".nav");
+      const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 20);
+      window.addEventListener("scroll", onScroll, {passive:true});
+      onScroll();
+    })();
+
+    // Smooth anchor scroll (avec offset nav)
+    (function(){
+      document.querySelectorAll("[data-scroll]").forEach(a=>{
+        a.addEventListener("click",(e)=>{
+          const href = a.getAttribute("href") || "";
+          if(!href.startsWith("#")) return;
+          const el = document.querySelector(href);
+          if(!el) return;
+          e.preventDefault();
+          const navH = 66;
+          const y = el.getBoundingClientRect().top + window.scrollY - navH;
+          window.scrollTo({ top:y, behavior:"smooth" });
+        });
+      });
+    })();
+
+    // Reveal on scroll
+    (function(){
+      const items = document.querySelectorAll(".reveal");
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      items.forEach(el=>io.observe(el));
+    })();
+
+    // Story slider (fallback si tu n’utilises pas slider.js)
+    (function(){
+      const el = document.getElementById("storySlider");
+      if(!el) return;
+      const imgs = [
+        "assets/img/slider-1.jpg",
+        "assets/img/slider-2.jpg",
+        "assets/img/slider-3.jpg",
+        "assets/img/slider-4.jpg",
+      ];
+      let i = Math.floor(Math.random() * imgs.length);
+      setInterval(()=> {
+        i = (i + 1) % imgs.length;
+        el.style.backgroundImage = "url('" + imgs[i] + "')";
+      }, 3600);
+    })();
+  </script>
+<script src="assets/js/main.js"></script>
+<script type="module">
+  import { hydrateIndexDates } from "./assets/js/stayDates.js";
+  hydrateIndexDates();
+</script>
+
+</body>
+</html>

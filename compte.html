@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Compte — Rêves Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="on-light">
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
+        <span>Rêves Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="index.html#apropos">À propos</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <section class="band cream">
+    <div style="padding-top: calc(var(--navH) + 44px); padding-bottom: 80px;">
+      <div class="container" style="display:grid; grid-template-columns: 1fr 1fr; gap:18px;">
+
+        <!-- COLONNE GAUCHE -->
+        <div style="border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
+          <h2>Mon compte</h2>
+          <p style="color:var(--muted); margin:10px 0 0;">
+            Accédez à vos réservations et suivez la validation des séjours.
+          </p>
+
+          <!-- Auth (visible si déconnecté) -->
+          <div id="authBox" style="margin-top:16px;">
+            <div style="display:grid; gap:10px;">
+              <input id="email" class="input"
+                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder="Email">
+
+              <input id="password" class="input"
+                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                type="password" placeholder="Mot de passe">
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
+                <button class="btn on-light" id="btnSignup" type="button">Inscription</button>
+              </div>
+
+              <!-- Mot de passe oublié -->
+              <button class="btn on-light" id="btnForgot" type="button" style="justify-content:flex-start;">
+                Mot de passe oublié ?
+              </button>
+
+              <div id="authMsg" style="color:var(--muted); font-size:12.5px;"></div>
+            </div>
+          </div>
+
+          <!-- Zone RESET (visible seulement si lien reçu) -->
+          <div id="resetBox" style="display:none; margin-top:16px;">
+            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
+
+            <div style="display:grid; gap:10px; margin-top:10px;">
+              <input id="newPassword" class="input"
+                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                type="password" placeholder="Nouveau mot de passe">
+
+              <button class="btn on-light" id="btnUpdatePassword" type="button">
+                Mettre à jour mon mot de passe
+              </button>
+
+              <div id="resetMsg" style="color:var(--muted); font-size:12.5px;"></div>
+            </div>
+          </div>
+
+          <!-- Logged (visible si connecté) -->
+          <div id="loggedBox" style="display:none; margin-top:16px;">
+            <div style="color:var(--muted); font-size:13px;">
+              Connecté(e) : <b id="userEmail"></b>
+            </div>
+
+            <!-- ✅ boutons visibles seulement une fois connecté -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+              <button class="btn on-light" id="btnSeeBookings" type="button">Voir mes réservations</button>
+              <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
+            </div>
+
+            <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+          </div>
+        </div>
+
+        <!-- COLONNE DROITE -->
+        <div>
+          <!-- Avantages si déconnecté -->
+          <div id="perksBox" style="border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
+            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
+            <p style="color:var(--muted); margin-top:10px;">
+              • Suivre vos réservations passées et à venir<br>
+              • Voir le nombre de réservations restantes pour valider un séjour (min. 10)<br>
+              • Recevoir les informations pratiques et mises à jour
+            </p>
+          </div>
+
+          <!-- Réservations si connecté -->
+          <div id="bookingsBox" style="display:none; border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
+            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Mes réservations</h3>
+            <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Chargement…</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
+          <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
+        </div>
+
+        <div class="footer-social">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
+
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
+
+          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+        </div>
+      </div>
+
+      <div class="legal">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Rêves Nomades</div>
+          <div>
+            <a href="mentions-legales.html">Mentions légales</a> ·
+            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <!-- ✅ SUPABASE AUTH + RESET + REDIRECT PANIER -->
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    // --- elements
+    const authBox = document.getElementById("authBox");
+    const resetBox = document.getElementById("resetBox");
+    const loggedBox = document.getElementById("loggedBox");
+    const perksBox = document.getElementById("perksBox");
+    const bookingsBox = document.getElementById("bookingsBox");
+
+    const emailEl = document.getElementById("email");
+    const passEl = document.getElementById("password");
+
+    const btnLogin = document.getElementById("btnLogin");
+    const btnSignup = document.getElementById("btnSignup");
+    const btnForgot = document.getElementById("btnForgot");
+    const btnUpdatePassword = document.getElementById("btnUpdatePassword");
+
+    const btnLogout = document.getElementById("btnLogout");
+    const btnSeeBookings = document.getElementById("btnSeeBookings");
+
+    const authMsg = document.getElementById("authMsg");
+    const resetMsg = document.getElementById("resetMsg");
+    const newPasswordEl = document.getElementById("newPassword");
+
+    const userEmail = document.getElementById("userEmail");
+    const loggedMsg = document.getElementById("loggedMsg");
+    const bookingsList = document.getElementById("bookingsList");
+
+    const setText = (el, t) => { if(el) el.textContent = t || ""; };
+
+    // --- redirect helpers
+    function getRedirectParam(){
+      const p = new URLSearchParams(location.search);
+      return p.get("redirect"); // ex: panier.html?stayId=...
+    }
+
+    function goRedirectIfAny(){
+      const redirect = getRedirectParam();
+      if(redirect) window.location.href = redirect;
+    }
+
+    function goPendingCartIfAny(){
+      const pendingStayId = sessionStorage.getItem("pendingStayId");
+      if(!pendingStayId) return;
+
+      const eventId = sessionStorage.getItem("pendingEventId") || "";
+      sessionStorage.setItem("allowCart", "1");
+
+      const params = new URLSearchParams({ stayId: pendingStayId });
+      if(eventId) params.set("eventId", eventId);
+
+      // nettoyage
+      sessionStorage.removeItem("pendingStayId");
+      sessionStorage.removeItem("pendingEventId");
+      sessionStorage.removeItem("pendingQty");
+      sessionStorage.removeItem("pendingRoom");
+
+      window.location.href = `panier.html?${params.toString()}`;
+    }
+
+    // --- UI
+    function showLogged(user){
+      authBox.style.display = "none";
+      resetBox.style.display = "none";
+      perksBox.style.display = "none";
+
+      loggedBox.style.display = "block";
+      bookingsBox.style.display = "block";
+
+      userEmail.textContent = user?.email || "";
+      btnSeeBookings.style.display = "inline-flex";
+      btnLogout.style.display = "inline-flex";
+    }
+
+    function showLoggedOut(){
+      loggedBox.style.display = "none";
+      bookingsBox.style.display = "none";
+      perksBox.style.display = "block";
+
+      // si flow reset -> resetBox, sinon authBox
+      const isResetFlow = window.location.hash.includes("reset");
+      resetBox.style.display = isResetFlow ? "block" : "none";
+      authBox.style.display = isResetFlow ? "none" : "block";
+
+      setText(authMsg, "");
+      setText(resetMsg, "");
+      setText(loggedMsg, "");
+      if(bookingsList) bookingsList.textContent = "";
+    }
+
+    async function refreshBookings(){
+      if(!bookingsList) return;
+      bookingsList.textContent = "Chargement…";
+
+      const { data: sessData } = await supabase.auth.getSession();
+      const user = sessData?.session?.user;
+      if(!user){
+        bookingsList.textContent = "";
+        return;
+      }
+
+      // ⚠️ adapte les colonnes selon ta table bookings
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("id, stay_id, event_id, places, room_type, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if(error){
+        bookingsList.textContent = "Les réservations apparaîtront ici prochainement.";
+        return;
+      }
+
+      if(!data || data.length === 0){
+        bookingsList.textContent = "Aucune réservation pour le moment.";
+        return;
+      }
+
+      bookingsList.innerHTML = data.map(b => `
+        <div style="border-top:1px solid var(--line); padding-top:10px; margin-top:10px;">
+          <div><b>Séjour :</b> ${b.stay_id || "—"}</div>
+          <div><b>Places :</b> ${b.places || 1}</div>
+          <div><b>Chambre :</b> ${b.room_type || "—"}</div>
+          <div style="font-size:12.5px; color:var(--muted); margin-top:4px;">
+            ${b.created_at ? new Date(b.created_at).toLocaleString("fr-FR") : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function refreshUI(){
+      const { data: sessData } = await supabase.auth.getSession();
+      const user = sessData?.session?.user;
+
+      if(user){
+        showLogged(user);
+        await refreshBookings();
+
+        // priorités : panier pending > redirect param
+        goPendingCartIfAny();
+        goRedirectIfAny();
+      }else{
+        showLoggedOut();
+      }
+    }
+
+    // --- actions
+    btnLogin?.addEventListener("click", async () => {
+      setText(authMsg, "");
+      const email = (emailEl.value || "").trim();
+      const password = passEl.value || "";
+
+      if(!email || !password){
+        setText(authMsg, "Merci de renseigner un email et un mot de passe.");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if(error){
+        setText(authMsg, error.message);
+        return;
+      }
+
+      await refreshUI();
+    });
+
+    btnSignup?.addEventListener("click", async () => {
+      setText(authMsg, "");
+      const email = (emailEl.value || "").trim();
+      const password = passEl.value || "";
+
+      if(!email || !password){
+        setText(authMsg, "Merci de renseigner un email et un mot de passe.");
+        return;
+      }
+
+      // si on vient du panier, on conserve le retour
+      const redirect = getRedirectParam();
+      const emailRedirectTo = redirect
+        ? `${location.origin}/${redirect}`
+        : `${location.origin}/compte.html`;
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo }
+      });
+
+      if(error){
+        setText(authMsg, error.message);
+        return;
+      }
+
+      setText(authMsg, "Inscription OK. Vérifiez vos emails pour confirmer votre compte (si demandé).");
+    });
+
+    btnForgot?.addEventListener("click", async () => {
+      setText(authMsg, "");
+      const email = (emailEl.value || "").trim();
+      if(!email){
+        setText(authMsg, "Entrez votre email puis cliquez sur “Mot de passe oublié ?”.");
+        return;
+      }
+
+      // important : l’URL de retour doit être autorisée dans Supabase (Redirect URLs)
+      const redirectTo = `${location.origin}/compte.html#reset`;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      if(error){
+        setText(authMsg, error.message);
+        return;
+      }
+
+      setText(authMsg, "Email envoyé. Ouvrez-le et suivez le lien pour créer un nouveau mot de passe.");
+    });
+
+    btnUpdatePassword?.addEventListener("click", async () => {
+      setText(resetMsg, "");
+      const newPassword = newPasswordEl.value || "";
+      if(newPassword.length < 8){
+        setText(resetMsg, "Choisissez un mot de passe d’au moins 8 caractères.");
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if(error){
+        setText(resetMsg, error.message);
+        return;
+      }
+
+      setText(resetMsg, "Mot de passe mis à jour. Vous êtes connecté(e).");
+      await refreshUI();
+    });
+
+    btnLogout?.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      await refreshUI();
+    });
+
+    btnSeeBookings?.addEventListener("click", async () => {
+      await refreshBookings();
+      setText(loggedMsg, "Réservations mises à jour.");
+      setTimeout(() => setText(loggedMsg, ""), 1800);
+    });
+
+    // live updates
+    supabase.auth.onAuthStateChange(() => refreshUI());
+
+    // init
+    await refreshUI();
+  </script>
+
+</body>
+</html>

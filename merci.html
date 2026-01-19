@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Merci — Rêves Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Favicons (si tu les as) -->
+  <link rel="icon" href="assets/img/favicon-32.png" sizes="32x32">
+  <link rel="icon" href="assets/img/favicon-16.png" sizes="16x16">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="on-light">
+
+  <!-- NAV -->
+  <header class="nav" id="top">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Accueil Rêves Nomades">
+        <img src="assets/img/logo-reves-nomades.png" alt="Logo Rêves Nomades" />
+        <span>Rêves Nomades</span>
+      </a>
+
+      <nav class="nav-links nav-links-desktop">
+        <a href="index.html#apropos" data-scroll>À propos</a>
+        <a href="index.html#contact" data-scroll>Contact</a>
+        <a class="icon-btn" href="compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <!-- hamburger si tu l'as sur les autres pages (optionnel) -->
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="mobile-drawer" aria-hidden="true">
+        <div class="mobile-menu">
+          <a href="index.html#apropos" data-scroll>À propos</a>
+          <a href="index.html#contact" data-scroll>Contact</a>
+          <a href="compte.html">Compte</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENU -->
+  <section class="band cream">
+    <div class="container" style="min-height: 85vh; display:flex; align-items:center; padding: calc(var(--navH) + 40px) 0 70px;">
+      <div class="reveal" data-delay="0" style="width:100%; text-align:center;">
+        <h1 style="font-family:MuseoModerno; font-weight:500; font-size: clamp(34px, 4.2vw, 62px); margin:0;">
+          Merci ✨
+        </h1>
+
+        <p style="max-width: 72ch; margin: 14px auto 0; color: var(--muted);">
+          Votre paiement a bien été pris en compte.
+          Vous allez recevoir un email de confirmation de la part de Stripe.
+        </p>
+
+        <p id="merciType" style="max-width: 72ch; margin: 12px auto 0; color: var(--muted);">
+          Si votre achat concerne un séjour, un email complémentaire vous sera envoyé dès que le séjour sera validé.
+        </p>
+
+        <div style="margin-top: 22px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <a class="btn on-light" href="index.html">Retour à l’accueil</a>
+          <a class="btn on-light" href="compte.html">Accéder à mon compte</a>
+        </div>
+
+        <p style="margin-top:18px; font-size:12.5px; color: var(--muted);">
+          Une question ? Écrivez-nous : <a href="index.html#contact" style="text-decoration:underline; text-underline-offset:3px;">contact@revesnomades.fr</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
+          <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
+        </div>
+
+        <div class="footer-social">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
+
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
+
+          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+        </div>
+      </div>
+
+      <div class="legal">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Rêves Nomades</div>
+          <div>
+            <a href="mentions-legales.html">Mentions légales</a> ·
+            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <!-- (Optionnel) ajuster le message si tu veux distinguer carte cadeau -->
+  <script>
+    // si Stripe te renvoie un paramètre ?type=gift ou ?type=stay, tu peux adapter.
+    const p = new URLSearchParams(location.search);
+    const type = p.get("type");
+    const el = document.getElementById("merciType");
+    if(el && type === "gift"){
+      el.textContent = "Votre carte cadeau sera envoyée par email après le paiement.";
+    }
+  </script>
+
+</body>
+</html>

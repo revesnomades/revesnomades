@@ -1,0 +1,157 @@
+/* Page bon cadeau – CSS isolé pour ne pas casser styles.css */
+
+.gc-wrap{
+  padding-top: calc(var(--navH) + 60px);
+  padding-bottom: 100px;
+}
+
+.gc-head{
+  text-align:center;
+  margin-bottom: 36px;
+}
+.gc-head h1{
+  font-size: clamp(30px, 3.2vw, 52px);
+}
+.gc-head p{
+  color: var(--muted);
+  max-width: 70ch;
+  margin: 12px auto 0;
+}
+
+.gc-grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.gc-card{
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.65);
+  padding: 22px;
+}
+
+.gc-card h2{
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.gc-sep{
+  margin: 22px 0;
+  height:1px;
+  background: var(--line);
+}
+
+/* radios */
+.gc-amounts{
+  display:grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+.gc-radio{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  font-size: 15px;
+  color: var(--text);
+}
+.gc-radio input{ accent-color: #111; }
+
+/* fields */
+.gc-field{
+  margin-top: 14px;
+}
+.gc-field label{
+  display:block;
+  font-size: 12px;
+  letter-spacing:.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.gc-input{
+  width:100%;
+  border: 1px solid rgba(30,31,34,.20);
+  background: rgba(255,255,255,.95);
+  color: var(--text);
+  border-radius: 0;
+  padding: 12px 12px;
+  font-weight: 300;
+}
+
+/* placeholders bien visibles */
+.gc-input::placeholder{
+  color: rgba(30,31,34,.45);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.gc-hint{
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* recap */
+.gc-recap{
+  position: sticky;
+  top: calc(var(--navH) + 18px);
+}
+
+.gc-recap-box{
+  border:1px solid var(--line);
+  padding: 14px;
+  background: rgba(255,255,255,.55);
+  margin-bottom: 14px;
+}
+
+.gc-recap-row{
+  display:grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(30,31,34,.10);
+}
+.gc-recap-row:last-child{
+  border-bottom: none;
+}
+
+.gc-recap-row .k{
+  color: var(--muted);
+  font-size: 13px;
+}
+.gc-recap-row .v{
+  color: var(--text);
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.gc-note{
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.gc-secure{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.gc-msg{
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .gc-grid{
+    grid-template-columns: 1fr;
+  }
+  .gc-recap{
+    position: static;
+  }
+}

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Bon cadeau — Rêves Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/bon-cadeau.css" />
+</head>
+
+<body class="on-light">
+
+  <!-- NAV -->
+  <header class="nav" id="top">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Accueil Rêves Nomades">
+        <img src="assets/img/logo-reves-nomades.png" alt="Logo Rêves Nomades" />
+        <span>Rêves Nomades</span>
+      </a>
+
+      <nav class="nav-links nav-links-desktop">
+        <a href="index.html#apropos" data-scroll>À propos</a>
+        <a href="index.html#contact" data-scroll>Contact</a>
+        <a class="icon-btn" href="compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Hamburger (mobile) -->
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Drawer mobile -->
+      <div class="mobile-drawer" aria-hidden="true">
+        <div class="mobile-menu">
+          <a href="index.html#apropos" data-scroll>À propos</a>
+          <a href="index.html#contact" data-scroll>Contact</a>
+          <a href="compte.html">Compte</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <main class="band cream">
+    <div class="container gc-wrap">
+
+      <header class="gc-head">
+        <h1>Offrir un bon cadeau</h1>
+        <p>
+          Un moment Rêves Nomades à offrir : douceur, présence, mouvement.
+          Le bon cadeau est valable sur l’ensemble des séjours.
+        </p>
+      </header>
+
+      <div class="gc-grid">
+
+        <!-- LEFT -->
+        <section class="gc-card">
+          <h2>Montant du bon cadeau</h2>
+
+          <div class="gc-amounts">
+            <label class="gc-radio">
+              <input type="radio" name="amount" value="50">
+              <span>50 €</span>
+            </label>
+            <label class="gc-radio">
+              <input type="radio" name="amount" value="100">
+              <span>100 €</span>
+            </label>
+            <label class="gc-radio">
+              <input type="radio" name="amount" value="150">
+              <span>150 €</span>
+            </label>
+            <label class="gc-radio">
+              <input type="radio" name="amount" value="200">
+              <span>200 €</span>
+            </label>
+          </div>
+
+          <div class="gc-field">
+            <label for="amountCustom">Montant personnalisé (min. 10€)</label>
+            <input id="amountCustom" class="input gc-input" type="number" min="10" step="1"
+              placeholder="Ex : 120" />
+            <div class="gc-hint">Si vous saisissez un montant ici, il remplace le choix ci-dessus.</div>
+          </div>
+
+          <div class="gc-sep"></div>
+
+          <h2>Informations</h2>
+
+          <div class="gc-field">
+            <label for="fromName">Offert par</label>
+            <input id="fromName" class="input gc-input" type="text"
+              placeholder="Nom de la personne qui offre le bon" />
+          </div>
+
+          <div class="gc-field">
+            <label for="toName">Pour</label>
+            <input id="toName" class="input gc-input" type="text"
+              placeholder="Nom de la personne qui recevra le bon" />
+          </div>
+
+          <div class="gc-field">
+            <label for="toEmail">Email du destinataire</label>
+            <input id="toEmail" class="input gc-input" type="email"
+              placeholder="Adresse email de la personne qui recevra le bon" />
+          </div>
+
+          <div class="gc-field">
+            <label for="message">Message (optionnel)</label>
+            <textarea id="message" class="input gc-input" rows="5"
+              placeholder="Ex : Je t’offre cette parenthèse pour ralentir, respirer, te retrouver…"></textarea>
+          </div>
+
+          <div id="gcMsg" class="gc-msg"></div>
+        </section>
+
+        <!-- RIGHT -->
+        <aside class="gc-card gc-recap">
+          <h2>Récapitulatif</h2>
+
+          <div class="gc-recap-box">
+            <div class="gc-recap-row">
+              <div class="k">Produit</div>
+              <div class="v"><b>Bon cadeau Rêves Nomades</b></div>
+            </div>
+
+            <div class="gc-recap-row">
+              <div class="k">Montant</div>
+              <div class="v" id="rAmount">—</div>
+            </div>
+
+            <div class="gc-recap-row">
+              <div class="k">Offert par</div>
+              <div class="v" id="rFrom">—</div>
+            </div>
+
+            <div class="gc-recap-row">
+              <div class="k">Pour</div>
+              <div class="v" id="rTo">—</div>
+            </div>
+
+            <div class="gc-recap-row">
+              <div class="k">Email</div>
+              <div class="v" id="rEmail">—</div>
+            </div>
+
+            <div class="gc-recap-row">
+              <div class="k">Message</div>
+              <div class="v" id="rMessage">—</div>
+            </div>
+
+            <div class="gc-note">
+              Valable sur l’ensemble des séjours Rêves Nomades.
+              Après paiement, vous serez redirigé(e) automatiquement vers une page de confirmation Stripe.
+            </div>
+          </div>
+
+          <!-- IMPORTANT : remplace TON lien Stripe ici -->
+          <button id="btnPayGift" class="btn on-light block" type="button">
+            Payer via Stripe
+          </button>
+
+          <div class="gc-secure">Paiement sécurisé via Stripe</div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="legal">
+        <div class="legal-row">
+          <div>Copyright © 2026 Rêves Nomades</div>
+          <div>
+            <a href="mentions-legales.html">Mentions légales</a> ·
+            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/bon-cadeau.js"></script>
+</body>
+</html>
