@@ -900,3 +900,117 @@ html.js .reveal.is-visible{
     align-items: center;
   }
 }
+/* ==========================================
+   CONTACT — MOBILE ONLY (meilleure mise en page)
+   Desktop inchangé
+========================================== */
+@media (max-width: 900px){
+
+  /* le bloc complet */
+  #contact .contact-grid{
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: calc(var(--navH) + 18px) 0 34px !important;
+    align-items: start !important;
+  }
+
+  /* ✅ titre "Pour vos questions" au-dessus du formulaire */
+  #contact .rightcopy{
+    order: 0 !important;
+    margin: 0 0 6px 0 !important;
+  }
+
+  #contact .rightcopy h2{
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+    margin: 0 0 10px 0 !important;
+    text-align: left !important;
+  }
+
+  #contact .rightcopy p{
+    margin-top: 8px !important;
+    text-align: left !important;
+  }
+
+  #contact .coords{
+    margin-top: 12px !important;
+    font-size: 13.5px !important;
+    line-height: 1.75 !important;
+    text-align: left !important;
+  }
+
+  /* ✅ formulaire en dessous, centré, largeur clean */
+  #contact .formbox{
+    order: 1 !important;
+    width: min(560px, 92vw) !important;
+    margin: 0 auto !important;
+    padding: 14px !important;
+  }
+
+  /* champs plus confortables */
+  #contact .formbox select,
+  #contact .formbox input,
+  #contact .formbox textarea{
+    padding: 13px !important;
+    font-size: 15px !important;
+  }
+
+  #contact .formbox textarea{
+    min-height: 150px !important;
+  }
+
+  /* bouton pleine largeur */
+  #contact .formbox .btn{
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+/* ===============================
+   SAC CADEAU – TEXTE + IMAGE
+================================ */
+
+.gift-pack{
+  margin-top: 34px;
+}
+
+.gift-pack-grid{
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 26px;
+  align-items: center;
+}
+
+/* Texte */
+.gift-pack-text h3{
+  margin: 0;
+}
+
+.gift-pack-list{
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.gift-pack-list li{
+  margin: 6px 0;
+}
+
+/* Image */
+.gift-pack-image img{
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .gift-pack-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .gift-pack-image{
+    order: 2;
+  }
+}

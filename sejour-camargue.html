@@ -51,8 +51,10 @@
 
   <!-- HERO IMAGE -->
   <section class="sejour-hero">
-    <div class="sejour-hero-bg" style="background-image:url('assets/img/sejour-camargue.jpg');"></div>
-  </section>
+  <div class="sejour-hero-bg"
+       style="background-image:url('assets/img/sejour-camargue.jpg'); background-position:center 65%;">
+  </div>
+</section>
 
   <!-- CONTENT -->
   <section class="band cream">
@@ -61,26 +63,163 @@
       <h1 class="reveal">Séjour en Camargue</h1>
 
       <p class="sejour-meta reveal">
-        5 jours · 4 nuits — <strong>970 €</strong> / personne
+        5 jours · 4 nuits — <strong>à partir de 970 €</strong> / personne
       </p>
 
       <p class="sejour-dates reveal">
-        Dates : du 7 au 11 mai 2026
+        Dates : <span id="stayDates">Dates à annoncer</span>
       </p>
 
       <div class="sejour-text reveal">
         <p>
-          Une parenthèse pour ralentir, respirer et revenir à l’essentiel, au cœur d’un lieu inspirant.
+          Une parenthèse pour ralentir, respirer et revenir à l’essentiel — dans une Camargue sauvage,
+          lumineuse et profondément apaisante. Ici, on marche pieds nus, on bouge en douceur,
+          on se nourrit sainement et on se reconnecte à son corps, à ses émotions, à son rythme.
         </p>
         <p>
-          Chaque journée mêle Pilates, activités liées au lieu, temps pour soi, massages, et cuisine saine préparée par une cheffe.
-        </p>
-        <p>
-          Un séjour pensé comme un voyage intérieur : se reconnecter à son corps, à ses émotions, à ce qui compte vraiment.
+          Ce séjour est pensé comme un voyage intérieur : une structure douce, mais solide.
+          Chaque journée alterne Pilates, respiration, temps de repos, découvertes locales
+          et cuisine consciente. On se laisse guider, et on se retrouve.
         </p>
       </div>
 
-      <!-- Décompte (si tu veux garder statique ici, sinon tu peux brancher Supabase) -->
+      <!-- HIGHLIGHTS -->
+      <section class="reveal" style="margin-top:26px;">
+        <h3 style="margin:0;">Ce que tu vas vivre</h3>
+        <div style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+          <div>• Pilates quotidien (tous niveaux) + mobilité / respiration</div>
+          <div>• Randonnées douces & balades dans la nature (selon météo)</div>
+          <div>• Activités locales (marché, découverte du lieu, temps au bord de l’eau…)</div>
+          <div>• Cuisine saine par une cheffe + atelier cuisine (apprendre, repartir avec des idées)</div>
+          <div>• Temps pour soi : journaling, sieste, lecture, silence, coucher de soleil</div>
+          <div>• Option massages (en supplément) pour relâcher profondément</div>
+        </div>
+      </section>
+
+      <!-- PROGRAMME -->
+      <section class="reveal" style="margin-top:34px;">
+        <h3 style="margin:0;">Programme (exemple — ajusté selon le groupe & la météo)</h3>
+
+        <div style="margin-top:14px; display:grid; gap:14px;">
+
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Jour 1 — Arrivée & atterrissage</div>
+            <p class="sub" style="margin-top:8px;">
+              Accueil, installation, boisson chaude, intention du séjour. Séance douce pour délier le corps,
+              puis dîner sain et chaleureux. Soirée calme : respiration, journaling, repos.
+            </p>
+          </div>
+
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Jour 2 — Mouvement & nature</div>
+            <p class="sub" style="margin-top:8px;">
+              Pilates + mobilité le matin. Brunch sain. Temps libre (repos / lecture) puis balade nature.
+              Fin de journée : étirements doux / relaxation. Option massage.
+            </p>
+          </div>
+
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Jour 3 — Cuisine consciente & énergie</div>
+            <p class="sub" style="margin-top:8px;">
+              Pilates tonique (adapté). Atelier cuisine avec la cheffe : apprendre à cuisiner simple, bon, sain.
+              Après-midi : activité locale (marché / découverte du village / temps au bord de l’eau).
+              Soir : dîner + cercle de partage (facultatif).
+            </p>
+          </div>
+
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Jour 4 — Reconnexion & profondeur</div>
+            <p class="sub" style="margin-top:8px;">
+              Pilates + respiration. Temps long pour soi (sieste, écriture, bain de nature).
+              Randonnée douce ou activité locale selon les envies. Option massage.
+              Soirée “coucher de soleil” & rituel de clôture.
+            </p>
+          </div>
+
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Jour 5 — Intégration & départ</div>
+            <p class="sub" style="margin-top:8px;">
+              Séance d’intégration (mobilité + stretch). Brunch. Temps pour repartir avec un plan simple :
+              rituels, mouvements, idées recettes. Départs en fin de matinée / début d’après-midi.
+            </p>
+          </div>
+
+        </div>
+
+        <p class="small muted" style="margin-top:10px;">
+          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe (tout en respectant la structure).
+        </p>
+      </section>
+
+    <!-- SAC CADEAU -->
+<section class="reveal gift-pack">
+  <div class="gift-pack-grid">
+
+    <!-- Texte -->
+    <div class="gift-pack-text">
+      <h3>Le sac cadeau Rêves Nomades</h3>
+
+      <p class="sub" style="margin-top:10px;">
+        À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience
+        bien au-delà du séjour.
+      </p>
+
+      <ul class="gift-pack-list">
+        <li>Tee-shirt Rêves Nomades</li>
+        <li>Sac en tissu</li>
+        <li>Gourde réutilisable</li>
+        <li>Carnet & stylo pour l’écriture et l’introspection</li>
+        <li>Un soin bien-être (surprise)</li>
+      </ul>
+
+      <p class="small muted" style="margin-top:10px;">
+        Chaque élément est choisi avec soin pour vous accompagner avant,
+        pendant et après le séjour.
+      </p>
+    </div>
+
+    <!-- Image -->
+    <div class="gift-pack-image">
+      <img
+        src="assets/img/sac-cadeau-reves-nomades.jpg"
+        alt="Sac cadeau Rêves Nomades"
+      />
+    </div>
+
+  </div>
+</section>
+
+      <!-- INCLUS / NON INCLUS -->
+      <section class="reveal" style="margin-top:34px;">
+        <h3 style="margin:0;">Ce qui est inclus</h3>
+        <div style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
+          <div>• 4 nuits d’hébergement</div>
+          <div>• Repas sains (petits-déj / brunch / dîners selon l’organisation)</div>
+          <div>• Pilates quotidien + mobilité / stretching</div>
+          <div>• 1 atelier cuisine</div>
+          <div>• Activités locales (selon programme)</div>
+          <div>• Sac cadeau Rêves Nomades</div>
+        </div>
+
+        <h3 style="margin:26px 0 0;">Ce qui n’est pas inclus</h3>
+        <div style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
+          <div>• Transport jusqu’au lieu</div>
+          <div>• Massages (optionnels)</div>
+          <div>• Dépenses personnelles</div>
+        </div>
+      </section>
+
+      <!-- OPTIONS -->
+      <section class="reveal" style="margin-top:34px;">
+        <h3 style="margin:0;">Options (en supplément)</h3>
+        <div style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+          <div>• Massage bien-être : 30 / 60 minutes (tarifs communiqués après réservation)</div>
+          <div>• Séance supplémentaire (selon disponibilités)</div>
+          <div>• Ajustements alimentaires (si besoin spécifique : à préciser à l’avance)</div>
+        </div>
+      </section>
+
+      <!-- Décompte -->
       <p class="sejour-count reveal">
         Encore <strong id="missingCount">—</strong> réservations nécessaires pour valider ce séjour.
         <br>
@@ -88,163 +227,203 @@
       </p>
 
       <!-- Réservation -->
-     <div class="booking-box reveal">
-  <h3>Réserver</h3>
+      <div class="booking-box reveal">
+        <h3>Réserver</h3>
 
-  <label class="kicker" for="roomSelect">Type de chambre</label>
-  <select id="roomSelect" style="
-    width:min(520px, 100%);
-    margin-top:8px;
-    padding:12px;
-    border-radius:0;
-    border:1px solid rgba(30,31,34,.18);
-    background: rgba(255,255,255,.85);
-    font-family:inherit;
-    font-weight:300;
-    color: var(--text);
-  ">
-    <option value="shared">Chambre partagée (incluse)</option>
-    <option value="single">Chambre individuelle (+120€)</option>
-  </select>
+        <label class="kicker" for="roomSelect">Type de chambre</label>
+        <select id="roomSelect" style="
+          width:min(520px, 100%);
+          margin-top:8px;
+          padding:12px;
+          border-radius:0;
+          border:1px solid rgba(30,31,34,.18);
+          background: rgba(255,255,255,.85);
+          font-family:inherit;
+          font-weight:300;
+          color: var(--text);
+        ">
+          <option value="shared">Chambre partagée (incluse)</option>
+          <option value="single">Chambre individuelle (+120€)</option>
+        </select>
 
-  <p class="small muted" style="margin-top:10px;">
-    La quantité se sélectionne directement sur Stripe.
-  </p>
-<div class="price-line">
-  <span>Prix</span>
-  <strong id="stayPriceLive">—</strong>
-</div>
+        <p class="small muted" style="margin-top:10px;">
+          La quantité se sélectionne directement sur Stripe.
+        </p>
 
-  <div class="actions" style="margin-top:16px;">
-    <a id="payBtn" class="btn on-light" target="_blank" rel="noopener">
-      Réserver sur Stripe
-    </a>
-  </div>
+        <div class="price-line" style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="color:var(--muted); font-size:13px;">Prix</span>
+          <strong id="stayPriceLive">—</strong>
+        </div>
 
-  <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
-</div>
+        <div class="actions" style="margin-top:16px;">
+          <a id="payBtn" class="btn on-light" target="_blank" rel="noopener">
+            Réserver sur Stripe
+          </a>
+        </div>
 
-<script>
-  // ✅ Tes liens Stripe Camargue
-  // Prix base et supplément
-  const BASE_PRICE = 970;
-  const SINGLE_EXTRA = 120;
+        <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
+      </div>
 
-  // Stripe links
-  const STRIPE_LINKS = {
-    shared: "https://buy.stripe.com/test_7sY7sF4GJaogdc11oM0ZW06",
-    single: "https://buy.stripe.com/test_28EbIVgprcwoc7X0kI0ZW09"
-  };
+      <!-- FAQ -->
+      <section class="reveal" style="margin-top:34px;">
+        <h3 style="margin:0;">FAQ</h3>
 
-  const sel = document.getElementById("roomSelect");
-  const btn = document.getElementById("payBtn");
-  const msg = document.getElementById("bookingMsg");
-  const priceEl = document.getElementById("stayPriceLive");
+        <div style="margin-top:12px; display:grid; gap:12px;">
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Niveau requis en Pilates ?</div>
+            <p class="sub" style="margin-top:8px;">
+              Tous niveaux. Chaque séance est adaptable : options faciles / intermédiaires / plus intenses.
+            </p>
+          </div>
 
-  function formatEUR(n){
-    return new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR" }).format(n);
-  }
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Et si je viens seule ?</div>
+            <p class="sub" style="margin-top:8px;">
+              C’est très fréquent. L’ambiance est douce, respectueuse, et la chambre partagée est pensée
+              pour être confortable.
+            </p>
+          </div>
 
-  function syncBooking(){
-    const room = sel.value;
-    const link = STRIPE_LINKS[room];
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Quels repas ?</div>
+            <p class="sub" style="margin-top:8px;">
+              Une cuisine simple, saine, gourmande. On privilégie des produits de saison et des assiettes équilibrées.
+              Tu repars aussi avec des idées recettes.
+            </p>
+          </div>
+        </div>
+      </section>
 
-    // Prix affiché
-    const price = room === "single" ? (BASE_PRICE + SINGLE_EXTRA) : BASE_PRICE;
-    priceEl.textContent = formatEUR(price);
+      <!-- CTA bas -->
+      <section class="reveal" style="margin-top:34px;">
+        <p class="sub">
+          Une question avant de réserver ? Écris-nous via la rubrique Contact, on te répond rapidement.
+        </p>
+        <div class="actions" style="margin-top:12px;">
+          <a class="btn tiny on-light" href="index.html#contact">Nous contacter</a>
+        </div>
+      </section>
 
-    // Lien Stripe
-    if(!link){
-      btn.removeAttribute("href");
-      msg.textContent = "Lien Stripe manquant pour ce type de chambre.";
-      return;
-    }
-    btn.href = link;
-    msg.textContent = "";
-  }
-
-  sel.addEventListener("change", syncBooking);
-  syncBooking();
-</script>
-
-
+    </div>
+  </section>
 
   <!-- FOOTER -->
-<footer class="band cream">
-  <div class="container footer">
+  <footer class="band cream">
+    <div class="container footer">
 
-    <div class="footer-row">
-      <div class="footer-brand reveal" data-delay="0">
-        <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
-        <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
-      </div>
+      <div class="footer-row">
+        <div class="footer-brand reveal" data-delay="0">
+          <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
+          <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
+        </div>
 
-      <div class="footer-social reveal" data-delay="1">
-        <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
-            <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
-            <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-          </svg>
-        </a>
+        <div class="footer-social reveal" data-delay="1">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
 
-        <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
-          </svg>
-        </a>
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
 
-        <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
-      </div>
-    </div>
-
-    <div class="legal reveal" data-delay="2">
-      <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>Copyright © 2026 Rêves Nomades</div>
-        <div>
-          <a href="mentions-legales.html">Mentions légales</a> ·
-          <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
         </div>
       </div>
-    </div>
 
-  </div>
-</footer>
+      <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Rêves Nomades</div>
+          <div>
+            <a href="mentions-legales.html">Mentions légales</a> ·
+            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </footer>
 
   <script src="assets/js/main.js"></script>
-<script type="module">
-  import { hydrateStayPageDate } from "./assets/js/stayDates.js";
-  hydrateStayPageDate("camargue", "stayDates");
-</script>
 
-  <!-- (Option) reveal animation: si tu utilises .reveal déjà, garde ton init dans main.js -->
-   <script type="module">
-  import { supabase } from "./assets/js/supabaseClient.js";
+  <!-- Dates Supabase (si tu utilises stayDates.js) -->
+  <script type="module">
+    import { hydrateStayPageDate } from "./assets/js/stayDates.js";
+    hydrateStayPageDate("camargue", "stayDates");
+  </script>
 
-  const EVENT_ID = "ee73b110-7d64-4344-821a-6b7980dcff69";
-  const MIN_BOOKINGS = 10;
+  <!-- Décompte Supabase (bookings payées) -->
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
 
-  async function loadMissing(){
-    const el = document.getElementById("missingCount");
-    if(!el) return;
+    const EVENT_ID = "ee73b110-7d64-4344-821a-6b7980dcff69";
+    const MIN_BOOKINGS = 10;
 
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("places")
-      .eq("event_id", EVENT_ID)
-      .eq("paid", true);
+    async function loadMissing(){
+      const el = document.getElementById("missingCount");
+      if(!el) return;
 
-    if(error){
-      el.textContent = "—";
-      return;
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("places")
+        .eq("event_id", EVENT_ID)
+        .eq("paid", true);
+
+      if(error){
+        el.textContent = "—";
+        return;
+      }
+
+      const total = (data || []).reduce((sum, b) => sum + (Number(b.places) || 0), 0);
+      el.textContent = String(Math.max(0, MIN_BOOKINGS - total));
     }
 
-    const total = (data || []).reduce((sum, b) => sum + (Number(b.places) || 0), 0);
-    el.textContent = String(Math.max(0, MIN_BOOKINGS - total));
-  }
+    loadMissing();
+  </script>
 
-  loadMissing();
-</script>
+  <!-- Stripe links + prix dynamique -->
+  <script>
+    const BASE_PRICE = 970;
+    const SINGLE_EXTRA = 120;
+
+    const STRIPE_LINKS = {
+      shared: "https://buy.stripe.com/test_7sY7sF4GJaogdc11oM0ZW06",
+      single: "https://buy.stripe.com/test_28EbIVgprcwoc7X0kI0ZW09"
+    };
+
+    const sel = document.getElementById("roomSelect");
+    const btn = document.getElementById("payBtn");
+    const msg = document.getElementById("bookingMsg");
+    const priceEl = document.getElementById("stayPriceLive");
+
+    function formatEUR(n){
+      return new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR" }).format(n);
+    }
+
+    function syncBooking(){
+      const room = sel.value;
+      const link = STRIPE_LINKS[room];
+
+      const price = room === "single" ? (BASE_PRICE + SINGLE_EXTRA) : BASE_PRICE;
+      priceEl.textContent = formatEUR(price);
+
+      if(!link){
+        btn.removeAttribute("href");
+        msg.textContent = "Lien Stripe manquant pour ce type de chambre.";
+        return;
+      }
+      btn.href = link;
+      msg.textContent = "";
+    }
+
+    sel.addEventListener("change", syncBooking);
+    syncBooking();
+  </script>
 
 </body>
 </html>
