@@ -475,41 +475,67 @@ Chaque séjour offre un temps pour soi, une pause essentielle pour retrouver én
 
 <!-- ✅ NEWSLETTER (Supabase + Brevo + déjà inscrit) -->
 <script type="module">
-  import { supabase } from "./assets/js/supabaseClient.js";
+import { supabase } from "./assets/js/supabaseClient.js";
 
-  const form = document.getElementById("newsletterForm");
-  const msg  = document.getElementById("newsletterMsg");
+const form = document.getElementById("newsletterForm");
+const msg  = document.getElementById("newsletterMsg");
 
-  function show(html){
-    msg.innerHTML = html || "";
+function show(html){
+  if(!msg) return;
+  msg.innerHTML = html || "";
+}
+
+form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  show("");
+
+  const fd = new FormData(form);
+  const firstname = String(fd.get("name") || "").trim();
+  const email = String(fd.get("email") || "").trim().toLowerCase();
+
+  if(!firstname || !email){
+    show("Merci de renseigner votre prénom et votre email.");
+    return;
   }
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    show("");
+  try {
+    // ✅ insert compatible avec ta contrainte NOT NULL sur newsletter.name
+    const { error } = await supabase
+      .from("newsletter")
+      .insert([{ email, name: firstname, firstname }]);
 
-    const firstname = (form.name.value || "").trim();
-    const email = (form.email.value || "").trim().toLowerCase();
-
-    if(!firstname || !email){
-      show("Merci de renseigner votre prénom et votre email.");
+    // Déjà inscrit (si contrainte unique sur email)
+    if (error && error.code === "23505") {
+      show(`💌 Vous êtes déjà inscrit(e).<br>
+        <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
+          Télécharger le guide
+        </a>`);
       return;
     }
 
-    try {
-      // 1) Supabase (newsletter)
-      const { error } = await supabase
-        .from("newsletter")
-        .insert([{ email, firstname }]);
+    if (error) throw error;
 
-      // Déjà inscrit (unique constraint)
-      if (error && error.code === "23505") {
-        show(`💌 Vous êtes déjà inscrit(e).<br>
-          <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
-            Télécharger le guide
-          </a>`);
-        return;
-      }
+    // ✅ Optionnel : appeler ta Edge Function Brevo (si elle marche et CORS ok)
+    // await fetch("https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/Brevo-newsletter", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ email, firstname })
+    // });
+
+    show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
+      <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
+        Télécharger le guide
+      </a>`);
+
+    form.reset();
+
+  } catch (err) {
+    console.error(err);
+    show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
+  }
+});
+</script>
+
 
       if (error) throw error;
 
