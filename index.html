@@ -475,12 +475,12 @@ Chaque séjour offre un temps pour soi, une pause essentielle pour retrouver én
 
 <!-- ✅ NEWSLETTER (Supabase + Brevo + déjà inscrit) -->
 <script type="module">
-import { supabase } from "./assets/js/supabaseClient.js";
+import { SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
 
 const form = document.getElementById("newsletterForm");
 const msg  = document.getElementById("newsletterMsg");
 
-function show(html){ msg.innerHTML = html || ""; }
+function show(html){ if(msg) msg.innerHTML = html || ""; }
 
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -496,32 +496,32 @@ form?.addEventListener("submit", async (e) => {
   }
 
   try {
-    // ✅ appel Edge Function (ultra safe)
     const url = "https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/newsletter-signup";
 
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // ✅ très important : évite le 401 du gateway Supabase
-        "apikey": supabase.anonKey ?? "",
-        "Authorization": `Bearer ${supabase.anonKey ?? ""}`,
+        // ✅ OBLIGATOIRE pour éviter Invalid JWT
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ email, firstname })
+      body: JSON.stringify({ email, firstname }),
     });
 
+    const text = await res.text();
     if(!res.ok){
-      const t = await res.text();
-      console.warn(t);
+      console.warn("newsletter-signup error:", text);
       throw new Error("Request failed");
     }
 
+    // Si la fonction renvoie du JSON, tu peux le parser, sinon pas besoin
     show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
       <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
         Télécharger le guide
       </a>`);
-    form.reset();
 
+    form.reset();
   } catch (err) {
     console.error(err);
     show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
