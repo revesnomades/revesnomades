@@ -480,10 +480,7 @@ import { supabase } from "./assets/js/supabaseClient.js";
 const form = document.getElementById("newsletterForm");
 const msg  = document.getElementById("newsletterMsg");
 
-function show(html){
-  if(!msg) return;
-  msg.innerHTML = html || "";
-}
+function show(html){ msg.innerHTML = html || ""; }
 
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -499,38 +496,30 @@ form?.addEventListener("submit", async (e) => {
   }
 
   try {
-    // ✅ UPSERT : si email existe → update du prénom, sinon insert
-    const { error } = await supabase
-      .from("newsletter")
-      .upsert(
-        { email, name: firstname, firstname },
-        { onConflict: "email" }
-      );
+    // ✅ appel Edge Function (ultra safe)
+    const url = "https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/newsletter-signup";
 
-    if (error) throw error;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // ✅ très important : évite le 401 du gateway Supabase
+        "apikey": supabase.anonKey ?? "",
+        "Authorization": `Bearer ${supabase.anonKey ?? ""}`,
+      },
+      body: JSON.stringify({ email, firstname })
+    });
 
-    // ✅ Brevo (edge function) — nom exact : brevo-newsletter (minuscules)
-    const res = await fetch(
-      "https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/brevo-newsletter",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, firstname }),
-      }
-    );
-
-    // si Brevo renvoie "already exists", pas grave (updateEnabled gère déjà)
     if(!res.ok){
-      console.warn("Brevo error:", await res.text());
+      const t = await res.text();
+      console.warn(t);
+      throw new Error("Request failed");
     }
 
-    // ✅ Message final : comme c'est un upsert, on ne sait pas si c'était déjà inscrit.
-    // Donc on affiche un message positif + lien direct.
     show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
       <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
         Télécharger le guide
       </a>`);
-
     form.reset();
 
   } catch (err) {
