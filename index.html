@@ -474,70 +474,69 @@ Chaque séjour offre un temps pour soi, une pause essentielle pour retrouver én
 </script>
 
 <!-- ✅ NEWSLETTER (Supabase + Brevo + déjà inscrit) -->
-import { supabase } from "./assets/js/supabaseClient.js";
+<script type="module">
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
 
-const SUPABASE_URL = "https://qxrxwgrgjvesevjkjmry.supabase.co";
-const SUPABASE_ANON_KEY = "TON_ANON_KEY_ICI"; // (la même que supabaseClient.js)
+  const form = document.getElementById("newsletterForm");
+  const msg  = document.getElementById("newsletterMsg");
 
-const form = document.getElementById("newsletterForm");
-const msg  = document.getElementById("newsletterMsg");
+  function show(html){ if(msg) msg.innerHTML = html || ""; }
 
-function show(html){ msg.innerHTML = html || ""; }
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    show("");
 
-form?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  show("");
+    const fd = new FormData(form);
+    const firstname = String(fd.get("name") || "").trim();
+    const email = String(fd.get("email") || "").trim().toLowerCase();
 
-  const fd = new FormData(form);
-  const firstname = String(fd.get("name") || "").trim();
-  const email = String(fd.get("email") || "").trim().toLowerCase();
-
-  if(!firstname || !email){
-    show("Merci de renseigner votre prénom et votre email.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({ firstname, email }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if(!res.ok){
-      console.warn("newsletter-signup error:", data);
-      // Message propre
-      show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
+    if(!firstname || !email){
+      show("Merci de renseigner votre prénom et votre email.");
       return;
     }
 
-    // ✅ cas déjà inscrit
-    if(data.status === "already_subscribed"){
-      show(`💌 Vous êtes déjà inscrit(e).<br>
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ firstname, email }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if(!res.ok){
+        console.warn("newsletter-signup error:", data);
+        show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
+        return;
+      }
+
+      // ✅ déjà inscrit (ton backend renvoie "already")
+      if(data.status === "already"){
+        show(`💌 Vous êtes déjà inscrit(e).<br>
+          <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
+            Télécharger le guide
+          </a>`);
+        return;
+      }
+
+      // ✅ succès
+      show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
         <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
           Télécharger le guide
         </a>`);
-      return;
+
+      form.reset();
+
+    } catch (err) {
+      console.error(err);
+      show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
     }
-
-    // ✅ succès
-    show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
-      <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
-        Télécharger le guide
-      </a>`);
-
-    form.reset();
-
-  } catch (err) {
-    console.error(err);
-    show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
-  }
-});
+  });
+</script>
+</body>
 
 
