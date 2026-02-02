@@ -496,26 +496,30 @@ form?.addEventListener("submit", async (e) => {
   }
 
   try {
-    const url = "https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/newsletter-signup";
-
-    const res = await fetch(url, {
+    const res = await fetch("https://qxrxwgrgjvesevjkjmry.supabase.co/functions/v1/newsletter-signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // ✅ OBLIGATOIRE pour éviter Invalid JWT
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ email, firstname }),
     });
 
-    const text = await res.text();
+    const data = await res.json().catch(() => ({}));
     if(!res.ok){
-      console.warn("newsletter-signup error:", text);
+      console.warn("newsletter-signup error:", data);
       throw new Error("Request failed");
     }
 
-    // Si la fonction renvoie du JSON, tu peux le parser, sinon pas besoin
+    if (data.status === "already") {
+      show(`💌 Vous êtes déjà inscrit(e).<br>
+        <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
+          Télécharger le guide
+        </a>`);
+      return;
+    }
+
     show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
       <a href="assets/pdf/guide.pdf" target="_blank" style="text-decoration:underline;">
         Télécharger le guide
