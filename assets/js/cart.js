@@ -1,7 +1,7 @@
 // assets/js/cart.js
 import { STRIPE_STAYS } from "./stripeLinks.js";
 import { supabase } from "./supabaseClient.js"; // garde au cas où (session)
-import { getNextEventForStay, getMissingForEvent } from "./supabaseapi.js";
+import { getNextEventForStay, getMissingForEvent } from "./supabaseApi.js";
 
 const $ = (id) => document.getElementById(id);
 

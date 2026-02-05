@@ -131,4 +131,28 @@
 
     sync();
   }
+
+  /* ===============================
+     6) iOS: simuler les backgrounds fixed
+  ================================ */
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    const fixedBands = Array.from(document.querySelectorAll(".fixed-bg"));
+    if (fixedBands.length) {
+      const updateFixedBg = () => {
+        for (const band of fixedBands) {
+          const top = band.getBoundingClientRect().top + window.scrollY;
+          const offset = window.scrollY - top;
+          band.style.backgroundPosition = `center ${offset}px`;
+        }
+      };
+
+      window.addEventListener("scroll", updateFixedBg, { passive: true });
+      window.addEventListener("resize", updateFixedBg);
+      updateFixedBg();
+    }
+  }
 })();
