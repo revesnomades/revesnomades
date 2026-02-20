@@ -127,10 +127,16 @@
   const aboutBtn = document.getElementById("aboutToggleBtn");
 
   if (aboutText && aboutBtn) {
+    const aboutRevealEls = Array.from(aboutText.querySelectorAll(".reveal"));
+
     const sync = () => {
       const collapsed = aboutText.classList.contains("is-collapsed");
       aboutBtn.textContent = collapsed ? "Voir la suite" : "Voir moins";
       aboutBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+
+      if (!collapsed) {
+        aboutRevealEls.forEach((el) => el.classList.add("is-visible"));
+      }
     };
 
     aboutBtn.addEventListener("click", () => {
