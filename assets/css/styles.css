@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500;600&display=swap");
+
 :root{
   --cream:#f7f4ef;
   --white:#ffffff;
@@ -26,16 +28,16 @@
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; height:100%; }
 body{
-  font-family:"playfair display", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-family:"Be Vietnam Pro", system-ui, -apple-system, Segoe UI, Roboto, Arial;
   font-weight:300;
   color:var(--text);
   background:var(--white);
   line-height:1.75;
   letter-spacing: .01em;
 }
-h1,h2{ font-family:"MuseoModerno", system-ui, sans-serif; }
+h1,h2{ font-family:"Playfair Display", serif; }
 h3,h4{
-  font-family:"playfair display", system-ui, sans-serif;
+  font-family:"Playfair Display", serif;
   font-weight:500;
   margin:0;
   letter-spacing:-0.02em;
@@ -109,7 +111,7 @@ select, option{ color: var(--text) !important; }
   color:#fff;
 }
 .brand img{ height:34px; width:auto; }
-.brand span{ font-family:"MuseoModerno"; font-weight:500; letter-spacing:.02em; }
+.brand span{ font-family:"Playfair Display", serif; font-weight:500; letter-spacing:.02em; }
 
 .nav-links{
   margin-left:auto;
@@ -214,7 +216,6 @@ html.js .reveal.is-visible{
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
   color: #fff;
 }
 .principle-band::before{
@@ -278,7 +279,7 @@ html.js .reveal.is-visible{
 /* ---------------- Newsletter ---------------- */
 .newsletter{
   background: var(--white);
-  min-height: 60vh;
+  min-height: 70vh;
   display: grid;
   place-items: center;
   text-align: center;
@@ -288,9 +289,12 @@ html.js .reveal.is-visible{
 
 .newsletter-inner{
   max-width: 760px;
-  padding: calc(var(--navH) + 40px) 20px 60px;
+  padding: 56px 20px;
   margin: 0 auto;
   color: var(--text);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .newsletter h2{
   color: var(--text);
@@ -322,7 +326,7 @@ html.js .reveal.is-visible{
   background: var(--cream) !important;
   background-image: none !important;
   color: var(--text) !important;
-  min-height: 60vh;
+  min-height: 70vh;
   display: grid;
   place-items: center;
   text-align: center;
@@ -333,9 +337,12 @@ html.js .reveal.is-visible{
 
 .gift-band .inner{
   max-width: 760px;
-  padding: calc(var(--navH) + 40px) 20px 60px;
+  padding: 56px 20px;
   margin: 0 auto;
   color: var(--text);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .gift-band h2{
   font-size: clamp(28px, 3vw, 48px);
@@ -359,12 +366,12 @@ html.js .reveal.is-visible{
 
 /* ---------------- Contact ---------------- */
 .contact-grid{
-  min-height: 40vh;
+  min-height: 70vh;
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap: 34px;
   align-items:center;
-  padding: calc(var(--navH) + 40px) 0 60px;
+  padding: 60px 0;
 }
 .formbox{
   border:1px solid rgba(30,31,34,.22);
@@ -392,6 +399,27 @@ html.js .reveal.is-visible{
   color: var(--muted);
   font-size: 14px;
   line-height: 1.8;
+}
+
+/* ---------------- Compte ---------------- */
+.account-section{
+  padding: calc(var(--navH) + 44px) 0 80px;
+}
+.account-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
+  align-items:start;
+}
+.account-card{
+  border:1px solid var(--line);
+  padding:16px;
+  background: rgba(255,255,255,.55);
+}
+.account-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 /* ---------------- Footer ---------------- */
@@ -522,7 +550,7 @@ html.js .reveal.is-visible{
 }
 .about-founder-meta{ text-align: left; }
 .about-founder-name{
-  font-family: "MuseoModerno", sans-serif;
+  font-family: "Playfair Display", serif;
   font-weight: 500;
   font-size: 15px;
   color: var(--text);
@@ -862,7 +890,7 @@ html.js .reveal.is-visible{
 
   .newsletter-inner,
   .gift-band .inner{
-    padding: calc(var(--navH) + 28px) 18px 50px;
+    padding: 44px 18px;
   }
   .form-stack{
     width: 100%;
@@ -1014,15 +1042,38 @@ html.js .reveal.is-visible{
     order: 2;
   }
 }
-/* Desktop: fond fixe OK */
-.principle-band{
+
+@media (max-width: 900px){
+  .account-section{
+    padding: calc(var(--navH) + 32px) 0 60px;
+  }
+
+  .account-grid{
+    grid-template-columns: 1fr;
+  }
+}
+/* Fond fixe pour les bandeaux avec image */
+.fixed-bg{
   background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+}
+
+.fixed-bg-layer{
+  position: absolute;
+  inset: -80px 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform;
 }
 
 /* Mobile: iOS/Android n’aiment pas background-attachment: fixed */
 @media (max-width: 900px){
-  .principle-band{
-    background-attachment: fixed; /* évite bug/no-image */
+  .fixed-bg{
+    background-attachment: scroll;
     background-position: center;
     min-height: 62vh;              /* garde un beau bandeau */
   }
@@ -1040,4 +1091,9 @@ html.js .reveal.is-visible{
   }
 }
 
-
+/* iOS fallback: on simule le fond fixe via JS */
+@supports (-webkit-touch-callout: none){
+  .fixed-bg{
+    background-attachment: scroll;
+  }
+}

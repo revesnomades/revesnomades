@@ -5,9 +5,15 @@
   <title>Compte — Rêves Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 
@@ -29,11 +35,11 @@
 
   <!-- PAGE -->
   <section class="band cream">
-    <div style="padding-top: calc(var(--navH) + 44px); padding-bottom: 80px;">
-      <div class="container account-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:18px;">
+    <div class="account-section">
+      <div class="container account-grid">
 
         <!-- COLONNE GAUCHE -->
-        <div style="border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
+        <div class="account-card">
           <h2>Mon compte</h2>
           <p style="color:var(--muted); margin:10px 0 0;">
             Accédez à vos réservations et suivez la validation des séjours.
@@ -50,7 +56,7 @@
                 style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                 type="password" placeholder="Mot de passe">
 
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <div class="account-actions">
                 <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
                 <button class="btn on-light" id="btnSignup" type="button">Inscription</button>
               </div>
@@ -66,7 +72,7 @@
 
           <!-- Zone RESET (visible seulement si lien reçu) -->
           <div id="resetBox" style="display:none; margin-top:16px;">
-            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
+            <h3 style="font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
 
             <div style="display:grid; gap:10px; margin-top:10px;">
               <input id="newPassword" class="input"
@@ -88,7 +94,7 @@
             </div>
 
             <!-- ✅ boutons visibles seulement une fois connecté -->
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+            <div class="account-actions" style="margin-top:12px;">
               <button class="btn on-light" id="btnSeeBookings" type="button">Voir mes réservations</button>
               <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
             </div>
@@ -100,8 +106,8 @@
         <!-- COLONNE DROITE -->
         <div>
           <!-- Avantages si déconnecté -->
-          <div id="perksBox" style="border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
-            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
+          <div id="perksBox" class="account-card">
+            <h3 style="font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
             <p style="color:var(--muted); margin-top:10px;">
               • Suivre vos réservations passées et à venir<br>
               • Voir le nombre de réservations restantes pour valider un séjour (min. 10)<br>
@@ -110,8 +116,8 @@
           </div>
 
           <!-- Réservations si connecté -->
-          <div id="bookingsBox" style="display:none; border:1px solid var(--line); padding:16px; background: rgba(255,255,255,.55);">
-            <h3 style="font-family:MuseoModerno; font-weight:500; margin:0;">Mes réservations</h3>
+          <div id="bookingsBox" class="account-card" style="display:none;">
+            <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
             <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Chargement…</div>
           </div>
         </div>
@@ -126,7 +132,7 @@
       <div class="footer-row">
         <div class="footer-brand">
           <img src="assets/img/logo-reves-nomades.png" alt="Rêves Nomades">
-          <div style="font-family:MuseoModerno; font-weight:500;">Rêves Nomades</div>
+          <div style="font-family:'Playfair Display'; font-weight:500;">Rêves Nomades</div>
         </div>
 
         <div class="footer-social">
