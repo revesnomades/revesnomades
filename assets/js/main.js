@@ -192,19 +192,7 @@
 
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", onScroll);
-
-    if (fixedBands.length) {
-      const updateFixedBg = () => {
-        for (const band of fixedBands) {
-          const top = band.getBoundingClientRect().top + window.scrollY;
-          const offset = window.scrollY - top;
-          band.style.backgroundPosition = `center ${offset}px`;
-        }
-      };
-
-      window.addEventListener("scroll", updateFixedBg, { passive: true });
-      window.addEventListener("resize", updateFixedBg);
-      updateFixedBg();
+      onScroll();
     }
   }
 })();
