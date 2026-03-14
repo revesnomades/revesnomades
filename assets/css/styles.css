@@ -1,5 +1,5 @@
 
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@200;300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@200;300;400;500;600&display=swap");
 
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@200;300;400;500;600&display=swap");
 
@@ -31,19 +31,13 @@
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; height:100%; }
 body{
-  font-family:"Be Vietnam Pro", system-ui, -apple-system, Segoe UI, Roboto, Arial
   font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial;
-
   font-weight:300;
   color:var(--text);
   background:var(--white);
   line-height:1.75;
   letter-spacing: .01em;
 }
-
-h1,h2{ font-family:"Playfair Display", serif; }
-h3,h4{
-  font-family:"Playfair Display", serif;
 h1,h2{
   font-family:"Cormorant Garamond", serif;
   text-transform: uppercase;
@@ -125,9 +119,6 @@ select, option{ color: var(--text) !important; }
   color:#fff;
 }
 .brand img{ height:34px; width:auto; }
-
-.brand span{ font-family:"Playfair Display", serif; font-weight:500; letter-spacing:.02em; }
-=======
 .brand span{
   font-family:"Cormorant Garamond", serif;
   font-weight:500;
