@@ -1,6 +1,7 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@200;300;400;500;600&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@200;300;400;500;600&display=swap");
 
 :root{
   --cream:#f7f4ef;
@@ -1054,8 +1055,6 @@ html.js .reveal.is-visible{
     order: 2;
   }
 }
-
-
 @media (max-width: 900px){
   .account-section{
     padding: calc(var(--navH) + 32px) 0 60px;
@@ -1065,13 +1064,11 @@ html.js .reveal.is-visible{
     grid-template-columns: 1fr;
   }
 }
-
 /* Fond fixe pour les bandeaux avec image */
 .fixed-bg{
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
-
   position: relative;
   overflow: hidden;
 }
