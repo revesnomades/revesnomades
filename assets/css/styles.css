@@ -35,7 +35,7 @@ body{
   letter-spacing: .01em;
 }
 h1,h2{
-  font-family:"Segoe UI", "SEGO", "Agrandir", "Inter", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  font-family:"Mrs Eaves", "MrsEaves", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
   letter-spacing: .02em;
 }
 h3,h4{
@@ -114,7 +114,7 @@ select, option{ color: var(--text) !important; }
 }
 .brand img{ height:34px; width:auto; }
 .brand span{
-  font-family:"Segoe UI", "SEGO", "Agrandir", "Inter", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  font-family:"Mrs Eaves", "MrsEaves", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
   font-weight:500;
   letter-spacing:.03em;
 }
