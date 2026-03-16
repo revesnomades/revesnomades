@@ -1048,8 +1048,6 @@ html.js .reveal.is-visible{
     order: 2;
   }
 }
-
-
 @media (max-width: 900px){
   .account-section{
     padding: calc(var(--navH) + 32px) 0 60px;
@@ -1059,13 +1057,11 @@ html.js .reveal.is-visible{
     grid-template-columns: 1fr;
   }
 }
-
 /* Fond fixe pour les bandeaux avec image */
 .fixed-bg{
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
-
   position: relative;
   overflow: hidden;
 }
