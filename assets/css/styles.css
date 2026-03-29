@@ -13,7 +13,19 @@
   font-weight: 400;
   font-style: normal;
 }
+/* 🔤 Police Segoe */
+@font-face {
+  font-family: 'SegoeCustom';
+  src: url('/assets/fonts/sego.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
+/* 🎯 UNIQUEMENT les titres principaux */
+h1 {
+  font-family: 'SegoeCustom', sans-serif;
+}
 :root{
   --cream:#f7f4ef;
   --white:#ffffff;
