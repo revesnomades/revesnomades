@@ -1105,7 +1105,8 @@ html.js .reveal.is-visible{
 }
 @font-face {
   font-family: 'SegoCustom';
-  src: url('/assets/fonts/sego.otf') format('opentype');
+  src:  url('/assets/fonts/sego.woff2') format('woff2'), 
+        url('/assets/fonts/sego.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   }
