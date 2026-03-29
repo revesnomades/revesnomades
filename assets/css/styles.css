@@ -1,8 +1,8 @@
 
 @font-face {
   font-family: 'SegoCustom';
-  src: url('../fonts/sego.woff2') format('woff2'),
-       url('../fonts/sego.otf') format('opentype');
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -10,8 +10,8 @@
 
 @font-face {
   font-family: 'SegoCustom';
-  src: url('../fonts/sego.woff2') format('woff2'),
-       url('../fonts/sego.otf') format('opentype');
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -19,8 +19,8 @@
 
 @font-face {
   font-family: 'SegoCustom';
-  src: url('../fonts/sego.woff2') format('woff2'),
-       url('../fonts/sego.otf') format('opentype');
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
