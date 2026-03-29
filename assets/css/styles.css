@@ -1,4 +1,39 @@
 
+@font-face {
+  font-family: 'SegoCustom';
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SegoCustom';
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SegoCustom';
+  src: url('/assets/sego.woff2') format('woff2'),
+       url('/assets/sego.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: local('Glacial Indifference'), local('GlacialIndifference-Regular');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root{
   --cream:#f7f4ef;
   --white:#ffffff;
@@ -27,7 +62,7 @@
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; height:100%; }
 body{
-  font-family:"Agrandir", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
   font-weight:300;
   color:var(--text);
   background:var(--white);
@@ -35,14 +70,21 @@ body{
   letter-spacing: .01em;
 }
 h1,h2{
-  font-family:"Mrs Eaves", "MrsEaves", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
+  font-family:"SegoCustom", serif;
   letter-spacing: .02em;
 }
 h3,h4{
-  font-family:"Roca One", "Agrandir", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family:"SegoCustom", serif;
   font-weight:500;
   margin:0;
   letter-spacing: .02em;
+}
+.title,
+.stay-card-title,
+.sejour-content h1,
+.gc-head h1,
+.gc-card h2{
+  font-family:"SegoCustom", serif;
 }
 p{ margin: 12px 0 0; }
 b,strong{ font-weight:600; }
@@ -114,7 +156,7 @@ select, option{ color: var(--text) !important; }
 }
 .brand img{ height:34px; width:auto; }
 .brand span{
-  font-family:"Mrs Eaves", "MrsEaves", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
+  font-family:"SegoCustom", serif;
   font-weight:500;
   letter-spacing:.03em;
 }
@@ -556,7 +598,7 @@ html.js .reveal.is-visible{
 }
 .about-founder-meta{ text-align: left; }
 .about-founder-name{
-  font-family: "Roca One", "Agrandir", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "SegoCustom", serif;
   font-weight: 500;
   font-size: 15px;
   color: var(--text);
@@ -1101,13 +1143,5 @@ html.js .reveal.is-visible{
 @supports (-webkit-touch-callout: none){
   .fixed-bg{
     background-attachment: scroll;
-  }
-}
-@font-face {
-  font-family: 'SegoCustom';
-  src:  url('/assets/fonts/sego.woff2') format('woff2'), 
-        url('/assets/fonts/sego.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
   }
 }
