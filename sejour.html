@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title id="pageTitle">Séjour — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body class="on-light">
+
+  <!-- NAV -->
+  <header class="nav" id="top">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
+        <img src="assets/img/logo-reves-nomades.png" alt="Logo Âmes Nomades" />
+        <span>Âmes Nomades</span>
+      </a>
+
+      <nav class="nav-links nav-links-desktop">
+        <a href="index.html#apropos" data-scroll>À propos</a>
+        <a href="index.html#contact" data-scroll>Contact</a>
+        <a class="icon-btn" href="compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="mobile-drawer" aria-hidden="true">
+        <div class="mobile-menu">
+          <a href="index.html#apropos" data-scroll>À propos</a>
+          <a href="index.html#contact" data-scroll>Contact</a>
+          <a href="compte.html">Compte</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO IMAGE -->
+  <section class="sejour-hero">
+    <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="band cream">
+    <div class="container sejour-content">
+
+      <h1 class="reveal" id="stayTitle">Séjour</h1>
+
+      <p class="sejour-meta reveal" id="stayMeta">
+        5 jours · 4 nuits — <strong>à partir de —</strong> / personne
+      </p>
+
+      <p class="sejour-dates reveal">
+        Dates : <span id="stayDates">Dates à annoncer</span>
+      </p>
+
+      <div class="sejour-text reveal" id="stayText">
+        <p>Chargement du séjour…</p>
+      </div>
+
+      <!-- HIGHLIGHTS -->
+      <section class="reveal" style="margin-top:26px;" id="highlightsSection">
+        <h3 style="margin:0;">Ce que tu vas vivre</h3>
+        <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+          <div>Chargement…</div>
+        </div>
+      </section>
+
+      <!-- PROGRAMME -->
+      <section class="reveal" style="margin-top:34px;" id="programSection">
+        <h3 style="margin:0;">Programme (exemple — ajusté selon le groupe & la météo)</h3>
+        <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Chargement…</div>
+            <p class="sub" style="margin-top:8px;">Le programme s’affichera ici.</p>
+          </div>
+        </div>
+        <p class="small muted" id="programNote" style="margin-top:10px;">
+          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
+        </p>
+      </section>
+
+      <!-- SAC CADEAU -->
+      <section class="reveal gift-pack" id="giftSection">
+        <div class="gift-pack-grid">
+          <div class="gift-pack-text">
+            <h3 id="giftTitle">Le sac cadeau Âmes Nomades</h3>
+
+            <p class="sub" style="margin-top:10px;" id="giftIntro">
+              À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.
+            </p>
+
+            <ul class="gift-pack-list" id="giftList">
+              <li>Tee-shirt Âmes Nomades</li>
+              <li>Sac en tissu</li>
+              <li>Gourde réutilisable</li>
+              <li>Carnet & stylo</li>
+              <li>Un soin bien-être</li>
+            </ul>
+
+            <p class="small muted" style="margin-top:10px;" id="giftOutro">
+              Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.
+            </p>
+          </div>
+
+          <div class="gift-pack-image">
+            <img
+              id="giftImage"
+              src="assets/img/sac-cadeau-reves-nomades.jpg"
+              alt="Sac cadeau Âmes Nomades"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- INCLUS / NON INCLUS -->
+      <section class="reveal" style="margin-top:34px;" id="includedSection">
+        <h3 style="margin:0;">Ce qui est inclus</h3>
+        <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
+          <div>Chargement…</div>
+        </div>
+
+        <h3 style="margin:26px 0 0;">Ce qui n’est pas inclus</h3>
+        <div id="notIncludedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
+          <div>Chargement…</div>
+        </div>
+      </section>
+
+      <!-- OPTIONS -->
+      <section class="reveal" style="margin-top:34px;" id="optionsSection">
+        <h3 style="margin:0;">Options (en supplément)</h3>
+        <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+          <div>Chargement…</div>
+        </div>
+      </section>
+
+      <!-- Décompte -->
+      <p class="sejour-count reveal">
+        Encore <strong id="missingCount">—</strong> réservations nécessaires pour valider ce séjour.
+        <br>
+        <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
+      </p>
+
+      <!-- Réservation -->
+      <div class="booking-box reveal">
+        <h3>Réserver</h3>
+
+        <label class="kicker" for="roomSelect">Formule / chambre</label>
+        <select id="roomSelect" style="
+          width:min(520px, 100%);
+          margin-top:8px;
+          padding:12px;
+          border-radius:0;
+          border:1px solid rgba(30,31,34,.18);
+          background: rgba(255,255,255,.85);
+          font-family:inherit;
+          font-weight:300;
+          color: var(--text);
+        ">
+          <option value="">Chargement…</option>
+        </select>
+
+        <p class="small muted" style="margin-top:10px;">
+          La quantité se sélectionne directement sur Stripe.
+        </p>
+
+        <div class="price-line" style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="color:var(--muted); font-size:13px;">Prix</span>
+          <strong id="stayPriceLive">—</strong>
+        </div>
+
+        <div class="actions" style="margin-top:16px;">
+          <a id="payBtn" class="btn on-light" target="_blank" rel="noopener">
+            Réserver sur Stripe
+          </a>
+        </div>
+
+        <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
+      </div>
+
+      <!-- FAQ -->
+      <section class="reveal" style="margin-top:34px;" id="faqSection">
+        <h3 style="margin:0;">FAQ</h3>
+
+        <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Chargement…</div>
+            <p class="sub" style="margin-top:8px;">Les questions fréquentes s’afficheront ici.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA bas -->
+      <section class="reveal" style="margin-top:34px;">
+        <p class="sub" id="bottomCtaText">
+          Une question avant de réserver ? Écris-nous via la rubrique Contact, on te répond rapidement.
+        </p>
+        <div class="actions" style="margin-top:12px;">
+          <a class="btn tiny on-light" href="index.html#contact">Nous contacter</a>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand reveal" data-delay="0">
+          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
+        </div>
+
+        <div class="footer-social reveal" data-delay="1">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
+
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
+
+          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+        </div>
+      </div>
+
+      <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Âmes Nomades</div>
+          <div>
+            <a href="mentions-legales.html">Mentions légales</a> ·
+            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const slug = new URLSearchParams(window.location.search).get("slug");
+
+    const stayTitle = document.getElementById("stayTitle");
+    const pageTitle = document.getElementById("pageTitle");
+    const stayMeta = document.getElementById("stayMeta");
+    const stayDates = document.getElementById("stayDates");
+    const stayText = document.getElementById("stayText");
+    const stayHeroBg = document.getElementById("stayHeroBg");
+
+    const highlightsList = document.getElementById("highlightsList");
+    const programList = document.getElementById("programList");
+    const programNote = document.getElementById("programNote");
+
+    const giftTitle = document.getElementById("giftTitle");
+    const giftIntro = document.getElementById("giftIntro");
+    const giftList = document.getElementById("giftList");
+    const giftOutro = document.getElementById("giftOutro");
+    const giftImage = document.getElementById("giftImage");
+
+    const includedList = document.getElementById("includedList");
+    const notIncludedList = document.getElementById("notIncludedList");
+    const optionsList = document.getElementById("optionsList");
+    const faqList = document.getElementById("faqList");
+
+    const roomSelect = document.getElementById("roomSelect");
+    const payBtn = document.getElementById("payBtn");
+    const bookingMsg = document.getElementById("bookingMsg");
+    const stayPriceLive = document.getElementById("stayPriceLive");
+    const missingCount = document.getElementById("missingCount");
+
+    function formatEUR(n){
+      return new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR" }).format(Number(n || 0));
+    }
+
+    function arrayFromField(value){
+      if (!value) return [];
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        return value
+          .split("\n")
+          .map(v => v.trim())
+          .filter(Boolean);
+      }
+      return [];
+    }
+
+    function renderSimpleList(container, items){
+      if(!container) return;
+      if(!items || !items.length){
+        container.innerHTML = `<div>—</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `<div>• ${item}</div>`).join("");
+    }
+
+    function renderFaq(container, items){
+      if(!container) return;
+      if(!items || !items.length){
+        container.innerHTML = `
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">FAQ</div>
+            <p class="sub" style="margin-top:8px;">Les questions fréquentes seront bientôt disponibles.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+          <div class="kicker">${item.q || "Question"}</div>
+          <p class="sub" style="margin-top:8px;">${item.a || ""}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderProgram(container, items){
+      if(!container) return;
+      if(!items || !items.length){
+        container.innerHTML = `
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+            <div class="kicker">Programme</div>
+            <p class="sub" style="margin-top:8px;">Le programme détaillé sera bientôt disponible.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+          <div class="kicker">${item.title || "Étape du séjour"}</div>
+          <p class="sub" style="margin-top:8px;">${item.text || ""}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderRichText(container, content){
+      if(!container) return;
+      if(!content){
+        container.innerHTML = `<p>Contenu bientôt disponible.</p>`;
+        return;
+      }
+
+      if (typeof content === "string" && content.includes("<")) {
+        container.innerHTML = content;
+        return;
+      }
+
+      const paragraphs = String(content)
+        .split("\n")
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join("");
+    }
+
+    async function loadStay(){
+      if(!slug){
+        stayTitle.textContent = "Séjour introuvable";
+        stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
+        return;
+      }
+
+      const { data: stay, error } = await supabase
+        .from("stays")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+      if(error || !stay){
+        console.error(error);
+        stayTitle.textContent = "Séjour introuvable";
+        stayText.innerHTML = "<p>Impossible de charger ce séjour.</p>";
+        return;
+      }
+
+      const { data: prices } = await supabase
+        .from("stay_prices")
+        .select("*")
+        .eq("stay_id", stay.id)
+        .order("price", { ascending: true });
+
+      const { data: dates } = await supabase
+        .from("stay_dates")
+        .select("*")
+        .eq("stay_id", stay.id)
+        .order("start_date", { ascending: true });
+
+      const { data: bookingsPaid } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("stay_id", stay.id)
+        .in("status", ["paid", "confirmed"]);
+
+      // Titre / meta
+      stayTitle.textContent = stay.title || "Séjour";
+      pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
+
+      const minPrice = prices && prices.length
+        ? Math.min(...prices.map(p => Number(p.price || 0)))
+        : null;
+
+      const location = stay.location ? ` — ${stay.location}` : "";
+      stayMeta.innerHTML = `5 jours · 4 nuits${location} — <strong>à partir de ${minPrice ? formatEUR(minPrice) : "—"}</strong> / personne`;
+
+      // Dates
+      if(dates && dates.length){
+        const first = dates[0];
+        const start = first.start_date ? new Date(first.start_date).toLocaleDateString("fr-FR") : "";
+        const end = first.end_date ? new Date(first.end_date).toLocaleDateString("fr-FR") : "";
+        stayDates.textContent = `${start}${end ? ` au ${end}` : ""}`;
+      } else {
+        stayDates.textContent = "Dates à annoncer";
+      }
+
+      // Hero
+      if(stay.hero_image){
+        stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
+      }
+
+      // Textes
+      renderRichText(stayText, stay.description || stay.long_description || stay.short_description || "");
+
+      // Highlights
+      renderSimpleList(highlightsList, stay.highlights || []);
+
+      // Programme
+      renderProgram(programList, stay.program || []);
+      if(stay.program_note){
+        programNote.textContent = stay.program_note;
+      }
+
+      // Gift
+      giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
+      giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
+      giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
+
+      const giftItems = stay.gift_items || [
+        "Tee-shirt Âmes Nomades",
+        "Sac en tissu",
+        "Gourde réutilisable",
+        "Carnet & stylo pour l’écriture et l’introspection",
+        "Un soin bien-être (surprise)"
+      ];
+
+      giftList.innerHTML = giftItems.map(item => `<li>${item}</li>`).join("");
+
+      if(stay.gift_image){
+        giftImage.src = stay.gift_image;
+      }
+
+      // Inclus / non inclus / options
+      renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
+      renderSimpleList(notIncludedList, stay.not_included_items || []);
+      renderSimpleList(optionsList, stay.extra_options || []);
+
+      // FAQ
+      renderFaq(faqList, stay.faq || []);
+
+      // Réservation
+      roomSelect.innerHTML = "";
+
+      if(prices && prices.length){
+        prices.forEach((price, index) => {
+          const option = document.createElement("option");
+          option.value = price.id;
+          option.textContent = `${price.label} — ${formatEUR(price.price)}`;
+          option.dataset.price = price.price;
+          option.dataset.link = price.stripe_link || stay.stripe_link || "";
+          roomSelect.appendChild(option);
+
+          if(index === 0){
+            stayPriceLive.textContent = formatEUR(price.price);
+            payBtn.href = price.stripe_link || stay.stripe_link || "#";
+          }
+        });
+      } else {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Formule à annoncer";
+        roomSelect.appendChild(option);
+
+        stayPriceLive.textContent = minPrice ? formatEUR(minPrice) : "—";
+        payBtn.href = stay.stripe_link || "#";
+      }
+
+      roomSelect.addEventListener("change", () => {
+        const selected = roomSelect.options[roomSelect.selectedIndex];
+        const price = selected?.dataset?.price;
+        const link = selected?.dataset?.link;
+
+        stayPriceLive.textContent = price ? formatEUR(price) : "—";
+
+        if(link){
+          payBtn.href = link;
+          bookingMsg.textContent = "";
+        } else {
+          payBtn.removeAttribute("href");
+          bookingMsg.textContent = "Lien Stripe manquant pour cette formule.";
+        }
+      });
+
+      // Quotas / missing count
+      if(dates && dates.length){
+        const totalSeats = dates.reduce((sum, d) => sum + Number(d.seats_total || 0), 0);
+        const remainingSeats = dates.reduce((sum, d) => sum + Number(d.seats_remaining || 0), 0);
+
+        if(totalSeats > 0){
+          const reserved = totalSeats - remainingSeats;
+          const minToValidate = stay.min_bookings || 10;
+          missingCount.textContent = String(Math.max(0, minToValidate - reserved));
+        } else {
+          missingCount.textContent = "—";
+        }
+      } else {
+        const minToValidate = stay.min_bookings || 10;
+        const reservedCount = (bookingsPaid || []).length;
+        missingCount.textContent = String(Math.max(0, minToValidate - reservedCount));
+      }
+    }
+
+    loadStay();
+  </script>
+
+</body>
+</html>
