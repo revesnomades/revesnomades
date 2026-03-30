@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Séjours — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="on-light">
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="index.html">Accueil</a>
+        <a href="compte.html">Compte</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div class="account-card" style="max-width:1100px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <h1 style="margin:0;">Gestion des séjours</h1>
+            <p style="color:var(--muted); margin-top:10px;">
+              Ajoutez, modifiez et supprimez vos séjours sans toucher au code.
+            </p>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn on-light" href="compte.html">Retour compte</a>
+            <button class="btn on-light" id="btnNewStay" type="button">➕ Nouveau séjour</button>
+          </div>
+        </div>
+
+        <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+        <!-- FORMULAIRE -->
+        <div id="editorBox" style="display:none; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
+          <h2 id="editorTitle" style="margin:0 0 14px;">Créer un séjour</h2>
+
+          <div style="display:grid; gap:12px;">
+            <input id="stayTitle" class="input"
+              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Titre du séjour">
+
+            <input id="staySlug" class="input"
+              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Slug (ex: sardaigne-2026)">
+
+            <input id="stayLocation" class="input"
+              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Lieu">
+
+            <textarea id="stayShortDescription" class="input"
+              style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Description courte"></textarea>
+
+            <textarea id="stayDescription" class="input"
+              style="min-height:180px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Description complète (HTML simple ou texte)"></textarea>
+
+            <textarea id="stayIncluded" class="input"
+              style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Ce qui est inclus (HTML simple ou texte)"></textarea>
+
+            <textarea id="stayFaq" class="input"
+              style="min-height:160px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder='FAQ en JSON, ex: [{"q":"Question","a":"Réponse"}]'></textarea>
+
+            <input id="stayHeroImage" class="input"
+              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="URL image hero">
+
+            <input id="stayStripeLink" class="input"
+              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+              placeholder="Lien Stripe">
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
+              <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                <input id="stayFeatured" type="checkbox">
+                Afficher dans le 1er bandeau
+              </label>
+
+              <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                <input id="stayHighlight" type="checkbox">
+                Afficher dans le bandeau 5 séjours
+              </label>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
+              <button class="btn on-light" id="btnCancelEdit" type="button">Annuler</button>
+            </div>
+
+            <div id="editorMsg" style="color:var(--muted); font-size:12.5px;"></div>
+          </div>
+        </div>
+
+        <!-- LISTE -->
+        <div style="margin-top:28px; border-top:1px solid var(--line); padding-top:20px;">
+          <h2 style="margin:0 0 14px;">Séjours existants</h2>
+          <div id="staysList" style="display:grid; gap:14px; color:var(--muted);">
+            Chargement…
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const adminStatus = document.getElementById("adminStatus");
+    const staysList = document.getElementById("staysList");
+    const editorBox = document.getElementById("editorBox");
+    const editorTitle = document.getElementById("editorTitle");
+    const editorMsg = document.getElementById("editorMsg");
+
+    const btnNewStay = document.getElementById("btnNewStay");
+    const btnSaveStay = document.getElementById("btnSaveStay");
+    const btnCancelEdit = document.getElementById("btnCancelEdit");
+
+    const stayTitle = document.getElementById("stayTitle");
+    const staySlug = document.getElementById("staySlug");
+    const stayLocation = document.getElementById("stayLocation");
+    const stayShortDescription = document.getElementById("stayShortDescription");
+    const stayDescription = document.getElementById("stayDescription");
+    const stayIncluded = document.getElementById("stayIncluded");
+    const stayFaq = document.getElementById("stayFaq");
+    const stayHeroImage = document.getElementById("stayHeroImage");
+    const stayStripeLink = document.getElementById("stayStripeLink");
+    const stayFeatured = document.getElementById("stayFeatured");
+    const stayHighlight = document.getElementById("stayHighlight");
+
+    let currentStayId = null;
+
+    function setMsg(el, msg){
+      if(el) el.textContent = msg || "";
+    }
+
+    function slugify(text){
+      return String(text || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-");
+    }
+
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if(!user){
+        window.location.href = "/compte.html";
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if(error || data?.role !== "admin"){
+        adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
+        staysList.innerHTML = "";
+        throw new Error("Not admin");
+      }
+
+      return user;
+    }
+
+    function resetEditor(){
+      currentStayId = null;
+      editorTitle.textContent = "Créer un séjour";
+      stayTitle.value = "";
+      staySlug.value = "";
+      stayLocation.value = "";
+      stayShortDescription.value = "";
+      stayDescription.value = "";
+      stayIncluded.value = "";
+      stayFaq.value = "";
+      stayHeroImage.value = "";
+      stayStripeLink.value = "";
+      stayFeatured.checked = false;
+      stayHighlight.checked = false;
+      setMsg(editorMsg, "");
+    }
+
+    function openEditor(){
+      editorBox.style.display = "block";
+      editorBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function closeEditor(){
+      editorBox.style.display = "none";
+      resetEditor();
+    }
+
+    async function loadStays(){
+      staysList.innerHTML = "Chargement…";
+
+      const { data, error } = await supabase
+        .from("stays")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if(error){
+        console.error(error);
+        staysList.innerHTML = "Impossible de charger les séjours.";
+        return;
+      }
+
+      if(!data || !data.length){
+        staysList.innerHTML = "Aucun séjour pour le moment.";
+        return;
+      }
+
+      staysList.innerHTML = data.map(stay => `
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+            <div>
+              <div style="font-weight:600; color:var(--text);">${stay.title || "Sans titre"}</div>
+              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+                Slug : ${stay.slug || "—"}
+              </div>
+              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+                Lieu : ${stay.location || "—"}
+              </div>
+              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+                Homepage : ${stay.is_featured ? "1er bandeau" : "—"} ${stay.is_highlight ? " · Bandeau 5 séjours" : ""}
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
+              <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">Voir</a>
+              <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      staysList.querySelectorAll("[data-edit]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-edit");
+          await editStay(id);
+        });
+      });
+
+      staysList.querySelectorAll("[data-delete]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-delete");
+          await deleteStay(id);
+        });
+      });
+    }
+
+    async function editStay(id){
+      setMsg(editorMsg, "");
+
+      const { data, error } = await supabase
+        .from("stays")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if(error){
+        console.error(error);
+        setMsg(editorMsg, "Impossible de charger ce séjour.");
+        return;
+      }
+
+      currentStayId = data.id;
+      editorTitle.textContent = "Modifier le séjour";
+      stayTitle.value = data.title || "";
+      staySlug.value = data.slug || "";
+      stayLocation.value = data.location || "";
+      stayShortDescription.value = data.short_description || "";
+      stayDescription.value = data.description || "";
+      stayIncluded.value = data.included || "";
+      stayFaq.value = data.faq ? JSON.stringify(data.faq, null, 2) : "";
+      stayHeroImage.value = data.hero_image || "";
+      stayStripeLink.value = data.stripe_link || data.stripe_payment_link || "";
+      stayFeatured.checked = !!data.is_featured;
+      stayHighlight.checked = !!data.is_highlight;
+
+      openEditor();
+    }
+
+    async function deleteStay(id){
+      const ok = confirm("Supprimer ce séjour ?");
+      if(!ok) return;
+
+      const { error } = await supabase
+        .from("stays")
+        .delete()
+        .eq("id", id);
+
+      if(error){
+        console.error(error);
+        adminStatus.textContent = "Impossible de supprimer ce séjour.";
+        return;
+      }
+
+      adminStatus.textContent = "Séjour supprimé.";
+      await loadStays();
+    }
+
+    btnNewStay?.addEventListener("click", () => {
+      resetEditor();
+      openEditor();
+    });
+
+    btnCancelEdit?.addEventListener("click", () => {
+      closeEditor();
+    });
+
+    stayTitle?.addEventListener("input", () => {
+      if(!currentStayId){
+        staySlug.value = slugify(stayTitle.value);
+      }
+    });
+
+    btnSaveStay?.addEventListener("click", async () => {
+      setMsg(editorMsg, "");
+
+      const title = stayTitle.value.trim();
+      const slug = staySlug.value.trim() || slugify(title);
+
+      if(!title){
+        setMsg(editorMsg, "Le titre est obligatoire.");
+        return;
+      }
+
+      let faqValue = [];
+      if(stayFaq.value.trim()){
+        try{
+          faqValue = JSON.parse(stayFaq.value.trim());
+        } catch(e){
+          setMsg(editorMsg, "Le champ FAQ doit être un JSON valide.");
+          return;
+        }
+      }
+
+      const payload = {
+        title,
+        slug,
+        location: stayLocation.value.trim(),
+        short_description: stayShortDescription.value.trim(),
+        description: stayDescription.value.trim(),
+        included: stayIncluded.value.trim(),
+        faq: faqValue,
+        hero_image: stayHeroImage.value.trim(),
+        stripe_link: stayStripeLink.value.trim(),
+        is_featured: stayFeatured.checked,
+        is_highlight: stayHighlight.checked
+      };
+
+      let error = null;
+
+      if(currentStayId){
+        const result = await supabase
+          .from("stays")
+          .update(payload)
+          .eq("id", currentStayId);
+
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from("stays")
+          .insert([payload]);
+
+        error = result.error;
+      }
+
+      if(error){
+        console.error(error);
+        setMsg(editorMsg, "Impossible d’enregistrer ce séjour.");
+        return;
+      }
+
+      setMsg(editorMsg, "Séjour enregistré.");
+      adminStatus.textContent = currentStayId ? "Séjour mis à jour." : "Nouveau séjour créé.";
+      closeEditor();
+      await loadStays();
+    });
+
+    try{
+      await checkAdmin();
+      adminStatus.textContent = "Vous êtes connecté(e) en tant qu’administrateur.";
+      await loadStays();
+    } catch(err){
+      console.warn(err);
+    }
+  </script>
+
+</body>
+</html>
