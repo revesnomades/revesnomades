@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Réservations — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="on-light">
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="index.html">Accueil</a>
+        <a href="compte.html">Compte</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div class="account-card" style="max-width:1100px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <h1 style="margin:0;">Réservations</h1>
+            <p style="color:var(--muted); margin-top:10px;">
+              Suivi des clientes, montants, statuts et séjours réservés.
+            </p>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn on-light" href="compte.html">Retour compte</a>
+            <a class="btn on-light" href="admin-stays.html">Gérer les séjours</a>
+          </div>
+        </div>
+
+        <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+        <div style="margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
+          <div id="bookingsList" style="display:grid; gap:14px; color:var(--muted);">
+            Chargement…
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="band cream">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const adminStatus = document.getElementById("adminStatus");
+    const bookingsList = document.getElementById("bookingsList");
+
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if(!user){
+        window.location.href = "/compte.html";
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if(error || data?.role !== "admin"){
+        adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
+        bookingsList.innerHTML = "";
+        throw new Error("Not admin");
+      }
+
+      return user;
+    }
+
+    async function loadBookings(){
+      bookingsList.innerHTML = "Chargement…";
+
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(`
+          id,
+          status,
+          amount,
+          price_label,
+          customer_email,
+          created_at,
+          stays(title)
+        `)
+        .order("created_at", { ascending: false });
+
+      if(error){
+        console.error(error);
+        bookingsList.innerHTML = "Impossible de charger les réservations.";
+        return;
+      }
+
+      if(!data || !data.length){
+        bookingsList.innerHTML = "Aucune réservation pour le moment.";
+        return;
+      }
+
+      bookingsList.innerHTML = data.map(item => {
+        const title = item.stays?.title || "Séjour";
+        const amount = item.amount ? `${item.amount} €` : "—";
+        const email = item.customer_email || "—";
+        const label = item.price_label || "—";
+        const status = item.status || "pending";
+        const createdAt = item.created_at
+          ? new Date(item.created_at).toLocaleString("fr-FR")
+          : "—";
+
+        return `
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+              <div>
+                <div style="font-weight:600; color:var(--text);">${title}</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:4px;">Cliente : ${email}</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:4px;">Option : ${label}</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:4px;">Montant : ${amount}</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:4px;">Réservé le : ${createdAt}</div>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <select data-status-id="${item.id}"
+                  style="padding:10px; border:1px solid var(--line); background:rgba(255,255,255,.75); color:var(--text);">
+                  <option value="pending" ${status === "pending" ? "selected" : ""}>pending</option>
+                  <option value="paid" ${status === "paid" ? "selected" : ""}>paid</option>
+                  <option value="confirmed" ${status === "confirmed" ? "selected" : ""}>confirmed</option>
+                  <option value="cancelled" ${status === "cancelled" ? "selected" : ""}>cancelled</option>
+                </select>
+
+                <button class="btn on-light" type="button" data-save-status="${item.id}">
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      bookingsList.querySelectorAll("[data-save-status]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-save-status");
+          const select = document.querySelector(`[data-status-id="${id}"]`);
+          const status = select?.value || "pending";
+
+          const { error } = await supabase
+            .from("bookings")
+            .update({ status })
+            .eq("id", id);
+
+          if(error){
+            console.error(error);
+            adminStatus.textContent = "Impossible de mettre à jour le statut.";
+            return;
+          }
+
+          adminStatus.textContent = "Statut mis à jour.";
+        });
+      });
+    }
+
+    try{
+      await checkAdmin();
+      adminStatus.textContent = "Vous êtes connecté(e) en tant qu’administrateur.";
+      await loadBookings();
+    } catch(err){
+      console.warn(err);
+    }
+  </script>
+
+</body>
+</html>
