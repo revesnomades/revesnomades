@@ -179,304 +179,284 @@
 
   <!-- ✅ SUPABASE AUTH + RESET + ADMIN -->
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js";
+  import { supabase } from "./assets/js/supabaseClient.js";
 
-    const emailEl = document.getElementById("email");
-    const passEl  = document.getElementById("password");
+  const emailEl = document.getElementById("email");
+  const passEl  = document.getElementById("password");
 
-    const btnLogin  = document.getElementById("btnLogin");
-    const btnSignup = document.getElementById("btnSignup");
-    const btnLogout = document.getElementById("btnLogout");
-    const btnSee    = document.getElementById("btnSeeBookings");
-    const btnForgot = document.getElementById("btnForgot");
-    const btnUpdatePassword = document.getElementById("btnUpdatePassword");
+  const btnLogin  = document.getElementById("btnLogin");
+  const btnSignup = document.getElementById("btnSignup");
+  const btnLogout = document.getElementById("btnLogout");
+  const btnSee    = document.getElementById("btnSeeBookings");
+  const btnForgot = document.getElementById("btnForgot");
+  const btnUpdatePassword = document.getElementById("btnUpdatePassword");
 
-    const btnAddStay       = document.getElementById("btnAddStay");
-    const btnManageStays   = document.getElementById("btnManageStays");
-    const btnAdminBookings = document.getElementById("btnAdminBookings");
+  const btnAddStay       = document.getElementById("btnAddStay");
+  const btnManageStays   = document.getElementById("btnManageStays");
+  const btnAdminBookings = document.getElementById("btnAdminBookings");
 
-    const authBox    = document.getElementById("authBox");
-    const resetBox   = document.getElementById("resetBox");
-    const loggedBox  = document.getElementById("loggedBox");
-    const perksBox   = document.getElementById("perksBox");
-    const bookingsBox = document.getElementById("bookingsBox");
-    const adminPanel = document.getElementById("adminPanel");
+  const authBox     = document.getElementById("authBox");
+  const resetBox    = document.getElementById("resetBox");
+  const loggedBox   = document.getElementById("loggedBox");
+  const perksBox    = document.getElementById("perksBox");
+  const bookingsBox = document.getElementById("bookingsBox");
+  const adminPanel  = document.getElementById("adminPanel");
 
-    const authMsg   = document.getElementById("authMsg");
-    const resetMsg  = document.getElementById("resetMsg");
-    const loggedMsg = document.getElementById("loggedMsg");
-    const adminMsg  = document.getElementById("adminMsg");
+  const authMsg   = document.getElementById("authMsg");
+  const resetMsg  = document.getElementById("resetMsg");
+  const loggedMsg = document.getElementById("loggedMsg");
+  const adminMsg  = document.getElementById("adminMsg");
 
-    const userEmail = document.getElementById("userEmail");
-    const bookingsList = document.getElementById("bookingsList");
+  const userEmail    = document.getElementById("userEmail");
+  const bookingsList = document.getElementById("bookingsList");
 
-    function setMsg(el, msg){
-      if(el) el.textContent = msg || "";
+  function setMsg(el, msg) {
+    if (el) el.textContent = msg || "";
+  }
+
+  function showLoggedOut() {
+    if (authBox) authBox.style.display = "block";
+    if (resetBox) resetBox.style.display = "none";
+    if (perksBox) perksBox.style.display = "block";
+    if (loggedBox) loggedBox.style.display = "none";
+    if (bookingsBox) bookingsBox.style.display = "none";
+    if (adminPanel) adminPanel.style.display = "none";
+  }
+
+  async function checkAdmin(userId) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    console.log("ADMIN CHECK → data:", data);
+    console.log("ADMIN CHECK → error:", error);
+
+    if (error) return false;
+    return data?.role === "admin";
+  }
+
+  async function loadMyBookings(user) {
+    if (!bookingsList || !user?.email) return;
+
+    bookingsList.textContent = "Chargement…";
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .select(`
+        id,
+        status,
+        amount,
+        price_label,
+        created_at,
+        stays(title)
+      `)
+      .eq("customer_email", user.email)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("BOOKINGS ERROR:", error);
+      bookingsList.textContent = "Impossible de charger vos réservations.";
+      return;
     }
 
-    function showLoggedOut(){
-      if(authBox) authBox.style.display = "block";
-      if(resetBox) resetBox.style.display = "none";
-      if(perksBox) perksBox.style.display = "block";
-      if(loggedBox) loggedBox.style.display = "none";
-      if(bookingsBox) bookingsBox.style.display = "none";
-      if(adminPanel) adminPanel.style.display = "none";
+    if (!data || !data.length) {
+      bookingsList.textContent = "Aucune réservation pour le moment.";
+      return;
     }
 
-    async function checkAdmin(userId){
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
+    bookingsList.innerHTML = data.map(item => {
+      const title = item.stays?.title || "Séjour";
+      const amount = item.amount ? `${item.amount} €` : "—";
+      const status = item.status || "—";
+      const label = item.price_label || "";
+      const date = item.created_at
+        ? new Date(item.created_at).toLocaleDateString("fr-FR")
+        : "";
 
-      if(error) return false;
-      return data?.role === "admin";
-    }
-
-    async function loadMyBookings(user){
-      if(!bookingsList || !user?.email) return;
-
-      bookingsList.textContent = "Chargement…";
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          id,
-          status,
-          amount,
-          price_label,
-          created_at,
-          stays(title)
-        `)
-        .eq("customer_email", user.email)
-        .order("created_at", { ascending: false });
-
-      if(error){
-        bookingsList.textContent = "Impossible de charger vos réservations.";
-        return;
-      }
-
-      if(!data || !data.length){
-        bookingsList.textContent = "Aucune réservation pour le moment.";
-        return;
-      }
-
-      bookingsList.innerHTML = data.map(item => {
-        const title = item.stays?.title || "Séjour";
-        const amount = item.amount ? `${item.amount} €` : "—";
-        const status = item.status || "—";
-        const label = item.price_label || "";
-        const date = item.created_at
-          ? new Date(item.created_at).toLocaleDateString("fr-FR")
-          : "";
-
-        return `
-          <div style="padding:12px 0; border-bottom:1px solid var(--line);">
-            <div style="font-weight:500; color:var(--text);">${title}</div>
-            <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-              ${label ? `${label} · ` : ""}${amount} · ${status}
-            </div>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
-              Réservation du ${date}
-            </div>
+      return `
+        <div style="padding:12px 0; border-bottom:1px solid var(--line);">
+          <div style="font-weight:500; color:var(--text);">${title}</div>
+          <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+            ${label ? `${label} · ` : ""}${amount} · ${status}
           </div>
-        `;
-      }).join("");
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+            Réservation du ${date}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function showLoggedIn(user) {
+    if (authBox) authBox.style.display = "none";
+    if (resetBox) resetBox.style.display = "none";
+    if (perksBox) perksBox.style.display = "none";
+    if (loggedBox) loggedBox.style.display = "block";
+    if (bookingsBox) bookingsBox.style.display = "block";
+    if (userEmail) userEmail.textContent = user?.email || "";
+
+    await loadMyBookings(user);
+
+    const isAdmin = await checkAdmin(user.id);
+
+    if (isAdmin && adminPanel) {
+      adminPanel.style.display = "block";
+    } else if (adminPanel) {
+      adminPanel.style.display = "none";
+    }
+  }
+
+  // Détection reset password
+  const hash = window.location.hash || "";
+  const isRecovery =
+    hash.includes("type=recovery") ||
+    hash.includes("access_token");
+
+  if (isRecovery) {
+    if (authBox) authBox.style.display = "none";
+    if (perksBox) perksBox.style.display = "none";
+    if (loggedBox) loggedBox.style.display = "none";
+    if (bookingsBox) bookingsBox.style.display = "none";
+    if (resetBox) resetBox.style.display = "block";
+  } else {
+    const { data: { session }, error: sErr } = await supabase.auth.getSession();
+    if (sErr) console.warn(sErr);
+
+    if (session?.user) await showLoggedIn(session.user);
+    else showLoggedOut();
+  }
+
+  // Login
+  btnLogin?.addEventListener("click", async () => {
+    setMsg(authMsg, "");
+
+    const email = (emailEl?.value || "").trim();
+    const password = passEl?.value || "";
+
+    if (!email || !password) {
+      setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
+      return;
     }
 
-    async function showLoggedIn(user){
-      if(authBox) authBox.style.display = "none";
-      if(resetBox) resetBox.style.display = "none";
-      if(perksBox) perksBox.style.display = "none";
-      if(loggedBox) loggedBox.style.display = "block";
-      if(bookingsBox) bookingsBox.style.display = "block";
-      if(userEmail) userEmail.textContent = user?.email || "";
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      await loadMyBookings(user);
-
-      const isAdmin = await checkAdmin(user.id);
-      if(isAdmin && adminPanel){
-        adminPanel.style.display = "block";
-      } else if(adminPanel){
-        adminPanel.style.display = "none";
-      }
+    if (error) {
+      setMsg(authMsg, error.message);
+      return;
     }
 
-    // ---- détection reset password depuis email ----
-    const hash = window.location.hash || "";
-    const isRecovery =
-      hash.includes("type=recovery") ||
-      hash.includes("access_token");
+    await showLoggedIn(data.user);
+    setMsg(authMsg, "");
+  });
 
-    if(isRecovery){
-      if(authBox) authBox.style.display = "none";
-      if(perksBox) perksBox.style.display = "none";
-      if(loggedBox) loggedBox.style.display = "none";
-      if(bookingsBox) bookingsBox.style.display = "none";
-      if(resetBox) resetBox.style.display = "block";
-    } else {
-      const { data: { session }, error: sErr } = await supabase.auth.getSession();
-      if(sErr) console.warn(sErr);
+  // Signup -> redirection vers page dédiée
+  btnSignup?.addEventListener("click", () => {
+    window.location.href = "/signup.html";
+  });
 
-      if(session?.user) await showLoggedIn(session.user);
-      else showLoggedOut();
+  // Mot de passe oublié
+  btnForgot?.addEventListener("click", async () => {
+    setMsg(authMsg, "");
+    const email = (emailEl?.value || "").trim();
+
+    if (!email) {
+      setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
+      return;
     }
 
-    // ---- login ----
-    btnLogin?.addEventListener("click", async () => {
-      setMsg(authMsg, "");
-      const email = (emailEl?.value || "").trim();
-      const password = passEl?.value || "";
-
-      if(!email || !password){
-        setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if(error){
-        setMsg(authMsg, error.message);
-        return;
-      }
-
-      await showLoggedIn(data.user);
-      setMsg(authMsg, "");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/compte.html`
     });
 
-    // ---- signup ----
-    btnSignup?.addEventListener("click", async () => {
-      setMsg(authMsg, "");
-      const email = (emailEl?.value || "").trim();
-      const password = passEl?.value || "";
+    if (error) {
+      setMsg(authMsg, error.message);
+      return;
+    }
 
-      if(!email || !password){
-        setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
-        return;
-      }
+    setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
+  });
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${location.origin}/compte.html` }
-      });
+  // Update password
+  btnUpdatePassword?.addEventListener("click", async () => {
+    setMsg(resetMsg, "");
+    const newPassword = (document.getElementById("newPassword")?.value || "").trim();
 
-      if(error){
-        setMsg(authMsg, error.message);
-        return;
-      }
+    if (!newPassword) {
+      setMsg(resetMsg, "Merci de renseigner un nouveau mot de passe.");
+      return;
+    }
 
-      // créer profil si user déjà dispo
-      if(data?.user?.id){
-        await supabase
-          .from("profiles")
-          .upsert([{ id: data.user.id, role: "user" }]);
-      }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-      setMsg(authMsg, "Inscription envoyée. Vérifiez vos emails pour confirmer votre compte.");
-    });
+    if (error) {
+      setMsg(resetMsg, error.message);
+      return;
+    }
 
-    // ---- mot de passe oublié ----
-    btnForgot?.addEventListener("click", async () => {
-      setMsg(authMsg, "");
-      const email = (emailEl?.value || "").trim();
+    setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
+  });
 
-      if(!email){
-        setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
-        return;
-      }
+  // Logout
+  btnLogout?.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    showLoggedOut();
+    setMsg(loggedMsg, "");
+  });
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${location.origin}/compte.html`
-      });
+  // Voir réservations
+  btnSee?.addEventListener("click", async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) await loadMyBookings(user);
+  });
 
-      if(error){
-        setMsg(authMsg, error.message);
-        return;
-      }
+  // Admin : ajouter séjour
+  btnAddStay?.addEventListener("click", async () => {
+    setMsg(adminMsg, "");
 
-      setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
-    });
+    const title = prompt("Nom du séjour");
+    if (!title) return;
 
-    // ---- update password ----
-    btnUpdatePassword?.addEventListener("click", async () => {
-      setMsg(resetMsg, "");
-      const newPassword = (document.getElementById("newPassword")?.value || "").trim();
+    const slug = title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
 
-      if(!newPassword){
-        setMsg(resetMsg, "Merci de renseigner un nouveau mot de passe.");
-        return;
-      }
+    const { data, error } = await supabase
+      .from("stays")
+      .insert([{ title, slug }])
+      .select()
+      .single();
 
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      setMsg(adminMsg, "Erreur lors de la création du séjour.");
+      console.error(error);
+      return;
+    }
 
-      if(error){
-        setMsg(resetMsg, error.message);
-        return;
-      }
+    window.location.href = `/sejour.html?slug=${data.slug}`;
+  });
 
-      setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
-    });
+  // Admin : gérer séjours
+  btnManageStays?.addEventListener("click", () => {
+    window.location.href = "/admin-stays.html";
+  });
 
-    // ---- logout ----
-    btnLogout?.addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      showLoggedOut();
-      setMsg(loggedMsg, "");
-    });
+  // Admin : réservations
+  btnAdminBookings?.addEventListener("click", () => {
+    window.location.href = "/admin-bookings.html";
+  });
 
-    // ---- voir réservations ----
-    btnSee?.addEventListener("click", async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if(user) await loadMyBookings(user);
-    });
-
-    // ---- admin : ajouter séjour ----
-    btnAddStay?.addEventListener("click", async () => {
-      setMsg(adminMsg, "");
-
-      const title = prompt("Nom du séjour");
-      if(!title) return;
-
-      const slug = title
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-");
-
-      const { data, error } = await supabase
-        .from("stays")
-        .insert([{ title, slug }])
-        .select()
-        .single();
-
-      if(error){
-        setMsg(adminMsg, "Erreur lors de la création du séjour.");
-        console.error(error);
-        return;
-      }
-
-      window.location.href = `/sejour.html?slug=${data.slug}`;
-    });
-
-    // ---- admin : gérer séjours ----
-    btnManageStays?.addEventListener("click", () => {
-      window.location.href = "/admin-stays.html";
-    });
-
-    // ---- admin : réservations ----
-    btnAdminBookings?.addEventListener("click", () => {
-      window.location.href = "/admin-bookings.html";
-    });
-
-    // ---- keep UI in sync ----
-    supabase.auth.onAuthStateChange(async (_evt, newSession) => {
-      if(newSession?.user) await showLoggedIn(newSession.user);
-      else showLoggedOut();
-    });
+  // Sync UI
+  supabase.auth.onAuthStateChange(async (_evt, newSession) => {
+    if (newSession?.user) await showLoggedIn(newSession.user);
+    else showLoggedOut();
+  });
+</script>
 }
   </script>
   
