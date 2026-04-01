@@ -477,8 +477,7 @@
       if(newSession?.user) await showLoggedIn(newSession.user);
       else showLoggedOut();
     });
-  </script>
-  
+      
 async function checkAdmin(userId){
   const { data, error } = await supabase
     .from("profiles")
@@ -492,6 +491,7 @@ async function checkAdmin(userId){
   if(error) return false;
   return data?.role === "admin";
 }
+  </script>
   
 </body>
 </html>
