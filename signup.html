@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Inscription — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body class="on-light">
+
+<section class="band cream">
+  <div class="container" style="max-width:480px;">
+
+    <h2>Créer un compte</h2>
+
+    <div style="display:grid; gap:12px; margin-top:16px;">
+
+      <input id="firstname" class="input" placeholder="Prénom">
+      <input id="email" class="input" type="email" placeholder="Email">
+      <input id="password" class="input" type="password" placeholder="Mot de passe">
+
+      <button id="btnSignup" class="btn on-light">Créer mon compte</button>
+
+      <div id="msg" style="font-size:13px; color:var(--muted);"></div>
+
+    </div>
+
+  </div>
+</section>
+
+<script type="module">
+import { supabase } from "./assets/js/supabaseClient.js";
+
+const btn = document.getElementById("btnSignup");
+const msg = document.getElementById("msg");
+
+btn.addEventListener("click", async () => {
+  msg.textContent = "";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const firstname = document.getElementById("firstname").value.trim();
+
+  if(!email || !password || !firstname){
+    msg.textContent = "Merci de remplir tous les champs.";
+    return;
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { firstname },
+      emailRedirectTo: `${location.origin}/compte.html`
+    }
+  });
+
+  if(error){
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent = "Vérifiez votre email pour confirmer votre compte.";
+});
+</script>
+
+</body>
+</html>
