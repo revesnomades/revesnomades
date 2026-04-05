@@ -450,29 +450,29 @@
         return;
       }
 
-      const cards = await Promise.all(stays.map(async (stay) => {
-        const firstDate = await getFirstStayDate(stay.id);
+     const cards = await Promise.all(stays.map(async (stay) => {
+  const firstDate = await getFirstStayDate(stay.id);
 
-        return `
-          <a class="stay-card reveal" href="sejour.html?slug=${encodeURIComponent(stay.slug)}">
-            <div class="stay-card-media" style="background-image:url('${stay.hero_image || "assets/img/sejour-camargue.jpg"}');">
-              <div class="stay-card-overlay">
-                <div class="stay-card-hover">
-                  <div class="stay-card-line">5 jours / 4 nuits</div>
-                  <div class="stay-card-line stay-card-dates">
-                    ${formatDateRange(firstDate?.start_date, firstDate?.end_date)}
-                  </div>
-                  <div class="card-place">${stay.location || ""}</div>
-                  <div class="stay-card-cta">
-                    <span class="stay-mini-btn">Plus d’infos</span>
-                  </div>
-                </div>
-              </div>
+  return `
+    <a class="stay-card" href="sejour.html?slug=${encodeURIComponent(stay.slug)}">
+      <div class="stay-card-media" style="background-image:url('${stay.hero_image || "/assets/img/sejour-camargue.jpg"}');">
+        <div class="stay-card-overlay">
+          <div class="stay-card-hover">
+            <div class="stay-card-line">5 jours / 4 nuits</div>
+            <div class="stay-card-line stay-card-dates">
+              ${formatDateRange(firstDate?.start_date, firstDate?.end_date)}
             </div>
-            <div class="stay-card-title">${stay.title || "Séjour"}</div>
-          </a>
-        `;
-      }));
+            <div class="card-place">${stay.location || ""}</div>
+            <div class="stay-card-cta">
+              <span class="stay-mini-btn">Plus d’infos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stay-card-title">${stay.title || "Séjour"}</div>
+    </a>
+  `;
+}));
 
       highlightStaysGrid.innerHTML = cards.join("");
     }
