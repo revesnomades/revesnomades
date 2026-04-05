@@ -16,28 +16,28 @@
 
 <body class="on-light">
 
-  <!-- NAV -->
   <header class="nav">
     <div class="container nav-inner">
       <a class="brand" href="index.html">
-        <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
         <span>Âmes Nomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
         <a href="index.html">Accueil</a>
         <a href="compte.html">Compte</a>
+        <a href="admin-bookings.html">Réservations</a>
       </div>
     </div>
   </header>
 
   <section class="band cream">
     <div class="container" style="padding:120px 0 60px;">
-      <div class="account-card" style="max-width:1100px; margin:0 auto;">
+      <div class="account-card" style="max-width:1180px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
           <div>
             <h1 style="margin:0;">Gestion des séjours</h1>
             <p style="color:var(--muted); margin-top:10px;">
-              Ajoutez, modifiez et supprimez vos séjours sans toucher au code.
+              Crée, modifie et supprime tes séjours. Cette page pilote directement <strong>sejour.html</strong>.
             </p>
           </div>
 
@@ -49,57 +49,187 @@
 
         <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
 
-        <!-- FORMULAIRE -->
+        <!-- ÉDITEUR -->
         <div id="editorBox" style="display:none; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
           <h2 id="editorTitle" style="margin:0 0 14px;">Créer un séjour</h2>
 
-          <div style="display:grid; gap:12px;">
-            <input id="stayTitle" class="input"
-              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Titre du séjour">
+          <div style="display:grid; gap:16px;">
 
-            <input id="staySlug" class="input"
-              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Slug (ex: sardaigne-2026)">
+            <!-- Infos principales -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <h3 style="margin:0 0 12px;">Informations principales</h3>
 
-            <input id="stayLocation" class="input"
-              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Lieu">
+              <div style="display:grid; gap:12px;">
+                <input id="stayTitle" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Titre du séjour">
 
-            <textarea id="stayShortDescription" class="input"
-              style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Description courte"></textarea>
+                <input id="staySlug" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Slug (ex : camargue)">
 
-            <textarea id="stayDescription" class="input"
-              style="min-height:180px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Description complète (HTML simple ou texte)"></textarea>
+                <input id="stayLocation" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Lieu">
 
-            <textarea id="stayIncluded" class="input"
-              style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Ce qui est inclus (HTML simple ou texte)"></textarea>
+                <textarea id="stayShortDescription" class="input"
+                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Description courte"></textarea>
 
-            <textarea id="stayFaq" class="input"
-              style="min-height:160px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder='FAQ en JSON, ex: [{"q":"Question","a":"Réponse"}]'></textarea>
+                <textarea id="stayDescription" class="input"
+                  style="min-height:180px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Description principale"></textarea>
 
-            <input id="stayHeroImage" class="input"
-              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="URL image hero">
+                <input id="stayHeroImage" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="URL image hero">
 
-            <input id="stayStripeLink" class="input"
-              style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-              placeholder="Lien Stripe">
+                <input id="stayStripeLink" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Lien Stripe principal (secours)">
 
-            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
-              <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                <input id="stayFeatured" type="checkbox">
-                Afficher dans le 1er bandeau
-              </label>
+                <input id="stayMinBookings" class="input"
+                  type="number"
+                  min="0"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Nombre minimum de réservations pour valider le séjour">
 
-              <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                <input id="stayHighlight" type="checkbox">
-                Afficher dans le bandeau 5 séjours
-              </label>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;">
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayFeatured" type="checkbox">
+                    Afficher dans le premier bandeau
+                  </label>
+
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayHighlight" type="checkbox">
+                    Afficher dans le bandeau 5 séjours
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ce que tu vas vivre -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <h3 style="margin:0 0 12px;">Ce que tu vas vivre</h3>
+              <p style="color:var(--muted); font-size:13px; margin:0 0 10px;">
+                Une ligne par item.
+              </p>
+              <textarea id="stayHighlights" class="input"
+                style="min-height:160px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder="Pilates quotidien&#10;Randonnées douces&#10;Cuisine saine..."></textarea>
+            </div>
+
+            <!-- Programme -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <h3 style="margin:0 0 12px;">Programme</h3>
+              <p style="color:var(--muted); font-size:13px; margin:0 0 10px;">
+                Format JSON. Exemple :
+              </p>
+              <pre style="white-space:pre-wrap; font-size:12px; color:var(--muted); margin:0 0 12px;">[
+  {"title":"Jour 1 — Arrivée","text":"Accueil, installation..."},
+  {"title":"Jour 2 — Mouvement & nature","text":"Pilates, brunch..."}
+]</pre>
+
+              <textarea id="stayProgram" class="input"
+                style="min-height:220px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder='[{"title":"Jour 1","text":"..."}]'></textarea>
+
+              <textarea id="stayProgramNote" class="input"
+                style="min-height:80px; margin-top:12px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder="Note affichée sous le programme"></textarea>
+            </div>
+
+            <!-- Inclus / non inclus / options -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <h3 style="margin:0 0 12px;">Inclus / non inclus / options</h3>
+
+              <div style="display:grid; gap:12px;">
+                <textarea id="stayIncludedItems" class="input"
+                  style="min-height:140px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Inclus : une ligne par élément"></textarea>
+
+                <textarea id="stayNotIncludedItems" class="input"
+                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Non inclus : une ligne par élément"></textarea>
+
+                <textarea id="stayExtraOptions" class="input"
+                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Options en supplément : une ligne par élément"></textarea>
+              </div>
+            </div>
+
+            <!-- Sac cadeau -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <h3 style="margin:0 0 12px;">Sac cadeau</h3>
+
+              <div style="display:grid; gap:12px;">
+                <input id="giftTitle" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Titre du bloc sac cadeau">
+
+                <textarea id="giftIntro" class="input"
+                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Texte d’introduction"></textarea>
+
+                <textarea id="giftItems" class="input"
+                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Une ligne par élément du sac cadeau"></textarea>
+
+                <textarea id="giftOutro" class="input"
+                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="Texte de conclusion"></textarea>
+
+                <input id="giftImage" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  placeholder="URL image du sac cadeau">
+              </div>
+            </div>
+
+            <!-- FAQ -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+                <h3 style="margin:0;">FAQ</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
+                  <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme FAQ modèle</button>
+                </div>
+              </div>
+
+              <p style="color:var(--muted); font-size:13px; margin:12px 0 10px;">
+                Format JSON. Exemple :
+              </p>
+              <pre style="white-space:pre-wrap; font-size:12px; color:var(--muted); margin:0 0 12px;">[
+  {"q":"Niveau requis en Pilates ?","a":"Tous niveaux."},
+  {"q":"Et si je viens seule ?","a":"C’est très fréquent."}
+]</pre>
+
+              <textarea id="stayFaq" class="input"
+                style="min-height:220px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
+            </div>
+
+            <!-- Formules / prix Stripe -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+                <h3 style="margin:0;">Formules & prix Stripe</h3>
+                <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
+              </div>
+
+              <p style="color:var(--muted); font-size:13px; margin:12px 0 10px;">
+                Chaque ligne correspond à une option visible sur la page séjour.
+              </p>
+
+              <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
+            </div>
+
+            <!-- Dates / quotas -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+                <h3 style="margin:0;">Dates & quotas</h3>
+                <button class="btn on-light" id="btnAddDateRow" type="button">➕ Ajouter une date</button>
+              </div>
+
+              <div id="datesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -126,7 +256,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand">
-          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
           <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
         </div>
       </div>
@@ -147,18 +277,40 @@
     const btnNewStay = document.getElementById("btnNewStay");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
+    const btnAddPriceRow = document.getElementById("btnAddPriceRow");
+    const btnAddDateRow = document.getElementById("btnAddDateRow");
+    const btnLoadDefaultFaq = document.getElementById("btnLoadDefaultFaq");
+    const btnSaveAsDefaultFaq = document.getElementById("btnSaveAsDefaultFaq");
 
     const stayTitle = document.getElementById("stayTitle");
     const staySlug = document.getElementById("staySlug");
     const stayLocation = document.getElementById("stayLocation");
     const stayShortDescription = document.getElementById("stayShortDescription");
     const stayDescription = document.getElementById("stayDescription");
-    const stayIncluded = document.getElementById("stayIncluded");
-    const stayFaq = document.getElementById("stayFaq");
     const stayHeroImage = document.getElementById("stayHeroImage");
     const stayStripeLink = document.getElementById("stayStripeLink");
+    const stayMinBookings = document.getElementById("stayMinBookings");
     const stayFeatured = document.getElementById("stayFeatured");
     const stayHighlight = document.getElementById("stayHighlight");
+
+    const stayHighlights = document.getElementById("stayHighlights");
+    const stayProgram = document.getElementById("stayProgram");
+    const stayProgramNote = document.getElementById("stayProgramNote");
+
+    const stayIncludedItems = document.getElementById("stayIncludedItems");
+    const stayNotIncludedItems = document.getElementById("stayNotIncludedItems");
+    const stayExtraOptions = document.getElementById("stayExtraOptions");
+
+    const giftTitle = document.getElementById("giftTitle");
+    const giftIntro = document.getElementById("giftIntro");
+    const giftItems = document.getElementById("giftItems");
+    const giftOutro = document.getElementById("giftOutro");
+    const giftImage = document.getElementById("giftImage");
+
+    const stayFaq = document.getElementById("stayFaq");
+
+    const pricesRows = document.getElementById("pricesRows");
+    const datesRows = document.getElementById("datesRows");
 
     let currentStayId = null;
 
@@ -174,6 +326,171 @@
         .replace(/[^a-z0-9\s-]/g, "")
         .trim()
         .replace(/\s+/g, "-");
+    }
+
+    function linesToArray(value){
+      return String(value || "")
+        .split("\n")
+        .map(v => v.trim())
+        .filter(Boolean);
+    }
+
+    function arrayToLines(value){
+      if(!value || !Array.isArray(value)) return "";
+      return value.join("\n");
+    }
+
+    function createPriceRow(data = {}){
+      const row = document.createElement("div");
+      row.className = "price-row";
+      row.style.cssText = "display:grid; grid-template-columns:1.3fr 1.6fr 0.8fr 1.6fr 0.7fr auto auto; gap:10px; align-items:center;";
+
+      row.innerHTML = `
+        <input class="input price-label"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Label"
+          value="${data.label || ""}">
+
+        <input class="input price-description"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Description courte"
+          value="${data.description || ""}">
+
+        <input class="input price-value"
+          type="number"
+          min="0"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Prix"
+          value="${data.price ?? ""}">
+
+        <input class="input price-link"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Lien Stripe"
+          value="${data.stripe_link || ""}">
+
+        <input class="input price-order"
+          type="number"
+          min="0"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Ordre"
+          value="${data.sort_order ?? 0}">
+
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px;">
+          <input class="price-active" type="checkbox" ${data.is_active === false ? "" : "checked"}>
+          Active
+        </label>
+
+        <button class="btn on-light btn-remove-price" type="button">✕</button>
+      `;
+
+      row.querySelector(".btn-remove-price").addEventListener("click", () => {
+        row.remove();
+      });
+
+      pricesRows.appendChild(row);
+    }
+
+    function createDateRow(data = {}){
+      const row = document.createElement("div");
+      row.className = "date-row";
+      row.style.cssText = "display:grid; grid-template-columns:1.2fr 1.2fr 1fr 1fr auto; gap:10px; align-items:center;";
+      row.innerHTML = `
+        <input class="input date-start"
+          type="date"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          value="${data.start_date || ""}">
+
+        <input class="input date-end"
+          type="date"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          value="${data.end_date || ""}">
+
+        <input class="input date-total"
+          type="number"
+          min="0"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Places totales"
+          value="${data.seats_total ?? ""}">
+
+        <input class="input date-remaining"
+          type="number"
+          min="0"
+          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+          placeholder="Places restantes"
+          value="${data.seats_remaining ?? ""}">
+
+        <button class="btn on-light btn-remove-date" type="button">✕</button>
+      `;
+
+      row.querySelector(".btn-remove-date").addEventListener("click", () => {
+        row.remove();
+      });
+
+      datesRows.appendChild(row);
+    }
+
+    async function loadDefaultFaqIntoField(){
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "default_stay_faq")
+        .single();
+
+      if(error){
+        console.error(error);
+        setMsg(editorMsg, "Impossible de charger la FAQ modèle.");
+        return;
+      }
+
+      stayFaq.value = JSON.stringify(data?.value || [], null, 2);
+      setMsg(editorMsg, "FAQ modèle chargée.");
+    }
+
+    function resetEditor(){
+      currentStayId = null;
+      editorTitle.textContent = "Créer un séjour";
+
+      stayTitle.value = "";
+      staySlug.value = "";
+      stayLocation.value = "";
+      stayShortDescription.value = "";
+      stayDescription.value = "";
+      stayHeroImage.value = "";
+      stayStripeLink.value = "";
+      stayMinBookings.value = "10";
+      stayFeatured.checked = false;
+      stayHighlight.checked = false;
+
+      stayHighlights.value = "";
+      stayProgram.value = "";
+      stayProgramNote.value = "";
+
+      stayIncludedItems.value = "";
+      stayNotIncludedItems.value = "";
+      stayExtraOptions.value = "";
+
+      giftTitle.value = "";
+      giftIntro.value = "";
+      giftItems.value = "";
+      giftOutro.value = "";
+      giftImage.value = "";
+
+      stayFaq.value = "";
+
+      pricesRows.innerHTML = "";
+      datesRows.innerHTML = "";
+
+      setMsg(editorMsg, "");
+    }
+
+    function openEditor(){
+      editorBox.style.display = "block";
+      editorBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function closeEditor(){
+      editorBox.style.display = "none";
+      resetEditor();
     }
 
     async function checkAdmin(){
@@ -197,33 +514,6 @@
       }
 
       return user;
-    }
-
-    function resetEditor(){
-      currentStayId = null;
-      editorTitle.textContent = "Créer un séjour";
-      stayTitle.value = "";
-      staySlug.value = "";
-      stayLocation.value = "";
-      stayShortDescription.value = "";
-      stayDescription.value = "";
-      stayIncluded.value = "";
-      stayFaq.value = "";
-      stayHeroImage.value = "";
-      stayStripeLink.value = "";
-      stayFeatured.checked = false;
-      stayHighlight.checked = false;
-      setMsg(editorMsg, "");
-    }
-
-    function openEditor(){
-      editorBox.style.display = "block";
-      editorBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function closeEditor(){
-      editorBox.style.display = "none";
-      resetEditor();
     }
 
     async function loadStays(){
@@ -250,14 +540,10 @@
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
             <div>
               <div style="font-weight:600; color:var(--text);">${stay.title || "Sans titre"}</div>
+              <div style="font-size:13px; color:var(--muted); margin-top:4px;">Slug : ${stay.slug || "—"}</div>
+              <div style="font-size:13px; color:var(--muted); margin-top:4px;">Lieu : ${stay.location || "—"}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Slug : ${stay.slug || "—"}
-              </div>
-              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Lieu : ${stay.location || "—"}
-              </div>
-              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Homepage : ${stay.is_featured ? "1er bandeau" : "—"} ${stay.is_highlight ? " · Bandeau 5 séjours" : ""}
+                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? " · bandeau 5 séjours" : ""}
               </div>
             </div>
 
@@ -272,47 +558,89 @@
 
       staysList.querySelectorAll("[data-edit]").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const id = btn.getAttribute("data-edit");
-          await editStay(id);
+          await editStay(btn.getAttribute("data-edit"));
         });
       });
 
       staysList.querySelectorAll("[data-delete]").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const id = btn.getAttribute("data-delete");
-          await deleteStay(id);
+          await deleteStay(btn.getAttribute("data-delete"));
         });
       });
     }
 
     async function editStay(id){
-      setMsg(editorMsg, "");
+      resetEditor();
 
-      const { data, error } = await supabase
+      const { data: stay, error } = await supabase
         .from("stays")
         .select("*")
         .eq("id", id)
         .single();
 
-      if(error){
+      if(error || !stay){
         console.error(error);
         setMsg(editorMsg, "Impossible de charger ce séjour.");
         return;
       }
 
-      currentStayId = data.id;
+      const { data: prices } = await supabase
+        .from("stay_prices")
+        .select("*")
+        .eq("stay_id", id)
+        .order("sort_order", { ascending: true })
+        .order("price", { ascending: true });
+
+      const { data: dates } = await supabase
+        .from("stay_dates")
+        .select("*")
+        .eq("stay_id", id)
+        .order("start_date", { ascending: true });
+
+      currentStayId = stay.id;
       editorTitle.textContent = "Modifier le séjour";
-      stayTitle.value = data.title || "";
-      staySlug.value = data.slug || "";
-      stayLocation.value = data.location || "";
-      stayShortDescription.value = data.short_description || "";
-      stayDescription.value = data.description || "";
-      stayIncluded.value = data.included || "";
-      stayFaq.value = data.faq ? JSON.stringify(data.faq, null, 2) : "";
-      stayHeroImage.value = data.hero_image || "";
-      stayStripeLink.value = data.stripe_link || data.stripe_payment_link || "";
-      stayFeatured.checked = !!data.is_featured;
-      stayHighlight.checked = !!data.is_highlight;
+
+      stayTitle.value = stay.title || "";
+      staySlug.value = stay.slug || "";
+      stayLocation.value = stay.location || "";
+      stayShortDescription.value = stay.short_description || "";
+      stayDescription.value = stay.description || "";
+      stayHeroImage.value = stay.hero_image || "";
+      stayStripeLink.value = stay.stripe_link || "";
+      stayMinBookings.value = stay.min_bookings ?? 10;
+      stayFeatured.checked = !!stay.is_featured;
+      stayHighlight.checked = !!stay.is_highlight;
+
+      stayHighlights.value = arrayToLines(stay.highlights);
+      stayProgram.value = stay.program ? JSON.stringify(stay.program, null, 2) : "";
+      stayProgramNote.value = stay.program_note || "";
+
+      stayIncludedItems.value = arrayToLines(stay.included_items);
+      stayNotIncludedItems.value = arrayToLines(stay.not_included_items);
+      stayExtraOptions.value = arrayToLines(stay.extra_options);
+
+      giftTitle.value = stay.gift_title || "";
+      giftIntro.value = stay.gift_intro || "";
+      giftItems.value = arrayToLines(stay.gift_items);
+      giftOutro.value = stay.gift_outro || "";
+      giftImage.value = stay.gift_image || "";
+
+      stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
+
+      pricesRows.innerHTML = "";
+      datesRows.innerHTML = "";
+
+      if(prices?.length){
+        prices.forEach(p => createPriceRow(p));
+      } else {
+        createPriceRow();
+      }
+
+      if(dates?.length){
+        dates.forEach(d => createDateRow(d));
+      } else {
+        createDateRow();
+      }
 
       openEditor();
     }
@@ -336,13 +664,54 @@
       await loadStays();
     }
 
-    btnNewStay?.addEventListener("click", () => {
+    btnNewStay?.addEventListener("click", async () => {
       resetEditor();
+      createPriceRow();
+      createDateRow();
+      await loadDefaultFaqIntoField();
       openEditor();
     });
 
     btnCancelEdit?.addEventListener("click", () => {
       closeEditor();
+    });
+
+    btnAddPriceRow?.addEventListener("click", () => {
+      createPriceRow();
+    });
+
+    btnAddDateRow?.addEventListener("click", () => {
+      createDateRow();
+    });
+
+    btnLoadDefaultFaq?.addEventListener("click", async () => {
+      await loadDefaultFaqIntoField();
+    });
+
+    btnSaveAsDefaultFaq?.addEventListener("click", async () => {
+      let faqValue = [];
+
+      try {
+        faqValue = stayFaq.value.trim() ? JSON.parse(stayFaq.value.trim()) : [];
+      } catch (e) {
+        setMsg(editorMsg, "La FAQ doit être un JSON valide.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert([{
+          key: "default_stay_faq",
+          value: faqValue
+        }], { onConflict: "key" });
+
+      if (error) {
+        console.error(error);
+        setMsg(editorMsg, "Impossible d’enregistrer la FAQ modèle.");
+        return;
+      }
+
+      setMsg(editorMsg, "FAQ modèle enregistrée. Elle sera utilisée pour les prochains séjours.");
     });
 
     stayTitle?.addEventListener("input", () => {
@@ -362,14 +731,21 @@
         return;
       }
 
+      let programValue = [];
       let faqValue = [];
-      if(stayFaq.value.trim()){
-        try{
-          faqValue = JSON.parse(stayFaq.value.trim());
-        } catch(e){
-          setMsg(editorMsg, "Le champ FAQ doit être un JSON valide.");
-          return;
-        }
+
+      try{
+        programValue = stayProgram.value.trim() ? JSON.parse(stayProgram.value.trim()) : [];
+      } catch(e){
+        setMsg(editorMsg, "Le programme doit être un JSON valide.");
+        return;
+      }
+
+      try{
+        faqValue = stayFaq.value.trim() ? JSON.parse(stayFaq.value.trim()) : [];
+      } catch(e){
+        setMsg(editorMsg, "La FAQ doit être un JSON valide.");
+        return;
       }
 
       const payload = {
@@ -378,35 +754,118 @@
         location: stayLocation.value.trim(),
         short_description: stayShortDescription.value.trim(),
         description: stayDescription.value.trim(),
-        included: stayIncluded.value.trim(),
-        faq: faqValue,
         hero_image: stayHeroImage.value.trim(),
         stripe_link: stayStripeLink.value.trim(),
+        min_bookings: Number(stayMinBookings.value || 10),
         is_featured: stayFeatured.checked,
-        is_highlight: stayHighlight.checked
+        is_highlight: stayHighlight.checked,
+        highlights: linesToArray(stayHighlights.value),
+        program: programValue,
+        program_note: stayProgramNote.value.trim(),
+        included_items: linesToArray(stayIncludedItems.value),
+        not_included_items: linesToArray(stayNotIncludedItems.value),
+        extra_options: linesToArray(stayExtraOptions.value),
+        gift_title: giftTitle.value.trim(),
+        gift_intro: giftIntro.value.trim(),
+        gift_items: linesToArray(giftItems.value),
+        gift_outro: giftOutro.value.trim(),
+        gift_image: giftImage.value.trim(),
+        faq: faqValue
       };
 
-      let error = null;
+      let stayId = currentStayId;
 
       if(currentStayId){
-        const result = await supabase
+        const { error } = await supabase
           .from("stays")
           .update(payload)
           .eq("id", currentStayId);
 
-        error = result.error;
+        if(error){
+          console.error(error);
+          setMsg(editorMsg, "Impossible de mettre à jour le séjour.");
+          return;
+        }
       } else {
-        const result = await supabase
+        const { data, error } = await supabase
           .from("stays")
-          .insert([payload]);
+          .insert([payload])
+          .select()
+          .single();
 
-        error = result.error;
+        if(error){
+          console.error(error);
+          setMsg(editorMsg, "Impossible de créer le séjour.");
+          return;
+        }
+
+        stayId = data.id;
       }
 
-      if(error){
-        console.error(error);
-        setMsg(editorMsg, "Impossible d’enregistrer ce séjour.");
-        return;
+      // Réécriture complète des formules
+      await supabase.from("stay_prices").delete().eq("stay_id", stayId);
+
+      const pricesPayload = Array.from(pricesRows.querySelectorAll(".price-row"))
+        .map(row => {
+          const label = row.querySelector(".price-label")?.value?.trim() || "";
+          const description = row.querySelector(".price-description")?.value?.trim() || "";
+          const price = row.querySelector(".price-value")?.value || "";
+          const stripe_link = row.querySelector(".price-link")?.value?.trim() || "";
+          const sort_order = row.querySelector(".price-order")?.value || "0";
+          const is_active = !!row.querySelector(".price-active")?.checked;
+
+          if(!label || !price || !stripe_link) return null;
+
+          return {
+            stay_id: stayId,
+            label,
+            description,
+            price: Number(price),
+            stripe_link,
+            sort_order: Number(sort_order),
+            is_active
+          };
+        })
+        .filter(Boolean);
+
+      if(pricesPayload.length){
+        const { error } = await supabase.from("stay_prices").insert(pricesPayload);
+        if(error){
+          console.error(error);
+          setMsg(editorMsg, "Séjour enregistré, mais erreur sur les formules.");
+          return;
+        }
+      }
+
+      // Réécriture complète des dates
+      await supabase.from("stay_dates").delete().eq("stay_id", stayId);
+
+      const datesPayload = Array.from(datesRows.querySelectorAll(".date-row"))
+        .map(row => {
+          const start_date = row.querySelector(".date-start")?.value || null;
+          const end_date = row.querySelector(".date-end")?.value || null;
+          const seats_total = row.querySelector(".date-total")?.value || "";
+          const seats_remaining = row.querySelector(".date-remaining")?.value || "";
+
+          if(!start_date && !end_date) return null;
+
+          return {
+            stay_id: stayId,
+            start_date,
+            end_date,
+            seats_total: Number(seats_total || 0),
+            seats_remaining: Number(seats_remaining || 0)
+          };
+        })
+        .filter(Boolean);
+
+      if(datesPayload.length){
+        const { error } = await supabase.from("stay_dates").insert(datesPayload);
+        if(error){
+          console.error(error);
+          setMsg(editorMsg, "Séjour enregistré, mais erreur sur les dates.");
+          return;
+        }
       }
 
       setMsg(editorMsg, "Séjour enregistré.");
