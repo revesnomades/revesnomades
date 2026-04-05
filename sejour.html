@@ -20,8 +20,8 @@
   <header class="nav" id="top">
     <div class="container nav-inner">
       <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
-        <img src="assets/img/logo-reves-nomades.png" alt="Logo Âmes Nomades" />
-        <span>ÂmesNomades</span>
+        <img src="/assets/img/logo-reves-nomades.png" alt="Logo Âmes Nomades" />
+        <span>Âmes Nomades</span>
       </a>
 
       <nav class="nav-links nav-links-desktop">
@@ -51,7 +51,7 @@
 
   <!-- HERO IMAGE -->
   <section class="sejour-hero">
-    <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+    <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
   </section>
 
   <!-- CONTENT -->
@@ -120,7 +120,7 @@
           <div class="gift-pack-image">
             <img
               id="giftImage"
-              src="assets/img/sac-cadeau-reves-nomades.jpg"
+              src="/assets/img/sac-cadeau-reves-nomades.jpg"
               alt="Sac cadeau Âmes Nomades"
             />
           </div>
@@ -222,7 +222,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
           <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
         </div>
 
@@ -378,6 +378,16 @@
       container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join("");
     }
 
+    function formatDateRange(start, end){
+      if(!start && !end) return "Dates à annoncer";
+
+      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
+      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
+
+      if(startText && endText) return `${startText} au ${endText}`;
+      return startText || endText || "Dates à annoncer";
+    }
+
     async function loadStay(){
       if(!slug){
         stayTitle.textContent = "Séjour introuvable";
@@ -402,6 +412,8 @@
         .from("stay_prices")
         .select("*")
         .eq("stay_id", stay.id)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
         .order("price", { ascending: true });
 
       const { data: dates } = await supabase
@@ -430,9 +442,7 @@
       // Dates
       if(dates && dates.length){
         const first = dates[0];
-        const start = first.start_date ? new Date(first.start_date).toLocaleDateString("fr-FR") : "";
-        const end = first.end_date ? new Date(first.end_date).toLocaleDateString("fr-FR") : "";
-        stayDates.textContent = `${start}${end ? ` au ${end}` : ""}`;
+        stayDates.textContent = formatDateRange(first.start_date, first.end_date);
       } else {
         stayDates.textContent = "Dates à annoncer";
       }
@@ -459,7 +469,7 @@
       giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
       giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
 
-      const giftItems = stay.gift_items || [
+      const giftItemsData = stay.gift_items || [
         "Tee-shirt Âmes Nomades",
         "Sac en tissu",
         "Gourde réutilisable",
@@ -467,7 +477,7 @@
         "Un soin bien-être (surprise)"
       ];
 
-      giftList.innerHTML = giftItems.map(item => `<li>${item}</li>`).join("");
+      giftList.innerHTML = giftItemsData.map(item => `<li>${item}</li>`).join("");
 
       if(stay.gift_image){
         giftImage.src = stay.gift_image;
@@ -481,21 +491,23 @@
       // FAQ
       renderFaq(faqList, stay.faq || []);
 
-      // Réservation
+      // Réservation - formules Stripe
       roomSelect.innerHTML = "";
 
-      if(prices && prices.length){
-        prices.forEach((price, index) => {
+      if (prices && prices.length) {
+        prices.forEach((priceItem, index) => {
           const option = document.createElement("option");
-          option.value = price.id;
-          option.textContent = `${price.label} — ${formatEUR(price.price)}`;
-          option.dataset.price = price.price;
-          option.dataset.link = price.stripe_link || stay.stripe_link || "";
+          option.value = priceItem.id;
+          option.textContent = `${priceItem.label} — ${formatEUR(priceItem.price)}`;
+          option.dataset.price = priceItem.price;
+          option.dataset.link = priceItem.stripe_link || "";
+          option.dataset.description = priceItem.description || "";
           roomSelect.appendChild(option);
 
-          if(index === 0){
-            stayPriceLive.textContent = formatEUR(price.price);
-            payBtn.href = price.stripe_link || stay.stripe_link || "#";
+          if (index === 0) {
+            stayPriceLive.textContent = formatEUR(priceItem.price);
+            payBtn.href = priceItem.stripe_link || "#";
+            bookingMsg.textContent = priceItem.description || "";
           }
         });
       } else {
@@ -504,20 +516,22 @@
         option.textContent = "Formule à annoncer";
         roomSelect.appendChild(option);
 
-        stayPriceLive.textContent = minPrice ? formatEUR(minPrice) : "—";
-        payBtn.href = stay.stripe_link || "#";
+        stayPriceLive.textContent = "—";
+        payBtn.removeAttribute("href");
+        bookingMsg.textContent = "Aucune formule disponible pour le moment.";
       }
 
       roomSelect.addEventListener("change", () => {
         const selected = roomSelect.options[roomSelect.selectedIndex];
         const price = selected?.dataset?.price;
         const link = selected?.dataset?.link;
+        const description = selected?.dataset?.description;
 
         stayPriceLive.textContent = price ? formatEUR(price) : "—";
 
-        if(link){
+        if (link) {
           payBtn.href = link;
-          bookingMsg.textContent = "";
+          bookingMsg.textContent = description || "";
         } else {
           payBtn.removeAttribute("href");
           bookingMsg.textContent = "Lien Stripe manquant pour cette formule.";
