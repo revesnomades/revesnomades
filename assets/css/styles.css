@@ -69,21 +69,16 @@ body{
   line-height:1.75;
   letter-spacing: .01em;
 }
-h1,h2{
-  font-family:"SegoCustom", serif;
+h1,h2,h3,h4{
+  font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
   letter-spacing: .02em;
 }
 h3,h4{
-  font-family:"SegoCustom", serif;
   font-weight:500;
   margin:0;
-  letter-spacing: .02em;
 }
-.title,
-.stay-card-title,
-.sejour-content h1,
-.gc-head h1,
-.gc-card h2{
+.brand span,
+.amesnomades-title{
   font-family:"SegoCustom", serif;
 }
 p{ margin: 12px 0 0; }
