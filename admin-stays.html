@@ -429,22 +429,28 @@
       datesRows.appendChild(row);
     }
 
-    async function loadDefaultFaqIntoField(){
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "default_stay_faq")
-        .single();
+   async function loadDefaultFaqIntoField() {
+  try {
+    const { data, error } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "default_faq")
+      .single();
 
-      if(error){
-        console.error(error);
-        setMsg(editorMsg, "Impossible de charger la FAQ modèle.");
-        return;
-      }
-
-      stayFaq.value = JSON.stringify(data?.value || [], null, 2);
-      setMsg(editorMsg, "FAQ modèle chargée.");
+    if (error) {
+      console.warn("FAQ non trouvée");
+      return;
     }
+
+    const el = document.getElementById("faqInput");
+    if (el && data?.value) {
+      el.value = JSON.stringify(data.value, null, 2);
+    }
+
+  } catch (err) {
+    console.error("Erreur FAQ:", err);
+  }
+}
 
     function resetEditor(){
       currentStayId = null;
