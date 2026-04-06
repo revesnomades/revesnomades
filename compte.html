@@ -203,6 +203,7 @@
   const perksBox    = document.getElementById("perksBox");
   const bookingsBox = document.getElementById("bookingsBox");
   const adminPanel  = document.getElementById("adminPanel");
+  const btnAdminDashboard = document.getElementById("btnAdminDashboard");
 
   const authMsg   = document.getElementById("authMsg");
   const resetMsg  = document.getElementById("resetMsg");
@@ -309,6 +310,10 @@
       adminPanel.style.display = "none";
     }
   }
+
+  btnAdminDashboard?.addEventListener("click", () => {
+  window.location.href = "/admin-dashboard.html";
+});
 
   // Détection reset password
   const hash = window.location.hash || "";
