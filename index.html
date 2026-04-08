@@ -551,6 +551,123 @@
       }
     });
   </script>
+<script type="module">
+  import { supabase } from "/assets/js/supabaseClient.js";
 
+  const featuredStayTitle = document.getElementById("featuredStayTitle");
+  const featuredStayDuration = document.getElementById("featuredStayDuration");
+  const featuredStayDates = document.getElementById("featuredStayDates");
+  const featuredStayLocation = document.getElementById("featuredStayLocation");
+  const featuredStayLink = document.getElementById("featuredStayLink");
+  const featuredStayMedia = document.getElementById("featuredStayMedia");
+  const featuredStayMissing = document.getElementById("featuredStayMissing");
+
+  function formatDateRange(start, end) {
+    if (!start && !end) return "Dates à annoncer";
+
+    const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
+    const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
+
+    if (startText && endText) return `${startText} au ${endText}`;
+    return startText || endText || "Dates à annoncer";
+  }
+
+  function getDurationLabel(start, end) {
+    if (!start || !end) return "Durée à annoncer";
+
+    const s = new Date(start + "T00:00:00");
+    const e = new Date(end + "T00:00:00");
+    const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
+
+    if (days <= 0) return "Durée à annoncer";
+
+    const nights = Math.max(0, days - 1);
+    return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
+  }
+
+  async function loadFeaturedStay() {
+    const { data: stay, error } = await supabase
+      .from("stays")
+      .select("*")
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erreur chargement séjour vedette :", error);
+      if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
+      if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
+      if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
+      return;
+    }
+
+    if (!stay) {
+      if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
+      if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
+      if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
+      if (featuredStayLocation) featuredStayLocation.textContent = "";
+      if (featuredStayMissing) featuredStayMissing.textContent = "";
+      return;
+    }
+
+    const { data: stayDate, error: dateError } = await supabase
+      .from("stay_dates")
+      .select("*")
+      .eq("stay_id", stay.id)
+      .order("start_date", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (dateError) {
+      console.error("Erreur chargement date séjour vedette :", dateError);
+    }
+
+    if (featuredStayTitle) {
+      featuredStayTitle.textContent = stay.title || "Séjour";
+    }
+
+    if (featuredStayDuration) {
+      featuredStayDuration.textContent = getDurationLabel(
+        stayDate?.start_date,
+        stayDate?.end_date
+      );
+    }
+
+    if (featuredStayDates) {
+      featuredStayDates.textContent = formatDateRange(
+        stayDate?.start_date,
+        stayDate?.end_date
+      );
+    }
+
+    if (featuredStayLocation) {
+      featuredStayLocation.textContent = stay.location || "";
+    }
+
+    if (featuredStayLink) {
+      featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+    }
+
+    if (featuredStayMedia && stay.hero_image) {
+      featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
+    }
+
+    if (featuredStayMissing) {
+      const minBookings = Number(stay.min_bookings || 10);
+
+      if (stayDate && typeof stayDate.seats_total === "number" && typeof stayDate.seats_remaining === "number") {
+        const reserved = Number(stayDate.seats_total) - Number(stayDate.seats_remaining);
+        const missing = Math.max(0, minBookings - reserved);
+        featuredStayMissing.textContent = `Encore ${missing} réservations nécessaires pour valider ce séjour.`;
+      } else {
+        featuredStayMissing.textContent = `Encore ${minBookings} réservations nécessaires pour valider ce séjour.`;
+      }
+    }
+  }
+
+  loadFeaturedStay();
+</script>
+  
 </body>
 </html>
