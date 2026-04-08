@@ -140,18 +140,25 @@
                   placeholder="Nombre minimum de réservations pour valider le séjour">
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;">
-                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                    <input id="stayFeatured" type="checkbox">
-                    Afficher dans le premier bandeau
-                  </label>
+  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+    <input id="stayFeatured" type="checkbox">
+    Afficher dans le premier bandeau
+  </label>
 
-                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                    <input id="stayHighlight" type="checkbox">
-                    Afficher dans le bandeau 5 séjours
-                  </label>
-                </div>
-              </div>
-            </div>
+  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+    <input id="stayHighlight" type="checkbox">
+    Afficher dans le bandeau 5 séjours
+  </label>
+
+  <div>
+    <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">
+      Ordre dans le bandeau 5 séjours
+    </label>
+    <input id="stayHighlightOrder" class="input" type="number" min="1" value="999"
+      style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+      placeholder="1, 2, 3, 4, 5">
+  </div>
+</div>
 
             <!-- HIGHLIGHTS -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
@@ -362,6 +369,7 @@
     const stayMinBookings = document.getElementById("stayMinBookings");
     const stayFeatured = document.getElementById("stayFeatured");
     const stayHighlight = document.getElementById("stayHighlight");
+    const stayHighlightOrder = document.getElementById("stayHighlightOrder");
 
     const mainStartDate = document.getElementById("mainStartDate");
     const mainEndDate = document.getElementById("mainEndDate");
@@ -746,6 +754,7 @@
       stayMinBookings.value = "10";
       stayFeatured.checked = false;
       stayHighlight.checked = false;
+      stayHighlightOrder.value = "999";
 
       showGiftSection = true;
       showFaqSection = true;
@@ -915,6 +924,7 @@
       stayMinBookings.value = stay.min_bookings ?? 10;
       stayFeatured.checked = !!stay.is_featured;
       stayHighlight.checked = !!stay.is_highlight;
+      stayHighlightOrder.value = stay.highlight_order ?? 999;
 
       showGiftSection = stay.show_gift_section ?? true;
       showFaqSection = stay.show_faq_section ?? true;
@@ -1094,6 +1104,7 @@
         min_bookings: Number(stayMinBookings.value || 10),
         is_featured: stayFeatured.checked,
         is_highlight: stayHighlight.checked,
+        highlight_order: Number(stayHighlightOrder.value || 999),
         highlights: linesToArray(stayHighlights.value),
         program: programValue,
         program_note: stayProgramNote.value.trim(),
