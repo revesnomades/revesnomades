@@ -404,11 +404,12 @@
 
     async function loadFeaturedStay(){
       const { data: stays, error } = await supabase
-        .from("stays")
-        .select("*")
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
-        .limit(1);
+  .from("stays")
+  .select("*")
+  .eq("is_highlight", true)
+  .order("highlight_order", { ascending: true })
+  .order("created_at", { ascending: false })
+  .limit(5);
 
       if(error || !stays?.length){
         console.warn("Aucun séjour featured", error);
