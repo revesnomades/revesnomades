@@ -31,7 +31,7 @@
 
   <section class="band cream">
     <div class="container" style="padding:120px 0 60px;">
-      <div class="account-card" style="max-width:1200px; margin:0 auto;">
+      <div class="account-card" style="max-width:1220px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
           <div>
             <h1 style="margin:0;">Gestion des séjours</h1>
@@ -48,13 +48,12 @@
 
         <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
 
-        <!-- ÉDITEUR -->
         <div id="editorBox" style="display:none; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
           <h2 id="editorTitle" style="margin:0 0 14px;">Créer un séjour</h2>
 
           <div style="display:grid; gap:16px;">
 
-            <!-- DATES + DURÉE -->
+            <!-- DATES -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
               <h3 style="margin:0 0 12px;">Dates du séjour</h3>
 
@@ -114,9 +113,20 @@
                   style="min-height:180px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                   placeholder="Description principale"></textarea>
 
-                <input id="stayHeroImage" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="URL image hero">
+                <div style="border:1px solid var(--line); padding:12px; background:rgba(255,255,255,.35);">
+                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Image hero</div>
+
+                  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <input id="heroImageFile" type="file" accept="image/*">
+                    <button class="btn on-light" id="btnUploadHeroImage" type="button">Uploader l’image hero</button>
+                  </div>
+
+                  <input id="stayHeroImage" class="input"
+                    style="margin-top:10px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                    placeholder="URL image hero">
+
+                  <img id="heroPreview" src="" alt="" style="display:none; width:100%; max-width:320px; margin-top:12px; border:1px solid var(--line);">
+                </div>
 
                 <input id="stayStripeLink" class="input"
                   style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
@@ -143,9 +153,13 @@
               </div>
             </div>
 
-            <!-- CE QUE TU VAS VIVRE -->
+            <!-- HIGHLIGHTS -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <h3 style="margin:0 0 12px;">Ce que tu vas vivre</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+                <h3 style="margin:0;">Ce que tu vas vivre</h3>
+                <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
+              </div>
+
               <p style="color:var(--muted); font-size:13px; margin:0 0 10px;">
                 Une ligne par item.
               </p>
@@ -154,19 +168,20 @@
                 placeholder="Pilates quotidien&#10;Randonnées douces&#10;Cuisine saine..."></textarea>
             </div>
 
-            <!-- PROGRAMME AUTO -->
+            <!-- PROGRAMME -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
               <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-                <div>
+                <div style="display:flex; align-items:center; gap:10px;">
                   <h3 style="margin:0;">Programme du séjour</h3>
-                  <p style="margin:8px 0 0; color:var(--muted); font-size:13px;">
-                    Le nombre de jours se génère automatiquement à partir des dates.  
-                    Pour chaque jour, clique sur <strong>Ajouter un horaire</strong>.
-                  </p>
+                  <button class="btn on-light" id="btnToggleProgramSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
                 </div>
 
                 <button class="btn on-light" id="btnRebuildProgram" type="button">Recalculer le programme</button>
               </div>
+
+              <p style="margin:8px 0 0; color:var(--muted); font-size:13px;">
+                Le nombre de jours se génère automatiquement à partir des dates.
+              </p>
 
               <div id="programEditors" style="display:grid; gap:14px; margin-top:16px;"></div>
 
@@ -175,9 +190,12 @@
                 placeholder="Note affichée sous le programme"></textarea>
             </div>
 
-            <!-- INCLUS / NON INCLUS / OPTIONS -->
+            <!-- INCLUS / NON INCLUS -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <h3 style="margin:0 0 12px;">Inclus / non inclus / options</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+                <h3 style="margin:0;">Inclus / non inclus</h3>
+                <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
+              </div>
 
               <div style="display:grid; gap:12px;">
                 <textarea id="stayIncludedItems" class="input"
@@ -187,16 +205,27 @@
                 <textarea id="stayNotIncludedItems" class="input"
                   style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                   placeholder="Non inclus : une ligne par élément"></textarea>
-
-                <textarea id="stayExtraOptions" class="input"
-                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Options en supplément : une ligne par élément"></textarea>
               </div>
             </div>
 
-            <!-- SAC CADEAU -->
+            <!-- OPTIONS -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <h3 style="margin:0 0 12px;">Sac cadeau</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+                <h3 style="margin:0;">Options en supplément</h3>
+                <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
+              </div>
+
+              <textarea id="stayExtraOptions" class="input"
+                style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                placeholder="Options en supplément : une ligne par élément"></textarea>
+            </div>
+
+            <!-- GIFT -->
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+                <h3 style="margin:0;">Sac cadeau</h3>
+                <button class="btn on-light" id="btnToggleGiftSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
+              </div>
 
               <div style="display:grid; gap:12px;">
                 <input id="giftTitle" class="input"
@@ -215,16 +244,31 @@
                   style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                   placeholder="Texte de conclusion"></textarea>
 
-                <input id="giftImage" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="URL image du sac cadeau">
+                <div style="border:1px solid var(--line); padding:12px; background:rgba(255,255,255,.35);">
+                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Image sac cadeau</div>
+
+                  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <input id="giftImageFile" type="file" accept="image/*">
+                    <button class="btn on-light" id="btnUploadGiftImage" type="button">Uploader l’image sac cadeau</button>
+                  </div>
+
+                  <input id="giftImage" class="input"
+                    style="margin-top:10px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                    placeholder="URL image sac cadeau">
+
+                  <img id="giftPreview" src="" alt="" style="display:none; width:100%; max-width:320px; margin-top:12px; border:1px solid var(--line);">
+                </div>
               </div>
             </div>
 
             <!-- FAQ -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
               <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-                <h3 style="margin:0;">FAQ</h3>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <h3 style="margin:0;">FAQ</h3>
+                  <button class="btn on-light" id="btnToggleFaqSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
+                </div>
+
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                   <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
                   <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme FAQ modèle</button>
@@ -243,7 +287,7 @@
                 placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
             </div>
 
-            <!-- FORMULES STRIPE -->
+            <!-- PRIX -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
               <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
                 <h3 style="margin:0;">Formules & prix Stripe</h3>
@@ -266,7 +310,6 @@
           </div>
         </div>
 
-        <!-- LISTE -->
         <div style="margin-top:28px; border-top:1px solid var(--line); padding-top:20px;">
           <h2 style="margin:0 0 14px;">Séjours existants</h2>
           <div id="staysList" style="display:grid; gap:14px; color:var(--muted);">
@@ -276,19 +319,6 @@
       </div>
     </div>
   </section>
-
-  <footer class="band cream">
-    <div class="container footer">
-      <div class="footer-row">
-        <div class="footer-brand">
-          <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
-          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script src="/assets/js/main.js"></script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
@@ -306,6 +336,21 @@
     const btnLoadDefaultFaq = document.getElementById("btnLoadDefaultFaq");
     const btnSaveAsDefaultFaq = document.getElementById("btnSaveAsDefaultFaq");
     const btnRebuildProgram = document.getElementById("btnRebuildProgram");
+
+    const btnToggleGiftSection = document.getElementById("btnToggleGiftSection");
+    const btnToggleFaqSection = document.getElementById("btnToggleFaqSection");
+    const btnToggleProgramSection = document.getElementById("btnToggleProgramSection");
+    const btnToggleIncludedSection = document.getElementById("btnToggleIncludedSection");
+    const btnToggleOptionsSection = document.getElementById("btnToggleOptionsSection");
+    const btnToggleHighlightsSection = document.getElementById("btnToggleHighlightsSection");
+
+    const heroImageFile = document.getElementById("heroImageFile");
+    const btnUploadHeroImage = document.getElementById("btnUploadHeroImage");
+    const heroPreview = document.getElementById("heroPreview");
+
+    const giftImageFile = document.getElementById("giftImageFile");
+    const btnUploadGiftImage = document.getElementById("btnUploadGiftImage");
+    const giftPreview = document.getElementById("giftPreview");
 
     const stayTitle = document.getElementById("stayTitle");
     const staySlug = document.getElementById("staySlug");
@@ -342,6 +387,13 @@
     const pricesRows = document.getElementById("pricesRows");
 
     let currentStayId = null;
+
+    let showGiftSection = true;
+    let showFaqSection = true;
+    let showProgramSection = true;
+    let showIncludedSection = true;
+    let showOptionsSection = true;
+    let showHighlightsSection = true;
 
     function setMsg(el, msg){
       if(el) el.textContent = msg || "";
@@ -400,19 +452,113 @@
         : "Durée : —";
     }
 
+    function eyeIcon(isVisible){
+      return isVisible ? "👁" : "🙈";
+    }
+
+    function updateSectionVisibility(buttonId, isVisible){
+      const btn = document.getElementById(buttonId);
+      if(btn){
+        btn.textContent = eyeIcon(isVisible);
+        btn.setAttribute("aria-pressed", String(isVisible));
+        btn.title = isVisible ? "Bloc visible" : "Bloc masqué";
+      }
+    }
+
+    function refreshAllEyeButtons(){
+      updateSectionVisibility("btnToggleGiftSection", showGiftSection);
+      updateSectionVisibility("btnToggleFaqSection", showFaqSection);
+      updateSectionVisibility("btnToggleProgramSection", showProgramSection);
+      updateSectionVisibility("btnToggleIncludedSection", showIncludedSection);
+      updateSectionVisibility("btnToggleOptionsSection", showOptionsSection);
+      updateSectionVisibility("btnToggleHighlightsSection", showHighlightsSection);
+    }
+
+    function setPreview(imgEl, url){
+      if(!imgEl) return;
+      if(url){
+        imgEl.src = url;
+        imgEl.style.display = "block";
+      } else {
+        imgEl.src = "";
+        imgEl.style.display = "none";
+      }
+    }
+
+    async function uploadImageToStorage(file, folder = "general"){
+      if(!file) throw new Error("Aucun fichier sélectionné.");
+
+      const safeName = file.name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9.\-_]/g, "-");
+
+      const filePath = `${folder}/${Date.now()}-${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("stays")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false
+        });
+
+      if(uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("stays").getPublicUrl(filePath);
+      return data.publicUrl;
+    }
+
+    btnUploadHeroImage?.addEventListener("click", async () => {
+      try{
+        const file = heroImageFile.files?.[0];
+        if(!file){
+          setMsg(editorMsg, "Sélectionnez une image hero avant l’upload.");
+          return;
+        }
+        setMsg(editorMsg, "Upload de l’image hero…");
+        const url = await uploadImageToStorage(file, "hero");
+        stayHeroImage.value = url;
+        setPreview(heroPreview, url);
+        setMsg(editorMsg, "Image hero uploadée.");
+      } catch(err){
+        console.error(err);
+        setMsg(editorMsg, `Erreur upload image hero : ${err.message || err}`);
+      }
+    });
+
+    btnUploadGiftImage?.addEventListener("click", async () => {
+      try{
+        const file = giftImageFile.files?.[0];
+        if(!file){
+          setMsg(editorMsg, "Sélectionnez une image sac cadeau avant l’upload.");
+          return;
+        }
+        setMsg(editorMsg, "Upload de l’image sac cadeau…");
+        const url = await uploadImageToStorage(file, "gift");
+        giftImage.value = url;
+        setPreview(giftPreview, url);
+        setMsg(editorMsg, "Image sac cadeau uploadée.");
+      } catch(err){
+        console.error(err);
+        setMsg(editorMsg, `Erreur upload image sac cadeau : ${err.message || err}`);
+      }
+    });
+
+    stayHeroImage?.addEventListener("input", () => setPreview(heroPreview, stayHeroImage.value.trim()));
+    giftImage?.addEventListener("input", () => setPreview(giftPreview, giftImage.value.trim()));
+
     function createProgramSlotRow(slot = {}){
       const row = document.createElement("div");
       row.className = "program-slot-row";
       row.style.cssText = "display:grid; grid-template-columns:120px 1fr auto; gap:10px; align-items:center; margin-top:10px;";
 
       row.innerHTML = `
-        <input type="time"
-          class="input slot-time"
+        <input type="time" class="input slot-time"
           value="${slot.time || ""}"
           style="color:var(--text); background:rgba(255,255,255,.78); border:1px solid var(--line);">
 
-        <input type="text"
-          class="input slot-text"
+        <input type="text" class="input slot-text"
           value="${(slot.text || "").replace(/"/g, "&quot;")}"
           placeholder="Texte de l’activité"
           style="color:var(--text); background:rgba(255,255,255,.78); border:1px solid var(--line);">
@@ -492,7 +638,6 @@
 
     function buildProgramEditors(daysCount, existingProgram = []){
       programEditors.innerHTML = "";
-
       if(!daysCount || daysCount < 1) return;
 
       const map = new Map();
@@ -601,6 +746,19 @@
       stayMinBookings.value = "10";
       stayFeatured.checked = false;
       stayHighlight.checked = false;
+
+      showGiftSection = true;
+      showFaqSection = true;
+      showProgramSection = true;
+      showIncludedSection = true;
+      showOptionsSection = true;
+      showHighlightsSection = true;
+      refreshAllEyeButtons();
+
+      setPreview(heroPreview, "");
+      setPreview(giftPreview, "");
+      heroImageFile.value = "";
+      giftImageFile.value = "";
 
       stayHighlights.value = "";
       stayProgramNote.value = "";
@@ -758,6 +916,16 @@
       stayFeatured.checked = !!stay.is_featured;
       stayHighlight.checked = !!stay.is_highlight;
 
+      showGiftSection = stay.show_gift_section ?? true;
+      showFaqSection = stay.show_faq_section ?? true;
+      showProgramSection = stay.show_program_section ?? true;
+      showIncludedSection = stay.show_included_section ?? true;
+      showOptionsSection = stay.show_options_section ?? true;
+      showHighlightsSection = stay.show_highlights_section ?? true;
+      refreshAllEyeButtons();
+
+      setPreview(heroPreview, stay.hero_image || "");
+
       stayHighlights.value = arrayToLines(stay.highlights);
       stayProgramNote.value = stay.program_note || "";
       buildProgramEditors(getDurationData().days, stay.program || []);
@@ -771,6 +939,8 @@
       giftItems.value = arrayToLines(stay.gift_items);
       giftOutro.value = stay.gift_outro || "";
       giftImage.value = stay.gift_image || "";
+
+      setPreview(giftPreview, stay.gift_image || "");
 
       stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
 
@@ -788,10 +958,7 @@
       const ok = confirm("Supprimer ce séjour ?");
       if(!ok) return;
 
-      const { error } = await supabase
-        .from("stays")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("stays").delete().eq("id", id);
 
       if(error){
         console.error(error);
@@ -802,6 +969,36 @@
       adminStatus.textContent = "Séjour supprimé.";
       await loadStays();
     }
+
+    btnToggleGiftSection?.addEventListener("click", () => {
+      showGiftSection = !showGiftSection;
+      updateSectionVisibility("btnToggleGiftSection", showGiftSection);
+    });
+
+    btnToggleFaqSection?.addEventListener("click", () => {
+      showFaqSection = !showFaqSection;
+      updateSectionVisibility("btnToggleFaqSection", showFaqSection);
+    });
+
+    btnToggleProgramSection?.addEventListener("click", () => {
+      showProgramSection = !showProgramSection;
+      updateSectionVisibility("btnToggleProgramSection", showProgramSection);
+    });
+
+    btnToggleIncludedSection?.addEventListener("click", () => {
+      showIncludedSection = !showIncludedSection;
+      updateSectionVisibility("btnToggleIncludedSection", showIncludedSection);
+    });
+
+    btnToggleOptionsSection?.addEventListener("click", () => {
+      showOptionsSection = !showOptionsSection;
+      updateSectionVisibility("btnToggleOptionsSection", showOptionsSection);
+    });
+
+    btnToggleHighlightsSection?.addEventListener("click", () => {
+      showHighlightsSection = !showHighlightsSection;
+      updateSectionVisibility("btnToggleHighlightsSection", showHighlightsSection);
+    });
 
     btnNewStay?.addEventListener("click", async () => {
       resetEditor();
@@ -824,7 +1021,6 @@
 
     btnSaveAsDefaultFaq?.addEventListener("click", async () => {
       let faqValue = [];
-
       try {
         faqValue = stayFaq.value.trim() ? JSON.parse(stayFaq.value.trim()) : [];
       } catch (e) {
@@ -834,10 +1030,7 @@
 
       const { error } = await supabase
         .from("site_settings")
-        .upsert([{
-          key: "default_stay_faq",
-          value: faqValue
-        }], { onConflict: "key" });
+        .upsert([{ key: "default_stay_faq", value: faqValue }], { onConflict: "key" });
 
       if (error) {
         console.error(error);
@@ -912,17 +1105,19 @@
         gift_items: linesToArray(giftItems.value),
         gift_outro: giftOutro.value.trim(),
         gift_image: giftImage.value.trim(),
-        faq: faqValue
+        faq: faqValue,
+        show_gift_section: showGiftSection,
+        show_faq_section: showFaqSection,
+        show_program_section: showProgramSection,
+        show_included_section: showIncludedSection,
+        show_options_section: showOptionsSection,
+        show_highlights_section: showHighlightsSection
       };
 
       let stayId = currentStayId;
 
       if(currentStayId){
-        const { error } = await supabase
-          .from("stays")
-          .update(payload)
-          .eq("id", currentStayId);
-
+        const { error } = await supabase.from("stays").update(payload).eq("id", currentStayId);
         if(error){
           console.error(error);
           setMsg(editorMsg, `Impossible de mettre à jour le séjour : ${error.message || "erreur inconnue"}`);
@@ -1004,6 +1199,7 @@
       await checkAdmin();
       adminStatus.textContent = "Vous êtes connecté(e) en tant qu’administrateur.";
       await loadStays();
+      refreshAllEyeButtons();
     } catch(err){
       console.warn(err);
     }
