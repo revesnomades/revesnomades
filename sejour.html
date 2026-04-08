@@ -258,6 +258,13 @@
     const stayText = document.getElementById("stayText");
     const stayHeroBg = document.getElementById("stayHeroBg");
 
+    const highlightsSection = document.getElementById("highlightsSection");
+    const programSection = document.getElementById("programSection");
+    const giftSection = document.getElementById("giftSection");
+    const includedSection = document.getElementById("includedSection");
+    const optionsSection = document.getElementById("optionsSection");
+    const faqSection = document.getElementById("faqSection");
+
     const highlightsList = document.getElementById("highlightsList");
     const programList = document.getElementById("programList");
     const programNote = document.getElementById("programNote");
@@ -413,6 +420,13 @@
         stayText.innerHTML = "<p>Impossible de charger ce séjour.</p>";
         return;
       }
+
+      if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
+      if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
+      if (giftSection) giftSection.style.display = stay.show_gift_section === false ? "none" : "";
+      if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
+      if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
+      if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
 
       const { data: prices } = await supabase
         .from("stay_prices")
