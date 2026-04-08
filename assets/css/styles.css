@@ -876,7 +876,7 @@ html.js .reveal.is-visible{
     position: relative !important;
   }
   #sejours .stay-band .stay-media{
-    min-height: 72vh !important;
+    min-height: 64vh !important;
     position: relative !important;
   }
   #sejours .stay-band .stay-copy{
@@ -961,6 +961,13 @@ html.js .reveal.is-visible{
     justify-content:center;
     padding: calc(var(--navH) + 60px) 60px 60px;
     background: var(--white);
+  }
+
+  /* Réduction uniquement du bandeau "séjour seul" de la home */
+  #sejours .stay-band-compact,
+  #sejours .stay-band-compact .stay-media,
+  #sejours .stay-band-compact .stay-copy{
+    min-height: 82vh;
   }
 
   /* contact split */
