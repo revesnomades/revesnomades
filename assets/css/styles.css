@@ -284,32 +284,20 @@ html.js .reveal.is-visible{
   display:grid;
   grid-template-columns: 1fr 1fr;
   align-items: stretch;
-  min-height: 100vh;
+  min-height: 480px;
 }
 .stay-band .stay-media{
-  min-height: 100vh;
+  min-height: 480px;
   background-size: cover;
   background-position: center;
 }
 .stay-band .stay-copy{
-  min-height: 100vh;
+  min-height: 480px;
   display:flex;
   flex-direction:column;
   justify-content:center;
-  padding: calc(var(--navH) + 60px) 60px 60px;
+  padding: calc(var(--navH) + 36px) 60px 36px;
   background: var(--white);
-}
-.stay-band-compact{
-  min-height: 480px;
-}
-
-.stay-band-compact .stay-media{
-  min-height: 480px;
-}
-
-.stay-band-compact .stay-copy{
-  padding-top: 48px;
-  padding-bottom: 48px;
 }
 .kicker{
   font-size: 12px;
