@@ -299,6 +299,18 @@ html.js .reveal.is-visible{
   padding: calc(var(--navH) + 60px) 60px 60px;
   background: var(--white);
 }
+.stay-band-compact{
+  min-height: 520px;
+}
+
+.stay-band-compact .stay-media{
+  min-height: 520px;
+}
+
+.stay-band-compact .stay-copy{
+  padding-top: 56px;
+  padding-bottom: 56px;
+}
 .kicker{
   font-size: 12px;
   letter-spacing:.14em;
