@@ -2,15 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Âmes Nomades</title>
+  <title>ÂmesNomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
-  <link rel="shortcut icon" href="/assets/img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-title" content="ÂmesNomades">
   <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
 
   <meta name="description" content="Âmes Nomades — séjours bien-être : Pilates quotidien, randonnées, massages & cuisine saine." />
   <meta name="robots" content="index,follow" />
@@ -27,18 +26,38 @@
   <meta name="twitter:description" content="Séjours bien-être : Pilates quotidien, randonnées, massages & cuisine saine." />
   <meta name="twitter:image" content="assets/img/hero-1.jpg" />
 
-  <link rel="preload" as="image" href="assets/img/hero-1.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="assets/img/site.webmanifest">
+  <link rel="icon" href="assets/img/favicon.ico">
 
+  <link rel="preload" as="image" href="assets/img/hero-1.jpg">
   <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <style>
+    .stay-band.stay-band-compact{
+      min-height: 480px !important;
+    }
+
+    .stay-band.stay-band-compact .stay-media{
+      min-height: 480px !important;
+    }
+
+    .stay-band.stay-band-compact .stay-copy{
+      min-height: 480px !important;
+      padding-top: calc(var(--navH) + 36px) !important;
+      padding-bottom: 36px !important;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- NAV -->
   <header class="nav" id="top">
     <div class="container nav-inner">
       <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
-        <img src="assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
+        <img src="assets/img/logo-reves-nomades.png" alt="Logo Âmes Nomades" />
         <span>ÂmesNomades</span>
       </a>
 
@@ -68,13 +87,12 @@
     </div>
   </header>
 
-  <!-- HERO -->
   <section class="hero hero-left">
     <div class="hero-bg" style="background-image:url('assets/img/hero-1.jpg');"></div>
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
-      <h1 class="reveal amesnomades-title" data-delay="0">ÂmesNomades</h1>
+      <h1 class="reveal" data-delay="0">ÂmesNomades</h1>
       <p class="reveal" data-delay="1">Partir pour mieux se retrouver.</p>
 
       <div class="actions reveal" data-delay="2">
@@ -83,7 +101,6 @@
     </div>
   </section>
 
-  <!-- PRINCIPLE -->
   <section class="band principle-band fixed-bg">
     <div class="container">
       <h2 class="reveal" data-delay="0">L'équilibre entre mouvement et détente.</h2>
@@ -96,40 +113,40 @@
     </div>
   </section>
 
-  <!-- SÉJOUR FEATURED -->
+  <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
-  <div class="stay-band stay-band-compact" id="featuredStayBand">
-    <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
+    <div class="stay-band stay-band-compact" id="featuredStayBand">
+      <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
 
-    <div class="stay-copy">
-      <div class="kicker reveal" data-delay="0">Prochain séjour…</div>
-      <div class="sep reveal" data-delay="1"></div>
+      <div class="stay-copy">
+        <div class="kicker reveal" data-delay="0">Prochain séjour…</div>
+        <div class="sep reveal" data-delay="1"></div>
 
-      <h2 class="title reveal" data-delay="2" id="featuredStayTitle">Chargement…</h2>
+        <h2 class="title reveal" data-delay="2" id="featuredStayTitle">Chargement…</h2>
 
-      <p class="sub reveal" data-delay="3" id="featuredStayDuration">
-        Durée à annoncer
-      </p>
+        <p class="sub reveal" data-delay="3" id="featuredStayDuration">
+          Durée à annoncer
+        </p>
 
-      <p class="sub reveal" data-delay="4" id="featuredStayDates">
-        Chargement…
-      </p>
+        <p class="sub reveal" data-delay="4" id="featuredStayDates">
+          Chargement…
+        </p>
 
-      <p class="sub reveal" data-delay="5" id="featuredStayLocation"></p>
+        <p class="sub reveal" data-delay="5" id="featuredStayLocation"></p>
 
-      <div class="actions reveal" data-delay="6">
-        <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Plus d'infos</a>
-      </div>
+        <div class="actions reveal" data-delay="6">
+          <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Plus d'infos</a>
+        </div>
 
-      <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
-      <div class="missing reveal" data-delay="8" style="font-size:12px;">
-        Un email vous sera envoyé dès la confirmation du séjour.
+        <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
+        <div class="missing reveal" data-delay="8" style="font-size:12px;">
+          Un email vous sera envoyé dès la confirmation du séjour.
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-  <!-- PROCHAINS SÉJOURS -->
+  <!-- BANDEAU 5 SEJOURS DYNAMIQUE -->
   <section class="band cream" id="prochains-sejours">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 var(--space-lg);">
       <div class="reveal">
@@ -139,13 +156,12 @@
         </p>
       </div>
 
-      <div class="stay-grid" id="highlightStaysGrid" style="margin-top:24px;">
-        <!-- rempli en JS -->
+      <div id="highlightStaysGrid" class="stay-grid" style="margin-top:24px;">
+        <div style="color:var(--muted);">Chargement…</div>
       </div>
     </div>
   </section>
 
-  <!-- À PROPOS -->
   <section class="band cream fixed-bg" id="apropos">
     <div class="container about-band">
       <div class="about-inner">
@@ -208,7 +224,6 @@
     </div>
   </section>
 
-  <!-- NEWSLETTER GUIDE -->
   <section class="newsletter on-photo">
     <div class="bg" style="background-image:url('assets/img/newsletter-bg.jpg');"></div>
 
@@ -219,14 +234,12 @@
         <input class="input" name="name" placeholder="Votre prénom" required />
         <input class="input" name="email" type="email" placeholder="Votre Email" required />
         <button class="btn block" type="submit">Recevoir mon guide</button>
-        <a href="/signup.html">Créer aussi mon compte</a>
       </form>
 
       <div id="newsletterMsg" class="form-msg reveal" data-delay="2"></div>
     </div>
   </section>
 
-  <!-- CARTE CADEAU -->
   <section class="gift-band gift-white">
     <div class="bg" style="background-image:url('assets/img/hero-2.jpg');"></div>
 
@@ -240,7 +253,6 @@
     </div>
   </section>
 
-  <!-- CONTACT -->
   <section class="band band-full white" id="contact">
     <div class="contact-grid">
 
@@ -281,7 +293,6 @@
     </div>
   </section>
 
-  <!-- BOTTOM IMAGE -->
   <section class="bottom-wide on-photo">
     <div class="bg" style="background-image:url('assets/img/bottom-wide.jpg');"></div>
     <div class="content container reveal">
@@ -290,13 +301,12 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="band cream">
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-          <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
+          <img src="assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
@@ -332,171 +342,173 @@
 
   <script src="assets/js/main.js"></script>
 
-  <!-- CMS stays -->
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
 
-    const featuredStayMedia = document.getElementById("featuredStayMedia");
     const featuredStayTitle = document.getElementById("featuredStayTitle");
-    const featuredStayMeta = document.getElementById("featuredStayMeta");
+    const featuredStayDuration = document.getElementById("featuredStayDuration");
     const featuredStayDates = document.getElementById("featuredStayDates");
     const featuredStayLocation = document.getElementById("featuredStayLocation");
     const featuredStayLink = document.getElementById("featuredStayLink");
+    const featuredStayMedia = document.getElementById("featuredStayMedia");
     const featuredStayMissing = document.getElementById("featuredStayMissing");
+
     const highlightStaysGrid = document.getElementById("highlightStaysGrid");
 
-    function formatEUR(n){
-      return new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR" }).format(Number(n || 0));
-    }
+    const form = document.getElementById("newsletterForm");
+    const msg = document.getElementById("newsletterMsg");
 
-    function formatDateRange(start, end){
-      if(!start && !end) return "Dates à annoncer";
+    function show(html){ if(msg) msg.innerHTML = html || ""; }
+
+    function formatDateRange(start, end) {
+      if (!start && !end) return "Dates à annoncer";
 
       const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
       const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
 
-      if(startText && endText) return `${startText} au ${endText}`;
+      if (startText && endText) return `${startText} au ${endText}`;
       return startText || endText || "Dates à annoncer";
     }
 
-    async function getStayMinPrice(stayId){
-      const { data } = await supabase
-        .from("stay_prices")
-        .select("price")
-        .eq("stay_id", stayId)
-        .order("price", { ascending: true })
-        .limit(1);
+    function getDurationLabel(start, end) {
+      if (!start || !end) return "Durée à annoncer";
 
-      return data?.length ? Number(data[0].price || 0) : null;
+      const s = new Date(start + "T00:00:00");
+      const e = new Date(end + "T00:00:00");
+      const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
+
+      if (days <= 0) return "Durée à annoncer";
+
+      const nights = Math.max(0, days - 1);
+      return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
-    async function getFirstStayDate(stayId){
-      const { data } = await supabase
-        .from("stay_dates")
-        .select("start_date,end_date,seats_total,seats_remaining")
-        .eq("stay_id", stayId)
-        .order("start_date", { ascending: true })
-        .limit(1);
+    async function loadFeaturedStay() {
+      const { data: stay, error } = await supabase
+        .from("stays")
+        .select("*")
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      return data?.length ? data[0] : null;
-    }
-
-    async function getMissingCount(stay){
-      const minBookings = Number(stay.min_bookings || 10);
-
-      const { data: dates } = await supabase
-        .from("stay_dates")
-        .select("seats_total,seats_remaining")
-        .eq("stay_id", stay.id);
-
-      if(dates?.length){
-        const totalSeats = dates.reduce((sum, d) => sum + Number(d.seats_total || 0), 0);
-        const remainingSeats = dates.reduce((sum, d) => sum + Number(d.seats_remaining || 0), 0);
-
-        if(totalSeats > 0){
-          const reserved = totalSeats - remainingSeats;
-          return Math.max(0, minBookings - reserved);
-        }
-      }
-
-      const { data: bookings } = await supabase
-        .from("bookings")
-        .select("id")
-        .eq("stay_id", stay.id)
-        .in("status", ["paid", "confirmed"]);
-
-      return Math.max(0, minBookings - (bookings?.length || 0));
-    }
-
-    async function loadFeaturedStay(){
-      const { data: stays, error } = await supabase
-  .from("stays")
-  .select("*")
-  .eq("is_highlight", true)
-  .order("highlight_order", { ascending: true })
-  .order("created_at", { ascending: false })
-  .limit(5);
-
-      if(error || !stays?.length){
-        console.warn("Aucun séjour featured", error);
+      if (error) {
+        console.error("Erreur chargement séjour vedette :", error);
+        if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
+        if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
+        if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
         return;
       }
 
-      const stay = stays[0];
-      const minPrice = await getStayMinPrice(stay.id);
-      const firstDate = await getFirstStayDate(stay.id);
-      const missing = await getMissingCount(stay);
-
-      if(stay.hero_image){
-        featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
+      if (!stay) {
+        if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
+        if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
+        if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
+        if (featuredStayLocation) featuredStayLocation.textContent = "";
+        if (featuredStayMissing) featuredStayMissing.textContent = "";
+        return;
       }
 
-      featuredStayTitle.textContent = stay.title || "Séjour à venir";
-      featuredStayMeta.innerHTML = `<b>5 jours / 4 nuits</b> · <b>${minPrice ? formatEUR(minPrice) : "Prix à venir"}</b> / personne`;
-      featuredStayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
-      featuredStayLocation.textContent = stay.location || "";
-      featuredStayLink.href = `sejour.html?slug=${encodeURIComponent(stay.slug)}`;
-      featuredStayMissing.textContent = `Encore ${missing} réservations nécessaires pour valider ce séjour.`;
+      const { data: stayDate, error: dateError } = await supabase
+        .from("stay_dates")
+        .select("*")
+        .eq("stay_id", stay.id)
+        .order("start_date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (dateError) {
+        console.error("Erreur chargement date séjour vedette :", dateError);
+      }
+
+      if (featuredStayTitle) featuredStayTitle.textContent = stay.title || "Séjour";
+      if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
+      if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
+      if (featuredStayLocation) featuredStayLocation.textContent = stay.location || "";
+      if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+      if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
+
+      if (featuredStayMissing) {
+        const minBookings = Number(stay.min_bookings || 10);
+
+        if (stayDate && typeof stayDate.seats_total === "number" && typeof stayDate.seats_remaining === "number") {
+          const reserved = Number(stayDate.seats_total) - Number(stayDate.seats_remaining);
+          const missing = Math.max(0, minBookings - reserved);
+          featuredStayMissing.textContent = `Encore ${missing} réservations nécessaires pour valider ce séjour.`;
+        } else {
+          featuredStayMissing.textContent = `Encore ${minBookings} réservations nécessaires pour valider ce séjour.`;
+        }
+      }
     }
 
-    async function loadHighlightStays(){
+    async function loadHighlightStays() {
+      if (!highlightStaysGrid) return;
+
+      highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Chargement…</div>`;
+
       const { data: stays, error } = await supabase
         .from("stays")
         .select("*")
         .eq("is_highlight", true)
+        .order("highlight_order", { ascending: true })
         .order("created_at", { ascending: false })
         .limit(5);
 
-      if(error){
-        console.error(error);
-        highlightStaysGrid.innerHTML = "<div>Impossible de charger les séjours.</div>";
+      if (error) {
+        console.error("Erreur chargement bandeau 5 séjours :", error);
+        highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Impossible de charger les séjours.</div>`;
         return;
       }
 
-      if(!stays?.length){
-        highlightStaysGrid.innerHTML = "<div>Aucun séjour à afficher pour le moment.</div>";
+      if (!stays || !stays.length) {
+        highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Aucun séjour à afficher pour le moment.</div>`;
         return;
       }
 
-     const cards = await Promise.all(stays.map(async (stay) => {
-  const firstDate = await getFirstStayDate(stay.id);
+      const dateResults = await Promise.all(
+        stays.map(async (stay) => {
+          const { data } = await supabase
+            .from("stay_dates")
+            .select("*")
+            .eq("stay_id", stay.id)
+            .order("start_date", { ascending: true })
+            .limit(1)
+            .maybeSingle();
 
-  return `
-    <a class="stay-card" href="sejour.html?slug=${encodeURIComponent(stay.slug)}">
-      <div class="stay-card-media" style="background-image:url('${stay.hero_image || "/assets/img/sejour-camargue.jpg"}');">
-        <div class="stay-card-overlay">
-          <div class="stay-card-hover">
-            <div class="stay-card-line">5 jours / 4 nuits</div>
-            <div class="stay-card-line stay-card-dates">
-              ${formatDateRange(firstDate?.start_date, firstDate?.end_date)}
-            </div>
-            <div class="card-place">${stay.location || ""}</div>
-            <div class="stay-card-cta">
-              <span class="stay-mini-btn">Plus d’infos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="stay-card-title">${stay.title || "Séjour"}</div>
-    </a>
-  `;
-}));
+          return { stayId: stay.id, date: data || null };
+        })
+      );
 
-      highlightStaysGrid.innerHTML = cards.join("");
+      const dateMap = new Map(dateResults.map(item => [item.stayId, item.date]));
+
+      highlightStaysGrid.innerHTML = stays.map((stay, index) => {
+        const stayDate = dateMap.get(stay.id);
+        const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
+        const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
+        const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
+        const location = stay.location || stay.title || "Séjour";
+
+        return `
+          <a class="stay-card reveal" data-delay="${index}" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
+            <div class="stay-card-media" style="background-image:url('${image}');">
+              <div class="stay-card-overlay">
+                <div class="stay-card-hover">
+                  <div class="stay-card-line">${duration}</div>
+                  <div class="stay-card-line stay-card-dates">${dates}</div>
+                  <div class="card-place">${location}</div>
+
+                  <div class="stay-card-cta">
+                    <span class="stay-mini-btn">Plus d’infos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stay-card-title">${stay.title || "Séjour"}</div>
+          </a>
+        `;
+      }).join("");
     }
-
-    await loadFeaturedStay();
-    await loadHighlightStays();
-  </script>
-
-  <!-- NEWSLETTER -->
-  <script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
-
-    const form = document.getElementById("newsletterForm");
-    const msg  = document.getElementById("newsletterMsg");
-
-    function show(html){ if(msg) msg.innerHTML = html || ""; }
 
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -550,124 +562,9 @@
         show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
       }
     });
+
+    await loadFeaturedStay();
+    await loadHighlightStays();
   </script>
-<script type="module">
-  import { supabase } from "/assets/js/supabaseClient.js";
-
-  const featuredStayTitle = document.getElementById("featuredStayTitle");
-  const featuredStayDuration = document.getElementById("featuredStayDuration");
-  const featuredStayDates = document.getElementById("featuredStayDates");
-  const featuredStayLocation = document.getElementById("featuredStayLocation");
-  const featuredStayLink = document.getElementById("featuredStayLink");
-  const featuredStayMedia = document.getElementById("featuredStayMedia");
-  const featuredStayMissing = document.getElementById("featuredStayMissing");
-
-  function formatDateRange(start, end) {
-    if (!start && !end) return "Dates à annoncer";
-
-    const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-    const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-
-    if (startText && endText) return `${startText} au ${endText}`;
-    return startText || endText || "Dates à annoncer";
-  }
-
-  function getDurationLabel(start, end) {
-    if (!start || !end) return "Durée à annoncer";
-
-    const s = new Date(start + "T00:00:00");
-    const e = new Date(end + "T00:00:00");
-    const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
-
-    if (days <= 0) return "Durée à annoncer";
-
-    const nights = Math.max(0, days - 1);
-    return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
-  }
-
-  async function loadFeaturedStay() {
-    const { data: stay, error } = await supabase
-      .from("stays")
-      .select("*")
-      .eq("is_featured", true)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Erreur chargement séjour vedette :", error);
-      if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
-      if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
-      if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
-      return;
-    }
-
-    if (!stay) {
-      if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
-      if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
-      if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
-      if (featuredStayLocation) featuredStayLocation.textContent = "";
-      if (featuredStayMissing) featuredStayMissing.textContent = "";
-      return;
-    }
-
-    const { data: stayDate, error: dateError } = await supabase
-      .from("stay_dates")
-      .select("*")
-      .eq("stay_id", stay.id)
-      .order("start_date", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (dateError) {
-      console.error("Erreur chargement date séjour vedette :", dateError);
-    }
-
-    if (featuredStayTitle) {
-      featuredStayTitle.textContent = stay.title || "Séjour";
-    }
-
-    if (featuredStayDuration) {
-      featuredStayDuration.textContent = getDurationLabel(
-        stayDate?.start_date,
-        stayDate?.end_date
-      );
-    }
-
-    if (featuredStayDates) {
-      featuredStayDates.textContent = formatDateRange(
-        stayDate?.start_date,
-        stayDate?.end_date
-      );
-    }
-
-    if (featuredStayLocation) {
-      featuredStayLocation.textContent = stay.location || "";
-    }
-
-    if (featuredStayLink) {
-      featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
-    }
-
-    if (featuredStayMedia && stay.hero_image) {
-      featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
-    }
-
-    if (featuredStayMissing) {
-      const minBookings = Number(stay.min_bookings || 10);
-
-      if (stayDate && typeof stayDate.seats_total === "number" && typeof stayDate.seats_remaining === "number") {
-        const reserved = Number(stayDate.seats_total) - Number(stayDate.seats_remaining);
-        const missing = Math.max(0, minBookings - reserved);
-        featuredStayMissing.textContent = `Encore ${missing} réservations nécessaires pour valider ce séjour.`;
-      } else {
-        featuredStayMissing.textContent = `Encore ${minBookings} réservations nécessaires pour valider ce séjour.`;
-      }
-    }
-  }
-
-  loadFeaturedStay();
-</script>
-  
 </body>
 </html>
