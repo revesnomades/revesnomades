@@ -19,8 +19,8 @@
   <header class="nav" id="top">
     <div class="container nav-inner">
       <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
-        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
-        <span>ÂmesNomades</span>
+        <img src="/assets/img/logo-reves-nomades.png" alt="Logo Âmes Nomades" />
+        <span>Âmes Nomades</span>
       </a>
 
       <nav class="nav-links nav-links-desktop">
@@ -209,8 +209,8 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-          <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
+          <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+          <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
@@ -293,9 +293,7 @@
     function arrayFromField(value){
       if (!value) return [];
       if (Array.isArray(value)) return value;
-      if (typeof value === "string") {
-        return value.split("\n").map(v => v.trim()).filter(Boolean);
-      }
+      if (typeof value === "string") return value.split("\n").map(v => v.trim()).filter(Boolean);
       return [];
     }
 
@@ -380,10 +378,8 @@
 
     function formatDateRange(start, end){
       if(!start && !end) return "Dates à annoncer";
-
       const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
       const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-
       if(startText && endText) return `${startText} au ${endText}`;
       return startText || endText || "Dates à annoncer";
     }
