@@ -300,16 +300,16 @@ html.js .reveal.is-visible{
   background: var(--white);
 }
 .stay-band-compact{
-  min-height: 520px;
+  min-height: 480px;
 }
 
 .stay-band-compact .stay-media{
-  min-height: 520px;
+  min-height: 480px;
 }
 
 .stay-band-compact .stay-copy{
-  padding-top: 56px;
-  padding-bottom: 56px;
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
 .kicker{
   font-size: 12px;
