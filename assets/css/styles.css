@@ -496,8 +496,8 @@ html.js .reveal.is-visible{
 /* ---------------- Pages séjour ---------------- */
 .sejour-hero{
   width:100%;
-  height: 80vh;
-  min-height: 420px;
+  height: 68vh;
+  min-height: 360px;
   position:relative;
 }
 .sejour-hero-bg{
@@ -923,7 +923,7 @@ html.js .reveal.is-visible{
   .btn{ padding: 10px 14px; }
   .btn.tiny{ padding: 8px 12px; }
 
-  .sejour-hero{ height: 56vh; min-height: 320px; }
+  .sejour-hero{ height: 50vh; min-height: 280px; }
   .sejour-content{ padding: 60px 0 70px; }
   .sejour-content h1{ font-size: 34px; }
 
