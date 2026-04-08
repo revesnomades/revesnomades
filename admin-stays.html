@@ -19,8 +19,8 @@
   <header class="nav">
     <div class="container nav-inner">
       <a class="brand" href="/index.html">
-        <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-        <span>ÂmesNomades</span>
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
         <a href="/compte.html">Compte</a>
@@ -140,25 +140,27 @@
                   placeholder="Nombre minimum de réservations pour valider le séjour">
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;">
-  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-    <input id="stayFeatured" type="checkbox">
-    Afficher dans le premier bandeau
-  </label>
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayFeatured" type="checkbox">
+                    Afficher dans le premier bandeau
+                  </label>
 
-  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-    <input id="stayHighlight" type="checkbox">
-    Afficher dans le bandeau 5 séjours
-  </label>
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayHighlight" type="checkbox">
+                    Afficher dans le bandeau 5 séjours
+                  </label>
 
-  <div>
-    <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">
-      Ordre dans le bandeau 5 séjours
-    </label>
-    <input id="stayHighlightOrder" class="input" type="number" min="1" value="999"
-      style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-      placeholder="1, 2, 3, 4, 5">
-  </div>
-</div>
+                  <div>
+                    <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">
+                      Ordre dans le bandeau 5 séjours
+                    </label>
+                    <input id="stayHighlightOrder" class="input" type="number" min="1" value="999"
+                      style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                      placeholder="1, 2, 3, 4, 5">
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- HIGHLIGHTS -->
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
@@ -607,9 +609,7 @@
 
       const slots = Array.isArray(existing.slots) ? existing.slots : [];
       if(slots.length){
-        slots.forEach(slot => {
-          slotsList.appendChild(createProgramSlotRow(slot));
-        });
+        slots.forEach(slot => slotsList.appendChild(createProgramSlotRow(slot)));
       } else {
         slotsList.appendChild(createProgramSlotRow());
       }
@@ -655,8 +655,7 @@
       });
 
       for(let i = 1; i <= daysCount; i++){
-        const existing = map.get(i) || {};
-        programEditors.appendChild(createProgramDayCard(i, existing));
+        programEditors.appendChild(createProgramDayCard(i, map.get(i) || {}));
       }
     }
 
@@ -849,7 +848,7 @@
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">Slug : ${stay.slug || "—"}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">Lieu : ${stay.location || "—"}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? " · bandeau 5 séjours" : ""}
+                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? ` · bandeau 5 séjours (ordre ${stay.highlight_order ?? 999})` : ""}
               </div>
             </div>
 
