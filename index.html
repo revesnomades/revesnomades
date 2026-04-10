@@ -442,74 +442,81 @@
     }
 
     async function loadHighlightStays() {
-      if (!highlightStaysGrid) return;
 
-      highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Chargement…</div>`;
+  if (!highlightStaysGrid) return;
 
-      const { data: stays, error } = await supabase
-        .from("stays")
+  highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Chargement…</div>`;
+
+  const { data: stays, error } = await supabase
+    .from("stays")
+    .select("*")
+    .eq("is_highlight", true)
+    .order("highlight_order", { ascending: true })
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error("Erreur chargement bandeau 5 séjours :", error);
+    highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Erreur chargement</div>`;
+    return;
+  }
+
+  if (!stays || !stays.length) {
+    highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Aucun séjour</div>`;
+    return;
+  }
+
+  const dateResults = await Promise.all(
+    stays.map(async (stay) => {
+      const { data } = await supabase
+        .from("stay_dates")
         .select("*")
-        .eq("is_highlight", true)
-        .order("highlight_order", { ascending: true })
-        .order("created_at", { ascending: false })
-        .limit(5);
+        .eq("stay_id", stay.id)
+        .order("start_date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
-      if (error) {
-        console.error("Erreur chargement bandeau 5 séjours :", error);
-        highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Impossible de charger les séjours.</div>`;
-        return;
-      }
+      return { stayId: stay.id, date: data || null };
+    })
+  );
 
-      if (!stays || !stays.length) {
-        highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Aucun séjour à afficher pour le moment.</div>`;
-        return;
-      }
+  const dateMap = new Map(dateResults.map(item => [item.stayId, item.date]));
 
-      const dateResults = await Promise.all(
-        stays.map(async (stay) => {
-          const { data } = await supabase
-            .from("stay_dates")
-            .select("*")
-            .eq("stay_id", stay.id)
-            .order("start_date", { ascending: true })
-            .limit(1)
-            .maybeSingle();
+  highlightStaysGrid.innerHTML = stays.map((stay, index) => {
 
-          return { stayId: stay.id, date: data || null };
-        })
-      );
+    const stayDate = dateMap.get(stay.id);
 
-      const dateMap = new Map(dateResults.map(item => [item.stayId, item.date]));
+    const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
+    const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
+    const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
 
-      highlightStaysGrid.innerHTML = stays.map((stay, index) => {
-        const stayDate = dateMap.get(stay.id);
-        const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
-        const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
-        const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
-        const location = stay.location || stay.title || "Séjour";
+    return `
+      <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
+        
+        <div class="stay-card-media" style="background-image:url('${image}')">
 
-        return `
-          <a class="stay-card reveal" data-delay="${index}" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
-            <div class="stay-card-media" style="background-image:url('${image}');">
-              <div class="stay-card-overlay">
-                <div class="stay-card-hover">
-                  <div class="stay-card-line">${duration}</div>
-                  <div class="stay-card-line stay-card-dates">${dates}</div>
-                  <div class="card-place">${location}</div>
+          <!-- overlay FIX -->
+          <div class="stay-card-overlay" style="background:rgba(0,0,0,0.35);"></div>
 
-                  <div class="stay-card-cta">
-                    <span class="stay-mini-btn">Plus d’infos</span>
-                  </div>
-                </div>
-              </div>
+          <!-- contenu visible -->
+          <div class="stay-card-hover" style="opacity:1; transform:none;">
+            <div class="stay-card-line">${duration}</div>
+            <div class="stay-card-line stay-card-dates">${dates}</div>
+            <div class="card-place">${stay.location || stay.title}</div>
+
+            <div class="stay-card-cta">
+              <span class="stay-mini-btn">Plus d’infos</span>
             </div>
+          </div>
 
-            <div class="stay-card-title">${stay.title || "Séjour"}</div>
-          </a>
-        `;
-      }).join("");
-    }
+        </div>
 
+        <div class="stay-card-title">${stay.title || "Séjour"}</div>
+      </a>
+    `;
+
+  }).join("");
+}
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       show("");
