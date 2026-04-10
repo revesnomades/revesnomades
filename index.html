@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
+
   <meta name="description" content="Âmes Nomades — séjours bien-être : Pilates quotidien, randonnées, massages & cuisine saine." />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#0e0f11" />
@@ -33,6 +34,22 @@
 
   <link rel="preload" as="image" href="assets/img/hero-1.jpg">
   <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <style>
+    .stay-band.stay-band-compact{
+      min-height: 480px !important;
+    }
+
+    .stay-band.stay-band-compact .stay-media{
+      min-height: 480px !important;
+    }
+
+    .stay-band.stay-band-compact .stay-copy{
+      min-height: 480px !important;
+      padding-top: calc(var(--navH) + 36px) !important;
+      padding-bottom: 36px !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -96,6 +113,7 @@
     </div>
   </section>
 
+  <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
     <div class="stay-band stay-band-compact" id="featuredStayBand">
       <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
@@ -128,6 +146,7 @@
     </div>
   </section>
 
+  <!-- BANDEAU 5 SEJOURS DYNAMIQUE -->
   <section class="band cream" id="prochains-sejours">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 var(--space-lg);">
       <div class="reveal">
@@ -152,7 +171,7 @@
         <div class="about-text is-collapsed" id="aboutText">
           <p class="reveal" data-delay="1">"Il y a quelques années, j’ai réalisé que beaucoup de femmes autour de moi étaient épuisées.</p>
           <p class="reveal" data-delay="2">
-            Pas seulement fatiguées… mais vidées de leur élan, de leurs envies, de leurs lumières.
+            Pas seulement fatiguées… mais vidées de leur élan, de leurs envies, de leur lumière.
             Et puis j’ai compris que moi aussi, je m’étais oubliée.
           </p>
           <p class="reveal" data-delay="3">
@@ -333,6 +352,7 @@
     const featuredStayLink = document.getElementById("featuredStayLink");
     const featuredStayMedia = document.getElementById("featuredStayMedia");
     const featuredStayMissing = document.getElementById("featuredStayMissing");
+
     const highlightStaysGrid = document.getElementById("highlightStaysGrid");
 
     const form = document.getElementById("newsletterForm");
@@ -431,6 +451,7 @@
         .select("*")
         .eq("is_highlight", true)
         .order("highlight_order", { ascending: true })
+        .order("created_at", { ascending: false })
         .limit(5);
 
       if (error) {
@@ -460,7 +481,7 @@
 
       const dateMap = new Map(dateResults.map(item => [item.stayId, item.date]));
 
-      highlightStaysGrid.innerHTML = stays.map((stay) => {
+      highlightStaysGrid.innerHTML = stays.map((stay, index) => {
         const stayDate = dateMap.get(stay.id);
         const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
         const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
@@ -468,7 +489,7 @@
         const location = stay.location || stay.title || "Séjour";
 
         return `
-          <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
+          <a class="stay-card reveal" data-delay="${index}" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
             <div class="stay-card-media" style="background-image:url('${image}');">
               <div class="stay-card-overlay">
                 <div class="stay-card-hover">
