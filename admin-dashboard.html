@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="on-light">
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/compte.html">Compte</a>
+        <a href="/admin-stays.html">Séjours</a>
+        <a href="/admin-bookings.html">Réservations</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div class="account-card" style="max-width:1180px; margin:0 auto;">
+        <h1 style="margin:0;">Tableau de bord admin</h1>
+        <p style="color:var(--muted); margin-top:10px;">
+          Vue d’ensemble du site et accès rapide aux outils.
+        </p>
+
+        <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:24px;">
+          <div class="account-card">
+            <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
+            <div id="newsletterCount" style="font-size:34px; font-weight:600; margin-top:8px;">—</div>
+            <div style="margin-top:14px;">
+              <a class="btn on-light" href="/admin-newsletter.html">Voir la liste</a>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
+            <div id="priorityCount" style="font-size:34px; font-weight:600; margin-top:8px;">—</div>
+            <div style="margin-top:14px;">
+              <a class="btn on-light" href="/admin-priority.html">Voir la liste</a>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div style="font-size:13px; color:var(--muted);">Gestion site</div>
+            <div style="display:grid; gap:10px; margin-top:14px;">
+              <a class="btn on-light" href="/admin-stays.html">Gérer les séjours</a>
+              <a class="btn on-light" href="/admin-bookings.html">Voir les réservations</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const adminStatus = document.getElementById("adminStatus");
+    const newsletterCount = document.getElementById("newsletterCount");
+    const priorityCount = document.getElementById("priorityCount");
+
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if(!user){
+        window.location.href = "/compte.html";
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if(error || data?.role !== "admin"){
+        adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
+        throw new Error("Not admin");
+      }
+
+      return user;
+    }
+
+    async function loadCounts(){
+      const { count: newsletterTotal, error: newsletterError } = await supabase
+        .from("newsletter")
+        .select("*", { count: "exact", head: true });
+
+      const { count: priorityTotal, error: priorityError } = await supabase
+        .from("priority_waitlist")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active");
+
+      if(newsletterError) console.error(newsletterError);
+      if(priorityError) console.error(priorityError);
+
+      newsletterCount.textContent = newsletterTotal ?? "0";
+      priorityCount.textContent = priorityTotal ?? "0";
+    }
+
+    try{
+      await checkAdmin();
+      adminStatus.textContent = "Connecté en administrateur.";
+      await loadCounts();
+    } catch(err){
+      console.warn(err);
+    }
+  </script>
+
+</body>
+</html>

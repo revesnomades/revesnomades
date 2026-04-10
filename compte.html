@@ -5,14 +5,13 @@
   <title>Compte — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
-  <link rel="shortcut icon" href="/assets/img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-title" content="ÂmesNomades">
   <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 
 <body class="on-light">
@@ -25,8 +24,8 @@
         <span>ÂmesNomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
-        <a href="index.html#apropos">À propos</a>
-        <a href="index.html#contact">Contact</a>
+        <a href="/index.html#apropos">À propos</a>
+        <a href="/index.html#contact">Contact</a>
       </div>
     </div>
   </header>
@@ -54,12 +53,11 @@
                 style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                 type="password" placeholder="Mot de passe">
 
-              <div class="account-actions">
+              <div class="account-actions" style="flex-wrap:wrap;">
                 <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
-                <a href="signup.html" class="btn on-light">Créer un compte</a>
+                <a class="btn on-light" href="/signup.html">Inscription</a>
               </div>
 
-              <!-- Mot de passe oublié -->
               <button class="btn on-light" id="btnForgot" type="button" style="justify-content:flex-start;">
                 Mot de passe oublié ?
               </button>
@@ -68,7 +66,7 @@
             </div>
           </div>
 
-          <!-- Zone RESET (visible seulement si lien reçu) -->
+          <!-- Zone RESET -->
           <div id="resetBox" style="display:none; margin-top:16px;">
             <h3 style="font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
 
@@ -85,27 +83,40 @@
             </div>
           </div>
 
-          <!-- Logged (visible si connecté) -->
+          <!-- Logged -->
           <div id="loggedBox" style="display:none; margin-top:16px;">
             <div style="color:var(--muted); font-size:13px;">
               Connecté(e) : <b id="userEmail"></b>
             </div>
 
-            <div class="account-actions" style="margin-top:12px;">
+            <div class="account-actions" style="margin-top:12px; flex-wrap:wrap;">
               <button class="btn on-light" id="btnSeeBookings" type="button">Voir mes réservations</button>
               <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
             </div>
 
             <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
 
-            <!-- 🟢 ADMIN PANEL -->
+            <!-- ADMIN PANEL -->
             <div id="adminPanel" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
               <h3 style="margin:0;">Espace admin</h3>
 
-              <div class="account-actions" style="margin-top:12px; flex-wrap:wrap;">
-                <button class="btn on-light" id="btnAddStay" type="button">➕ Ajouter un séjour</button>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;">
+                <div class="account-card" style="padding:16px;">
+                  <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
+                  <div id="newsletterCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
+                </div>
+
+                <div class="account-card" style="padding:16px;">
+                  <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
+                  <div id="priorityCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
+                </div>
+              </div>
+
+              <div class="account-actions" style="margin-top:14px; flex-wrap:wrap;">
                 <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
                 <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
+                <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
+                <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
               </div>
 
               <div id="adminMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
@@ -115,7 +126,6 @@
 
         <!-- COLONNE DROITE -->
         <div>
-          <!-- Avantages si déconnecté -->
           <div id="perksBox" class="account-card">
             <h3 style="font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
             <p style="color:var(--muted); margin-top:10px;">
@@ -125,7 +135,6 @@
             </p>
           </div>
 
-          <!-- Réservations si connecté -->
           <div id="bookingsBox" class="account-card" style="display:none;">
             <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
             <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
@@ -160,7 +169,7 @@
             </svg>
           </a>
 
-          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
         </div>
       </div>
 
@@ -168,298 +177,288 @@
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <div>Copyright © 2026 Âmes Nomades</div>
           <div>
-            <a href="mentions-legales.html">Mentions légales</a> ·
-            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+            <a href="/mentions-legales.html">Mentions légales</a> ·
+            <a href="/politique-confidentialite.html">Politique de confidentialité</a>
           </div>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <script src="/assets/js/main.js"></script>
 
-  <!-- ✅ SUPABASE AUTH + RESET + ADMIN -->
   <script type="module">
-  import { supabase } from "./assets/js/supabaseClient.js";
+    import { supabase } from "/assets/js/supabaseClient.js";
 
-  const emailEl = document.getElementById("email");
-  const passEl  = document.getElementById("password");
+    const emailEl = document.getElementById("email");
+    const passEl  = document.getElementById("password");
 
-  const btnLogin  = document.getElementById("btnLogin");
-  const btnSignup = document.getElementById("btnSignup");
-  const btnLogout = document.getElementById("btnLogout");
-  const btnSee    = document.getElementById("btnSeeBookings");
-  const btnForgot = document.getElementById("btnForgot");
-  const btnUpdatePassword = document.getElementById("btnUpdatePassword");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnLogout = document.getElementById("btnLogout");
+    const btnSee = document.getElementById("btnSeeBookings");
+    const btnForgot = document.getElementById("btnForgot");
+    const btnUpdatePassword = document.getElementById("btnUpdatePassword");
 
-  const btnAddStay       = document.getElementById("btnAddStay");
-  const btnManageStays   = document.getElementById("btnManageStays");
-  const btnAdminBookings = document.getElementById("btnAdminBookings");
+    const btnManageStays = document.getElementById("btnManageStays");
+    const btnAdminBookings = document.getElementById("btnAdminBookings");
+    const btnPriorityList = document.getElementById("btnPriorityList");
+    const btnNewsletterList = document.getElementById("btnNewsletterList");
 
-  const authBox     = document.getElementById("authBox");
-  const resetBox    = document.getElementById("resetBox");
-  const loggedBox   = document.getElementById("loggedBox");
-  const perksBox    = document.getElementById("perksBox");
-  const bookingsBox = document.getElementById("bookingsBox");
-  const adminPanel  = document.getElementById("adminPanel");
+    const authBox = document.getElementById("authBox");
+    const resetBox = document.getElementById("resetBox");
+    const loggedBox = document.getElementById("loggedBox");
+    const perksBox = document.getElementById("perksBox");
+    const bookingsBox = document.getElementById("bookingsBox");
+    const adminPanel = document.getElementById("adminPanel");
 
-  const authMsg   = document.getElementById("authMsg");
-  const resetMsg  = document.getElementById("resetMsg");
-  const loggedMsg = document.getElementById("loggedMsg");
-  const adminMsg  = document.getElementById("adminMsg");
+    const authMsg = document.getElementById("authMsg");
+    const resetMsg = document.getElementById("resetMsg");
+    const loggedMsg = document.getElementById("loggedMsg");
+    const adminMsg = document.getElementById("adminMsg");
 
-  const userEmail    = document.getElementById("userEmail");
-  const bookingsList = document.getElementById("bookingsList");
+    const userEmail = document.getElementById("userEmail");
+    const bookingsList = document.getElementById("bookingsList");
 
-  function setMsg(el, msg) {
-    if (el) el.textContent = msg || "";
-  }
+    const newsletterCount = document.getElementById("newsletterCount");
+    const priorityCount = document.getElementById("priorityCount");
 
-  function showLoggedOut() {
-    if (authBox) authBox.style.display = "block";
-    if (resetBox) resetBox.style.display = "none";
-    if (perksBox) perksBox.style.display = "block";
-    if (loggedBox) loggedBox.style.display = "none";
-    if (bookingsBox) bookingsBox.style.display = "none";
-    if (adminPanel) adminPanel.style.display = "none";
-  }
-
-  async function checkAdmin(userId) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .single();
-
-    console.log("ADMIN CHECK → data:", data);
-    console.log("ADMIN CHECK → error:", error);
-
-    if (error) return false;
-    return data?.role === "admin";
-  }
-
-  async function loadMyBookings(user) {
-    if (!bookingsList || !user?.email) return;
-
-    bookingsList.textContent = "Chargement…";
-
-    const { data, error } = await supabase
-      .from("bookings")
-      .select(`
-        id,
-        status,
-        amount,
-        price_label,
-        created_at,
-        stays(title)
-      `)
-      .eq("customer_email", user.email)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("BOOKINGS ERROR:", error);
-      bookingsList.textContent = "Impossible de charger vos réservations.";
-      return;
+    function setMsg(el, msg) {
+      if (el) el.textContent = msg || "";
     }
 
-    if (!data || !data.length) {
-      bookingsList.textContent = "Aucune réservation pour le moment.";
-      return;
+    function showLoggedOut() {
+      if (authBox) authBox.style.display = "block";
+      if (resetBox) resetBox.style.display = "none";
+      if (perksBox) perksBox.style.display = "block";
+      if (loggedBox) loggedBox.style.display = "none";
+      if (bookingsBox) bookingsBox.style.display = "none";
+      if (adminPanel) adminPanel.style.display = "none";
     }
 
-    bookingsList.innerHTML = data.map(item => {
-      const title = item.stays?.title || "Séjour";
-      const amount = item.amount ? `${item.amount} €` : "—";
-      const status = item.status || "—";
-      const label = item.price_label || "";
-      const date = item.created_at
-        ? new Date(item.created_at).toLocaleDateString("fr-FR")
-        : "";
+    async function checkAdmin(userId) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
 
-      return `
-        <div style="padding:12px 0; border-bottom:1px solid var(--line);">
-          <div style="font-weight:500; color:var(--text);">${title}</div>
-          <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-            ${label ? `${label} · ` : ""}${amount} · ${status}
+      console.log("ADMIN CHECK → data:", data);
+      console.log("ADMIN CHECK → error:", error);
+
+      if (error) return false;
+      return data?.role === "admin";
+    }
+
+    async function loadAdminStats() {
+      const { count: newsletterTotal, error: newsletterError } = await supabase
+        .from("newsletter")
+        .select("*", { count: "exact", head: true });
+
+      const { count: priorityTotal, error: priorityError } = await supabase
+        .from("priority_waitlist")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active");
+
+      if (newsletterError) console.error("NEWSLETTER COUNT ERROR:", newsletterError);
+      if (priorityError) console.error("PRIORITY COUNT ERROR:", priorityError);
+
+      if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
+      if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
+    }
+
+    async function loadMyBookings(user) {
+      if (!bookingsList || !user?.email) return;
+
+      bookingsList.textContent = "Chargement…";
+
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(`
+          id,
+          status,
+          amount,
+          price_label,
+          created_at,
+          stays(title)
+        `)
+        .eq("customer_email", user.email)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("BOOKINGS ERROR:", error);
+        bookingsList.textContent = "Impossible de charger vos réservations.";
+        return;
+      }
+
+      if (!data || !data.length) {
+        bookingsList.textContent = "Aucune réservation pour le moment.";
+        return;
+      }
+
+      bookingsList.innerHTML = data.map(item => {
+        const title = item.stays?.title || "Séjour";
+        const amount = item.amount ? `${item.amount} €` : "—";
+        const status = item.status || "—";
+        const label = item.price_label || "";
+        const date = item.created_at
+          ? new Date(item.created_at).toLocaleDateString("fr-FR")
+          : "";
+
+        return `
+          <div style="padding:12px 0; border-bottom:1px solid var(--line);">
+            <div style="font-weight:500; color:var(--text);">${title}</div>
+            <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+              ${label ? `${label} · ` : ""}${amount} · ${status}
+            </div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+              Réservation du ${date}
+            </div>
           </div>
-          <div style="font-size:12px; color:var(--muted); margin-top:4px;">
-            Réservation du ${date}
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  async function showLoggedIn(user) {
-    if (authBox) authBox.style.display = "none";
-    if (resetBox) resetBox.style.display = "none";
-    if (perksBox) perksBox.style.display = "none";
-    if (loggedBox) loggedBox.style.display = "block";
-    if (bookingsBox) bookingsBox.style.display = "block";
-    if (userEmail) userEmail.textContent = user?.email || "";
-
-    await loadMyBookings(user);
-
-    const isAdmin = await checkAdmin(user.id);
-
-    if (isAdmin && adminPanel) {
-      adminPanel.style.display = "block";
-    } else if (adminPanel) {
-      adminPanel.style.display = "none";
-    }
-  }
-
-  // Détection reset password
-  const hash = window.location.hash || "";
-  const isRecovery =
-    hash.includes("type=recovery") ||
-    hash.includes("access_token");
-
-  if (isRecovery) {
-    if (authBox) authBox.style.display = "none";
-    if (perksBox) perksBox.style.display = "none";
-    if (loggedBox) loggedBox.style.display = "none";
-    if (bookingsBox) bookingsBox.style.display = "none";
-    if (resetBox) resetBox.style.display = "block";
-  } else {
-    const { data: { session }, error: sErr } = await supabase.auth.getSession();
-    if (sErr) console.warn(sErr);
-
-    if (session?.user) await showLoggedIn(session.user);
-    else showLoggedOut();
-  }
-
-  // Login
-  btnLogin?.addEventListener("click", async () => {
-    setMsg(authMsg, "");
-
-    const email = (emailEl?.value || "").trim();
-    const password = passEl?.value || "";
-
-    if (!email || !password) {
-      setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
-      return;
+        `;
+      }).join("");
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    async function showLoggedIn(user) {
+      if (authBox) authBox.style.display = "none";
+      if (resetBox) resetBox.style.display = "none";
+      if (perksBox) perksBox.style.display = "none";
+      if (loggedBox) loggedBox.style.display = "block";
+      if (bookingsBox) bookingsBox.style.display = "block";
+      if (userEmail) userEmail.textContent = user?.email || "";
 
-    if (error) {
-      setMsg(authMsg, error.message);
-      return;
+      await loadMyBookings(user);
+
+      const isAdmin = await checkAdmin(user.id);
+
+      if (isAdmin && adminPanel) {
+        adminPanel.style.display = "block";
+        await loadAdminStats();
+      } else if (adminPanel) {
+        adminPanel.style.display = "none";
+      }
     }
 
-    await showLoggedIn(data.user);
-    setMsg(authMsg, "");
-  });
+    // Détection reset password
+    const hash = window.location.hash || "";
+    const isRecovery =
+      hash.includes("type=recovery") ||
+      hash.includes("access_token");
 
-  // Signup -> redirection vers page dédiée
-  btnSignup?.addEventListener("click", () => {
-    window.location.href = "/signup.html";
-  });
+    if (isRecovery) {
+      if (authBox) authBox.style.display = "none";
+      if (perksBox) perksBox.style.display = "none";
+      if (loggedBox) loggedBox.style.display = "none";
+      if (bookingsBox) bookingsBox.style.display = "none";
+      if (resetBox) resetBox.style.display = "block";
+    } else {
+      const { data: { session }, error: sErr } = await supabase.auth.getSession();
+      if (sErr) console.warn(sErr);
 
-  // Mot de passe oublié
-  btnForgot?.addEventListener("click", async () => {
-    setMsg(authMsg, "");
-    const email = (emailEl?.value || "").trim();
-
-    if (!email) {
-      setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
-      return;
+      if (session?.user) await showLoggedIn(session.user);
+      else showLoggedOut();
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/compte.html`
+    // Login
+    btnLogin?.addEventListener("click", async () => {
+      setMsg(authMsg, "");
+
+      const email = (emailEl?.value || "").trim();
+      const password = passEl?.value || "";
+
+      if (!email || !password) {
+        setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setMsg(authMsg, error.message);
+        return;
+      }
+
+      await showLoggedIn(data.user);
+      setMsg(authMsg, "");
     });
 
-    if (error) {
-      setMsg(authMsg, error.message);
-      return;
-    }
+    // Mot de passe oublié
+    btnForgot?.addEventListener("click", async () => {
+      setMsg(authMsg, "");
+      const email = (emailEl?.value || "").trim();
 
-    setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
-  });
+      if (!email) {
+        setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
+        return;
+      }
 
-  // Update password
-  btnUpdatePassword?.addEventListener("click", async () => {
-    setMsg(resetMsg, "");
-    const newPassword = (document.getElementById("newPassword")?.value || "").trim();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/compte.html`
+      });
 
-    if (!newPassword) {
-      setMsg(resetMsg, "Merci de renseigner un nouveau mot de passe.");
-      return;
-    }
+      if (error) {
+        setMsg(authMsg, error.message);
+        return;
+      }
 
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+      setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
+    });
 
-    if (error) {
-      setMsg(resetMsg, error.message);
-      return;
-    }
+    // Update password
+    btnUpdatePassword?.addEventListener("click", async () => {
+      setMsg(resetMsg, "");
+      const newPassword = (document.getElementById("newPassword")?.value || "").trim();
 
-    setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
-  });
+      if (!newPassword) {
+        setMsg(resetMsg, "Merci de renseigner un nouveau mot de passe.");
+        return;
+      }
 
-  // Logout
-  btnLogout?.addEventListener("click", async () => {
-    await supabase.auth.signOut();
-    showLoggedOut();
-    setMsg(loggedMsg, "");
-  });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-  // Voir réservations
-  btnSee?.addEventListener("click", async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) await loadMyBookings(user);
-  });
+      if (error) {
+        setMsg(resetMsg, error.message);
+        return;
+      }
 
-  // Admin : ajouter séjour
-  btnAddStay?.addEventListener("click", async () => {
-    setMsg(adminMsg, "");
+      setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
+    });
 
-    const title = prompt("Nom du séjour");
-    if (!title) return;
+    // Logout
+    btnLogout?.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      showLoggedOut();
+      setMsg(loggedMsg, "");
+    });
 
-    const slug = title
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-");
+    // Voir réservations
+    btnSee?.addEventListener("click", async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await loadMyBookings(user);
+    });
 
-    const { data, error } = await supabase
-      .from("stays")
-      .insert([{ title, slug }])
-      .select()
-      .single();
+    // Admin
+    btnManageStays?.addEventListener("click", () => {
+      window.location.href = "/admin-stays.html";
+    });
 
-    if (error) {
-      setMsg(adminMsg, "Erreur lors de la création du séjour.");
-      console.error(error);
-      return;
-    }
+    btnAdminBookings?.addEventListener("click", () => {
+      window.location.href = "/admin-bookings.html";
+    });
 
-    window.location.href = `/sejour.html?slug=${data.slug}`;
-  });
+    btnPriorityList?.addEventListener("click", () => {
+      window.location.href = "/admin-priority.html";
+    });
 
-  // Admin : gérer séjours
-  btnManageStays?.addEventListener("click", () => {
-    window.location.href = "/admin-stays.html";
-  });
+    btnNewsletterList?.addEventListener("click", () => {
+      window.location.href = "/admin-newsletter.html";
+    });
 
-  // Admin : réservations
-  btnAdminBookings?.addEventListener("click", () => {
-    window.location.href = "/admin-bookings.html";
-  });
-
-  // Sync UI
-  supabase.auth.onAuthStateChange(async (_evt, newSession) => {
-    if (newSession?.user) await showLoggedIn(newSession.user);
-    else showLoggedOut();
-  });
-</script>
-}
+    // Sync UI
+    supabase.auth.onAuthStateChange(async (_evt, newSession) => {
+      if (newSession?.user) await showLoggedIn(newSession.user);
+      else showLoggedOut();
+    });
   </script>
-  
+
 </body>
 </html>

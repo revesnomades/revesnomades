@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Inscrits prioritaires — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="on-light">
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div class="account-card" style="max-width:1180px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <h1 style="margin:0;">Inscrits prioritaires</h1>
+            <p style="color:var(--muted); margin-top:10px;">Liste des personnes inscrites depuis la maintenance.</p>
+          </div>
+          <a class="btn on-light" href="/compte.html">Retour dashboard</a>
+        </div>
+
+        <div id="priorityList" style="margin-top:24px;">Chargement…</div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const priorityList = document.getElementById("priorityList");
+
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+      if(!user){
+        window.location.href = "/compte.html";
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if(error || data?.role !== "admin"){
+        throw new Error("Not admin");
+      }
+
+      return user;
+    }
+
+    async function loadPriority(){
+      const { data, error } = await supabase
+        .from("priority_waitlist")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if(error){
+        console.error(error);
+        priorityList.textContent = "Impossible de charger la liste.";
+        return;
+      }
+
+      if(!data?.length){
+        priorityList.textContent = "Aucun inscrit prioritaire.";
+        return;
+      }
+
+      priorityList.innerHTML = `
+        <div style="display:grid; gap:10px;">
+          ${data.map(item => `
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+              <div style="font-weight:600;">${item.firstname || "—"}</div>
+              <div style="margin-top:4px; color:var(--muted);">${item.email}</div>
+              <div style="margin-top:4px; font-size:13px; color:var(--muted);">
+                Source : ${item.source || "—"} · Statut : ${item.status || "—"}
+              </div>
+              <div style="margin-top:4px; font-size:12px; color:var(--muted);">
+                Inscription : ${item.created_at ? new Date(item.created_at).toLocaleString("fr-FR") : "—"}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    try{
+      await checkAdmin();
+      await loadPriority();
+    } catch(err){
+      console.warn(err);
+      window.location.href = "/compte.html";
+    }
+  </script>
+
+</body>
+</html>
