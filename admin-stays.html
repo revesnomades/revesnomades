@@ -12,15 +12,328 @@
   <link rel="icon" href="/assets/img/favicon.ico">
 
   <link rel="stylesheet" href="/assets/css/styles.css" />
+
+  <style>
+    .admin-shell{
+      display:grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .admin-panel{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      padding:16px;
+    }
+
+    .admin-panel h2,
+    .admin-panel h3{
+      margin:0;
+    }
+
+    .muted-small{
+      color:var(--muted);
+      font-size:12.5px;
+    }
+
+    .admin-grid-2{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .admin-grid-3{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .admin-block{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.35);
+      padding:14px;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .admin-inline{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .upload-preview{
+      display:none;
+      width:100%;
+      max-width:320px;
+      margin-top:12px;
+      border:1px solid var(--line);
+    }
+
+    .program-day-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      padding:14px;
+    }
+
+    .program-slot-row{
+      display:grid;
+      grid-template-columns:120px 1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+    }
+
+    .price-row{
+      display:grid;
+      grid-template-columns:1.1fr 1.5fr .8fr 1.4fr .7fr auto auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .stays-admin-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .stay-admin-item{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .homepage-layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(320px, .9fr);
+      gap:16px;
+      align-items:start;
+    }
+
+    .draggable-pool,
+    .drop-slots{
+      display:grid;
+      gap:10px;
+    }
+
+    .drag-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.72);
+      padding:12px;
+      cursor:grab;
+      user-select:none;
+    }
+
+    .drag-card:active{
+      cursor:grabbing;
+    }
+
+    .drag-card.dragging{
+      opacity:.45;
+    }
+
+    .slot-box{
+      border:1px dashed rgba(30,31,34,.35);
+      background:rgba(255,255,255,.45);
+      min-height:72px;
+      padding:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .slot-box.is-over{
+      border-color:#111;
+      background:rgba(255,255,255,.85);
+    }
+
+    .slot-label{
+      min-width:86px;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .slot-content{
+      flex:1 1 auto;
+    }
+
+    .slot-empty{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .slot-pill{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:8px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+    }
+
+    .mini-remove{
+      border:none;
+      background:none;
+      cursor:pointer;
+      font-size:16px;
+      line-height:1;
+      color:var(--muted);
+      padding:0;
+    }
+
+    .preview-shell{
+      display:grid;
+      gap:16px;
+      position:sticky;
+      top:90px;
+    }
+
+    .preview-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.75);
+      overflow:hidden;
+    }
+
+    .preview-label{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      background:rgba(255,255,255,.85);
+    }
+
+    .featured-preview{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      min-height:320px;
+    }
+
+    .featured-preview-media{
+      background-size:cover;
+      background-position:center;
+      min-height:320px;
+      background-color:#ddd;
+    }
+
+    .featured-preview-copy{
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background:#fff;
+    }
+
+    .featured-preview-copy h3{
+      margin:0;
+      font-size:28px;
+    }
+
+    .featured-preview-copy p{
+      margin:10px 0 0;
+      color:var(--muted);
+    }
+
+    .cards-preview{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+      padding:12px;
+    }
+
+    .cards-preview .card{
+      border:1px solid var(--line);
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .cards-preview .card-media{
+      aspect-ratio:4/5;
+      background-size:cover;
+      background-position:center;
+      background-color:#ddd;
+      position:relative;
+    }
+
+    .cards-preview .card-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.26);
+      display:flex;
+      align-items:flex-end;
+      padding:10px;
+      color:#fff;
+      font-size:12px;
+    }
+
+    .cards-preview .card-title{
+      padding:10px 12px;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      border-top:1px solid var(--line);
+    }
+
+    .helper-note{
+      margin-top:10px;
+      font-size:12.5px;
+      color:var(--muted);
+    }
+
+    @media (max-width: 1120px){
+      .admin-shell,
+      .homepage-layout{
+        grid-template-columns:1fr;
+      }
+
+      .preview-shell{
+        position:static;
+      }
+
+      .featured-preview{
+        grid-template-columns:1fr;
+      }
+
+      .cards-preview{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 780px){
+      .admin-grid-2,
+      .admin-grid-3,
+      .price-row,
+      .program-slot-row{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
 </head>
 
 <body class="on-light">
 
   <header class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="index.html">
-        <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-        <span>ÂmesNomades</span>
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
         <a href="/compte.html">Compte</a>
@@ -30,327 +343,371 @@
   </header>
 
   <section class="band cream">
-    <div class="container" style="padding:120px 0 60px;">
-      <div class="account-card" style="max-width:1220px; margin:0 auto;">
-        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
-          <div>
-            <h1 style="margin:0;">Gestion des séjours</h1>
-            <p style="color:var(--muted); margin-top:10px;">
-              Création et modification des séjours affichés sur <strong>sejour.html</strong>.
-            </p>
-          </div>
+    <div class="container" style="padding:110px 0 60px;">
+      <div class="admin-shell">
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <a class="btn on-light" href="/compte.html">Retour compte</a>
-            <button class="btn on-light" id="btnNewStay" type="button">➕ Nouveau séjour</button>
-          </div>
-        </div>
+        <!-- COLONNE PRINCIPALE -->
+        <div style="display:grid; gap:18px;">
 
-        <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
-
-        <div id="editorBox" style="display:none; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
-          <h2 id="editorTitle" style="margin:0 0 14px;">Créer un séjour</h2>
-
-          <div style="display:grid; gap:16px;">
-
-            <!-- DATES -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <h3 style="margin:0 0 12px;">Dates du séjour</h3>
-
-              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
-                <div>
-                  <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">Date de début</label>
-                  <input id="mainStartDate" class="input" type="date"
-                    style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
-                </div>
-
-                <div>
-                  <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">Date de fin</label>
-                  <input id="mainEndDate" class="input" type="date"
-                    style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
-                </div>
-
-                <div>
-                  <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">Places totales</label>
-                  <input id="mainSeatsTotal" class="input" type="number" min="0" value="10"
-                    style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
-                </div>
-
-                <div>
-                  <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">Places restantes</label>
-                  <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10"
-                    style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
-                </div>
+          <!-- ORGANISATION HOMEPAGE -->
+          <div class="admin-panel">
+            <div class="section-head">
+              <div>
+                <h2>Homepage CMS</h2>
+                <p class="muted-small" style="margin-top:8px;">
+                  Organise le bandeau principal et les 5 séjours avec glisser-déposer.
+                </p>
               </div>
 
-              <div id="durationInfo" style="margin-top:12px; font-size:14px; color:var(--text);">
-                Durée : —
+              <div class="admin-inline">
+                <button class="btn on-light" id="btnReloadHomepage" type="button">Actualiser</button>
+                <button class="btn on-light" id="btnSaveHomepage" type="button">Enregistrer homepage</button>
               </div>
             </div>
 
-            <!-- INFOS PRINCIPALES -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <h3 style="margin:0 0 12px;">Informations principales</h3>
+            <div id="homepageMsg" class="muted-small" style="margin-bottom:12px;"></div>
 
-              <div style="display:grid; gap:12px;">
-                <input id="stayTitle" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Titre du séjour">
+            <div class="homepage-layout">
 
-                <input id="staySlug" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Slug (ex : camargue)">
-
-                <input id="stayLocation" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Lieu">
-
-                <textarea id="stayShortDescription" class="input"
-                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Description courte"></textarea>
-
-                <textarea id="stayDescription" class="input"
-                  style="min-height:180px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Description principale"></textarea>
-
-                <div style="border:1px solid var(--line); padding:12px; background:rgba(255,255,255,.35);">
-                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Image hero</div>
-
-                  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <input id="heroImageFile" type="file" accept="image/*">
-                    <button class="btn on-light" id="btnUploadHeroImage" type="button">Uploader l’image hero</button>
+              <div style="display:grid; gap:14px;">
+                <div class="admin-block">
+                  <div class="section-head" style="margin-bottom:10px;">
+                    <h3>Bibliothèque de séjours</h3>
+                    <span class="muted-small">Glisse un séjour dans un emplacement</span>
                   </div>
-
-                  <input id="stayHeroImage" class="input"
-                    style="margin-top:10px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                    placeholder="URL image hero">
-
-                  <img id="heroPreview" src="" alt="" style="display:none; width:100%; max-width:320px; margin-top:12px; border:1px solid var(--line);">
+                  <div id="staysPool" class="draggable-pool"></div>
                 </div>
 
-                <input id="stayStripeLink" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Lien Stripe principal (secours)">
+                <div class="admin-block">
+                  <div class="section-head" style="margin-bottom:10px;">
+                    <h3>Bandeau principal</h3>
+                    <span class="muted-small">1 seul séjour</span>
+                  </div>
+                  <div class="drop-slots">
+                    <div class="slot-box" data-slot-type="featured">
+                      <div class="slot-label">Vedette</div>
+                      <div class="slot-content" id="featuredSlotContent">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                <input id="stayMinBookings" class="input"
-                  type="number"
-                  min="0"
-                  value="10"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Nombre minimum de réservations pour valider le séjour">
+                <div class="admin-block">
+                  <div class="section-head" style="margin-bottom:10px;">
+                    <h3>Bandeau 5 séjours</h3>
+                    <span class="muted-small">Positions 1 à 5</span>
+                  </div>
 
-                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;">
-                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                    <input id="stayFeatured" type="checkbox">
-                    Afficher dans le premier bandeau
-                  </label>
+                  <div class="drop-slots">
+                    <div class="slot-box" data-slot-type="highlight" data-slot-index="1">
+                      <div class="slot-label">Position 1</div>
+                      <div class="slot-content" id="highlightSlot1">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
 
-                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                    <input id="stayHighlight" type="checkbox">
-                    Afficher dans le bandeau 5 séjours
-                  </label>
+                    <div class="slot-box" data-slot-type="highlight" data-slot-index="2">
+                      <div class="slot-label">Position 2</div>
+                      <div class="slot-content" id="highlightSlot2">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
+
+                    <div class="slot-box" data-slot-type="highlight" data-slot-index="3">
+                      <div class="slot-label">Position 3</div>
+                      <div class="slot-content" id="highlightSlot3">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
+
+                    <div class="slot-box" data-slot-type="highlight" data-slot-index="4">
+                      <div class="slot-label">Position 4</div>
+                      <div class="slot-content" id="highlightSlot4">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
+
+                    <div class="slot-box" data-slot-type="highlight" data-slot-index="5">
+                      <div class="slot-label">Position 5</div>
+                      <div class="slot-content" id="highlightSlot5">
+                        <div class="slot-empty">Dépose un séjour ici</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="helper-note">
+                    Un même séjour ne peut être placé qu’une seule fois dans le bandeau 5 séjours.
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview-shell">
+                <div class="preview-card">
+                  <div class="preview-label">Preview live — bandeau principal</div>
+                  <div id="featuredPreview" class="featured-preview">
+                    <div class="featured-preview-media" id="featuredPreviewMedia"></div>
+                    <div class="featured-preview-copy">
+                      <div class="kicker">Prochain séjour…</div>
+                      <div class="sep" style="margin:10px 0 16px;"></div>
+                      <h3 id="featuredPreviewTitle">Aucun séjour</h3>
+                      <p id="featuredPreviewDuration">Durée à annoncer</p>
+                      <p id="featuredPreviewDates">Dates à annoncer</p>
+                      <p id="featuredPreviewLocation"></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="preview-card">
+                  <div class="preview-label">Preview live — bandeau 5 séjours</div>
+                  <div id="cardsPreview" class="cards-preview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EDITEUR -->
+          <div class="admin-panel">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+              <div>
+                <h2 id="editorTitle">Créer un séjour</h2>
+                <p class="muted-small" style="margin-top:8px;">
+                  CMS séjour : contenu, images, planning, FAQ, formules Stripe, visibilité des blocs.
+                </p>
+              </div>
+
+              <div class="admin-inline">
+                <button class="btn on-light" id="btnNewStay" type="button">➕ Nouveau séjour</button>
+                <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
+                <button class="btn on-light" id="btnCancelEdit" type="button">Annuler</button>
+              </div>
+            </div>
+
+            <div id="adminStatus" class="muted-small" style="margin-top:12px;"></div>
+            <div id="editorMsg" class="muted-small" style="margin-top:8px;"></div>
+
+            <div style="display:grid; gap:16px; margin-top:18px;">
+
+              <!-- DATES -->
+              <div class="admin-block">
+                <h3>Dates du séjour</h3>
+                <div class="admin-grid-2" style="margin-top:12px;">
+                  <div>
+                    <label class="muted-small" style="display:block; margin-bottom:6px;">Date de début</label>
+                    <input id="mainStartDate" class="input" type="date">
+                  </div>
 
                   <div>
-                    <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">
-                      Ordre dans le bandeau 5 séjours
-                    </label>
-                    <input id="stayHighlightOrder" class="input" type="number" min="1" value="999"
-                      style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                      placeholder="1, 2, 3, 4, 5">
+                    <label class="muted-small" style="display:block; margin-bottom:6px;">Date de fin</label>
+                    <input id="mainEndDate" class="input" type="date">
+                  </div>
+
+                  <div>
+                    <label class="muted-small" style="display:block; margin-bottom:6px;">Places totales</label>
+                    <input id="mainSeatsTotal" class="input" type="number" min="0" value="10">
+                  </div>
+
+                  <div>
+                    <label class="muted-small" style="display:block; margin-bottom:6px;">Places restantes</label>
+                    <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10">
+                  </div>
+                </div>
+
+                <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
+              </div>
+
+              <!-- INFOS -->
+              <div class="admin-block">
+                <h3>Informations principales</h3>
+
+                <div style="display:grid; gap:12px; margin-top:12px;">
+                  <input id="stayTitle" class="input" placeholder="Titre du séjour">
+                  <input id="staySlug" class="input" placeholder="Slug (ex : camargue)">
+                  <input id="stayLocation" class="input" placeholder="Lieu">
+                  <textarea id="stayShortDescription" class="input" style="min-height:90px;" placeholder="Description courte"></textarea>
+                  <textarea id="stayDescription" class="input" style="min-height:180px;" placeholder="Description principale"></textarea>
+
+                  <div class="admin-block" style="padding:12px;">
+                    <div class="muted-small" style="margin-bottom:8px;">Image hero</div>
+                    <div class="admin-inline">
+                      <input id="heroImageFile" type="file" accept="image/*">
+                      <button class="btn on-light" id="btnUploadHeroImage" type="button">Uploader l’image hero</button>
+                    </div>
+                    <input id="stayHeroImage" class="input" style="margin-top:10px;" placeholder="URL image hero">
+                    <img id="heroPreview" class="upload-preview" src="" alt="">
+                  </div>
+
+                  <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
+                  <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
+                </div>
+              </div>
+
+              <!-- HIGHLIGHTS -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <h3>Ce que tu vas vivre</h3>
+                  <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+                <textarea id="stayHighlights" class="input" style="min-height:160px;" placeholder="Une ligne par item"></textarea>
+              </div>
+
+              <!-- PROGRAMME -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <div>
+                    <h3>Programme du séjour</h3>
+                    <div class="muted-small" style="margin-top:6px;">Le nombre de jours est calculé automatiquement à partir des dates.</div>
+                  </div>
+                  <div class="admin-inline">
+                    <button class="btn on-light" id="btnToggleProgramSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                    <button class="btn on-light" id="btnRebuildProgram" type="button">Recalculer</button>
+                  </div>
+                </div>
+
+                <div id="programEditors" style="display:grid; gap:14px; margin-top:14px;"></div>
+                <textarea id="stayProgramNote" class="input" style="min-height:80px; margin-top:12px;" placeholder="Note affichée sous le programme"></textarea>
+              </div>
+
+              <!-- INCLUS -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <h3>Inclus / non inclus</h3>
+                  <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+
+                <div style="display:grid; gap:12px;">
+                  <textarea id="stayIncludedItems" class="input" style="min-height:140px;" placeholder="Inclus : une ligne par élément"></textarea>
+                  <textarea id="stayNotIncludedItems" class="input" style="min-height:120px;" placeholder="Non inclus : une ligne par élément"></textarea>
+                </div>
+              </div>
+
+              <!-- OPTIONS -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <h3>Options en supplément</h3>
+                  <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+
+                <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
+              </div>
+
+              <!-- GIFT -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <h3>Sac cadeau</h3>
+                  <button class="btn on-light" id="btnToggleGiftSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+
+                <div style="display:grid; gap:12px;">
+                  <input id="giftTitle" class="input" placeholder="Titre du bloc sac cadeau">
+                  <textarea id="giftIntro" class="input" style="min-height:90px;" placeholder="Texte d’introduction"></textarea>
+                  <textarea id="giftItems" class="input" style="min-height:120px;" placeholder="Une ligne par élément du sac cadeau"></textarea>
+                  <textarea id="giftOutro" class="input" style="min-height:90px;" placeholder="Texte de conclusion"></textarea>
+
+                  <div class="admin-block" style="padding:12px;">
+                    <div class="muted-small" style="margin-bottom:8px;">Image sac cadeau</div>
+                    <div class="admin-inline">
+                      <input id="giftImageFile" type="file" accept="image/*">
+                      <button class="btn on-light" id="btnUploadGiftImage" type="button">Uploader l’image sac cadeau</button>
+                    </div>
+                    <input id="giftImage" class="input" style="margin-top:10px;" placeholder="URL image sac cadeau">
+                    <img id="giftPreview" class="upload-preview" src="" alt="">
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- HIGHLIGHTS -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-                <h3 style="margin:0;">Ce que tu vas vivre</h3>
-                <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-              </div>
-
-              <p style="color:var(--muted); font-size:13px; margin:0 0 10px;">
-                Une ligne par item.
-              </p>
-              <textarea id="stayHighlights" class="input"
-                style="min-height:160px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder="Pilates quotidien&#10;Randonnées douces&#10;Cuisine saine..."></textarea>
-            </div>
-
-            <!-- PROGRAMME -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <h3 style="margin:0;">Programme du séjour</h3>
-                  <button class="btn on-light" id="btnToggleProgramSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-                </div>
-
-                <button class="btn on-light" id="btnRebuildProgram" type="button">Recalculer le programme</button>
-              </div>
-
-              <p style="margin:8px 0 0; color:var(--muted); font-size:13px;">
-                Le nombre de jours se génère automatiquement à partir des dates.
-              </p>
-
-              <div id="programEditors" style="display:grid; gap:14px; margin-top:16px;"></div>
-
-              <textarea id="stayProgramNote" class="input"
-                style="min-height:80px; margin-top:12px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder="Note affichée sous le programme"></textarea>
-            </div>
-
-            <!-- INCLUS / NON INCLUS -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-                <h3 style="margin:0;">Inclus / non inclus</h3>
-                <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-              </div>
-
-              <div style="display:grid; gap:12px;">
-                <textarea id="stayIncludedItems" class="input"
-                  style="min-height:140px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Inclus : une ligne par élément"></textarea>
-
-                <textarea id="stayNotIncludedItems" class="input"
-                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Non inclus : une ligne par élément"></textarea>
-              </div>
-            </div>
-
-            <!-- OPTIONS -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-                <h3 style="margin:0;">Options en supplément</h3>
-                <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-              </div>
-
-              <textarea id="stayExtraOptions" class="input"
-                style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder="Options en supplément : une ligne par élément"></textarea>
-            </div>
-
-            <!-- GIFT -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-                <h3 style="margin:0;">Sac cadeau</h3>
-                <button class="btn on-light" id="btnToggleGiftSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-              </div>
-
-              <div style="display:grid; gap:12px;">
-                <input id="giftTitle" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Titre du bloc sac cadeau">
-
-                <textarea id="giftIntro" class="input"
-                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Texte d’introduction"></textarea>
-
-                <textarea id="giftItems" class="input"
-                  style="min-height:120px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Une ligne par élément du sac cadeau"></textarea>
-
-                <textarea id="giftOutro" class="input"
-                  style="min-height:90px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  placeholder="Texte de conclusion"></textarea>
-
-                <div style="border:1px solid var(--line); padding:12px; background:rgba(255,255,255,.35);">
-                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Image sac cadeau</div>
-
-                  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <input id="giftImageFile" type="file" accept="image/*">
-                    <button class="btn on-light" id="btnUploadGiftImage" type="button">Uploader l’image sac cadeau</button>
+              <!-- FAQ -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <div class="admin-inline">
+                    <h3>FAQ</h3>
+                    <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
                   </div>
 
-                  <input id="giftImage" class="input"
-                    style="margin-top:10px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                    placeholder="URL image sac cadeau">
-
-                  <img id="giftPreview" src="" alt="" style="display:none; width:100%; max-width:320px; margin-top:12px; border:1px solid var(--line);">
+                  <div class="admin-inline">
+                    <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
+                    <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme modèle</button>
+                  </div>
                 </div>
+
+                <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
+              </div>
+
+              <!-- PRIX -->
+              <div class="admin-block">
+                <div class="section-head">
+                  <h3>Formules & prix Stripe</h3>
+                  <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
+                </div>
+
+                <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTE DES SEJOURS -->
+          <div class="admin-panel">
+            <div class="section-head">
+              <div>
+                <h2>Tous les séjours</h2>
+                <p class="muted-small" style="margin-top:8px;">Gestion rapide de tous les contenus.</p>
               </div>
             </div>
 
-            <!-- FAQ -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <h3 style="margin:0;">FAQ</h3>
-                  <button class="btn on-light" id="btnToggleFaqSection" type="button" style="padding:10px 12px; min-width:auto;">👁</button>
-                </div>
-
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                  <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
-                  <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme FAQ modèle</button>
-                </div>
-              </div>
-
-              <p style="color:var(--muted); font-size:13px; margin:12px 0 10px;">
-                Format JSON. Exemple :
-              </p>
-              <pre style="white-space:pre-wrap; font-size:12px; color:var(--muted); margin:0 0 12px;">[
-  {"q":"Question ?","a":"Réponse"}
-]</pre>
-
-              <textarea id="stayFaq" class="input"
-                style="min-height:220px; color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
-            </div>
-
-            <!-- PRIX -->
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.42); padding:16px;">
-              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-                <h3 style="margin:0;">Formules & prix Stripe</h3>
-                <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
-              </div>
-
-              <p style="color:var(--muted); font-size:13px; margin:12px 0 10px;">
-                Chaque ligne correspond à une option visible sur la page séjour.
-              </p>
-
-              <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
-            </div>
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
-              <button class="btn on-light" id="btnCancelEdit" type="button">Annuler</button>
-            </div>
-
-            <div id="editorMsg" style="color:var(--muted); font-size:12.5px;"></div>
+            <div id="staysList" class="stays-admin-list">Chargement…</div>
           </div>
         </div>
 
-        <div style="margin-top:28px; border-top:1px solid var(--line); padding-top:20px;">
-          <h2 style="margin:0 0 14px;">Séjours existants</h2>
-          <div id="staysList" style="display:grid; gap:14px; color:var(--muted);">
-            Chargement…
+        <!-- PREVIEW LATERAL -->
+        <div class="preview-shell">
+          <div class="admin-panel">
+            <div class="section-head">
+              <div>
+                <h2>Preview live CMS</h2>
+                <p class="muted-small" style="margin-top:8px;">
+                  Le contenu homepage se met à jour instantanément quand tu déplaces les séjours.
+                </p>
+              </div>
+            </div>
+
+            <div class="preview-card">
+              <div class="preview-label">Bandeau principal</div>
+              <div id="featuredPreviewSticky" class="featured-preview">
+                <div class="featured-preview-media" id="featuredPreviewMediaSticky"></div>
+                <div class="featured-preview-copy">
+                  <div class="kicker">Prochain séjour…</div>
+                  <div class="sep" style="margin:10px 0 16px;"></div>
+                  <h3 id="featuredPreviewTitleSticky">Aucun séjour</h3>
+                  <p id="featuredPreviewDurationSticky">Durée à annoncer</p>
+                  <p id="featuredPreviewDatesSticky">Dates à annoncer</p>
+                  <p id="featuredPreviewLocationSticky"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-card" style="margin-top:16px;">
+              <div class="preview-label">Bandeau 5 séjours</div>
+              <div id="cardsPreviewSticky" class="cards-preview"></div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
-
-  <footer class="band cream">
-    <div class="container footer">
-      <div class="footer-row">
-        <div class="footer-brand">
-          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-          <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script src="assets/js/main.js"></script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
     const adminStatus = document.getElementById("adminStatus");
-    const staysList = document.getElementById("staysList");
-    const editorBox = document.getElementById("editorBox");
-    const editorTitle = document.getElementById("editorTitle");
     const editorMsg = document.getElementById("editorMsg");
+    const homepageMsg = document.getElementById("homepageMsg");
+    const editorTitle = document.getElementById("editorTitle");
+    const staysList = document.getElementById("staysList");
+    const staysPool = document.getElementById("staysPool");
 
+    const btnReloadHomepage = document.getElementById("btnReloadHomepage");
+    const btnSaveHomepage = document.getElementById("btnSaveHomepage");
     const btnNewStay = document.getElementById("btnNewStay");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
@@ -383,8 +740,6 @@
     const stayStripeLink = document.getElementById("stayStripeLink");
     const stayMinBookings = document.getElementById("stayMinBookings");
     const stayFeatured = document.getElementById("stayFeatured");
-    const stayHighlight = document.getElementById("stayHighlight");
-    const stayHighlightOrder = document.getElementById("stayHighlightOrder");
 
     const mainStartDate = document.getElementById("mainStartDate");
     const mainEndDate = document.getElementById("mainEndDate");
@@ -409,7 +764,26 @@
     const stayFaq = document.getElementById("stayFaq");
     const pricesRows = document.getElementById("pricesRows");
 
+    const featuredSlotContent = document.getElementById("featuredSlotContent");
+    const featuredPreviewMedia = document.getElementById("featuredPreviewMedia");
+    const featuredPreviewTitle = document.getElementById("featuredPreviewTitle");
+    const featuredPreviewDuration = document.getElementById("featuredPreviewDuration");
+    const featuredPreviewDates = document.getElementById("featuredPreviewDates");
+    const featuredPreviewLocation = document.getElementById("featuredPreviewLocation");
+
+    const featuredPreviewMediaSticky = document.getElementById("featuredPreviewMediaSticky");
+    const featuredPreviewTitleSticky = document.getElementById("featuredPreviewTitleSticky");
+    const featuredPreviewDurationSticky = document.getElementById("featuredPreviewDurationSticky");
+    const featuredPreviewDatesSticky = document.getElementById("featuredPreviewDatesSticky");
+    const featuredPreviewLocationSticky = document.getElementById("featuredPreviewLocationSticky");
+
+    const cardsPreview = document.getElementById("cardsPreview");
+    const cardsPreviewSticky = document.getElementById("cardsPreviewSticky");
+
     let currentStayId = null;
+    let allStays = [];
+    let homepageFeaturedId = null;
+    let homepageHighlights = [null, null, null, null, null];
 
     let showGiftSection = true;
     let showFaqSection = true;
@@ -508,6 +882,28 @@
       }
     }
 
+    function formatDateRange(start, end){
+      if(!start && !end) return "Dates à annoncer";
+      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
+      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
+      if(startText && endText) return `${startText} au ${endText}`;
+      return startText || endText || "Dates à annoncer";
+    }
+
+    function getDurationLabel(start, end){
+      if(!start || !end) return "Durée à annoncer";
+      const s = new Date(start + "T00:00:00");
+      const e = new Date(end + "T00:00:00");
+      const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
+      if(days <= 0) return "Durée à annoncer";
+      const nights = Math.max(0, days - 1);
+      return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
+    }
+
+    function stayById(id){
+      return allStays.find(s => s.id === id) || null;
+    }
+
     async function uploadImageToStorage(file, folder = "general"){
       if(!file) throw new Error("Aucun fichier sélectionné.");
 
@@ -574,25 +970,14 @@
     function createProgramSlotRow(slot = {}){
       const row = document.createElement("div");
       row.className = "program-slot-row";
-      row.style.cssText = "display:grid; grid-template-columns:120px 1fr auto; gap:10px; align-items:center; margin-top:10px;";
 
       row.innerHTML = `
-        <input type="time" class="input slot-time"
-          value="${slot.time || ""}"
-          style="color:var(--text); background:rgba(255,255,255,.78); border:1px solid var(--line);">
-
-        <input type="text" class="input slot-text"
-          value="${(slot.text || "").replace(/"/g, "&quot;")}"
-          placeholder="Texte de l’activité"
-          style="color:var(--text); background:rgba(255,255,255,.78); border:1px solid var(--line);">
-
+        <input type="time" class="input slot-time" value="${slot.time || ""}">
+        <input type="text" class="input slot-text" value="${(slot.text || "").replace(/"/g, "&quot;")}" placeholder="Texte de l’activité">
         <button type="button" class="btn on-light btn-remove-slot">✕</button>
       `;
 
-      row.querySelector(".btn-remove-slot").addEventListener("click", () => {
-        row.remove();
-      });
-
+      row.querySelector(".btn-remove-slot").addEventListener("click", () => row.remove());
       return row;
     }
 
@@ -600,13 +985,11 @@
       const card = document.createElement("div");
       card.className = "program-day-card";
       card.dataset.dayNumber = String(dayNumber);
-      card.style.cssText = "border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;";
 
       card.innerHTML = `
         <div style="display:grid; gap:10px;">
           <input class="input program-day-title"
             value="${(existing.title || `Jour ${dayNumber}`).replace(/"/g, "&quot;")}"
-            style="color:var(--text); background:rgba(255,255,255,.78); border:1px solid var(--line);"
             placeholder="Titre du jour">
 
           <div class="program-slots-list"></div>
@@ -682,50 +1065,21 @@
     function createPriceRow(data = {}){
       const row = document.createElement("div");
       row.className = "price-row";
-      row.style.cssText = "display:grid; grid-template-columns:1.3fr 1.6fr 0.8fr 1.6fr 0.7fr auto auto; gap:10px; align-items:center;";
 
       row.innerHTML = `
-        <input class="input price-label"
-          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-          placeholder="Label"
-          value="${data.label || ""}">
-
-        <input class="input price-description"
-          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-          placeholder="Description courte"
-          value="${data.description || ""}">
-
-        <input class="input price-value"
-          type="number"
-          min="0"
-          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-          placeholder="Prix"
-          value="${data.price ?? ""}">
-
-        <input class="input price-link"
-          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-          placeholder="Lien Stripe"
-          value="${data.stripe_link || ""}">
-
-        <input class="input price-order"
-          type="number"
-          min="0"
-          style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-          placeholder="Ordre"
-          value="${data.sort_order ?? 0}">
-
+        <input class="input price-label" placeholder="Label" value="${data.label || ""}">
+        <input class="input price-description" placeholder="Description courte" value="${data.description || ""}">
+        <input class="input price-value" type="number" min="0" placeholder="Prix" value="${data.price ?? ""}">
+        <input class="input price-link" placeholder="Lien Stripe" value="${data.stripe_link || ""}">
+        <input class="input price-order" type="number" min="0" placeholder="Ordre" value="${data.sort_order ?? 0}">
         <label style="display:flex; align-items:center; gap:6px; font-size:12px;">
           <input class="price-active" type="checkbox" ${data.is_active === false ? "" : "checked"}>
           Active
         </label>
-
         <button class="btn on-light btn-remove-price" type="button">✕</button>
       `;
 
-      row.querySelector(".btn-remove-price").addEventListener("click", () => {
-        row.remove();
-      });
-
+      row.querySelector(".btn-remove-price").addEventListener("click", () => row.remove());
       pricesRows.appendChild(row);
     }
 
@@ -744,6 +1098,270 @@
 
       stayFaq.value = JSON.stringify(data?.value || [], null, 2);
       setMsg(editorMsg, "FAQ modèle chargée.");
+    }
+
+    function renderSlotPill(stay, onRemove){
+      const pill = document.createElement("div");
+      pill.className = "slot-pill";
+      pill.innerHTML = `
+        <span>${stay.title || "Séjour"}</span>
+        <button type="button" class="mini-remove">×</button>
+      `;
+      pill.querySelector(".mini-remove").addEventListener("click", onRemove);
+      return pill;
+    }
+
+    function renderHomepagePool(){
+      const usedIds = new Set([
+        ...(homepageFeaturedId ? [homepageFeaturedId] : []),
+        ...homepageHighlights.filter(Boolean)
+      ]);
+
+      const available = allStays.filter(stay => !usedIds.has(stay.id));
+
+      staysPool.innerHTML = "";
+
+      if(!available.length){
+        staysPool.innerHTML = `<div class="slot-empty">Tous les séjours sont déjà utilisés dans la homepage.</div>`;
+        return;
+      }
+
+      available.forEach(stay => {
+        const card = document.createElement("div");
+        card.className = "drag-card";
+        card.draggable = true;
+        card.dataset.stayId = stay.id;
+        card.innerHTML = `
+          <div style="font-weight:600;">${stay.title || "Séjour"}</div>
+          <div class="muted-small" style="margin-top:4px;">${stay.location || "Lieu à annoncer"}</div>
+        `;
+
+        card.addEventListener("dragstart", () => {
+          card.classList.add("dragging");
+          event.dataTransfer.setData("text/plain", stay.id);
+        });
+
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+        });
+
+        staysPool.appendChild(card);
+      });
+    }
+
+    function renderHomepageSlots(){
+      featuredSlotContent.innerHTML = "";
+      if(homepageFeaturedId){
+        const stay = stayById(homepageFeaturedId);
+        if(stay){
+          featuredSlotContent.appendChild(renderSlotPill(stay, () => {
+            homepageFeaturedId = null;
+            renderHomepageManager();
+          }));
+        }
+      } else {
+        featuredSlotContent.innerHTML = `<div class="slot-empty">Dépose un séjour ici</div>`;
+      }
+
+      for(let i = 0; i < 5; i++){
+        const container = document.getElementById(`highlightSlot${i+1}`);
+        container.innerHTML = "";
+        const id = homepageHighlights[i];
+
+        if(id){
+          const stay = stayById(id);
+          if(stay){
+            container.appendChild(renderSlotPill(stay, () => {
+              homepageHighlights[i] = null;
+              renderHomepageManager();
+            }));
+          }
+        } else {
+          container.innerHTML = `<div class="slot-empty">Dépose un séjour ici</div>`;
+        }
+      }
+    }
+
+    function renderHomepagePreview(){
+      const featured = stayById(homepageFeaturedId);
+
+      const featuredImage = featured?.hero_image || "";
+      const featuredDuration = featured?.firstDate
+        ? getDurationLabel(featured.firstDate.start_date, featured.firstDate.end_date)
+        : "Durée à annoncer";
+      const featuredDates = featured?.firstDate
+        ? formatDateRange(featured.firstDate.start_date, featured.firstDate.end_date)
+        : "Dates à annoncer";
+
+      const mediaTargets = [featuredPreviewMedia, featuredPreviewMediaSticky];
+      const titleTargets = [featuredPreviewTitle, featuredPreviewTitleSticky];
+      const durationTargets = [featuredPreviewDuration, featuredPreviewDurationSticky];
+      const datesTargets = [featuredPreviewDates, featuredPreviewDatesSticky];
+      const locationTargets = [featuredPreviewLocation, featuredPreviewLocationSticky];
+
+      mediaTargets.forEach(el => {
+        el.style.backgroundImage = featuredImage ? `url('${featuredImage}')` : "none";
+      });
+      titleTargets.forEach(el => el.textContent = featured?.title || "Aucun séjour");
+      durationTargets.forEach(el => el.textContent = featuredDuration);
+      datesTargets.forEach(el => el.textContent = featuredDates);
+      locationTargets.forEach(el => el.textContent = featured?.location || "");
+
+      const previews = [cardsPreview, cardsPreviewSticky];
+      previews.forEach(previewEl => {
+        previewEl.innerHTML = "";
+
+        for(let i = 0; i < 5; i++){
+          const stay = stayById(homepageHighlights[i]);
+
+          const card = document.createElement("div");
+          card.className = "card";
+
+          if(!stay){
+            card.innerHTML = `
+              <div class="card-media" style="display:grid; place-items:center; color:var(--muted); background:#f0ece6;">
+                Position ${i+1}
+              </div>
+              <div class="card-title">Emplacement vide</div>
+            `;
+          } else {
+            const image = stay.hero_image || "";
+            const duration = stay.firstDate
+              ? getDurationLabel(stay.firstDate.start_date, stay.firstDate.end_date)
+              : "Durée à annoncer";
+            const dates = stay.firstDate
+              ? formatDateRange(stay.firstDate.start_date, stay.firstDate.end_date)
+              : "Dates à annoncer";
+
+            card.innerHTML = `
+              <div class="card-media" style="${image ? `background-image:url('${image}')` : ''}">
+                <div class="card-overlay">
+                  <div>
+                    <div style="text-transform:uppercase; letter-spacing:.08em;">${duration}</div>
+                    <div style="margin-top:4px;">${dates}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-title">${stay.title || "Séjour"}</div>
+            `;
+          }
+
+          previewEl.appendChild(card);
+        }
+      });
+    }
+
+    function renderHomepageManager(){
+      renderHomepagePool();
+      renderHomepageSlots();
+      renderHomepagePreview();
+    }
+
+    function attachDropEvents(){
+      document.querySelectorAll(".slot-box").forEach(slot => {
+        slot.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          slot.classList.add("is-over");
+        });
+
+        slot.addEventListener("dragleave", () => {
+          slot.classList.remove("is-over");
+        });
+
+        slot.addEventListener("drop", (e) => {
+          e.preventDefault();
+          slot.classList.remove("is-over");
+
+          const stayId = e.dataTransfer.getData("text/plain");
+          if(!stayId) return;
+
+          if(slot.dataset.slotType === "featured"){
+            homepageFeaturedId = stayId;
+          }
+
+          if(slot.dataset.slotType === "highlight"){
+            const idx = Number(slot.dataset.slotIndex) - 1;
+            if(idx >= 0 && idx < 5){
+              homepageHighlights = homepageHighlights.map(id => id === stayId ? null : id);
+              homepageHighlights[idx] = stayId;
+            }
+          }
+
+          renderHomepageManager();
+        });
+      });
+    }
+
+    async function loadHomepageState(){
+      const { data: stays, error } = await supabase
+        .from("stays")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if(error){
+        console.error(error);
+        setMsg(homepageMsg, "Impossible de charger les séjours pour la homepage.");
+        return;
+      }
+
+      const { data: dates } = await supabase
+        .from("stay_dates")
+        .select("*")
+        .order("start_date", { ascending: true });
+
+      const firstDateMap = new Map();
+      (dates || []).forEach(d => {
+        if(!firstDateMap.has(d.stay_id)) firstDateMap.set(d.stay_id, d);
+      });
+
+      allStays = (stays || []).map(stay => ({
+        ...stay,
+        firstDate: firstDateMap.get(stay.id) || null
+      }));
+
+      homepageFeaturedId = allStays.find(s => s.is_featured)?.id || null;
+
+      const orderedHighlights = allStays
+        .filter(s => s.is_highlight)
+        .sort((a, b) => (a.highlight_order ?? 999) - (b.highlight_order ?? 999));
+
+      homepageHighlights = [null, null, null, null, null];
+      orderedHighlights.slice(0, 5).forEach((stay, index) => {
+        homepageHighlights[index] = stay.id;
+      });
+
+      renderHomepageManager();
+    }
+
+    async function saveHomepageState(){
+      setMsg(homepageMsg, "Enregistrement homepage…");
+
+      try{
+        for(const stay of allStays){
+          const isFeatured = homepageFeaturedId === stay.id;
+          const highlightIndex = homepageHighlights.findIndex(id => id === stay.id);
+
+          const payload = {
+            is_featured: isFeatured,
+            is_highlight: highlightIndex !== -1,
+            highlight_order: highlightIndex !== -1 ? highlightIndex + 1 : 999
+          };
+
+          const { error } = await supabase
+            .from("stays")
+            .update(payload)
+            .eq("id", stay.id);
+
+          if(error) throw error;
+        }
+
+        setMsg(homepageMsg, "Homepage enregistrée.");
+        await loadHomepageState();
+        await loadStays();
+      } catch(err){
+        console.error(err);
+        setMsg(homepageMsg, `Erreur homepage : ${err.message || err}`);
+      }
     }
 
     function resetEditor(){
@@ -765,8 +1383,6 @@
       stayStripeLink.value = "";
       stayMinBookings.value = "10";
       stayFeatured.checked = false;
-      stayHighlight.checked = false;
-      stayHighlightOrder.value = "999";
 
       showGiftSection = true;
       showFaqSection = true;
@@ -801,16 +1417,6 @@
       setMsg(editorMsg, "");
     }
 
-    function openEditor(){
-      editorBox.style.display = "block";
-      editorBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function closeEditor(){
-      editorBox.style.display = "none";
-      resetEditor();
-    }
-
     async function checkAdmin(){
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -827,7 +1433,6 @@
 
       if(error || data?.role !== "admin"){
         adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
-        staysList.innerHTML = "";
         throw new Error("Not admin");
       }
 
@@ -848,28 +1453,26 @@
         return;
       }
 
-      if(!data || !data.length){
+      if(!data?.length){
         staysList.innerHTML = "Aucun séjour pour le moment.";
         return;
       }
 
       staysList.innerHTML = data.map(stay => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
-          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
-            <div>
-              <div style="font-weight:600; color:var(--text);">${stay.title || "Sans titre"}</div>
-              <div style="font-size:13px; color:var(--muted); margin-top:4px;">Slug : ${stay.slug || "—"}</div>
-              <div style="font-size:13px; color:var(--muted); margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-              <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? ` · bandeau 5 séjours (ordre ${stay.highlight_order ?? 999})` : ""}
-              </div>
+        <div class="stay-admin-item">
+          <div>
+            <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
+            <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
+            <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
+            <div class="muted-small" style="margin-top:4px;">
+              Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
             </div>
+          </div>
 
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-              <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">Voir</a>
-              <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
-            </div>
+          <div class="admin-inline">
+            <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
+            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
+            <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
           </div>
         </div>
       `).join("");
@@ -935,8 +1538,6 @@
       stayStripeLink.value = stay.stripe_link || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
       stayFeatured.checked = !!stay.is_featured;
-      stayHighlight.checked = !!stay.is_highlight;
-      stayHighlightOrder.value = stay.highlight_order ?? 999;
 
       showGiftSection = stay.show_gift_section ?? true;
       showFaqSection = stay.show_faq_section ?? true;
@@ -963,7 +1564,6 @@
       giftImage.value = stay.gift_image || "";
 
       setPreview(giftPreview, stay.gift_image || "");
-
       stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
 
       pricesRows.innerHTML = "";
@@ -973,7 +1573,7 @@
         createPriceRow();
       }
 
-      openEditor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function deleteStay(id){
@@ -984,11 +1584,12 @@
 
       if(error){
         console.error(error);
-        adminStatus.textContent = "Impossible de supprimer ce séjour.";
+        setMsg(adminStatus, "Impossible de supprimer ce séjour.");
         return;
       }
 
-      adminStatus.textContent = "Séjour supprimé.";
+      setMsg(adminStatus, "Séjour supprimé.");
+      await loadHomepageState();
       await loadStays();
     }
 
@@ -1022,15 +1623,23 @@
       updateSectionVisibility("btnToggleHighlightsSection", showHighlightsSection);
     });
 
+    btnReloadHomepage?.addEventListener("click", async () => {
+      await loadHomepageState();
+      setMsg(homepageMsg, "Homepage rechargée.");
+    });
+
+    btnSaveHomepage?.addEventListener("click", async () => {
+      await saveHomepageState();
+    });
+
     btnNewStay?.addEventListener("click", async () => {
       resetEditor();
       createPriceRow();
       await loadDefaultFaqIntoField();
-      openEditor();
     });
 
     btnCancelEdit?.addEventListener("click", () => {
-      closeEditor();
+      resetEditor();
     });
 
     btnAddPriceRow?.addEventListener("click", () => {
@@ -1115,8 +1724,6 @@
         stripe_link: stayStripeLink.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
         is_featured: stayFeatured.checked,
-        is_highlight: stayHighlight.checked,
-        highlight_order: Number(stayHighlightOrder.value || 999),
         highlights: linesToArray(stayHighlights.value),
         program: programValue,
         program_note: stayProgramNote.value.trim(),
@@ -1140,7 +1747,11 @@
       let stayId = currentStayId;
 
       if(currentStayId){
-        const { error } = await supabase.from("stays").update(payload).eq("id", currentStayId);
+        const { error } = await supabase
+          .from("stays")
+          .update(payload)
+          .eq("id", currentStayId);
+
         if(error){
           console.error(error);
           setMsg(editorMsg, `Impossible de mettre à jour le séjour : ${error.message || "erreur inconnue"}`);
@@ -1213,16 +1824,22 @@
       }
 
       setMsg(editorMsg, "Séjour enregistré.");
-      adminStatus.textContent = currentStayId ? "Séjour mis à jour." : "Nouveau séjour créé.";
-      closeEditor();
+      setMsg(adminStatus, currentStayId ? "Séjour mis à jour." : "Nouveau séjour créé.");
+      resetEditor();
+      await loadHomepageState();
       await loadStays();
     });
 
+    attachDropEvents();
+
     try{
       await checkAdmin();
-      adminStatus.textContent = "Vous êtes connecté(e) en tant qu’administrateur.";
+      setMsg(adminStatus, "Vous êtes connecté(e) en tant qu’administrateur.");
+      await loadHomepageState();
       await loadStays();
       refreshAllEyeButtons();
+      createPriceRow();
+      await loadDefaultFaqIntoField();
     } catch(err){
       console.warn(err);
     }
