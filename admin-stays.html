@@ -145,18 +145,18 @@
                     Afficher dans le premier bandeau
                   </label>
 
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayHighlight" type="checkbox">
+                    Afficher dans le bandeau 5 séjours
+                  </label>
+
                   <div>
                     <label style="display:block; margin-bottom:6px; font-size:13px; color:var(--muted);">
-                      Position dans le bandeau 5 séjours
+                      Ordre dans le bandeau 5 séjours
                     </label>
-
-                    <div id="highlightPositions" style="display:flex; gap:10px; flex-wrap:wrap;">
-                      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" name="highlightPos" value="1"> 1</label>
-                      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" name="highlightPos" value="2"> 2</label>
-                      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" name="highlightPos" value="3"> 3</label>
-                      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" name="highlightPos" value="4"> 4</label>
-                      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" name="highlightPos" value="5"> 5</label>
-                    </div>
+                    <input id="stayHighlightOrder" class="input" type="number" min="1" value="999"
+                      style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                      placeholder="1, 2, 3, 4, 5">
                   </div>
                 </div>
               </div>
@@ -370,8 +370,8 @@
     const stayStripeLink = document.getElementById("stayStripeLink");
     const stayMinBookings = document.getElementById("stayMinBookings");
     const stayFeatured = document.getElementById("stayFeatured");
-
-    const highlightCheckboxes = document.querySelectorAll('input[name="highlightPos"]');
+    const stayHighlight = document.getElementById("stayHighlight");
+    const stayHighlightOrder = document.getElementById("stayHighlightOrder");
 
     const mainStartDate = document.getElementById("mainStartDate");
     const mainEndDate = document.getElementById("mainEndDate");
@@ -495,14 +495,6 @@
       }
     }
 
-    function getSelectedHighlightPosition(){
-      let selected = null;
-      highlightCheckboxes.forEach(cb => {
-        if(cb.checked) selected = Number(cb.value);
-      });
-      return selected;
-    }
-
     async function uploadImageToStorage(file, folder = "general"){
       if(!file) throw new Error("Aucun fichier sélectionné.");
 
@@ -526,16 +518,6 @@
       const { data } = supabase.storage.from("stays").getPublicUrl(filePath);
       return data.publicUrl;
     }
-
-    highlightCheckboxes.forEach(cb => {
-      cb.addEventListener("change", () => {
-        if (cb.checked) {
-          highlightCheckboxes.forEach(other => {
-            if (other !== cb) other.checked = false;
-          });
-        }
-      });
-    });
 
     btnUploadHeroImage?.addEventListener("click", async () => {
       try{
@@ -770,8 +752,8 @@
       stayStripeLink.value = "";
       stayMinBookings.value = "10";
       stayFeatured.checked = false;
-
-      highlightCheckboxes.forEach(cb => cb.checked = false);
+      stayHighlight.checked = false;
+      stayHighlightOrder.value = "999";
 
       showGiftSection = true;
       showFaqSection = true;
@@ -866,7 +848,7 @@
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">Slug : ${stay.slug || "—"}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">Lieu : ${stay.location || "—"}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? ` · bandeau 5 séjours (position ${stay.highlight_order ?? 999})` : ""}
+                Homepage : ${stay.is_featured ? "1er bandeau" : "—"}${stay.is_highlight ? ` · bandeau 5 séjours (ordre ${stay.highlight_order ?? 999})` : ""}
               </div>
             </div>
 
@@ -940,10 +922,8 @@
       stayStripeLink.value = stay.stripe_link || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
       stayFeatured.checked = !!stay.is_featured;
-
-      highlightCheckboxes.forEach(cb => {
-        cb.checked = Number(cb.value) === Number(stay.highlight_order) && stay.is_highlight === true;
-      });
+      stayHighlight.checked = !!stay.is_highlight;
+      stayHighlightOrder.value = stay.highlight_order ?? 999;
 
       showGiftSection = stay.show_gift_section ?? true;
       showFaqSection = stay.show_faq_section ?? true;
@@ -1111,7 +1091,6 @@
       }
 
       const programValue = getCurrentProgramFromEditors();
-      const selectedPosition = getSelectedHighlightPosition();
 
       const payload = {
         title,
@@ -1123,8 +1102,8 @@
         stripe_link: stayStripeLink.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
         is_featured: stayFeatured.checked,
-        is_highlight: selectedPosition !== null,
-        highlight_order: selectedPosition ?? 999,
+        is_highlight: stayHighlight.checked,
+        highlight_order: Number(stayHighlightOrder.value || 999),
         highlights: linesToArray(stayHighlights.value),
         program: programValue,
         program_note: stayProgramNote.value.trim(),
