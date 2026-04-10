@@ -1,3 +1,4 @@
+
 @font-face {
   font-family: 'SegoCustom';
   src: url('/assets/sego.woff2') format('woff2'),
@@ -71,9 +72,6 @@ body{
 h1,h2,h3,h4{
   font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
   letter-spacing: .02em;
-}
-.hero h1 {
-  font-family: 'SegoCustom', serif !important;
 }
 h3,h4{
   font-weight:500;
