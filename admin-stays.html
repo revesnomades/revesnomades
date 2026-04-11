@@ -14,11 +14,9 @@
   <link rel="stylesheet" href="/assets/css/styles.css" />
 
   <style>
-    .admin-shell{
+    .admin-page{
       display:grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
       gap:18px;
-      align-items:start;
     }
 
     .admin-panel{
@@ -61,6 +59,7 @@
       justify-content:space-between;
       gap:12px;
       margin-bottom:12px;
+      flex-wrap:wrap;
     }
 
     .admin-inline{
@@ -117,9 +116,99 @@
 
     .homepage-layout{
       display:grid;
-      grid-template-columns:minmax(0, 1fr) minmax(320px, .9fr);
       gap:16px;
-      align-items:start;
+    }
+
+    .visual-homepage-preview{
+      display:grid;
+      gap:16px;
+    }
+
+    .preview-card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.75);
+      overflow:hidden;
+    }
+
+    .preview-label{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      background:rgba(255,255,255,.85);
+    }
+
+    .featured-preview{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      min-height:320px;
+    }
+
+    .featured-preview-media{
+      background-size:cover;
+      background-position:center;
+      min-height:320px;
+      background-color:#ddd;
+    }
+
+    .featured-preview-copy{
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background:#fff;
+    }
+
+    .featured-preview-copy h3{
+      margin:0;
+      font-size:28px;
+    }
+
+    .featured-preview-copy p{
+      margin:10px 0 0;
+      color:var(--muted);
+    }
+
+    .cards-preview{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0,1fr));
+      gap:12px;
+      padding:12px;
+    }
+
+    .cards-preview .card{
+      border:1px solid var(--line);
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .cards-preview .card-media{
+      aspect-ratio:4/5;
+      background-size:cover;
+      background-position:center;
+      background-color:#ddd;
+      position:relative;
+    }
+
+    .cards-preview .card-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.26);
+      display:flex;
+      align-items:flex-end;
+      padding:10px;
+      color:#fff;
+      font-size:12px;
+    }
+
+    .cards-preview .card-title{
+      padding:10px 12px;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      border-top:1px solid var(--line);
     }
 
     .draggable-pool,
@@ -134,6 +223,16 @@
       padding:12px;
       cursor:grab;
       user-select:none;
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -ms-user-select:none;
+      -webkit-user-drag:element;
+    }
+
+    .drag-card *{
+      user-select:none;
+      -webkit-user-select:none;
+      pointer-events:none;
     }
 
     .drag-card:active{
@@ -197,122 +296,41 @@
       padding:0;
     }
 
-    .preview-shell{
-      display:grid;
-      gap:16px;
-      position:sticky;
-      top:90px;
-    }
-
-    .preview-card{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.75);
-      overflow:hidden;
-    }
-
-    .preview-label{
-      padding:10px 12px;
-      border-bottom:1px solid var(--line);
-      font-size:12px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:var(--muted);
-      background:rgba(255,255,255,.85);
-    }
-
-    .featured-preview{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      min-height:320px;
-    }
-
-    .featured-preview-media{
-      background-size:cover;
-      background-position:center;
-      min-height:320px;
-      background-color:#ddd;
-    }
-
-    .featured-preview-copy{
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      background:#fff;
-    }
-
-    .featured-preview-copy h3{
-      margin:0;
-      font-size:28px;
-    }
-
-    .featured-preview-copy p{
-      margin:10px 0 0;
-      color:var(--muted);
-    }
-
-    .cards-preview{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:12px;
-      padding:12px;
-    }
-
-    .cards-preview .card{
-      border:1px solid var(--line);
-      background:#fff;
-      overflow:hidden;
-    }
-
-    .cards-preview .card-media{
-      aspect-ratio:4/5;
-      background-size:cover;
-      background-position:center;
-      background-color:#ddd;
-      position:relative;
-    }
-
-    .cards-preview .card-overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.26);
-      display:flex;
-      align-items:flex-end;
-      padding:10px;
-      color:#fff;
-      font-size:12px;
-    }
-
-    .cards-preview .card-title{
-      padding:10px 12px;
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      border-top:1px solid var(--line);
-    }
-
     .helper-note{
       margin-top:10px;
       font-size:12.5px;
       color:var(--muted);
     }
 
-    @media (max-width: 1120px){
-      .admin-shell,
-      .homepage-layout{
-        grid-template-columns:1fr;
-      }
+    .editor-hidden{
+      display:none;
+    }
 
-      .preview-shell{
-        position:static;
-      }
+    .position-picker{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
 
+    .position-picker label{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      padding:10px 12px;
+      cursor:pointer;
+      font-size:13px;
+    }
+
+    @media (max-width: 980px){
       .featured-preview{
         grid-template-columns:1fr;
       }
 
       .cards-preview{
-        grid-template-columns:1fr;
+        grid-template-columns:repeat(2, minmax(0,1fr));
       }
     }
 
@@ -320,7 +338,12 @@
       .admin-grid-2,
       .admin-grid-3,
       .price-row,
-      .program-slot-row{
+      .program-slot-row,
+      .position-picker{
+        grid-template-columns:1fr;
+      }
+
+      .cards-preview{
         grid-template-columns:1fr;
       }
     }
@@ -344,354 +367,323 @@
 
   <section class="band cream">
     <div class="container" style="padding:110px 0 60px;">
-      <div class="admin-shell">
+      <div class="admin-page">
 
-        <!-- COLONNE PRINCIPALE -->
-        <div style="display:grid; gap:18px;">
-
-          <!-- ORGANISATION HOMEPAGE -->
-          <div class="admin-panel">
-            <div class="section-head">
-              <div>
-                <h2>Homepage CMS</h2>
-                <p class="muted-small" style="margin-top:8px;">
-                  Organise le bandeau principal et les 5 séjours avec glisser-déposer.
-                </p>
-              </div>
-
-              <div class="admin-inline">
-                <button class="btn on-light" id="btnReloadHomepage" type="button">Actualiser</button>
-                <button class="btn on-light" id="btnSaveHomepage" type="button">Enregistrer homepage</button>
-              </div>
+        <!-- HOMEPAGE CMS -->
+        <div class="admin-panel">
+          <div class="section-head">
+            <div>
+              <h2>Homepage CMS</h2>
+              <p class="muted-small" style="margin-top:8px;">
+                Organise le bandeau principal et les 5 séjours avec glisser-déposer.
+              </p>
             </div>
 
-            <div id="homepageMsg" class="muted-small" style="margin-bottom:12px;"></div>
-
-            <div class="homepage-layout">
-
-              <div style="display:grid; gap:14px;">
-                <div class="admin-block">
-                  <div class="section-head" style="margin-bottom:10px;">
-                    <h3>Bibliothèque de séjours</h3>
-                    <span class="muted-small">Glisse un séjour dans un emplacement</span>
-                  </div>
-                  <div id="staysPool" class="draggable-pool"></div>
-                </div>
-
-                <div class="admin-block">
-                  <div class="section-head" style="margin-bottom:10px;">
-                    <h3>Bandeau principal</h3>
-                    <span class="muted-small">1 seul séjour</span>
-                  </div>
-                  <div class="drop-slots">
-                    <div class="slot-box" data-slot-type="featured">
-                      <div class="slot-label">Vedette</div>
-                      <div class="slot-content" id="featuredSlotContent">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="admin-block">
-                  <div class="section-head" style="margin-bottom:10px;">
-                    <h3>Bandeau 5 séjours</h3>
-                    <span class="muted-small">Positions 1 à 5</span>
-                  </div>
-
-                  <div class="drop-slots">
-                    <div class="slot-box" data-slot-type="highlight" data-slot-index="1">
-                      <div class="slot-label">Position 1</div>
-                      <div class="slot-content" id="highlightSlot1">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-
-                    <div class="slot-box" data-slot-type="highlight" data-slot-index="2">
-                      <div class="slot-label">Position 2</div>
-                      <div class="slot-content" id="highlightSlot2">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-
-                    <div class="slot-box" data-slot-type="highlight" data-slot-index="3">
-                      <div class="slot-label">Position 3</div>
-                      <div class="slot-content" id="highlightSlot3">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-
-                    <div class="slot-box" data-slot-type="highlight" data-slot-index="4">
-                      <div class="slot-label">Position 4</div>
-                      <div class="slot-content" id="highlightSlot4">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-
-                    <div class="slot-box" data-slot-type="highlight" data-slot-index="5">
-                      <div class="slot-label">Position 5</div>
-                      <div class="slot-content" id="highlightSlot5">
-                        <div class="slot-empty">Dépose un séjour ici</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="helper-note">
-                    Un même séjour ne peut être placé qu’une seule fois dans le bandeau 5 séjours.
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-shell">
-                <div class="preview-card">
-                  <div class="preview-label">Preview live — bandeau principal</div>
-                  <div id="featuredPreview" class="featured-preview">
-                    <div class="featured-preview-media" id="featuredPreviewMedia"></div>
-                    <div class="featured-preview-copy">
-                      <div class="kicker">Prochain séjour…</div>
-                      <div class="sep" style="margin:10px 0 16px;"></div>
-                      <h3 id="featuredPreviewTitle">Aucun séjour</h3>
-                      <p id="featuredPreviewDuration">Durée à annoncer</p>
-                      <p id="featuredPreviewDates">Dates à annoncer</p>
-                      <p id="featuredPreviewLocation"></p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="preview-card">
-                  <div class="preview-label">Preview live — bandeau 5 séjours</div>
-                  <div id="cardsPreview" class="cards-preview"></div>
-                </div>
-              </div>
+            <div class="admin-inline">
+              <button class="btn on-light" id="btnReloadHomepage" type="button">Actualiser</button>
+              <button class="btn on-light" id="btnSaveHomepage" type="button">Enregistrer homepage</button>
+              <button class="btn on-light" id="btnNewStay" type="button">➕ Créer un séjour</button>
             </div>
           </div>
 
-          <!-- EDITEUR -->
-          <div class="admin-panel">
-            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
-              <div>
-                <h2 id="editorTitle">Créer un séjour</h2>
-                <p class="muted-small" style="margin-top:8px;">
-                  CMS séjour : contenu, images, planning, FAQ, formules Stripe, visibilité des blocs.
-                </p>
+          <div id="homepageMsg" class="muted-small" style="margin-bottom:12px;"></div>
+
+          <div class="homepage-layout">
+
+            <!-- VISUEL ADMIN UNIQUE -->
+            <div class="visual-homepage-preview">
+              <div class="preview-card">
+                <div class="preview-label">Visuel admin — bandeau principal</div>
+                <div id="featuredPreview" class="featured-preview">
+                  <div class="featured-preview-media" id="featuredPreviewMedia"></div>
+                  <div class="featured-preview-copy">
+                    <div class="kicker">Prochain séjour…</div>
+                    <div class="sep" style="margin:10px 0 16px;"></div>
+                    <h3 id="featuredPreviewTitle">Aucun séjour</h3>
+                    <p id="featuredPreviewDuration">Durée à annoncer</p>
+                    <p id="featuredPreviewDates">Dates à annoncer</p>
+                    <p id="featuredPreviewLocation"></p>
+                  </div>
+                </div>
               </div>
 
-              <div class="admin-inline">
-                <button class="btn on-light" id="btnNewStay" type="button">➕ Nouveau séjour</button>
-                <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
-                <button class="btn on-light" id="btnCancelEdit" type="button">Annuler</button>
+              <div class="preview-card">
+                <div class="preview-label">Visuel admin — bandeau 5 séjours</div>
+                <div id="cardsPreview" class="cards-preview"></div>
               </div>
             </div>
 
-            <div id="adminStatus" class="muted-small" style="margin-top:12px;"></div>
-            <div id="editorMsg" class="muted-small" style="margin-top:8px;"></div>
-
-            <div style="display:grid; gap:16px; margin-top:18px;">
-
-              <!-- DATES -->
-              <div class="admin-block">
-                <h3>Dates du séjour</h3>
-                <div class="admin-grid-2" style="margin-top:12px;">
-                  <div>
-                    <label class="muted-small" style="display:block; margin-bottom:6px;">Date de début</label>
-                    <input id="mainStartDate" class="input" type="date">
-                  </div>
-
-                  <div>
-                    <label class="muted-small" style="display:block; margin-bottom:6px;">Date de fin</label>
-                    <input id="mainEndDate" class="input" type="date">
-                  </div>
-
-                  <div>
-                    <label class="muted-small" style="display:block; margin-bottom:6px;">Places totales</label>
-                    <input id="mainSeatsTotal" class="input" type="number" min="0" value="10">
-                  </div>
-
-                  <div>
-                    <label class="muted-small" style="display:block; margin-bottom:6px;">Places restantes</label>
-                    <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10">
-                  </div>
-                </div>
-
-                <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
+            <!-- DRAG & DROP EN DESSOUS DU VISUEL -->
+            <div class="admin-block">
+              <div class="section-head" style="margin-bottom:10px;">
+                <h3>Bibliothèque de séjours</h3>
+                <span class="muted-small">Glisse un séjour dans un emplacement</span>
               </div>
-
-              <!-- INFOS -->
-              <div class="admin-block">
-                <h3>Informations principales</h3>
-
-                <div style="display:grid; gap:12px; margin-top:12px;">
-                  <input id="stayTitle" class="input" placeholder="Titre du séjour">
-                  <input id="staySlug" class="input" placeholder="Slug (ex : camargue)">
-                  <input id="stayLocation" class="input" placeholder="Lieu">
-                  <textarea id="stayShortDescription" class="input" style="min-height:90px;" placeholder="Description courte"></textarea>
-                  <textarea id="stayDescription" class="input" style="min-height:180px;" placeholder="Description principale"></textarea>
-
-                  <div class="admin-block" style="padding:12px;">
-                    <div class="muted-small" style="margin-bottom:8px;">Image hero</div>
-                    <div class="admin-inline">
-                      <input id="heroImageFile" type="file" accept="image/*">
-                      <button class="btn on-light" id="btnUploadHeroImage" type="button">Uploader l’image hero</button>
-                    </div>
-                    <input id="stayHeroImage" class="input" style="margin-top:10px;" placeholder="URL image hero">
-                    <img id="heroPreview" class="upload-preview" src="" alt="">
-                  </div>
-
-                  <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
-                  <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
-                </div>
-              </div>
-
-              <!-- HIGHLIGHTS -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <h3>Ce que tu vas vivre</h3>
-                  <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                </div>
-                <textarea id="stayHighlights" class="input" style="min-height:160px;" placeholder="Une ligne par item"></textarea>
-              </div>
-
-              <!-- PROGRAMME -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <div>
-                    <h3>Programme du séjour</h3>
-                    <div class="muted-small" style="margin-top:6px;">Le nombre de jours est calculé automatiquement à partir des dates.</div>
-                  </div>
-                  <div class="admin-inline">
-                    <button class="btn on-light" id="btnToggleProgramSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                    <button class="btn on-light" id="btnRebuildProgram" type="button">Recalculer</button>
-                  </div>
-                </div>
-
-                <div id="programEditors" style="display:grid; gap:14px; margin-top:14px;"></div>
-                <textarea id="stayProgramNote" class="input" style="min-height:80px; margin-top:12px;" placeholder="Note affichée sous le programme"></textarea>
-              </div>
-
-              <!-- INCLUS -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <h3>Inclus / non inclus</h3>
-                  <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                </div>
-
-                <div style="display:grid; gap:12px;">
-                  <textarea id="stayIncludedItems" class="input" style="min-height:140px;" placeholder="Inclus : une ligne par élément"></textarea>
-                  <textarea id="stayNotIncludedItems" class="input" style="min-height:120px;" placeholder="Non inclus : une ligne par élément"></textarea>
-                </div>
-              </div>
-
-              <!-- OPTIONS -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <h3>Options en supplément</h3>
-                  <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                </div>
-
-                <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
-              </div>
-
-              <!-- GIFT -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <h3>Sac cadeau</h3>
-                  <button class="btn on-light" id="btnToggleGiftSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                </div>
-
-                <div style="display:grid; gap:12px;">
-                  <input id="giftTitle" class="input" placeholder="Titre du bloc sac cadeau">
-                  <textarea id="giftIntro" class="input" style="min-height:90px;" placeholder="Texte d’introduction"></textarea>
-                  <textarea id="giftItems" class="input" style="min-height:120px;" placeholder="Une ligne par élément du sac cadeau"></textarea>
-                  <textarea id="giftOutro" class="input" style="min-height:90px;" placeholder="Texte de conclusion"></textarea>
-
-                  <div class="admin-block" style="padding:12px;">
-                    <div class="muted-small" style="margin-bottom:8px;">Image sac cadeau</div>
-                    <div class="admin-inline">
-                      <input id="giftImageFile" type="file" accept="image/*">
-                      <button class="btn on-light" id="btnUploadGiftImage" type="button">Uploader l’image sac cadeau</button>
-                    </div>
-                    <input id="giftImage" class="input" style="margin-top:10px;" placeholder="URL image sac cadeau">
-                    <img id="giftPreview" class="upload-preview" src="" alt="">
-                  </div>
-                </div>
-              </div>
-
-              <!-- FAQ -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <div class="admin-inline">
-                    <h3>FAQ</h3>
-                    <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                  </div>
-
-                  <div class="admin-inline">
-                    <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
-                    <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme modèle</button>
-                  </div>
-                </div>
-
-                <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
-              </div>
-
-              <!-- PRIX -->
-              <div class="admin-block">
-                <div class="section-head">
-                  <h3>Formules & prix Stripe</h3>
-                  <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
-                </div>
-
-                <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LISTE DES SEJOURS -->
-          <div class="admin-panel">
-            <div class="section-head">
-              <div>
-                <h2>Tous les séjours</h2>
-                <p class="muted-small" style="margin-top:8px;">Gestion rapide de tous les contenus.</p>
-              </div>
+              <div id="staysPool" class="draggable-pool"></div>
             </div>
 
-            <div id="staysList" class="stays-admin-list">Chargement…</div>
-          </div>
-        </div>
-
-        <!-- PREVIEW LATERAL -->
-        <div class="preview-shell">
-          <div class="admin-panel">
-            <div class="section-head">
-              <div>
-                <h2>Preview live CMS</h2>
-                <p class="muted-small" style="margin-top:8px;">
-                  Le contenu homepage se met à jour instantanément quand tu déplaces les séjours.
-                </p>
+            <div class="admin-block">
+              <div class="section-head" style="margin-bottom:10px;">
+                <h3>Bandeau principal</h3>
+                <span class="muted-small">1 seul séjour</span>
               </div>
-            </div>
-
-            <div class="preview-card">
-              <div class="preview-label">Bandeau principal</div>
-              <div id="featuredPreviewSticky" class="featured-preview">
-                <div class="featured-preview-media" id="featuredPreviewMediaSticky"></div>
-                <div class="featured-preview-copy">
-                  <div class="kicker">Prochain séjour…</div>
-                  <div class="sep" style="margin:10px 0 16px;"></div>
-                  <h3 id="featuredPreviewTitleSticky">Aucun séjour</h3>
-                  <p id="featuredPreviewDurationSticky">Durée à annoncer</p>
-                  <p id="featuredPreviewDatesSticky">Dates à annoncer</p>
-                  <p id="featuredPreviewLocationSticky"></p>
+              <div class="drop-slots">
+                <div class="slot-box" data-slot-type="featured">
+                  <div class="slot-label">Vedette</div>
+                  <div class="slot-content" id="featuredSlotContent">
+                    <div class="slot-empty">Dépose un séjour ici</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="preview-card" style="margin-top:16px;">
-              <div class="preview-label">Bandeau 5 séjours</div>
-              <div id="cardsPreviewSticky" class="cards-preview"></div>
+            <div class="admin-block">
+              <div class="section-head" style="margin-bottom:10px;">
+                <h3>Bandeau 5 séjours</h3>
+                <span class="muted-small">Positions 1 à 5</span>
+              </div>
+
+              <div class="drop-slots">
+                <div class="slot-box" data-slot-type="highlight" data-slot-index="1">
+                  <div class="slot-label">Position 1</div>
+                  <div class="slot-content" id="highlightSlot1"><div class="slot-empty">Dépose un séjour ici</div></div>
+                </div>
+
+                <div class="slot-box" data-slot-type="highlight" data-slot-index="2">
+                  <div class="slot-label">Position 2</div>
+                  <div class="slot-content" id="highlightSlot2"><div class="slot-empty">Dépose un séjour ici</div></div>
+                </div>
+
+                <div class="slot-box" data-slot-type="highlight" data-slot-index="3">
+                  <div class="slot-label">Position 3</div>
+                  <div class="slot-content" id="highlightSlot3"><div class="slot-empty">Dépose un séjour ici</div></div>
+                </div>
+
+                <div class="slot-box" data-slot-type="highlight" data-slot-index="4">
+                  <div class="slot-label">Position 4</div>
+                  <div class="slot-content" id="highlightSlot4"><div class="slot-empty">Dépose un séjour ici</div></div>
+                </div>
+
+                <div class="slot-box" data-slot-type="highlight" data-slot-index="5">
+                  <div class="slot-label">Position 5</div>
+                  <div class="slot-content" id="highlightSlot5"><div class="slot-empty">Dépose un séjour ici</div></div>
+                </div>
+              </div>
+
+              <div class="helper-note">
+                Un même séjour ne peut être placé qu’une seule fois dans le bandeau 5 séjours.
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- EDITEUR MASQUÉ PAR DÉFAUT -->
+        <div class="admin-panel editor-hidden" id="editorPanel">
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+            <div>
+              <h2 id="editorTitle">Créer un séjour</h2>
+              <p class="muted-small" style="margin-top:8px;">
+                CMS séjour : contenu, images, planning, FAQ, formules Stripe, visibilité des blocs.
+              </p>
+            </div>
+
+            <div class="admin-inline">
+              <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
+              <button class="btn on-light" id="btnCancelEdit" type="button">Fermer</button>
+            </div>
+          </div>
+
+          <div id="adminStatus" class="muted-small" style="margin-top:12px;"></div>
+          <div id="editorMsg" class="muted-small" style="margin-top:8px;"></div>
+
+          <div style="display:grid; gap:16px; margin-top:18px;">
+
+            <!-- DATES -->
+            <div class="admin-block">
+              <h3>Dates du séjour</h3>
+              <div class="admin-grid-2" style="margin-top:12px;">
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de début</label>
+                  <input id="mainStartDate" class="input" type="date">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de fin</label>
+                  <input id="mainEndDate" class="input" type="date">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places totales</label>
+                  <input id="mainSeatsTotal" class="input" type="number" min="0" value="10">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places restantes</label>
+                  <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10">
+                </div>
+              </div>
+
+              <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
+            </div>
+
+            <!-- POSITION HOMEPAGE -->
+            <div class="admin-block">
+              <h3>Position homepage</h3>
+              <p class="muted-small" style="margin-top:8px;">
+                Tu peux choisir une position ici ou utiliser le drag & drop au-dessus.
+              </p>
+
+              <div class="position-picker" id="positionPicker">
+                <label><input type="radio" name="homepagePosition" value="none" checked> Aucune</label>
+                <label><input type="radio" name="homepagePosition" value="featured"> Bandeau principal</label>
+                <label><input type="radio" name="homepagePosition" value="1"> Position 1</label>
+                <label><input type="radio" name="homepagePosition" value="2"> Position 2</label>
+                <label><input type="radio" name="homepagePosition" value="3"> Position 3</label>
+                <label><input type="radio" name="homepagePosition" value="4"> Position 4</label>
+                <label><input type="radio" name="homepagePosition" value="5"> Position 5</label>
+              </div>
+            </div>
+
+            <!-- INFOS -->
+            <div class="admin-block">
+              <h3>Informations principales</h3>
+
+              <div style="display:grid; gap:12px; margin-top:12px;">
+                <input id="stayTitle" class="input" placeholder="Titre du séjour">
+                <input id="staySlug" class="input" placeholder="Slug (ex : camargue)">
+                <input id="stayLocation" class="input" placeholder="Lieu">
+                <textarea id="stayShortDescription" class="input" style="min-height:90px;" placeholder="Description courte"></textarea>
+                <textarea id="stayDescription" class="input" style="min-height:180px;" placeholder="Description principale"></textarea>
+
+                <div class="admin-block" style="padding:12px;">
+                  <div class="muted-small" style="margin-bottom:8px;">Image hero</div>
+                  <div class="admin-inline">
+                    <input id="heroImageFile" type="file" accept="image/*">
+                    <button class="btn on-light" id="btnUploadHeroImage" type="button">Uploader l’image hero</button>
+                  </div>
+                  <input id="stayHeroImage" class="input" style="margin-top:10px;" placeholder="URL image hero">
+                  <img id="heroPreview" class="upload-preview" src="" alt="">
+                </div>
+
+                <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
+                <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
+              </div>
+            </div>
+
+            <!-- HIGHLIGHTS -->
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Ce que tu vas vivre</h3>
+                <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+              <textarea id="stayHighlights" class="input" style="min-height:160px;" placeholder="Une ligne par item"></textarea>
+            </div>
+
+            <!-- PROGRAMME -->
+            <div class="admin-block">
+              <div class="section-head">
+                <div>
+                  <h3>Programme du séjour</h3>
+                  <div class="muted-small" style="margin-top:6px;">Le nombre de jours est calculé automatiquement à partir des dates.</div>
+                </div>
+                <div class="admin-inline">
+                  <button class="btn on-light" id="btnToggleProgramSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                  <button class="btn on-light" id="btnRebuildProgram" type="button">Recalculer</button>
+                </div>
+              </div>
+
+              <div id="programEditors" style="display:grid; gap:14px; margin-top:14px;"></div>
+              <textarea id="stayProgramNote" class="input" style="min-height:80px; margin-top:12px;" placeholder="Note affichée sous le programme"></textarea>
+            </div>
+
+            <!-- INCLUS -->
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Inclus / non inclus</h3>
+                <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+
+              <div style="display:grid; gap:12px;">
+                <textarea id="stayIncludedItems" class="input" style="min-height:140px;" placeholder="Inclus : une ligne par élément"></textarea>
+                <textarea id="stayNotIncludedItems" class="input" style="min-height:120px;" placeholder="Non inclus : une ligne par élément"></textarea>
+              </div>
+            </div>
+
+            <!-- OPTIONS -->
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Options en supplément</h3>
+                <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+
+              <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
+            </div>
+
+            <!-- GIFT -->
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Sac cadeau</h3>
+                <button class="btn on-light" id="btnToggleGiftSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+
+              <div style="display:grid; gap:12px;">
+                <input id="giftTitle" class="input" placeholder="Titre du bloc sac cadeau">
+                <textarea id="giftIntro" class="input" style="min-height:90px;" placeholder="Texte d’introduction"></textarea>
+                <textarea id="giftItems" class="input" style="min-height:120px;" placeholder="Une ligne par élément du sac cadeau"></textarea>
+                <textarea id="giftOutro" class="input" style="min-height:90px;" placeholder="Texte de conclusion"></textarea>
+
+                <div class="admin-block" style="padding:12px;">
+                  <div class="muted-small" style="margin-bottom:8px;">Image sac cadeau</div>
+                  <div class="admin-inline">
+                    <input id="giftImageFile" type="file" accept="image/*">
+                    <button class="btn on-light" id="btnUploadGiftImage" type="button">Uploader l’image sac cadeau</button>
+                  </div>
+                  <input id="giftImage" class="input" style="margin-top:10px;" placeholder="URL image sac cadeau">
+                  <img id="giftPreview" class="upload-preview" src="" alt="">
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="admin-block">
+              <div class="section-head">
+                <div class="admin-inline">
+                  <h3>FAQ</h3>
+                  <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+
+                <div class="admin-inline">
+                  <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
+                  <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme modèle</button>
+                </div>
+              </div>
+
+              <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
+            </div>
+
+            <!-- PRIX -->
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Formules & prix Stripe</h3>
+                <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
+              </div>
+
+              <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTE DES SEJOURS -->
+        <div class="admin-panel">
+          <div class="section-head">
+            <div>
+              <h2>Tous les séjours</h2>
+              <p class="muted-small" style="margin-top:8px;">Gestion rapide de tous les contenus.</p>
+            </div>
+          </div>
+
+          <div id="staysList" class="stays-admin-list">Chargement…</div>
+        </div>
       </div>
     </div>
   </section>
@@ -705,6 +697,7 @@
     const editorTitle = document.getElementById("editorTitle");
     const staysList = document.getElementById("staysList");
     const staysPool = document.getElementById("staysPool");
+    const editorPanel = document.getElementById("editorPanel");
 
     const btnReloadHomepage = document.getElementById("btnReloadHomepage");
     const btnSaveHomepage = document.getElementById("btnSaveHomepage");
@@ -739,7 +732,6 @@
     const stayHeroImage = document.getElementById("stayHeroImage");
     const stayStripeLink = document.getElementById("stayStripeLink");
     const stayMinBookings = document.getElementById("stayMinBookings");
-    const stayFeatured = document.getElementById("stayFeatured");
 
     const mainStartDate = document.getElementById("mainStartDate");
     const mainEndDate = document.getElementById("mainEndDate");
@@ -770,15 +762,7 @@
     const featuredPreviewDuration = document.getElementById("featuredPreviewDuration");
     const featuredPreviewDates = document.getElementById("featuredPreviewDates");
     const featuredPreviewLocation = document.getElementById("featuredPreviewLocation");
-
-    const featuredPreviewMediaSticky = document.getElementById("featuredPreviewMediaSticky");
-    const featuredPreviewTitleSticky = document.getElementById("featuredPreviewTitleSticky");
-    const featuredPreviewDurationSticky = document.getElementById("featuredPreviewDurationSticky");
-    const featuredPreviewDatesSticky = document.getElementById("featuredPreviewDatesSticky");
-    const featuredPreviewLocationSticky = document.getElementById("featuredPreviewLocationSticky");
-
     const cardsPreview = document.getElementById("cardsPreview");
-    const cardsPreviewSticky = document.getElementById("cardsPreviewSticky");
 
     let currentStayId = null;
     let allStays = [];
@@ -794,6 +778,26 @@
 
     function setMsg(el, msg){
       if(el) el.textContent = msg || "";
+    }
+
+    function openEditor(){
+      editorPanel.classList.remove("editor-hidden");
+      editorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function closeEditor(){
+      editorPanel.classList.add("editor-hidden");
+    }
+
+    function getHomepagePositionValue(){
+      const checked = document.querySelector('input[name="homepagePosition"]:checked');
+      return checked ? checked.value : "none";
+    }
+
+    function setHomepagePositionValue(value){
+      const target = document.querySelector(`input[name="homepagePosition"][value="${value}"]`)
+        || document.querySelector('input[name="homepagePosition"][value="none"]');
+      if(target) target.checked = true;
     }
 
     function slugify(text){
@@ -1118,7 +1122,6 @@
       ]);
 
       const available = allStays.filter(stay => !usedIds.has(stay.id));
-
       staysPool.innerHTML = "";
 
       if(!available.length){
@@ -1136,9 +1139,10 @@
           <div class="muted-small" style="margin-top:4px;">${stay.location || "Lieu à annoncer"}</div>
         `;
 
-        card.addEventListener("dragstart", () => {
+        card.addEventListener("dragstart", (e) => {
           card.classList.add("dragging");
-          event.dataTransfer.setData("text/plain", stay.id);
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", stay.id);
         });
 
         card.addEventListener("dragend", () => {
@@ -1193,62 +1197,50 @@
         ? formatDateRange(featured.firstDate.start_date, featured.firstDate.end_date)
         : "Dates à annoncer";
 
-      const mediaTargets = [featuredPreviewMedia, featuredPreviewMediaSticky];
-      const titleTargets = [featuredPreviewTitle, featuredPreviewTitleSticky];
-      const durationTargets = [featuredPreviewDuration, featuredPreviewDurationSticky];
-      const datesTargets = [featuredPreviewDates, featuredPreviewDatesSticky];
-      const locationTargets = [featuredPreviewLocation, featuredPreviewLocationSticky];
+      featuredPreviewMedia.style.backgroundImage = featuredImage ? `url('${featuredImage}')` : "none";
+      featuredPreviewTitle.textContent = featured?.title || "Aucun séjour";
+      featuredPreviewDuration.textContent = featuredDuration;
+      featuredPreviewDates.textContent = featuredDates;
+      featuredPreviewLocation.textContent = featured?.location || "";
 
-      mediaTargets.forEach(el => {
-        el.style.backgroundImage = featuredImage ? `url('${featuredImage}')` : "none";
-      });
-      titleTargets.forEach(el => el.textContent = featured?.title || "Aucun séjour");
-      durationTargets.forEach(el => el.textContent = featuredDuration);
-      datesTargets.forEach(el => el.textContent = featuredDates);
-      locationTargets.forEach(el => el.textContent = featured?.location || "");
+      cardsPreview.innerHTML = "";
 
-      const previews = [cardsPreview, cardsPreviewSticky];
-      previews.forEach(previewEl => {
-        previewEl.innerHTML = "";
+      for(let i = 0; i < 5; i++){
+        const stay = stayById(homepageHighlights[i]);
+        const card = document.createElement("div");
+        card.className = "card";
 
-        for(let i = 0; i < 5; i++){
-          const stay = stayById(homepageHighlights[i]);
+        if(!stay){
+          card.innerHTML = `
+            <div class="card-media" style="display:grid; place-items:center; color:var(--muted); background:#f0ece6;">
+              Position ${i+1}
+            </div>
+            <div class="card-title">Emplacement vide</div>
+          `;
+        } else {
+          const image = stay.hero_image || "";
+          const duration = stay.firstDate
+            ? getDurationLabel(stay.firstDate.start_date, stay.firstDate.end_date)
+            : "Durée à annoncer";
+          const dates = stay.firstDate
+            ? formatDateRange(stay.firstDate.start_date, stay.firstDate.end_date)
+            : "Dates à annoncer";
 
-          const card = document.createElement("div");
-          card.className = "card";
-
-          if(!stay){
-            card.innerHTML = `
-              <div class="card-media" style="display:grid; place-items:center; color:var(--muted); background:#f0ece6;">
-                Position ${i+1}
-              </div>
-              <div class="card-title">Emplacement vide</div>
-            `;
-          } else {
-            const image = stay.hero_image || "";
-            const duration = stay.firstDate
-              ? getDurationLabel(stay.firstDate.start_date, stay.firstDate.end_date)
-              : "Durée à annoncer";
-            const dates = stay.firstDate
-              ? formatDateRange(stay.firstDate.start_date, stay.firstDate.end_date)
-              : "Dates à annoncer";
-
-            card.innerHTML = `
-              <div class="card-media" style="${image ? `background-image:url('${image}')` : ''}">
-                <div class="card-overlay">
-                  <div>
-                    <div style="text-transform:uppercase; letter-spacing:.08em;">${duration}</div>
-                    <div style="margin-top:4px;">${dates}</div>
-                  </div>
+          card.innerHTML = `
+            <div class="card-media" style="${image ? `background-image:url('${image}')` : ''}">
+              <div class="card-overlay">
+                <div>
+                  <div style="text-transform:uppercase; letter-spacing:.08em;">${duration}</div>
+                  <div style="margin-top:4px;">${dates}</div>
                 </div>
               </div>
-              <div class="card-title">${stay.title || "Séjour"}</div>
-            `;
-          }
-
-          previewEl.appendChild(card);
+            </div>
+            <div class="card-title">${stay.title || "Séjour"}</div>
+          `;
         }
-      });
+
+        cardsPreview.appendChild(card);
+      }
     }
 
     function renderHomepageManager(){
@@ -1382,7 +1374,8 @@
       stayHeroImage.value = "";
       stayStripeLink.value = "";
       stayMinBookings.value = "10";
-      stayFeatured.checked = false;
+
+      setHomepagePositionValue("none");
 
       showGiftSection = true;
       showFaqSection = true;
@@ -1537,7 +1530,14 @@
       stayHeroImage.value = stay.hero_image || "";
       stayStripeLink.value = stay.stripe_link || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
-      stayFeatured.checked = !!stay.is_featured;
+
+      if(stay.is_featured){
+        setHomepagePositionValue("featured");
+      } else if(stay.is_highlight && stay.highlight_order >= 1 && stay.highlight_order <= 5){
+        setHomepagePositionValue(String(stay.highlight_order));
+      } else {
+        setHomepagePositionValue("none");
+      }
 
       showGiftSection = stay.show_gift_section ?? true;
       showFaqSection = stay.show_faq_section ?? true;
@@ -1573,7 +1573,7 @@
         createPriceRow();
       }
 
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      openEditor();
     }
 
     async function deleteStay(id){
@@ -1634,12 +1634,15 @@
 
     btnNewStay?.addEventListener("click", async () => {
       resetEditor();
+      pricesRows.innerHTML = "";
       createPriceRow();
       await loadDefaultFaqIntoField();
+      openEditor();
     });
 
     btnCancelEdit?.addEventListener("click", () => {
       resetEditor();
+      closeEditor();
     });
 
     btnAddPriceRow?.addEventListener("click", () => {
@@ -1713,6 +1716,7 @@
       }
 
       const programValue = getCurrentProgramFromEditors();
+      const homepagePosition = getHomepagePositionValue();
 
       const payload = {
         title,
@@ -1723,7 +1727,9 @@
         hero_image: stayHeroImage.value.trim(),
         stripe_link: stayStripeLink.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
-        is_featured: stayFeatured.checked,
+        is_featured: homepagePosition === "featured",
+        is_highlight: ["1","2","3","4","5"].includes(homepagePosition),
+        highlight_order: ["1","2","3","4","5"].includes(homepagePosition) ? Number(homepagePosition) : 999,
         highlights: linesToArray(stayHighlights.value),
         program: programValue,
         program_note: stayProgramNote.value.trim(),
@@ -1826,6 +1832,7 @@
       setMsg(editorMsg, "Séjour enregistré.");
       setMsg(adminStatus, currentStayId ? "Séjour mis à jour." : "Nouveau séjour créé.");
       resetEditor();
+      closeEditor();
       await loadHomepageState();
       await loadStays();
     });
@@ -1840,6 +1847,7 @@
       refreshAllEyeButtons();
       createPriceRow();
       await loadDefaultFaqIntoField();
+      closeEditor();
     } catch(err){
       console.warn(err);
     }
