@@ -352,7 +352,8 @@ async function loadWelcomeName(user){
       if (loggedBox) loggedBox.style.display = "block";
       if (bookingsBox) bookingsBox.style.display = "block";
       if (userEmail) userEmail.textContent = user?.email || "";
-
+      
+      await loadWelcomeName(user);
       await loadMyBookings(user);
 
       const isAdmin = await checkAdmin(user.id);
