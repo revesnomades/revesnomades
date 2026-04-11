@@ -222,8 +222,11 @@ select, option{ color: var(--text) !important; }
   font-size: clamp(34px, 4.6vw, 64px);
   line-height: 1.05;
 }
+.hero.hero-left .hero-content h1{
+  transform: translateY(-6px);
+}
 .hero.hero-left .hero-content p{
-  margin-top: 14px;
+  margin-top: 6px;
   max-width: 60ch;
   color: rgba(255,255,255,.90);
   font-size: 15.5px;
