@@ -267,7 +267,32 @@
       if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
       if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
     }
+async function loadWelcomeName(user){
+  if(!welcomeName || !user?.id) return;
 
+  let firstname = "";
+
+  const metaFirstname = user.user_metadata?.firstname;
+  if(metaFirstname) firstname = String(metaFirstname).trim();
+
+  if(!firstname){
+    const { data } = await supabase
+      .from("profiles")
+      .select("firstname")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    firstname = data?.firstname || "";
+  }
+
+  if(firstname){
+    welcomeName.textContent = `Bienvenue ${firstname} ✨`;
+    welcomeName.style.display = "block";
+  } else {
+    welcomeName.textContent = "Bienvenue ✨";
+    welcomeName.style.display = "block";
+  }
+}
     async function loadMyBookings(user) {
       if (!bookingsList || !user?.email) return;
 
