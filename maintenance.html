@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <title>Âmes Nomades — Site en maintenance</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <title>Âmes Nomades — Maintenance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
@@ -14,353 +14,368 @@
   <style>
     @font-face {
       font-family: 'SegoCustom';
-      src: url('/assets/fonts/sego.woff2') format('woff2');
+      src: url('/assets/sego.woff2') format('woff2'),
+           url('/assets/sego.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Glacial Indifference';
+      src: local('Glacial Indifference'), local('GlacialIndifference-Regular');
+      font-weight: 400;
+      font-style: normal;
       font-display: swap;
     }
 
     :root{
-      --bg:#f7f4ef;
-      --card:#ffffff;
+      --cream:#f7f4ef;
+      --white:#ffffff;
       --text:#1e1f22;
       --muted:#6c7078;
-      --line:rgba(30,31,34,.14);
-      --overlay:rgba(14,15,17,.36);
+      --line: rgba(30,31,34,.16);
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
 
-    html,body{
+    html, body{
       margin:0;
       padding:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+      min-height:100%;
     }
 
     body{
-      min-height:100vh;
-      position:relative;
-      overflow-x:hidden;
+      font-family:"Glacial Indifference","Segoe UI",Arial,sans-serif;
+      color:var(--text);
+      background:var(--cream);
+      line-height:1.7;
     }
 
-    .page{
+    .maintenance-page{
       min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:28px 18px;
       position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:32px 18px;
-      isolation:isolate;
+      overflow:hidden;
     }
 
-    .bg{
-      position:fixed;
+    .maintenance-bg{
+      position:absolute;
       inset:0;
-      background-image:url('/assets/img/newsletter-bg.jpg');
+      background-image:
+        linear-gradient(rgba(247,244,239,.72), rgba(247,244,239,.86)),
+        url('/assets/img/hero-2.jpg');
       background-size:cover;
       background-position:center;
-      z-index:-2;
+      background-repeat:no-repeat;
       transform:scale(1.02);
     }
 
-    .overlay{
-      position:fixed;
-      inset:0;
-      background:linear-gradient(to bottom, rgba(14,15,17,.46), rgba(14,15,17,.54));
-      z-index:-1;
-    }
-
-    .card{
+    .maintenance-card{
+      position:relative;
+      z-index:2;
       width:min(760px, 100%);
-      background:rgba(255,255,255,.94);
-      border:1px solid rgba(30,31,34,.12);
-      backdrop-filter: blur(6px);
-      padding:34px 24px 28px;
-      box-shadow:0 20px 60px rgba(0,0,0,.08);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.76);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding:34px 26px;
+      box-shadow:0 18px 40px rgba(0,0,0,.08);
     }
 
-    @media (min-width: 768px){
-      .card{
-        padding:42px 42px 34px;
-      }
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      text-decoration:none;
-      color:var(--text);
-      margin-bottom:24px;
-    }
-
-    .brand img{
-      width:44px;
-      height:44px;
-      object-fit:contain;
-      display:block;
-    }
-
-    .brand span{
-      font-family:'SegoCustom', serif;
-      font-size:24px;
+    .brand-title{
+      font-family:"SegoCustom", serif;
+      font-size:clamp(34px, 5vw, 58px);
       line-height:1;
-      font-weight:500;
-      letter-spacing:.01em;
-    }
-
-    h1,h2,h3{
-      font-family:'SegoCustom', serif;
-      font-weight:500;
+      text-align:center;
       margin:0;
-      letter-spacing:.01em;
-    }
-
-    h1{
-      font-size:clamp(34px, 6vw, 56px);
-      line-height:1.02;
-    }
-
-    .intro{
-      margin-top:14px;
-      color:var(--muted);
-      font-size:15px;
-      line-height:1.8;
-      max-width:60ch;
-    }
-
-    .divider{
-      width:72px;
-      height:1px;
-      background:var(--line);
-      margin:24px 0 22px;
     }
 
     .subtitle{
-      font-size:12px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
+      margin:14px auto 0;
+      max-width:56ch;
+      text-align:center;
       color:var(--muted);
-      margin:0 0 10px;
+      font-size:15px;
     }
 
-    .form-title{
+    .section{
+      margin-top:28px;
+      padding-top:24px;
+      border-top:1px solid var(--line);
+    }
+
+    h2{
+      margin:0;
+      font-family:"Glacial Indifference","Segoe UI",Arial,sans-serif;
       font-size:24px;
-      line-height:1.15;
+      font-weight:400;
+      text-align:center;
     }
 
-    .form-text{
-      margin:10px 0 0;
+    .section-text{
+      margin:10px auto 0;
+      max-width:58ch;
+      text-align:center;
       color:var(--muted);
       font-size:14px;
-      line-height:1.7;
-      max-width:58ch;
     }
 
-    form{
+    .form-stack{
+      margin:22px auto 0;
+      width:min(520px, 100%);
       display:grid;
-      gap:12px;
-      margin-top:18px;
-      max-width:520px;
+      gap:10px;
     }
 
     .input{
       width:100%;
-      padding:15px 16px;
-      border:1px solid rgba(30,31,34,.16);
-      background:#fff;
+      padding:14px 14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.92);
       color:var(--text);
-      font:inherit;
+      font-family:inherit;
+      font-size:15px;
       border-radius:0;
       outline:none;
     }
 
     .input::placeholder{
-      color:#8a8f97;
+      color:var(--muted);
     }
 
-    .input:focus{
-      border-color:rgba(30,31,34,.4);
+    .check-row{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .check-row input{
+      margin-top:3px;
+      accent-color:#1e1f22;
     }
 
     .btn{
-      appearance:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       border:1px solid var(--text);
-      background:var(--text);
-      color:#fff;
-      text-transform:uppercase;
-      letter-spacing:.12em;
+      background:transparent;
+      color:var(--text);
+      padding:12px 16px;
       font-size:12px;
-      padding:15px 18px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
       cursor:pointer;
-      transition:opacity .2s ease, transform .2s ease;
-      font-family:inherit;
+      transition:background .18s ease, color .18s ease, transform .18s ease;
     }
 
     .btn:hover{
-      opacity:.92;
+      background:#111;
+      color:#fff;
+      transform:translateY(-1px);
     }
 
-    .btn:active{
-      transform:translateY(1px);
+    .btn.block{
+      width:100%;
     }
 
-    .msg{
+    .form-msg{
       margin-top:12px;
-      font-size:14px;
-      line-height:1.7;
+      text-align:center;
       color:var(--muted);
-      min-height:24px;
+      font-size:13px;
+      min-height:20px;
     }
 
-    .msg a{
-      color:var(--text);
+    .small-note{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .admin-secret{
+      position:fixed;
+      right:12px;
+      bottom:10px;
+      z-index:5;
+      opacity:.22;
+      transition:opacity .18s ease;
+    }
+
+    .admin-secret:hover{
+      opacity:.9;
+    }
+
+    .admin-secret a{
+      display:inline-block;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:#111;
+    }
+
+    .admin-link{
+      margin-top:18px;
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .admin-link a{
       text-decoration:underline;
       text-underline-offset:3px;
     }
 
-    .bottom-note{
-      margin-top:26px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.7;
-    }
+    @media (max-width: 640px){
+      .maintenance-card{
+        padding:26px 18px;
+      }
 
-    .bottom-note strong{
-      color:var(--text);
-      font-weight:600;
-    }
-
-    .footer-line{
-      margin-top:28px;
-      padding-top:18px;
-      border-top:1px solid var(--line);
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .footer-line a{
-      color:var(--text);
-      text-decoration:none;
-    }
-
-    .footer-line a:hover{
-      text-decoration:underline;
-    }
-
-    .admin-secret-link{
-      position:fixed;
-      right:14px;
-      bottom:14px;
-      width:18px;
-      height:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      color:rgba(255,255,255,.22);
-      font-size:14px;
-      z-index:60;
-      transition:opacity .2s ease, transform .2s ease, color .2s ease;
-      user-select:none;
-    }
-
-    .admin-secret-link:hover{
-      color:rgba(255,255,255,.55);
-      transform:scale(1.08);
+      .brand-title{
+        font-size:42px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <main class="wrap" role="main" aria-label="Maintenance Âmes Nomades">
 
-    <div class="top">
-      <!-- ✅ Mets ton vrai logo (lien direct) -->
-      <img class="logo" src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades" />
-      <div>
-        <div class="brand">ÂmesNomades</div>
-        <div class="small">Partir pour mieux se retrouver.</div>
-      </div>
+  <main class="maintenance-page">
+    <div class="maintenance-bg"></div>
+
+    <div class="maintenance-card">
+      <h1 class="brand-title">Âmes Nomades</h1>
+
+      <p class="subtitle">
+        Le site est momentanément en maintenance. Nous préparons les prochains séjours et quelques améliorations pour rendre l’expérience encore plus belle.
+      </p>
+
+      <section class="section">
+        <h2>Être informé(e) en priorité</h2>
+
+        <p class="section-text">
+          Laissez votre prénom et votre email pour recevoir les prochaines ouvertures de séjour en avant-première et être inscrit(e) sur la liste prioritaire.
+        </p>
+
+        <form id="priorityForm" class="form-stack">
+          <input
+            class="input"
+            type="text"
+            name="name"
+            placeholder="Votre prénom"
+            required
+          />
+
+          <input
+            class="input"
+            type="email"
+            name="email"
+            placeholder="Votre email"
+            required
+          />
+
+          <label class="check-row">
+            <input type="checkbox" name="consent" required>
+            <span>J’accepte de recevoir les informations Âmes Nomades et les prochaines ouvertures de séjours.</span>
+          </label>
+
+          <button class="btn block" type="submit">
+            Rejoindre la liste prioritaire
+          </button>
+        </form>
+
+        <div id="priorityMsg" class="form-msg"></div>
+
+        <div class="small-note">
+          Vous serez ajouté(e) à la newsletter et marqué(e) comme contact prioritaire.
+        </div>
+
+        <div class="admin-link">
+          <a href="/compte.html">Accès administrateur</a>
+        </div>
+      </section>
     </div>
 
-    <section class="hero">
-      <div>
-        <h1>Le site est en maintenance 🌿</h1>
-        <p>
-          Nous préparons une nouvelle expérience plus fluide et plus inspirante.
-          Le site revient très vite.
-        </p>
-        <p class="small">
-          Merci pour votre patience. En attendant, vous pouvez nous écrire ou nous suivre sur Instagram.
-        </p>
-
-        <div class="row">
-          <!-- ✅ Remplace par ton IG/FB -->
-          <a class="btn" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener">Instagram</a>
-          <a class="btn secondary" href="mailto:amesnomades.contact@gmail.com">Nous écrire</a>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- lien discret admin -->
-  <a href="/acces-admin-7k29x.html" class="admin-secret-link" aria-label="Accès admin">•</a>
+    <!-- bouton discret admin -->
+    <div class="admin-secret" aria-hidden="true">
+      <a href="/compte.html" title="Accès admin"></a>
+    </div>
+  </main>
 
   <script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
 
-    const form = document.getElementById("maintenanceSignupForm");
-    const msg = document.getElementById("maintenanceSignupMsg");
+    const form = document.getElementById("priorityForm");
+    const msg = document.getElementById("priorityMsg");
 
-    function show(html) {
-      if (msg) msg.innerHTML = html || "";
+    function showMessage(html){
+      if(msg) msg.innerHTML = html || "";
     }
 
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      show("");
+      showMessage("");
 
       const fd = new FormData(form);
-      const firstname = String(fd.get("firstname") || "").trim();
+      const firstname = String(fd.get("name") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
+      const consent = fd.get("consent");
 
-      if (!firstname || !email) {
-        show("Merci de renseigner votre prénom et votre email.");
+      if(!firstname || !email){
+        showMessage("Merci de renseigner votre prénom et votre email.");
         return;
       }
 
-      try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/maintenance-signup`, {
+      if(!consent){
+        showMessage("Merci de cocher la case de consentement.");
+        return;
+      }
+
+      try{
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({ firstname, email })
+          body: JSON.stringify({
+            firstname,
+            email,
+            priority: true,
+            source: "maintenance_page"
+          }),
         });
 
         const data = await res.json().catch(() => ({}));
 
-        if (!res.ok) {
-          console.warn("maintenance-signup error:", data);
-          show("Oups… impossible de vous enregistrer pour le moment. Réessayez dans un instant.");
+        if(!res.ok){
+          console.warn("priority signup error:", data);
+          showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
           return;
         }
 
-        show("🌿 Merci, vous êtes bien inscrit(e) à la newsletter et prioritaire pour le prochain séjour.");
+        if(data.status === "already"){
+          showMessage("💌 Vous êtes déjà inscrit(e). Votre priorité est bien prise en compte.");
+          return;
+        }
+
+        showMessage(`🌿 Merci ${firstname}, vous êtes bien inscrit(e) à la liste prioritaire.`);
         form.reset();
-      } catch (err) {
+
+      } catch(err){
         console.error(err);
-        show("Oups… impossible de vous enregistrer pour le moment. Réessayez dans un instant.");
+        showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
       }
     });
   </script>
+
 </body>
 </html>
