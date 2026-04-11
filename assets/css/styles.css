@@ -72,14 +72,16 @@ body{
 h1,h2,h3,h4{
   font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
   letter-spacing: .02em;
+  text-transform: uppercase;
+  font-weight:300;
 }
 h3,h4{
-  font-weight:500;
   margin:0;
 }
 .brand span,
 .amesnomades-title{
   font-family:"SegoCustom", serif;
+  text-transform:none;
 }
 p{ margin: 12px 0 0; }
 b,strong{ font-weight:600; }
@@ -412,6 +414,9 @@ html.js .reveal.is-visible{
 }
 
 /* ---------------- Contact ---------------- */
+#contact.band{
+  background:#F1E6B6;
+}
 .contact-grid{
   min-height: 70vh;
   display:grid;
@@ -423,7 +428,7 @@ html.js .reveal.is-visible{
 .formbox{
   border:1px solid rgba(30,31,34,.22);
   padding:16px;
-  background: #f1e6b6;
+  background: #FAF5DC;
 }
 .formbox select,
 .formbox input,
@@ -431,14 +436,14 @@ html.js .reveal.is-visible{
   width:100%;
   border-radius:0;
   border:1px solid rgba(30,31,34,.18);
-  background: #f1e6b6;
+  background: #FAF5DC;
   padding: 12px;
   font-family:inherit;
   font-weight:300;
   color: var(--text);
 }
 .formbox option{
-  background: #f1e6b6;
+  background: #FAF5DC;
 }
 .formbox textarea{ min-height: 140px; resize:vertical; }
 .small{ margin-top:6px; color: var(--muted); font-size:12.5px; }
