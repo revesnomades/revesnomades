@@ -218,6 +218,7 @@ select, option{ color: var(--text) !important; }
   color: rgba(255,255,255,.92);
 }
 .hero.hero-left .hero-content h1{
+  font-family:"SegoCustom", serif;
   font-size: clamp(34px, 4.6vw, 64px);
   line-height: 1.05;
 }
