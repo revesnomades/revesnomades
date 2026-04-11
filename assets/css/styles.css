@@ -225,7 +225,7 @@ select, option{ color: var(--text) !important; }
   line-height: 1.05;
 }
 .hero.hero-left .hero-content h1{
-  transform: translateY(-6px);
+  transform: translateY(+16px);
 }
 .hero.hero-left .hero-content p{
   margin-top: 6px;
