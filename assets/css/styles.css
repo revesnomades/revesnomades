@@ -366,7 +366,7 @@ html.js .reveal.is-visible{
 /* ---------------- Gift band (beige) ---------------- */
 .gift-band,
 .gift-band.hero-like{
-  background: var(--cream) !important;
+  background: #fffdf3 !important;
   background-image: none !important;
   color: var(--text) !important;
   min-height: 70vh;
@@ -419,7 +419,7 @@ html.js .reveal.is-visible{
 .formbox{
   border:1px solid rgba(30,31,34,.22);
   padding:16px;
-  background: rgba(255,255,255,.55);
+  background: #f1e6b6;
 }
 .formbox select,
 .formbox input,
@@ -427,11 +427,14 @@ html.js .reveal.is-visible{
   width:100%;
   border-radius:0;
   border:1px solid rgba(30,31,34,.18);
-  background: rgba(255,255,255,.85);
+  background: #f1e6b6;
   padding: 12px;
   font-family:inherit;
   font-weight:300;
   color: var(--text);
+}
+.formbox option{
+  background: #f1e6b6;
 }
 .formbox textarea{ min-height: 140px; resize:vertical; }
 .small{ margin-top:6px; color: var(--muted); font-size:12.5px; }
@@ -467,6 +470,9 @@ html.js .reveal.is-visible{
 
 /* ---------------- Footer ---------------- */
 .footer{ padding: 26px 0; }
+footer.band.cream{
+  background: #ede5de;
+}
 .footer-row{
   display:flex;
   justify-content:space-between;
