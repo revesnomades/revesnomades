@@ -1176,4 +1176,28 @@ input, textarea {
   -ms-user-select: text;
   user-select: text;
 }
+  /* ==========================================
+   PRINCIPLE BAND MOBILE FIX (fond cream)
+========================================== */
+@media (max-width: 900px){
+
+  .principle-band{
+    background-image: none !important;
+    background: var(--cream) !important;
+    color: var(--text) !important;
+  }
+
+  .principle-band::before{
+    display: none !important;
+  }
+@media (max-width: 900px){
+
+  .principle-band .container{
+    margin: 0 auto;
+    max-width: 88vw;
+    text-align: left;
+  }
+
+}
+}
 }
