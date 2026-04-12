@@ -567,6 +567,23 @@
 
                 <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
                 <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
+                <div class="admin-block" style="padding:12px;">
+  <div class="section-head" style="margin-bottom:8px;">
+    <h3>Publication</h3>
+
+    <div class="admin-inline">
+      <button class="btn on-light" id="btnPreviewStay" type="button">Aperçu</button>
+      <button class="btn on-light" id="btnTogglePublish" type="button">Publier / Dépublier</button>
+    </div>
+  </div>
+
+  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+    <input id="stayPublished" type="checkbox">
+    <span>Publié sur le site</span>
+  </label>
+
+  <div id="publishMsg" class="muted-small" style="margin-top:10px;"></div>
+</div>
               </div>
             </div>
 
@@ -715,6 +732,11 @@
     const btnToggleIncludedSection = document.getElementById("btnToggleIncludedSection");
     const btnToggleOptionsSection = document.getElementById("btnToggleOptionsSection");
     const btnToggleHighlightsSection = document.getElementById("btnToggleHighlightsSection");
+
+    const stayPublished = document.getElementById("stayPublished");
+    const btnPreviewStay = document.getElementById("btnPreviewStay");
+    const btnTogglePublish = document.getElementById("btnTogglePublish");
+    const publishMsg = document.getElementById("publishMsg");
 
     const heroImageFile = document.getElementById("heroImageFile");
     const btnUploadHeroImage = document.getElementById("btnUploadHeroImage");
@@ -1374,6 +1396,8 @@
       stayHeroImage.value = "";
       stayStripeLink.value = "";
       stayMinBookings.value = "10";
+      stayPublished.checked = false;
+      setMsg(publishMsg, "");
 
       setHomepagePositionValue("none");
 
