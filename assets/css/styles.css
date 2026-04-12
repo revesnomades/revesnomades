@@ -1187,6 +1187,10 @@ input, textarea {
     color: var(--text) !important;
   }
 
+  .principle-band p{
+    color: var(--text) !important;
+  }
+
   .principle-band::before{
     display: none !important;
   }
