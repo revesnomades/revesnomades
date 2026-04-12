@@ -967,6 +967,7 @@ footer.band.cream{
   .gift-band h2,
   .bottom-wide h2{
     font-size: clamp(21px, 6.4vw, 28px) !important;
+    font-weight: 180;
     line-height: 1.15;
   }
 
