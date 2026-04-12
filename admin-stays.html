@@ -1264,7 +1264,7 @@
 
       const cleanItems = siteFaqItems
         .map((item, index) => ({
-          id: item.id || undefined,
+          id: typeof item.id === "string" && item.id.trim() ? item.id.trim() : null,
           question: String(item.question || "").trim(),
           answer: String(item.answer || "").trim(),
           sort_order: index + 1,
@@ -1273,15 +1273,43 @@
         }))
         .filter(item => item.question && item.answer);
 
+      const existingItems = cleanItems
+        .filter(item => item.id)
+        .map(({ id, question, answer, sort_order, is_active, use_for_stay_default }) => ({
+          id,
+          question,
+          answer,
+          sort_order,
+          is_active,
+          use_for_stay_default
+        }));
+
+      const newItems = cleanItems
+        .filter(item => !item.id)
+        .map(({ question, answer, sort_order, is_active, use_for_stay_default }) => ({
+          question,
+          answer,
+          sort_order,
+          is_active,
+          use_for_stay_default
+        }));
+
       try{
-        if(cleanItems.length){
+        if(existingItems.length){
           const { error: upsertError } = await supabase
             .from("faq_items")
-            .upsert(cleanItems, { onConflict: "id" });
+            .upsert(existingItems, { onConflict: "id" });
           if(upsertError) throw upsertError;
         }
 
-        const keptIds = cleanItems.map(i => i.id).filter(Boolean);
+        if(newItems.length){
+          const { error: insertError } = await supabase
+            .from("faq_items")
+            .insert(newItems);
+          if(insertError) throw insertError;
+        }
+
+        const keptIds = existingItems.map(i => i.id).filter(Boolean);
         const idsToDelete = initialSiteFaqIds.filter(id => !keptIds.includes(id));
         if(idsToDelete.length){
           const { error: deleteError } = await supabase
