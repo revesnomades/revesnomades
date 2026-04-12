@@ -369,7 +369,6 @@
     <div class="container" style="padding:110px 0 60px;">
       <div class="admin-page">
 
-        <!-- HOMEPAGE CMS -->
         <div class="admin-panel">
           <div class="section-head">
             <div>
@@ -390,7 +389,6 @@
 
           <div class="homepage-layout">
 
-            <!-- VISUEL ADMIN UNIQUE -->
             <div class="visual-homepage-preview">
               <div class="preview-card">
                 <div class="preview-label">Visuel admin — bandeau principal</div>
@@ -413,7 +411,6 @@
               </div>
             </div>
 
-            <!-- DRAG & DROP EN DESSOUS DU VISUEL -->
             <div class="admin-block">
               <div class="section-head" style="margin-bottom:10px;">
                 <h3>Bibliothèque de séjours</h3>
@@ -477,7 +474,6 @@
           </div>
         </div>
 
-        <!-- EDITEUR MASQUÉ PAR DÉFAUT -->
         <div class="admin-panel editor-hidden" id="editorPanel">
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
             <div>
@@ -498,7 +494,6 @@
 
           <div style="display:grid; gap:16px; margin-top:18px;">
 
-            <!-- DATES -->
             <div class="admin-block">
               <h3>Dates du séjour</h3>
               <div class="admin-grid-2" style="margin-top:12px;">
@@ -526,7 +521,6 @@
               <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
             </div>
 
-            <!-- POSITION HOMEPAGE -->
             <div class="admin-block">
               <h3>Position homepage</h3>
               <p class="muted-small" style="margin-top:8px;">
@@ -544,7 +538,6 @@
               </div>
             </div>
 
-            <!-- INFOS -->
             <div class="admin-block">
               <h3>Informations principales</h3>
 
@@ -567,27 +560,27 @@
 
                 <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
                 <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
+
                 <div class="admin-block" style="padding:12px;">
-  <div class="section-head" style="margin-bottom:8px;">
-    <h3>Publication</h3>
+                  <div class="section-head" style="margin-bottom:8px;">
+                    <h3>Publication</h3>
 
-    <div class="admin-inline">
-      <button class="btn on-light" id="btnPreviewStay" type="button">Aperçu</button>
-      <button class="btn on-light" id="btnTogglePublish" type="button">Publier / Dépublier</button>
-    </div>
-  </div>
+                    <div class="admin-inline">
+                      <button class="btn on-light" id="btnPreviewStay" type="button">Aperçu</button>
+                      <button class="btn on-light" id="btnTogglePublish" type="button">Publier / Dépublier</button>
+                    </div>
+                  </div>
 
-  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-    <input id="stayPublished" type="checkbox">
-    <span>Publié sur le site</span>
-  </label>
+                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+                    <input id="stayPublished" type="checkbox">
+                    <span>Publié sur le site</span>
+                  </label>
 
-  <div id="publishMsg" class="muted-small" style="margin-top:10px;"></div>
-</div>
+                  <div id="publishMsg" class="muted-small" style="margin-top:10px;"></div>
+                </div>
               </div>
             </div>
 
-            <!-- HIGHLIGHTS -->
             <div class="admin-block">
               <div class="section-head">
                 <h3>Ce que tu vas vivre</h3>
@@ -596,7 +589,6 @@
               <textarea id="stayHighlights" class="input" style="min-height:160px;" placeholder="Une ligne par item"></textarea>
             </div>
 
-            <!-- PROGRAMME -->
             <div class="admin-block">
               <div class="section-head">
                 <div>
@@ -613,7 +605,6 @@
               <textarea id="stayProgramNote" class="input" style="min-height:80px; margin-top:12px;" placeholder="Note affichée sous le programme"></textarea>
             </div>
 
-            <!-- INCLUS -->
             <div class="admin-block">
               <div class="section-head">
                 <h3>Inclus / non inclus</h3>
@@ -626,7 +617,6 @@
               </div>
             </div>
 
-            <!-- OPTIONS -->
             <div class="admin-block">
               <div class="section-head">
                 <h3>Options en supplément</h3>
@@ -636,7 +626,6 @@
               <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
             </div>
 
-            <!-- GIFT -->
             <div class="admin-block">
               <div class="section-head">
                 <h3>Sac cadeau</h3>
@@ -661,7 +650,6 @@
               </div>
             </div>
 
-            <!-- FAQ -->
             <div class="admin-block">
               <div class="section-head">
                 <div class="admin-inline">
@@ -678,7 +666,6 @@
               <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
             </div>
 
-            <!-- PRIX -->
             <div class="admin-block">
               <div class="section-head">
                 <h3>Formules & prix Stripe</h3>
@@ -690,7 +677,6 @@
           </div>
         </div>
 
-        <!-- LISTE DES SEJOURS -->
         <div class="admin-panel">
           <div class="section-head">
             <div>
@@ -733,11 +719,6 @@
     const btnToggleOptionsSection = document.getElementById("btnToggleOptionsSection");
     const btnToggleHighlightsSection = document.getElementById("btnToggleHighlightsSection");
 
-    const stayPublished = document.getElementById("stayPublished");
-    const btnPreviewStay = document.getElementById("btnPreviewStay");
-    const btnTogglePublish = document.getElementById("btnTogglePublish");
-    const publishMsg = document.getElementById("publishMsg");
-
     const heroImageFile = document.getElementById("heroImageFile");
     const btnUploadHeroImage = document.getElementById("btnUploadHeroImage");
     const heroPreview = document.getElementById("heroPreview");
@@ -754,6 +735,11 @@
     const stayHeroImage = document.getElementById("stayHeroImage");
     const stayStripeLink = document.getElementById("stayStripeLink");
     const stayMinBookings = document.getElementById("stayMinBookings");
+
+    const stayPublished = document.getElementById("stayPublished");
+    const btnPreviewStay = document.getElementById("btnPreviewStay");
+    const btnTogglePublish = document.getElementById("btnTogglePublish");
+    const publishMsg = document.getElementById("publishMsg");
 
     const mainStartDate = document.getElementById("mainStartDate");
     const mainEndDate = document.getElementById("mainEndDate");
@@ -1397,7 +1383,6 @@
       stayStripeLink.value = "";
       stayMinBookings.value = "10";
       stayPublished.checked = false;
-      setMsg(publishMsg, "");
 
       setHomepagePositionValue("none");
 
@@ -1432,6 +1417,7 @@
       pricesRows.innerHTML = "";
 
       setMsg(editorMsg, "");
+      setMsg(publishMsg, "");
     }
 
     async function checkAdmin(){
@@ -1481,6 +1467,7 @@
             <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
             <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
             <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
+            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "Publié" : "Brouillon"}</div>
             <div class="muted-small" style="margin-top:4px;">
               Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
             </div>
@@ -1488,6 +1475,7 @@
 
           <div class="admin-inline">
             <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
+            <button class="btn on-light" type="button" data-preview="${stay.slug}">Aperçu</button>
             <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
             <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
           </div>
@@ -1497,6 +1485,13 @@
       staysList.querySelectorAll("[data-edit]").forEach(btn => {
         btn.addEventListener("click", async () => {
           await editStay(btn.getAttribute("data-edit"));
+        });
+      });
+
+      staysList.querySelectorAll("[data-preview]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const slug = btn.getAttribute("data-preview");
+          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
         });
       });
 
@@ -1554,6 +1549,7 @@
       stayHeroImage.value = stay.hero_image || "";
       stayStripeLink.value = stay.stripe_link || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
+      stayPublished.checked = !!stay.published;
 
       if(stay.is_featured){
         setHomepagePositionValue("featured");
@@ -1699,6 +1695,46 @@
       setMsg(editorMsg, "FAQ modèle enregistrée.");
     });
 
+    btnPreviewStay?.addEventListener("click", () => {
+      const slug = staySlug.value.trim() || slugify(stayTitle.value.trim());
+
+      if(!slug){
+        setMsg(publishMsg, "Renseigne au moins un titre ou un slug.");
+        return;
+      }
+
+      window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+    });
+
+    btnTogglePublish?.addEventListener("click", async () => {
+      if(!currentStayId){
+        setMsg(publishMsg, "Enregistre d’abord le séjour avant de changer son statut.");
+        return;
+      }
+
+      const nextPublished = !stayPublished.checked;
+
+      const { error } = await supabase
+        .from("stays")
+        .update({
+          published: nextPublished,
+          published_at: nextPublished ? new Date().toISOString() : null
+        })
+        .eq("id", currentStayId);
+
+      if(error){
+        console.error(error);
+        setMsg(publishMsg, "Impossible de modifier la publication.");
+        return;
+      }
+
+      stayPublished.checked = nextPublished;
+      setMsg(publishMsg, nextPublished ? "Séjour publié." : "Séjour dépublié.");
+
+      await loadHomepageState();
+      await loadStays();
+    });
+
     stayTitle?.addEventListener("input", () => {
       if(!currentStayId){
         staySlug.value = slugify(stayTitle.value);
@@ -1751,6 +1787,8 @@
         hero_image: stayHeroImage.value.trim(),
         stripe_link: stayStripeLink.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
+        published: !!stayPublished.checked,
+        published_at: stayPublished.checked ? new Date().toISOString() : null,
         is_featured: homepagePosition === "featured",
         is_highlight: ["1","2","3","4","5"].includes(homepagePosition),
         highlight_order: ["1","2","3","4","5"].includes(homepagePosition) ? Number(homepagePosition) : 999,
