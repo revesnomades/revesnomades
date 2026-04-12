@@ -484,6 +484,30 @@
 
             <div class="admin-block">
               <div class="section-head">
+                <div>
+                  <h3>Blocs personnalisés</h3>
+                  <p class="muted-small" style="margin-top:6px;">
+                    Chaque séjour peut avoir une structure unique (ordre via ↑ ↓).
+                  </p>
+                </div>
+                <div class="admin-inline">
+                  <select id="newBlockType" class="input" style="min-width:180px;">
+                    <option value="text">text</option>
+                    <option value="image_full">image_full</option>
+                    <option value="image_text">image_text</option>
+                    <option value="text_image">text_image</option>
+                    <option value="gallery_2">gallery_2</option>
+                    <option value="quote">quote</option>
+                  </select>
+                  <button class="btn on-light" id="btnAddContentBlock" type="button">+ Ajouter un bloc</button>
+                </div>
+              </div>
+
+              <div id="contentBlocksList" class="blocks-list"></div>
+            </div>
+
+            <div class="admin-block">
+              <div class="section-head">
                 <h3>Ce que tu vas vivre</h3>
                 <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
               </div>
