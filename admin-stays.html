@@ -484,30 +484,6 @@
 
             <div class="admin-block">
               <div class="section-head">
-                <div>
-                  <h3>Blocs personnalisés</h3>
-                  <p class="muted-small" style="margin-top:6px;">
-                    Chaque séjour peut avoir une structure unique (ordre via ↑ ↓).
-                  </p>
-                </div>
-                <div class="admin-inline">
-                  <select id="newBlockType" class="input" style="min-width:180px;">
-                    <option value="text">text</option>
-                    <option value="image_full">image_full</option>
-                    <option value="image_text">image_text</option>
-                    <option value="text_image">text_image</option>
-                    <option value="gallery_2">gallery_2</option>
-                    <option value="quote">quote</option>
-                  </select>
-                  <button class="btn on-light" id="btnAddContentBlock" type="button">+ Ajouter un bloc</button>
-                </div>
-              </div>
-
-              <div id="contentBlocksList" class="blocks-list"></div>
-            </div>
-
-            <div class="admin-block">
-              <div class="section-head">
                 <h3>Ce que tu vas vivre</h3>
                 <button class="btn on-light" id="btnToggleHighlightsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
               </div>
@@ -609,6 +585,7 @@
               <p class="muted-small" style="margin-top:8px;">FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).</p>
             </div>
             <div class="admin-inline">
+              <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener">Voir faq.html</a>
               <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
               <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
             </div>
@@ -827,6 +804,13 @@
       }
 
       stayContentBlocks.forEach((block, index) => {
+        const showLayout = block.type === "image_text" || block.type === "text_image";
+        const showImage = ["image_full", "image_text", "text_image"].includes(block.type);
+        const showImages = block.type === "gallery_2";
+        const showQuote = block.type === "quote";
+        const showText = ["text", "image_text", "text_image", "quote"].includes(block.type);
+        const showCaption = ["image_full", "image_text", "text_image", "gallery_2", "quote"].includes(block.type);
+
         const card = document.createElement("div");
         card.className = "custom-block-editor";
 
@@ -861,19 +845,19 @@
           </label>
 
           <div class="admin-grid-2-tight">
-            <select class="input block-layout">
+            <select class="input block-layout" ${showLayout ? "" : "style='display:none;'"} >
               <option value="image_left" ${block.layout === "image_left" ? "selected" : ""}>image_left</option>
               <option value="image_right" ${block.layout === "image_right" ? "selected" : ""}>image_right</option>
             </select>
             <input class="input block-title" value="${block.title.replace(/"/g, "&quot;")}" placeholder="title">
           </div>
 
-          <textarea class="input block-text" style="min-height:90px;" placeholder="text">${block.text}</textarea>
-          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL">
-          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt">
-          <textarea class="input block-images" style="min-height:70px;" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
-          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote">
-          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption">
+          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text}</textarea>
+          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
+          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
+          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
+          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
+          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
         `;
 
         function syncBlockFromCard(){
@@ -896,6 +880,11 @@
         card.querySelectorAll("input,textarea,select").forEach(field => {
           field.addEventListener("input", syncBlockFromCard);
           field.addEventListener("change", syncBlockFromCard);
+        });
+
+        card.querySelector(".block-type")?.addEventListener("change", () => {
+          syncBlockFromCard();
+          renderContentBlocksEditor();
         });
 
         card.querySelector(".btn-block-up")?.addEventListener("click", () => {
