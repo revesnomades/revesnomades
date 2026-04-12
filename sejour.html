@@ -16,10 +16,14 @@
 
 <body class="on-light">
 
+  <div id="previewBanner" style="display:none; background:#111; color:#fff; text-align:center; padding:10px 14px; font-size:12px; letter-spacing:.08em; text-transform:uppercase;">
+    Mode aperçu admin
+  </div>
+
   <header class="nav" id="top">
     <div class="container nav-inner">
-      <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
-        <img src="assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
+      <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
         <span>ÂmesNomades</span>
       </a>
 
@@ -209,7 +213,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+          <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
           <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
         </div>
 
@@ -249,7 +253,14 @@
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
-    const slug = new URLSearchParams(window.location.search).get("slug");
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug");
+    const isPreview = params.get("preview") === "1";
+
+    const previewBanner = document.getElementById("previewBanner");
+    if (isPreview && previewBanner) {
+      previewBanner.style.display = "block";
+    }
 
     const stayTitle = document.getElementById("stayTitle");
     const pageTitle = document.getElementById("pageTitle");
@@ -404,11 +415,39 @@
         return;
       }
 
-      const { data: stay, error } = await supabase
+      if (isPreview) {
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData?.user;
+
+        if (!user) {
+          stayTitle.textContent = "Accès refusé";
+          stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.role !== "admin") {
+          stayTitle.textContent = "Accès refusé";
+          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
+          return;
+        }
+      }
+
+      let stayQuery = supabase
         .from("stays")
         .select("*")
-        .eq("slug", slug)
-        .single();
+        .eq("slug", slug);
+
+      if (!isPreview) {
+        stayQuery = stayQuery.eq("published", true);
+      }
+
+      const { data: stay, error } = await stayQuery.single();
 
       if(error || !stay){
         console.error(error);
@@ -508,7 +547,11 @@
 
           if (index === 0) {
             stayPriceLive.textContent = formatEUR(priceItem.price);
-            payBtn.href = priceItem.stripe_link || "#";
+            if (priceItem.stripe_link) {
+              payBtn.href = priceItem.stripe_link;
+            } else {
+              payBtn.removeAttribute("href");
+            }
             bookingMsg.textContent = priceItem.description || "";
           }
         });
