@@ -91,13 +91,6 @@
       margin-top:10px;
     }
 
-    .price-row{
-      display:grid;
-      grid-template-columns:1.1fr 1.5fr .8fr 1.4fr .7fr auto auto;
-      gap:10px;
-      align-items:center;
-    }
-
     .stays-admin-list{
       display:grid;
       gap:12px;
@@ -119,96 +112,31 @@
       gap:16px;
     }
 
-    .visual-homepage-preview{
+    .blocks-list{
       display:grid;
-      gap:16px;
-    }
-
-    .preview-card{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.75);
-      overflow:hidden;
-    }
-
-    .preview-label{
-      padding:10px 12px;
-      border-bottom:1px solid var(--line);
-      font-size:12px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:var(--muted);
-      background:rgba(255,255,255,.85);
-    }
-
-    .featured-preview{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      min-height:320px;
-    }
-
-    .featured-preview-media{
-      background-size:cover;
-      background-position:center;
-      min-height:320px;
-      background-color:#ddd;
-    }
-
-    .featured-preview-copy{
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      background:#fff;
-    }
-
-    .featured-preview-copy h3{
-      margin:0;
-      font-size:28px;
-    }
-
-    .featured-preview-copy p{
-      margin:10px 0 0;
-      color:var(--muted);
-    }
-
-    .cards-preview{
-      display:grid;
-      grid-template-columns:repeat(5, minmax(0,1fr));
       gap:12px;
-      padding:12px;
+      margin-top:12px;
     }
 
-    .cards-preview .card{
+    .custom-block-editor{
       border:1px solid var(--line);
-      background:#fff;
-      overflow:hidden;
+      background:rgba(255,255,255,.55);
+      padding:12px;
+      display:grid;
+      gap:10px;
     }
 
-    .cards-preview .card-media{
-      aspect-ratio:4/5;
-      background-size:cover;
-      background-position:center;
-      background-color:#ddd;
-      position:relative;
-    }
-
-    .cards-preview .card-overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.26);
+    .custom-block-actions{
       display:flex;
-      align-items:flex-end;
-      padding:10px;
-      color:#fff;
-      font-size:12px;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
     }
 
-    .cards-preview .card-title{
-      padding:10px 12px;
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      border-top:1px solid var(--line);
+    .admin-grid-2-tight{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:10px;
     }
 
     .draggable-pool,
@@ -324,26 +252,12 @@
       font-size:13px;
     }
 
-    @media (max-width: 980px){
-      .featured-preview{
-        grid-template-columns:1fr;
-      }
-
-      .cards-preview{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-    }
-
     @media (max-width: 780px){
       .admin-grid-2,
       .admin-grid-3,
-      .price-row,
       .program-slot-row,
-      .position-picker{
-        grid-template-columns:1fr;
-      }
-
-      .cards-preview{
+      .position-picker,
+      .admin-grid-2-tight{
         grid-template-columns:1fr;
       }
     }
@@ -388,28 +302,6 @@
           <div id="homepageMsg" class="muted-small" style="margin-bottom:12px;"></div>
 
           <div class="homepage-layout">
-
-            <div class="visual-homepage-preview">
-              <div class="preview-card">
-                <div class="preview-label">Visuel admin — bandeau principal</div>
-                <div id="featuredPreview" class="featured-preview">
-                  <div class="featured-preview-media" id="featuredPreviewMedia"></div>
-                  <div class="featured-preview-copy">
-                    <div class="kicker">Prochain séjour…</div>
-                    <div class="sep" style="margin:10px 0 16px;"></div>
-                    <h3 id="featuredPreviewTitle">Aucun séjour</h3>
-                    <p id="featuredPreviewDuration">Durée à annoncer</p>
-                    <p id="featuredPreviewDates">Dates à annoncer</p>
-                    <p id="featuredPreviewLocation"></p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <div class="preview-label">Visuel admin — bandeau 5 séjours</div>
-                <div id="cardsPreview" class="cards-preview"></div>
-              </div>
-            </div>
 
             <div class="admin-block">
               <div class="section-head" style="margin-bottom:10px;">
@@ -479,11 +371,12 @@
             <div>
               <h2 id="editorTitle">Créer un séjour</h2>
               <p class="muted-small" style="margin-top:8px;">
-                CMS séjour : contenu, images, planning, FAQ, formules Stripe, visibilité des blocs.
+                CMS séjour : contenu, images, planning, FAQ et visibilité des blocs.
               </p>
             </div>
 
             <div class="admin-inline">
+              <button class="btn on-light" id="btnPreviewStayTop" type="button">Aperçu</button>
               <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
               <button class="btn on-light" id="btnCancelEdit" type="button">Fermer</button>
             </div>
@@ -491,6 +384,8 @@
 
           <div id="adminStatus" class="muted-small" style="margin-top:12px;"></div>
           <div id="editorMsg" class="muted-small" style="margin-top:8px;"></div>
+          <input id="stayPublished" type="checkbox" hidden>
+          <div id="publishMsg" class="muted-small" style="display:none;"></div>
 
           <div style="display:grid; gap:16px; margin-top:18px;">
 
@@ -558,27 +453,33 @@
                   <img id="heroPreview" class="upload-preview" src="" alt="">
                 </div>
 
-                <input id="stayStripeLink" class="input" placeholder="Lien Stripe principal (secours)">
+                <input id="stayBookingUrl" class="input" placeholder="Lien du bouton réserver (booking_url)">
                 <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
+              </div>
+            </div>
 
-                <div class="admin-block" style="padding:12px;">
-                  <div class="section-head" style="margin-bottom:8px;">
-                    <h3>Publication</h3>
-
-                    <div class="admin-inline">
-                      <button class="btn on-light" id="btnPreviewStay" type="button">Aperçu</button>
-                      <button class="btn on-light" id="btnTogglePublish" type="button">Publier / Dépublier</button>
-                    </div>
-                  </div>
-
-                  <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
-                    <input id="stayPublished" type="checkbox">
-                    <span>Publié sur le site</span>
-                  </label>
-
-                  <div id="publishMsg" class="muted-small" style="margin-top:10px;"></div>
+            <div class="admin-block">
+              <div class="section-head">
+                <div>
+                  <h3>Blocs personnalisés</h3>
+                  <p class="muted-small" style="margin-top:6px;">
+                    Chaque séjour peut avoir une structure unique (ordre via ↑ ↓).
+                  </p>
+                </div>
+                <div class="admin-inline">
+                  <select id="newBlockType" class="input" style="min-width:180px;">
+                    <option value="text">text</option>
+                    <option value="image_full">image_full</option>
+                    <option value="image_text">image_text</option>
+                    <option value="text_image">text_image</option>
+                    <option value="gallery_2">gallery_2</option>
+                    <option value="quote">quote</option>
+                  </select>
+                  <button class="btn on-light" id="btnAddContentBlock" type="button">+ Ajouter un bloc</button>
                 </div>
               </div>
+
+              <div id="contentBlocksList" class="blocks-list"></div>
             </div>
 
             <div class="admin-block">
@@ -653,26 +554,15 @@
             <div class="admin-block">
               <div class="section-head">
                 <div class="admin-inline">
-                  <h3>FAQ</h3>
+                  <h3>FAQ du séjour (personnalisée)</h3>
                   <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
                 </div>
-
-                <div class="admin-inline">
-                  <button class="btn on-light" id="btnLoadDefaultFaq" type="button">Charger la FAQ modèle</button>
-                  <button class="btn on-light" id="btnSaveAsDefaultFaq" type="button">Enregistrer comme modèle</button>
-                </div>
               </div>
 
+              <p class="muted-small" style="margin:0 0 10px;">
+                Si vide, la page séjour utilisera automatiquement la FAQ modèle du site (max 5).
+              </p>
               <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
-            </div>
-
-            <div class="admin-block">
-              <div class="section-head">
-                <h3>Formules & prix Stripe</h3>
-                <button class="btn on-light" id="btnAddPriceRow" type="button">➕ Ajouter une formule</button>
-              </div>
-
-              <div id="pricesRows" style="display:grid; gap:10px; margin-top:14px;"></div>
             </div>
           </div>
         </div>
@@ -686,6 +576,22 @@
           </div>
 
           <div id="staysList" class="stays-admin-list">Chargement…</div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="section-head">
+            <div>
+              <h2>FAQ du site</h2>
+              <p class="muted-small" style="margin-top:8px;">FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).</p>
+            </div>
+            <div class="admin-inline">
+              <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener">Voir faq.html</a>
+              <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
+              <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
+            </div>
+          </div>
+          <div id="siteFaqMsg" class="muted-small" style="margin-bottom:12px;"></div>
+          <div id="siteFaqList" class="blocks-list"></div>
         </div>
       </div>
     </div>
@@ -705,12 +611,12 @@
     const btnReloadHomepage = document.getElementById("btnReloadHomepage");
     const btnSaveHomepage = document.getElementById("btnSaveHomepage");
     const btnNewStay = document.getElementById("btnNewStay");
+    const btnPreviewStayTop = document.getElementById("btnPreviewStayTop");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
-    const btnAddPriceRow = document.getElementById("btnAddPriceRow");
-    const btnLoadDefaultFaq = document.getElementById("btnLoadDefaultFaq");
-    const btnSaveAsDefaultFaq = document.getElementById("btnSaveAsDefaultFaq");
     const btnRebuildProgram = document.getElementById("btnRebuildProgram");
+    const btnAddSiteFaq = document.getElementById("btnAddSiteFaq");
+    const btnSaveSiteFaq = document.getElementById("btnSaveSiteFaq");
 
     const btnToggleGiftSection = document.getElementById("btnToggleGiftSection");
     const btnToggleFaqSection = document.getElementById("btnToggleFaqSection");
@@ -733,12 +639,10 @@
     const stayShortDescription = document.getElementById("stayShortDescription");
     const stayDescription = document.getElementById("stayDescription");
     const stayHeroImage = document.getElementById("stayHeroImage");
-    const stayStripeLink = document.getElementById("stayStripeLink");
+    const stayBookingUrl = document.getElementById("stayBookingUrl");
     const stayMinBookings = document.getElementById("stayMinBookings");
 
     const stayPublished = document.getElementById("stayPublished");
-    const btnPreviewStay = document.getElementById("btnPreviewStay");
-    const btnTogglePublish = document.getElementById("btnTogglePublish");
     const publishMsg = document.getElementById("publishMsg");
 
     const mainStartDate = document.getElementById("mainStartDate");
@@ -762,17 +666,18 @@
     const giftImage = document.getElementById("giftImage");
 
     const stayFaq = document.getElementById("stayFaq");
-    const pricesRows = document.getElementById("pricesRows");
+    const newBlockType = document.getElementById("newBlockType");
+    const btnAddContentBlock = document.getElementById("btnAddContentBlock");
+    const contentBlocksList = document.getElementById("contentBlocksList");
+    const siteFaqList = document.getElementById("siteFaqList");
+    const siteFaqMsg = document.getElementById("siteFaqMsg");
 
     const featuredSlotContent = document.getElementById("featuredSlotContent");
-    const featuredPreviewMedia = document.getElementById("featuredPreviewMedia");
-    const featuredPreviewTitle = document.getElementById("featuredPreviewTitle");
-    const featuredPreviewDuration = document.getElementById("featuredPreviewDuration");
-    const featuredPreviewDates = document.getElementById("featuredPreviewDates");
-    const featuredPreviewLocation = document.getElementById("featuredPreviewLocation");
-    const cardsPreview = document.getElementById("cardsPreview");
 
     let currentStayId = null;
+    let stayContentBlocks = [];
+    let siteFaqItems = [];
+    let initialSiteFaqIds = [];
     let allStays = [];
     let homepageFeaturedId = null;
     let homepageHighlights = [null, null, null, null, null];
@@ -828,6 +733,183 @@
     function arrayToLines(value){
       if(!value || !Array.isArray(value)) return "";
       return value.join("\n");
+    }
+
+    function createDefaultBlock(type = "text"){
+      const uid = `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      return {
+        id: uid,
+        type,
+        enabled: true,
+        layout: type === "text_image" ? "image_right" : "image_left",
+        title: "",
+        text: "",
+        image: "",
+        image_alt: "",
+        images: [],
+        quote: "",
+        caption: ""
+      };
+    }
+
+    function normalizeContentBlocks(rawValue){
+      if(!Array.isArray(rawValue)) return [];
+      return rawValue.map((raw, index) => {
+        const fallback = createDefaultBlock(raw?.type || "text");
+        const normalizedImages = Array.isArray(raw?.images)
+          ? raw.images.map(v => String(v || "").trim()).filter(Boolean)
+          : [];
+
+        return {
+          ...fallback,
+          ...raw,
+          id: String(raw?.id || `block_${index + 1}`),
+          enabled: raw?.enabled !== false,
+          type: String(raw?.type || fallback.type),
+          layout: String(raw?.layout || fallback.layout),
+          title: String(raw?.title || ""),
+          text: String(raw?.text || ""),
+          image: String(raw?.image || ""),
+          image_alt: String(raw?.image_alt || ""),
+          images: normalizedImages,
+          quote: String(raw?.quote || ""),
+          caption: String(raw?.caption || "")
+        };
+      });
+    }
+
+    function serializeContentBlocks(){
+      return normalizeContentBlocks(stayContentBlocks).map((block, index) => ({
+        id: block.id || `block_${index + 1}`,
+        type: block.type || "text",
+        enabled: block.enabled !== false,
+        layout: block.layout || (block.type === "text_image" ? "image_right" : "image_left"),
+        title: block.title || "",
+        text: block.text || "",
+        image: block.image || "",
+        image_alt: block.image_alt || "",
+        images: Array.isArray(block.images) ? block.images : [],
+        quote: block.quote || "",
+        caption: block.caption || ""
+      }));
+    }
+
+    function renderContentBlocksEditor(){
+      if(!contentBlocksList) return;
+      contentBlocksList.innerHTML = "";
+
+      if(!stayContentBlocks.length){
+        contentBlocksList.innerHTML = `<div class="slot-empty">Aucun bloc personnalisé. Le rendu actuel restera actif.</div>`;
+        return;
+      }
+
+      stayContentBlocks.forEach((block, index) => {
+        const showLayout = block.type === "image_text" || block.type === "text_image";
+        const showImage = ["image_full", "image_text", "text_image"].includes(block.type);
+        const showImages = block.type === "gallery_2";
+        const showQuote = block.type === "quote";
+        const showText = ["text", "image_text", "text_image", "quote"].includes(block.type);
+        const showCaption = ["image_full", "image_text", "text_image", "gallery_2", "quote"].includes(block.type);
+
+        const card = document.createElement("div");
+        card.className = "custom-block-editor";
+
+        card.innerHTML = `
+          <div class="section-head" style="margin-bottom:0;">
+            <div>
+              <strong>Bloc ${index + 1}</strong>
+              <span class="muted-small" style="margin-left:8px;">type: ${block.type}</span>
+            </div>
+            <div class="custom-block-actions">
+              <button class="btn on-light btn-block-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="btn on-light btn-block-down" type="button" ${index === stayContentBlocks.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="btn on-light btn-block-delete" type="button">Supprimer</button>
+            </div>
+          </div>
+
+          <div class="admin-grid-2-tight">
+            <input class="input block-id" value="${block.id.replace(/"/g, "&quot;")}" placeholder="id">
+            <select class="input block-type">
+              <option value="text" ${block.type === "text" ? "selected" : ""}>text</option>
+              <option value="image_full" ${block.type === "image_full" ? "selected" : ""}>image_full</option>
+              <option value="image_text" ${block.type === "image_text" ? "selected" : ""}>image_text</option>
+              <option value="text_image" ${block.type === "text_image" ? "selected" : ""}>text_image</option>
+              <option value="gallery_2" ${block.type === "gallery_2" ? "selected" : ""}>gallery_2</option>
+              <option value="quote" ${block.type === "quote" ? "selected" : ""}>quote</option>
+            </select>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; font-size:14px;">
+            <input class="block-enabled" type="checkbox" ${block.enabled ? "checked" : ""}>
+            <span>Bloc actif</span>
+          </label>
+
+          <div class="admin-grid-2-tight">
+            <select class="input block-layout" ${showLayout ? "" : "style='display:none;'"} >
+              <option value="image_left" ${block.layout === "image_left" ? "selected" : ""}>image_left</option>
+              <option value="image_right" ${block.layout === "image_right" ? "selected" : ""}>image_right</option>
+            </select>
+            <input class="input block-title" value="${block.title.replace(/"/g, "&quot;")}" placeholder="title">
+          </div>
+
+          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text}</textarea>
+          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
+          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
+          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
+          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
+          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
+        `;
+
+        function syncBlockFromCard(){
+          stayContentBlocks[index] = {
+            ...stayContentBlocks[index],
+            id: card.querySelector(".block-id")?.value?.trim() || `block_${index + 1}`,
+            type: card.querySelector(".block-type")?.value || "text",
+            enabled: !!card.querySelector(".block-enabled")?.checked,
+            layout: card.querySelector(".block-layout")?.value || "image_left",
+            title: card.querySelector(".block-title")?.value?.trim() || "",
+            text: card.querySelector(".block-text")?.value?.trim() || "",
+            image: card.querySelector(".block-image")?.value?.trim() || "",
+            image_alt: card.querySelector(".block-image-alt")?.value?.trim() || "",
+            images: linesToArray(card.querySelector(".block-images")?.value || ""),
+            quote: card.querySelector(".block-quote")?.value?.trim() || "",
+            caption: card.querySelector(".block-caption")?.value?.trim() || ""
+          };
+        }
+
+        card.querySelectorAll("input,textarea,select").forEach(field => {
+          field.addEventListener("input", syncBlockFromCard);
+          field.addEventListener("change", syncBlockFromCard);
+        });
+
+        card.querySelector(".block-type")?.addEventListener("change", () => {
+          syncBlockFromCard();
+          renderContentBlocksEditor();
+        });
+
+        card.querySelector(".btn-block-up")?.addEventListener("click", () => {
+          if(index < 1) return;
+          const temp = stayContentBlocks[index - 1];
+          stayContentBlocks[index - 1] = stayContentBlocks[index];
+          stayContentBlocks[index] = temp;
+          renderContentBlocksEditor();
+        });
+
+        card.querySelector(".btn-block-down")?.addEventListener("click", () => {
+          if(index >= stayContentBlocks.length - 1) return;
+          const temp = stayContentBlocks[index + 1];
+          stayContentBlocks[index + 1] = stayContentBlocks[index];
+          stayContentBlocks[index] = temp;
+          renderContentBlocksEditor();
+        });
+
+        card.querySelector(".btn-block-delete")?.addEventListener("click", () => {
+          stayContentBlocks.splice(index, 1);
+          renderContentBlocksEditor();
+        });
+
+        contentBlocksList.appendChild(card);
+      });
     }
 
     function parseDateSafe(value){
@@ -892,24 +974,6 @@
         imgEl.src = "";
         imgEl.style.display = "none";
       }
-    }
-
-    function formatDateRange(start, end){
-      if(!start && !end) return "Dates à annoncer";
-      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-      if(startText && endText) return `${startText} au ${endText}`;
-      return startText || endText || "Dates à annoncer";
-    }
-
-    function getDurationLabel(start, end){
-      if(!start || !end) return "Durée à annoncer";
-      const s = new Date(start + "T00:00:00");
-      const e = new Date(end + "T00:00:00");
-      const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
-      if(days <= 0) return "Durée à annoncer";
-      const nights = Math.max(0, days - 1);
-      return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function stayById(id){
@@ -1074,42 +1138,165 @@
       updateDurationInfo();
     }
 
-    function createPriceRow(data = {}){
-      const row = document.createElement("div");
-      row.className = "price-row";
-
-      row.innerHTML = `
-        <input class="input price-label" placeholder="Label" value="${data.label || ""}">
-        <input class="input price-description" placeholder="Description courte" value="${data.description || ""}">
-        <input class="input price-value" type="number" min="0" placeholder="Prix" value="${data.price ?? ""}">
-        <input class="input price-link" placeholder="Lien Stripe" value="${data.stripe_link || ""}">
-        <input class="input price-order" type="number" min="0" placeholder="Ordre" value="${data.sort_order ?? 0}">
-        <label style="display:flex; align-items:center; gap:6px; font-size:12px;">
-          <input class="price-active" type="checkbox" ${data.is_active === false ? "" : "checked"}>
-          Active
-        </label>
-        <button class="btn on-light btn-remove-price" type="button">✕</button>
-      `;
-
-      row.querySelector(".btn-remove-price").addEventListener("click", () => row.remove());
-      pricesRows.appendChild(row);
+    function normalizeSiteFaqItems(raw){
+      if(!Array.isArray(raw)) return [];
+      return raw.map((item, index) => ({
+        id: item?.id || null,
+        question: String(item?.question || ""),
+        answer: String(item?.answer || ""),
+        sort_order: Number(item?.sort_order ?? index + 1),
+        is_active: item?.is_active !== false,
+        use_for_stay_default: item?.use_for_stay_default === true
+      }));
     }
 
-    async function loadDefaultFaqIntoField(){
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "default_stay_faq")
-        .single();
+    function renderSiteFaqEditor(){
+      if(!siteFaqList) return;
+      siteFaqList.innerHTML = "";
 
-      if(error){
-        console.error(error);
-        setMsg(editorMsg, "Impossible de charger la FAQ modèle.");
+      if(!siteFaqItems.length){
+        siteFaqList.innerHTML = `<div class="slot-empty">Aucune question FAQ pour le moment.</div>`;
         return;
       }
 
-      stayFaq.value = JSON.stringify(data?.value || [], null, 2);
-      setMsg(editorMsg, "FAQ modèle chargée.");
+      siteFaqItems.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "custom-block-editor";
+        card.innerHTML = `
+          <div class="section-head" style="margin-bottom:0;">
+            <strong>Question ${index + 1}</strong>
+            <div class="custom-block-actions">
+              <button class="btn on-light btn-faq-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="btn on-light btn-faq-down" type="button" ${index === siteFaqItems.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="btn on-light btn-faq-delete" type="button">Supprimer</button>
+            </div>
+          </div>
+          <input class="input faq-question" placeholder="Question" value="${item.question.replace(/"/g, "&quot;")}">
+          <textarea class="input faq-answer" style="min-height:90px;" placeholder="Réponse">${item.answer}</textarea>
+          <div class="admin-inline">
+            <label style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" class="faq-active" ${item.is_active ? "checked" : ""}>
+              <span>Active</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" class="faq-stay-default" ${item.use_for_stay_default ? "checked" : ""}>
+              <span>FAQ modèle séjour</span>
+            </label>
+          </div>
+        `;
+
+        function syncFaq(){
+          siteFaqItems[index] = {
+            ...siteFaqItems[index],
+            question: card.querySelector(".faq-question")?.value?.trim() || "",
+            answer: card.querySelector(".faq-answer")?.value?.trim() || "",
+            is_active: !!card.querySelector(".faq-active")?.checked,
+            use_for_stay_default: !!card.querySelector(".faq-stay-default")?.checked,
+            sort_order: index + 1
+          };
+
+          const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
+          if(selectedForStay.length > 5){
+            siteFaqItems[index].use_for_stay_default = false;
+            const check = card.querySelector(".faq-stay-default");
+            if(check) check.checked = false;
+            setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
+          }
+        }
+
+        card.querySelectorAll("input,textarea").forEach(el => {
+          el.addEventListener("input", syncFaq);
+          el.addEventListener("change", syncFaq);
+        });
+
+        card.querySelector(".btn-faq-up")?.addEventListener("click", () => {
+          if(index < 1) return;
+          const tmp = siteFaqItems[index - 1];
+          siteFaqItems[index - 1] = siteFaqItems[index];
+          siteFaqItems[index] = tmp;
+          renderSiteFaqEditor();
+        });
+
+        card.querySelector(".btn-faq-down")?.addEventListener("click", () => {
+          if(index >= siteFaqItems.length - 1) return;
+          const tmp = siteFaqItems[index + 1];
+          siteFaqItems[index + 1] = siteFaqItems[index];
+          siteFaqItems[index] = tmp;
+          renderSiteFaqEditor();
+        });
+
+        card.querySelector(".btn-faq-delete")?.addEventListener("click", () => {
+          siteFaqItems.splice(index, 1);
+          renderSiteFaqEditor();
+        });
+
+        siteFaqList.appendChild(card);
+      });
+    }
+
+    async function loadSiteFaqItems(){
+      const { data, error } = await supabase
+        .from("faq_items")
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if(error){
+        console.error(error);
+        setMsg(siteFaqMsg, "Impossible de charger la FAQ du site.");
+        return;
+      }
+
+      siteFaqItems = normalizeSiteFaqItems(data || []);
+      initialSiteFaqIds = siteFaqItems.map(item => item.id).filter(Boolean);
+      renderSiteFaqEditor();
+      setMsg(siteFaqMsg, "");
+    }
+
+    async function saveSiteFaqItems(){
+      setMsg(siteFaqMsg, "Enregistrement FAQ du site…");
+
+      const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
+      if(selectedForStay.length > 5){
+        setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
+        return;
+      }
+
+      const cleanItems = siteFaqItems
+        .map((item, index) => ({
+          id: item.id || undefined,
+          question: String(item.question || "").trim(),
+          answer: String(item.answer || "").trim(),
+          sort_order: index + 1,
+          is_active: item.is_active !== false,
+          use_for_stay_default: item.use_for_stay_default === true
+        }))
+        .filter(item => item.question && item.answer);
+
+      try{
+        if(cleanItems.length){
+          const { error: upsertError } = await supabase
+            .from("faq_items")
+            .upsert(cleanItems, { onConflict: "id" });
+          if(upsertError) throw upsertError;
+        }
+
+        const keptIds = cleanItems.map(i => i.id).filter(Boolean);
+        const idsToDelete = initialSiteFaqIds.filter(id => !keptIds.includes(id));
+        if(idsToDelete.length){
+          const { error: deleteError } = await supabase
+            .from("faq_items")
+            .delete()
+            .in("id", idsToDelete);
+          if(deleteError) throw deleteError;
+        }
+
+        setMsg(siteFaqMsg, "FAQ du site enregistrée.");
+        await loadSiteFaqItems();
+      } catch(err){
+        console.error(err);
+        setMsg(siteFaqMsg, `Erreur FAQ du site : ${err.message || err}`);
+      }
     }
 
     function renderSlotPill(stay, onRemove){
@@ -1194,67 +1381,9 @@
       }
     }
 
-    function renderHomepagePreview(){
-      const featured = stayById(homepageFeaturedId);
-
-      const featuredImage = featured?.hero_image || "";
-      const featuredDuration = featured?.firstDate
-        ? getDurationLabel(featured.firstDate.start_date, featured.firstDate.end_date)
-        : "Durée à annoncer";
-      const featuredDates = featured?.firstDate
-        ? formatDateRange(featured.firstDate.start_date, featured.firstDate.end_date)
-        : "Dates à annoncer";
-
-      featuredPreviewMedia.style.backgroundImage = featuredImage ? `url('${featuredImage}')` : "none";
-      featuredPreviewTitle.textContent = featured?.title || "Aucun séjour";
-      featuredPreviewDuration.textContent = featuredDuration;
-      featuredPreviewDates.textContent = featuredDates;
-      featuredPreviewLocation.textContent = featured?.location || "";
-
-      cardsPreview.innerHTML = "";
-
-      for(let i = 0; i < 5; i++){
-        const stay = stayById(homepageHighlights[i]);
-        const card = document.createElement("div");
-        card.className = "card";
-
-        if(!stay){
-          card.innerHTML = `
-            <div class="card-media" style="display:grid; place-items:center; color:var(--muted); background:#f0ece6;">
-              Position ${i+1}
-            </div>
-            <div class="card-title">Emplacement vide</div>
-          `;
-        } else {
-          const image = stay.hero_image || "";
-          const duration = stay.firstDate
-            ? getDurationLabel(stay.firstDate.start_date, stay.firstDate.end_date)
-            : "Durée à annoncer";
-          const dates = stay.firstDate
-            ? formatDateRange(stay.firstDate.start_date, stay.firstDate.end_date)
-            : "Dates à annoncer";
-
-          card.innerHTML = `
-            <div class="card-media" style="${image ? `background-image:url('${image}')` : ''}">
-              <div class="card-overlay">
-                <div>
-                  <div style="text-transform:uppercase; letter-spacing:.08em;">${duration}</div>
-                  <div style="margin-top:4px;">${dates}</div>
-                </div>
-              </div>
-            </div>
-            <div class="card-title">${stay.title || "Séjour"}</div>
-          `;
-        }
-
-        cardsPreview.appendChild(card);
-      }
-    }
-
     function renderHomepageManager(){
       renderHomepagePool();
       renderHomepageSlots();
-      renderHomepagePreview();
     }
 
     function attachDropEvents(){
@@ -1380,7 +1509,7 @@
       stayShortDescription.value = "";
       stayDescription.value = "";
       stayHeroImage.value = "";
-      stayStripeLink.value = "";
+      stayBookingUrl.value = "";
       stayMinBookings.value = "10";
       stayPublished.checked = false;
 
@@ -1414,7 +1543,8 @@
       giftImage.value = "";
 
       stayFaq.value = "";
-      pricesRows.innerHTML = "";
+      stayContentBlocks = [];
+      renderContentBlocksEditor();
 
       setMsg(editorMsg, "");
       setMsg(publishMsg, "");
@@ -1517,13 +1647,6 @@
         return;
       }
 
-      const { data: prices } = await supabase
-        .from("stay_prices")
-        .select("*")
-        .eq("stay_id", id)
-        .order("sort_order", { ascending: true })
-        .order("price", { ascending: true });
-
       const { data: dates } = await supabase
         .from("stay_dates")
         .select("*")
@@ -1547,7 +1670,7 @@
       stayShortDescription.value = stay.short_description || "";
       stayDescription.value = stay.description || "";
       stayHeroImage.value = stay.hero_image || "";
-      stayStripeLink.value = stay.stripe_link || "";
+      stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
       stayPublished.checked = !!stay.published;
 
@@ -1585,13 +1708,8 @@
 
       setPreview(giftPreview, stay.gift_image || "");
       stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
-
-      pricesRows.innerHTML = "";
-      if(prices?.length){
-        prices.forEach(p => createPriceRow(p));
-      } else {
-        createPriceRow();
-      }
+      stayContentBlocks = normalizeContentBlocks(stay.content_blocks);
+      renderContentBlocksEditor();
 
       openEditor();
     }
@@ -1654,9 +1772,6 @@
 
     btnNewStay?.addEventListener("click", async () => {
       resetEditor();
-      pricesRows.innerHTML = "";
-      createPriceRow();
-      await loadDefaultFaqIntoField();
       openEditor();
     });
 
@@ -1665,37 +1780,14 @@
       closeEditor();
     });
 
-    btnAddPriceRow?.addEventListener("click", () => {
-      createPriceRow();
+    btnAddContentBlock?.addEventListener("click", () => {
+      const type = newBlockType?.value || "text";
+      stayContentBlocks.push(createDefaultBlock(type));
+      renderContentBlocksEditor();
+      setMsg(editorMsg, "");
     });
 
-    btnLoadDefaultFaq?.addEventListener("click", async () => {
-      await loadDefaultFaqIntoField();
-    });
-
-    btnSaveAsDefaultFaq?.addEventListener("click", async () => {
-      let faqValue = [];
-      try {
-        faqValue = stayFaq.value.trim() ? JSON.parse(stayFaq.value.trim()) : [];
-      } catch (e) {
-        setMsg(editorMsg, "La FAQ doit être un JSON valide.");
-        return;
-      }
-
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert([{ key: "default_stay_faq", value: faqValue }], { onConflict: "key" });
-
-      if (error) {
-        console.error(error);
-        setMsg(editorMsg, "Impossible d’enregistrer la FAQ modèle.");
-        return;
-      }
-
-      setMsg(editorMsg, "FAQ modèle enregistrée.");
-    });
-
-    btnPreviewStay?.addEventListener("click", () => {
+    btnPreviewStayTop?.addEventListener("click", () => {
       const slug = staySlug.value.trim() || slugify(stayTitle.value.trim());
 
       if(!slug){
@@ -1706,33 +1798,20 @@
       window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
     });
 
-    btnTogglePublish?.addEventListener("click", async () => {
-      if(!currentStayId){
-        setMsg(publishMsg, "Enregistre d’abord le séjour avant de changer son statut.");
-        return;
-      }
+    btnAddSiteFaq?.addEventListener("click", () => {
+      siteFaqItems.push({
+        id: null,
+        question: "",
+        answer: "",
+        sort_order: siteFaqItems.length + 1,
+        is_active: true,
+        use_for_stay_default: false
+      });
+      renderSiteFaqEditor();
+    });
 
-      const nextPublished = !stayPublished.checked;
-
-      const { error } = await supabase
-        .from("stays")
-        .update({
-          published: nextPublished,
-          published_at: nextPublished ? new Date().toISOString() : null
-        })
-        .eq("id", currentStayId);
-
-      if(error){
-        console.error(error);
-        setMsg(publishMsg, "Impossible de modifier la publication.");
-        return;
-      }
-
-      stayPublished.checked = nextPublished;
-      setMsg(publishMsg, nextPublished ? "Séjour publié." : "Séjour dépublié.");
-
-      await loadHomepageState();
-      await loadStays();
+    btnSaveSiteFaq?.addEventListener("click", async () => {
+      await saveSiteFaqItems();
     });
 
     stayTitle?.addEventListener("input", () => {
@@ -1777,6 +1856,7 @@
 
       const programValue = getCurrentProgramFromEditors();
       const homepagePosition = getHomepagePositionValue();
+      const contentBlocksValue = serializeContentBlocks();
 
       const payload = {
         title,
@@ -1785,7 +1865,8 @@
         short_description: stayShortDescription.value.trim(),
         description: stayDescription.value.trim(),
         hero_image: stayHeroImage.value.trim(),
-        stripe_link: stayStripeLink.value.trim(),
+        booking_url: stayBookingUrl.value.trim(),
+        reservation_url: stayBookingUrl.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
         published: !!stayPublished.checked,
         published_at: stayPublished.checked ? new Date().toISOString() : null,
@@ -1804,6 +1885,7 @@
         gift_outro: giftOutro.value.trim(),
         gift_image: giftImage.value.trim(),
         faq: faqValue,
+        content_blocks: contentBlocksValue,
         show_gift_section: showGiftSection,
         show_faq_section: showFaqSection,
         show_program_section: showProgramSection,
@@ -1841,40 +1923,6 @@
         stayId = data.id;
       }
 
-      await supabase.from("stay_prices").delete().eq("stay_id", stayId);
-
-      const pricesPayload = Array.from(pricesRows.querySelectorAll(".price-row"))
-        .map(row => {
-          const label = row.querySelector(".price-label")?.value?.trim() || "";
-          const description = row.querySelector(".price-description")?.value?.trim() || "";
-          const price = row.querySelector(".price-value")?.value || "";
-          const stripe_link = row.querySelector(".price-link")?.value?.trim() || "";
-          const sort_order = row.querySelector(".price-order")?.value || "0";
-          const is_active = !!row.querySelector(".price-active")?.checked;
-
-          if(!label || !price || !stripe_link) return null;
-
-          return {
-            stay_id: stayId,
-            label,
-            description,
-            price: Number(price),
-            stripe_link,
-            sort_order: Number(sort_order),
-            is_active
-          };
-        })
-        .filter(Boolean);
-
-      if(pricesPayload.length){
-        const { error } = await supabase.from("stay_prices").insert(pricesPayload);
-        if(error){
-          console.error(error);
-          setMsg(editorMsg, `Séjour enregistré, mais erreur sur les formules : ${error.message || "erreur inconnue"}`);
-          return;
-        }
-      }
-
       await supabase.from("stay_dates").delete().eq("stay_id", stayId);
 
       const { error: dateError } = await supabase.from("stay_dates").insert([{
@@ -1906,9 +1954,9 @@
       setMsg(adminStatus, "Vous êtes connecté(e) en tant qu’administrateur.");
       await loadHomepageState();
       await loadStays();
+      await loadSiteFaqItems();
       refreshAllEyeButtons();
-      createPriceRow();
-      await loadDefaultFaqIntoField();
+      renderContentBlocksEditor();
       closeEditor();
     } catch(err){
       console.warn(err);

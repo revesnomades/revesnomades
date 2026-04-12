@@ -29,6 +29,7 @@
 
       <nav class="nav-links nav-links-desktop">
         <a href="/index.html#apropos" data-scroll>À propos</a>
+        <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
         <a class="icon-btn" href="/compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
@@ -45,6 +46,7 @@
       <div class="mobile-drawer" aria-hidden="true">
         <div class="mobile-menu">
           <a href="/index.html#apropos" data-scroll>À propos</a>
+          <a href="/faq.html">FAQ</a>
           <a href="/index.html#contact" data-scroll>Contact</a>
           <a href="/compte.html">Compte</a>
         </div>
@@ -62,7 +64,7 @@
       <h1 class="reveal" id="stayTitle">Séjour</h1>
 
       <p class="sejour-meta reveal" id="stayMeta">
-        5 jours · 4 nuits — <strong>à partir de —</strong> / personne
+        5 jours · 4 nuits
       </p>
 
       <p class="sejour-dates reveal">
@@ -72,6 +74,10 @@
       <div class="sejour-text reveal" id="stayText">
         <p>Chargement du séjour…</p>
       </div>
+
+      <section class="reveal" style="margin-top:26px; display:none;" id="contentBlocksSection">
+        <div id="contentBlocksContainer" style="display:grid; gap:18px;"></div>
+      </section>
 
       <section class="reveal" style="margin-top:26px;" id="highlightsSection">
         <h3 style="margin:0;">Ce que tu vas vivre</h3>
@@ -153,33 +159,9 @@
       <div class="booking-box reveal">
         <h3>Réserver</h3>
 
-        <label class="kicker" for="roomSelect">Formule / chambre</label>
-        <select id="roomSelect" style="
-          width:min(520px, 100%);
-          margin-top:8px;
-          padding:12px;
-          border-radius:0;
-          border:1px solid rgba(30,31,34,.18);
-          background: rgba(255,255,255,.85);
-          font-family:inherit;
-          font-weight:300;
-          color: var(--text);
-        ">
-          <option value="">Chargement…</option>
-        </select>
-
-        <p class="small muted" style="margin-top:10px;">
-          La quantité se sélectionne directement sur Stripe.
-        </p>
-
-        <div class="price-line" style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
-          <span style="color:var(--muted); font-size:13px;">Prix</span>
-          <strong id="stayPriceLive">—</strong>
-        </div>
-
         <div class="actions" style="margin-top:16px;">
-          <a id="payBtn" class="btn on-light" target="_blank" rel="noopener">
-            Réserver sur Stripe
+          <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener">
+            Réserver
           </a>
         </div>
 
@@ -268,6 +250,8 @@
     const stayDates = document.getElementById("stayDates");
     const stayText = document.getElementById("stayText");
     const stayHeroBg = document.getElementById("stayHeroBg");
+    const contentBlocksSection = document.getElementById("contentBlocksSection");
+    const contentBlocksContainer = document.getElementById("contentBlocksContainer");
 
     const highlightsSection = document.getElementById("highlightsSection");
     const programSection = document.getElementById("programSection");
@@ -291,15 +275,9 @@
     const optionsList = document.getElementById("optionsList");
     const faqList = document.getElementById("faqList");
 
-    const roomSelect = document.getElementById("roomSelect");
-    const payBtn = document.getElementById("payBtn");
+    const bookingBtn = document.getElementById("bookingBtn");
     const bookingMsg = document.getElementById("bookingMsg");
-    const stayPriceLive = document.getElementById("stayPriceLive");
     const missingCount = document.getElementById("missingCount");
-
-    function formatEUR(n){
-      return new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR" }).format(Number(n || 0));
-    }
 
     function arrayFromField(value){
       if (!value) return [];
@@ -387,6 +365,92 @@
       container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join("");
     }
 
+    function normalizeContentBlocks(value){
+      if(!Array.isArray(value)) return [];
+      return value
+        .filter(block => block && block.enabled !== false)
+        .map((block, index) => ({
+          id: block.id || `block_${index + 1}`,
+          type: block.type || "text",
+          layout: block.layout || (block.type === "text_image" ? "image_right" : "image_left"),
+          title: block.title || "",
+          text: block.text || "",
+          image: block.image || "",
+          image_alt: block.image_alt || "",
+          images: Array.isArray(block.images) ? block.images : [],
+          quote: block.quote || "",
+          caption: block.caption || ""
+        }));
+    }
+
+    function escapeHtml(value){
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderContentBlocks(container, blocks){
+      if(!container) return;
+      if(!blocks.length){
+        container.innerHTML = "";
+        return;
+      }
+
+      container.innerHTML = blocks.map((block) => {
+        const safeTitle = escapeHtml(block.title);
+        const safeText = escapeHtml(block.text).replace(/\n/g, "<br>");
+        const safeCaption = escapeHtml(block.caption);
+        const safeQuote = escapeHtml(block.quote);
+        const imageMarkup = block.image
+          ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || "Image du séjour")}" style="width:100%; height:auto; display:block;">`
+          : "";
+
+        if(block.type === "image_full"){
+          return `<article style="display:grid; gap:8px;">${imageMarkup}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
+        }
+
+        if(block.type === "image_text" || block.type === "text_image"){
+          const imageFirst = block.type === "image_text" || block.layout === "image_left";
+          const textPanel = `<div>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></div>`;
+          const imagePanel = `<div>${imageMarkup}${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`;
+          return `
+            <article style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;">
+              ${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}
+            </article>
+          `;
+        }
+
+        if(block.type === "gallery_2"){
+          const galleryImages = block.images.slice(0, 2).map(url => `
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55);">
+              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="width:100%; height:auto; display:block;">
+            </div>
+          `).join("");
+          return `<article style="display:grid; gap:10px;">${safeTitle ? `<h3 style="margin:0;">${safeTitle}</h3>` : ""}<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
+        }
+
+        if(block.type === "quote"){
+          return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
+        }
+
+        return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
+      }).join("");
+    }
+
+    async function getSiteStayDefaultFaq(){
+      const { data } = await supabase
+        .from("faq_items")
+        .select("question, answer")
+        .eq("is_active", true)
+        .eq("use_for_stay_default", true)
+        .order("sort_order", { ascending: true })
+        .limit(5);
+
+      return (data || []).map(item => ({ q: item.question, a: item.answer }));
+    }
+
     function formatDateRange(start, end){
       if(!start && !end) return "Dates à annoncer";
       const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
@@ -463,14 +527,6 @@
       if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
       if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
 
-      const { data: prices } = await supabase
-        .from("stay_prices")
-        .select("*")
-        .eq("stay_id", stay.id)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true })
-        .order("price", { ascending: true });
-
       const { data: dates } = await supabase
         .from("stay_dates")
         .select("*")
@@ -489,12 +545,8 @@
       stayTitle.textContent = stay.title || "Séjour";
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
 
-      const minPrice = prices && prices.length
-        ? Math.min(...prices.map(p => Number(p.price || 0)))
-        : null;
-
       const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date);
-      stayMeta.innerHTML = `${durationText} — <strong>à partir de ${minPrice ? formatEUR(minPrice) : "—"}</strong> / personne`;
+      stayMeta.textContent = durationText;
 
       stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
 
@@ -502,9 +554,25 @@
         stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
       }
 
-      renderRichText(stayText, stay.description || stay.short_description || "");
-      renderSimpleList(highlightsList, stay.highlights || []);
-      renderProgram(programList, stay.program || []);
+      const blocks = normalizeContentBlocks(stay.content_blocks);
+      const hasBlocks = blocks.length > 0;
+
+      if(hasBlocks){
+        renderContentBlocks(contentBlocksContainer, blocks);
+        if(contentBlocksSection) contentBlocksSection.style.display = "";
+        if(stayText) stayText.style.display = "none";
+        if(highlightsSection) highlightsSection.style.display = "none";
+        if(programSection) programSection.style.display = "none";
+        if(giftSection) giftSection.style.display = "none";
+        if(includedSection) includedSection.style.display = "none";
+        if(optionsSection) optionsSection.style.display = "none";
+      } else {
+        if(contentBlocksSection) contentBlocksSection.style.display = "none";
+        if(stayText) stayText.style.display = "";
+        renderRichText(stayText, stay.description || stay.short_description || "");
+        renderSimpleList(highlightsList, stay.highlights || []);
+        renderProgram(programList, stay.program || []);
+      }
 
       if(stay.program_note){
         programNote.textContent = stay.program_note;
@@ -531,57 +599,18 @@
       renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
       renderSimpleList(notIncludedList, stay.not_included_items || []);
       renderSimpleList(optionsList, stay.extra_options || []);
-      renderFaq(faqList, stay.faq || []);
+      const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
+      const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
+      renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
 
-      roomSelect.innerHTML = "";
-
-      if (prices && prices.length) {
-        prices.forEach((priceItem, index) => {
-          const option = document.createElement("option");
-          option.value = priceItem.id;
-          option.textContent = `${priceItem.label} — ${formatEUR(priceItem.price)}`;
-          option.dataset.price = priceItem.price;
-          option.dataset.link = priceItem.stripe_link || "";
-          option.dataset.description = priceItem.description || "";
-          roomSelect.appendChild(option);
-
-          if (index === 0) {
-            stayPriceLive.textContent = formatEUR(priceItem.price);
-            if (priceItem.stripe_link) {
-              payBtn.href = priceItem.stripe_link;
-            } else {
-              payBtn.removeAttribute("href");
-            }
-            bookingMsg.textContent = priceItem.description || "";
-          }
-        });
+      const bookingUrl = stay.booking_url || stay.reservation_url || "";
+      if(bookingUrl){
+        bookingBtn.href = bookingUrl;
+        bookingMsg.textContent = "Tu peux réserver directement via ce lien.";
       } else {
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "Formule à annoncer";
-        roomSelect.appendChild(option);
-
-        stayPriceLive.textContent = "—";
-        payBtn.removeAttribute("href");
-        bookingMsg.textContent = "Aucune formule disponible pour le moment.";
+        bookingBtn.removeAttribute("href");
+        bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
-
-      roomSelect.addEventListener("change", () => {
-        const selected = roomSelect.options[roomSelect.selectedIndex];
-        const price = selected?.dataset?.price;
-        const link = selected?.dataset?.link;
-        const description = selected?.dataset?.description;
-
-        stayPriceLive.textContent = price ? formatEUR(price) : "—";
-
-        if (link) {
-          payBtn.href = link;
-          bookingMsg.textContent = description || "";
-        } else {
-          payBtn.removeAttribute("href");
-          bookingMsg.textContent = "Lien Stripe manquant pour cette formule.";
-        }
-      });
 
       if(firstDate){
         const totalSeats = Number(firstDate.seats_total || 0);
