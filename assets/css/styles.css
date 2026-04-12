@@ -73,7 +73,7 @@ h1,h2,h3,h4{
   font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
   letter-spacing: .02em;
   text-transform: uppercase;
-  font-weight:300;
+  font-weight:250;
 }
 h3,h4{
   margin:0;
@@ -415,7 +415,7 @@ html.js .reveal.is-visible{
 
 /* ---------------- Contact ---------------- */
 #contact.band{
-  background:#F1E6B6;
+  background: var(--cream);
 }
 .contact-grid{
   min-height: 70vh;
@@ -629,7 +629,7 @@ footer.band.cream{
 .bottom-wide .bg{
   position:absolute; inset:0;
   background-size:cover;
-  background-position:center;
+  background-position:center top;
 }
 .bottom-wide::before{
   content:"";
@@ -639,7 +639,7 @@ footer.band.cream{
 .bottom-wide .content{
   position:relative;
   text-align:center;
-  padding: calc(var(--navH) + 60px) 0 60px;
+  padding: calc(var(--navH) + 40px) 0 80px;
 }
 .bottom-wide p{ color: rgba(255,255,255,.92); }
 
@@ -732,6 +732,7 @@ footer.band.cream{
   font-size: 13px;
   letter-spacing: .10em;
   text-transform: uppercase;
+  font-weight: 250;
   color: rgba(30,31,34,.70);
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(30,31,34,.14);
