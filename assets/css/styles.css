@@ -213,7 +213,7 @@ select, option{ color: var(--text) !important; }
 .hero.hero-left .hero-content{
   position:absolute;
   left: clamp(18px, 5vw, 84px);
-  bottom: clamp(26px, 8vh, 110px);
+  bottom: clamp(40px, 10vh, 128px);
   max-width: 640px;
   text-align:left;
   z-index:2;
@@ -229,7 +229,7 @@ select, option{ color: var(--text) !important; }
   transform: translateY(+16px);
 }
 .hero.hero-left .hero-content p{
-  margin-top: 0;
+  margin-top: 8px;
   max-width: 60ch;
   color: rgba(255,255,255,.90);
   font-size: 15.5px;
@@ -651,7 +651,7 @@ footer.band.cream{
 .bottom-wide .content{
   position:relative;
   text-align:center;
-  padding: calc(var(--navH) + 40px) 0 80px;
+  padding: calc(var(--navH) + 48px) 0 80px;
 }
 .bottom-wide p{ color: rgba(255,255,255,.92); }
 
