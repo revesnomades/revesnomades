@@ -213,7 +213,7 @@ select, option{ color: var(--text) !important; }
 .hero.hero-left .hero-content{
   position:absolute;
   left: clamp(18px, 5vw, 84px);
-  bottom: clamp(24px, 7vh, 110px);
+  bottom: clamp(56px, 12vh, 170px);
   max-width: 640px;
   text-align:left;
   z-index:2;
@@ -256,10 +256,10 @@ html.js .reveal.is-visible{
 /* ---------------- BANDEAU PRINCIPE ---------------- */
 .principle-band{
   position: relative;
-  min-height: 60vh;
+  min-height: 46vh;
   display: flex;
   align-items: center;
-  padding: calc(var(--navH) + 40px) 0 80px;
+  padding: calc(var(--navH) + 20px) 0 42px;
 
   background-image: url("../img/hero-2.jpg");
   background-size: cover;
@@ -283,6 +283,9 @@ html.js .reveal.is-visible{
   margin-right: auto;
 }
 .principle-band p{ color: rgba(255,255,255,.88); }
+.principle-band h2{
+  font-size: clamp(24px, 2.4vw, 38px);
+}
 
 /* ---------------- Séjours homepage (stay-band) ---------------- */
 .stay-band{
@@ -317,7 +320,7 @@ html.js .reveal.is-visible{
   background: var(--line);
   margin: 14px 0 22px;
 }
-.title{ font-size: clamp(26px, 2.7vw, 44px); }
+.title{ font-size: clamp(22px, 2.2vw, 34px); }
 .sub{ margin-top: 10px; color: var(--muted); max-width: 62ch; }
 .actions{ margin-top: 18px; }
 .missing{ margin-top: 12px; font-size: 12.5px; color: var(--muted); }
@@ -394,7 +397,7 @@ html.js .reveal.is-visible{
   justify-content:center;
 }
 .gift-band h2{
-  font-size: clamp(28px, 3vw, 48px);
+  font-size: clamp(24px, 2.4vw, 36px);
   margin-bottom: 18px;
 }
 .gift-band p{
@@ -482,6 +485,14 @@ html.js .reveal.is-visible{
 footer.band.cream{
   background: #ede5de;
 }
+.footer-dark{
+  background: rgba(14, 15, 17, .62) !important;
+  color: rgba(255,255,255,.92);
+}
+.footer-dark .legal{
+  color: rgba(255,255,255,.72);
+  border-top-color: rgba(255,255,255,.2);
+}
 .footer-row{
   display:flex;
   justify-content:space-between;
@@ -561,7 +572,7 @@ footer.band.cream{
   text-align: center;
 }
 .about-inner h2{
-  font-size: clamp(30px, 3.2vw, 54px);
+  font-size: clamp(24px, 2.6vw, 40px);
   margin: 0 auto;
 }
 .about-text{
@@ -629,7 +640,7 @@ footer.band.cream{
 .bottom-wide .bg{
   position:absolute; inset:0;
   background-size:cover;
-  background-position:center top;
+  background-position:center 22%;
 }
 .bottom-wide::before{
   content:"";
@@ -941,7 +952,22 @@ footer.band.cream{
 
   .sejour-hero{ height: 50vh; min-height: 280px; }
   .sejour-content{ padding: 60px 0 70px; }
-  .sejour-content h1{ font-size: 34px; }
+  .sejour-content h1{ font-size: 28px; }
+
+  h1, h2, h3, h4{
+    font-weight: 210;
+  }
+  .hero.hero-left .hero-content h1{
+    font-size: clamp(30px, 8vw, 42px);
+  }
+  .principle-band h2,
+  .title,
+  .about-inner h2,
+  .gift-band h2,
+  .bottom-wide h2{
+    font-size: clamp(21px, 6.4vw, 28px) !important;
+    line-height: 1.15;
+  }
 
   .about-text{ max-width: 92vw; line-height: 1.62; }
   .about-founder-meta{ text-align:center; }
