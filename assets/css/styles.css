@@ -415,7 +415,7 @@ html.js .reveal.is-visible{
 
 /* ---------------- Contact ---------------- */
 #contact.band{
-  background: var(--cream);
+  background:#FAF5DC;
 }
 .contact-grid{
   min-height: 70vh;
@@ -1162,4 +1162,42 @@ footer.band.cream{
   .fixed-bg{
     background-attachment: scroll;
   }
+  body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Autoriser dans les inputs */
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+  /* ==========================================
+   PRINCIPLE BAND MOBILE FIX (fond cream)
+========================================== */
+@media (max-width: 900px){
+
+  .principle-band{
+    background-image: none !important;
+    background: var(--cream) !important;
+    color: var(--text) !important;
+  }
+
+  .principle-band::before{
+    display: none !important;
+  }
+@media (max-width: 900px){
+
+  .principle-band .container{
+    margin: 0 auto;
+    max-width: 88vw;
+    text-align: left;
+  }
+
+}
+}
 }
