@@ -415,7 +415,7 @@ html.js .reveal.is-visible{
 
 /* ---------------- Contact ---------------- */
 #contact.band{
-  background: var(--cream);
+  background:#FAF5DC;
 }
 .contact-grid{
   min-height: 70vh;
