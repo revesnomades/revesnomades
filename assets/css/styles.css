@@ -213,7 +213,7 @@ select, option{ color: var(--text) !important; }
 .hero.hero-left .hero-content{
   position:absolute;
   left: clamp(18px, 5vw, 84px);
-  bottom: clamp(90px, 20vh, 180px);
+  bottom: clamp(70px, 16vh, 140px);
   max-width: 640px;
   text-align:left;
   z-index:2;
