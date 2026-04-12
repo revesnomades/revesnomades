@@ -119,96 +119,31 @@
       gap:16px;
     }
 
-    .visual-homepage-preview{
+    .blocks-list{
       display:grid;
-      gap:16px;
-    }
-
-    .preview-card{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.75);
-      overflow:hidden;
-    }
-
-    .preview-label{
-      padding:10px 12px;
-      border-bottom:1px solid var(--line);
-      font-size:12px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:var(--muted);
-      background:rgba(255,255,255,.85);
-    }
-
-    .featured-preview{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      min-height:320px;
-    }
-
-    .featured-preview-media{
-      background-size:cover;
-      background-position:center;
-      min-height:320px;
-      background-color:#ddd;
-    }
-
-    .featured-preview-copy{
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      background:#fff;
-    }
-
-    .featured-preview-copy h3{
-      margin:0;
-      font-size:28px;
-    }
-
-    .featured-preview-copy p{
-      margin:10px 0 0;
-      color:var(--muted);
-    }
-
-    .cards-preview{
-      display:grid;
-      grid-template-columns:repeat(5, minmax(0,1fr));
       gap:12px;
-      padding:12px;
+      margin-top:12px;
     }
 
-    .cards-preview .card{
+    .custom-block-editor{
       border:1px solid var(--line);
-      background:#fff;
-      overflow:hidden;
+      background:rgba(255,255,255,.55);
+      padding:12px;
+      display:grid;
+      gap:10px;
     }
 
-    .cards-preview .card-media{
-      aspect-ratio:4/5;
-      background-size:cover;
-      background-position:center;
-      background-color:#ddd;
-      position:relative;
-    }
-
-    .cards-preview .card-overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.26);
+    .custom-block-actions{
       display:flex;
-      align-items:flex-end;
-      padding:10px;
-      color:#fff;
-      font-size:12px;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
     }
 
-    .cards-preview .card-title{
-      padding:10px 12px;
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      border-top:1px solid var(--line);
+    .admin-grid-2-tight{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:10px;
     }
 
     .draggable-pool,
@@ -324,26 +259,13 @@
       font-size:13px;
     }
 
-    @media (max-width: 980px){
-      .featured-preview{
-        grid-template-columns:1fr;
-      }
-
-      .cards-preview{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-    }
-
     @media (max-width: 780px){
       .admin-grid-2,
       .admin-grid-3,
       .price-row,
       .program-slot-row,
-      .position-picker{
-        grid-template-columns:1fr;
-      }
-
-      .cards-preview{
+      .position-picker,
+      .admin-grid-2-tight{
         grid-template-columns:1fr;
       }
     }
@@ -388,28 +310,6 @@
           <div id="homepageMsg" class="muted-small" style="margin-bottom:12px;"></div>
 
           <div class="homepage-layout">
-
-            <div class="visual-homepage-preview">
-              <div class="preview-card">
-                <div class="preview-label">Visuel admin — bandeau principal</div>
-                <div id="featuredPreview" class="featured-preview">
-                  <div class="featured-preview-media" id="featuredPreviewMedia"></div>
-                  <div class="featured-preview-copy">
-                    <div class="kicker">Prochain séjour…</div>
-                    <div class="sep" style="margin:10px 0 16px;"></div>
-                    <h3 id="featuredPreviewTitle">Aucun séjour</h3>
-                    <p id="featuredPreviewDuration">Durée à annoncer</p>
-                    <p id="featuredPreviewDates">Dates à annoncer</p>
-                    <p id="featuredPreviewLocation"></p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <div class="preview-label">Visuel admin — bandeau 5 séjours</div>
-                <div id="cardsPreview" class="cards-preview"></div>
-              </div>
-            </div>
 
             <div class="admin-block">
               <div class="section-head" style="margin-bottom:10px;">
@@ -484,6 +384,7 @@
             </div>
 
             <div class="admin-inline">
+              <button class="btn on-light" id="btnPreviewStayTop" type="button">Aperçu</button>
               <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
               <button class="btn on-light" id="btnCancelEdit" type="button">Fermer</button>
             </div>
@@ -566,7 +467,6 @@
                     <h3>Publication</h3>
 
                     <div class="admin-inline">
-                      <button class="btn on-light" id="btnPreviewStay" type="button">Aperçu</button>
                       <button class="btn on-light" id="btnTogglePublish" type="button">Publier / Dépublier</button>
                     </div>
                   </div>
@@ -579,6 +479,30 @@
                   <div id="publishMsg" class="muted-small" style="margin-top:10px;"></div>
                 </div>
               </div>
+            </div>
+
+            <div class="admin-block">
+              <div class="section-head">
+                <div>
+                  <h3>Blocs personnalisés</h3>
+                  <p class="muted-small" style="margin-top:6px;">
+                    Chaque séjour peut avoir une structure unique (ordre via ↑ ↓).
+                  </p>
+                </div>
+                <div class="admin-inline">
+                  <select id="newBlockType" class="input" style="min-width:180px;">
+                    <option value="text">text</option>
+                    <option value="image_full">image_full</option>
+                    <option value="image_text">image_text</option>
+                    <option value="text_image">text_image</option>
+                    <option value="gallery_2">gallery_2</option>
+                    <option value="quote">quote</option>
+                  </select>
+                  <button class="btn on-light" id="btnAddContentBlock" type="button">+ Ajouter un bloc</button>
+                </div>
+              </div>
+
+              <div id="contentBlocksList" class="blocks-list"></div>
             </div>
 
             <div class="admin-block">
@@ -705,6 +629,7 @@
     const btnReloadHomepage = document.getElementById("btnReloadHomepage");
     const btnSaveHomepage = document.getElementById("btnSaveHomepage");
     const btnNewStay = document.getElementById("btnNewStay");
+    const btnPreviewStayTop = document.getElementById("btnPreviewStayTop");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
     const btnAddPriceRow = document.getElementById("btnAddPriceRow");
@@ -737,7 +662,6 @@
     const stayMinBookings = document.getElementById("stayMinBookings");
 
     const stayPublished = document.getElementById("stayPublished");
-    const btnPreviewStay = document.getElementById("btnPreviewStay");
     const btnTogglePublish = document.getElementById("btnTogglePublish");
     const publishMsg = document.getElementById("publishMsg");
 
@@ -763,16 +687,14 @@
 
     const stayFaq = document.getElementById("stayFaq");
     const pricesRows = document.getElementById("pricesRows");
+    const newBlockType = document.getElementById("newBlockType");
+    const btnAddContentBlock = document.getElementById("btnAddContentBlock");
+    const contentBlocksList = document.getElementById("contentBlocksList");
 
     const featuredSlotContent = document.getElementById("featuredSlotContent");
-    const featuredPreviewMedia = document.getElementById("featuredPreviewMedia");
-    const featuredPreviewTitle = document.getElementById("featuredPreviewTitle");
-    const featuredPreviewDuration = document.getElementById("featuredPreviewDuration");
-    const featuredPreviewDates = document.getElementById("featuredPreviewDates");
-    const featuredPreviewLocation = document.getElementById("featuredPreviewLocation");
-    const cardsPreview = document.getElementById("cardsPreview");
 
     let currentStayId = null;
+    let stayContentBlocks = [];
     let allStays = [];
     let homepageFeaturedId = null;
     let homepageHighlights = [null, null, null, null, null];
@@ -828,6 +750,171 @@
     function arrayToLines(value){
       if(!value || !Array.isArray(value)) return "";
       return value.join("\n");
+    }
+
+    function createDefaultBlock(type = "text"){
+      const uid = `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      return {
+        id: uid,
+        type,
+        enabled: true,
+        layout: type === "text_image" ? "image_right" : "image_left",
+        title: "",
+        text: "",
+        image: "",
+        image_alt: "",
+        images: [],
+        quote: "",
+        caption: ""
+      };
+    }
+
+    function normalizeContentBlocks(rawValue){
+      if(!Array.isArray(rawValue)) return [];
+      return rawValue.map((raw, index) => {
+        const fallback = createDefaultBlock(raw?.type || "text");
+        const normalizedImages = Array.isArray(raw?.images)
+          ? raw.images.map(v => String(v || "").trim()).filter(Boolean)
+          : [];
+
+        return {
+          ...fallback,
+          ...raw,
+          id: String(raw?.id || `block_${index + 1}`),
+          enabled: raw?.enabled !== false,
+          type: String(raw?.type || fallback.type),
+          layout: String(raw?.layout || fallback.layout),
+          title: String(raw?.title || ""),
+          text: String(raw?.text || ""),
+          image: String(raw?.image || ""),
+          image_alt: String(raw?.image_alt || ""),
+          images: normalizedImages,
+          quote: String(raw?.quote || ""),
+          caption: String(raw?.caption || "")
+        };
+      });
+    }
+
+    function serializeContentBlocks(){
+      return normalizeContentBlocks(stayContentBlocks).map((block, index) => ({
+        id: block.id || `block_${index + 1}`,
+        type: block.type || "text",
+        enabled: block.enabled !== false,
+        layout: block.layout || (block.type === "text_image" ? "image_right" : "image_left"),
+        title: block.title || "",
+        text: block.text || "",
+        image: block.image || "",
+        image_alt: block.image_alt || "",
+        images: Array.isArray(block.images) ? block.images : [],
+        quote: block.quote || "",
+        caption: block.caption || ""
+      }));
+    }
+
+    function renderContentBlocksEditor(){
+      if(!contentBlocksList) return;
+      contentBlocksList.innerHTML = "";
+
+      if(!stayContentBlocks.length){
+        contentBlocksList.innerHTML = `<div class="slot-empty">Aucun bloc personnalisé. Le rendu actuel restera actif.</div>`;
+        return;
+      }
+
+      stayContentBlocks.forEach((block, index) => {
+        const card = document.createElement("div");
+        card.className = "custom-block-editor";
+
+        card.innerHTML = `
+          <div class="section-head" style="margin-bottom:0;">
+            <div>
+              <strong>Bloc ${index + 1}</strong>
+              <span class="muted-small" style="margin-left:8px;">type: ${block.type}</span>
+            </div>
+            <div class="custom-block-actions">
+              <button class="btn on-light btn-block-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="btn on-light btn-block-down" type="button" ${index === stayContentBlocks.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="btn on-light btn-block-delete" type="button">Supprimer</button>
+            </div>
+          </div>
+
+          <div class="admin-grid-2-tight">
+            <input class="input block-id" value="${block.id.replace(/"/g, "&quot;")}" placeholder="id">
+            <select class="input block-type">
+              <option value="text" ${block.type === "text" ? "selected" : ""}>text</option>
+              <option value="image_full" ${block.type === "image_full" ? "selected" : ""}>image_full</option>
+              <option value="image_text" ${block.type === "image_text" ? "selected" : ""}>image_text</option>
+              <option value="text_image" ${block.type === "text_image" ? "selected" : ""}>text_image</option>
+              <option value="gallery_2" ${block.type === "gallery_2" ? "selected" : ""}>gallery_2</option>
+              <option value="quote" ${block.type === "quote" ? "selected" : ""}>quote</option>
+            </select>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; font-size:14px;">
+            <input class="block-enabled" type="checkbox" ${block.enabled ? "checked" : ""}>
+            <span>Bloc actif</span>
+          </label>
+
+          <div class="admin-grid-2-tight">
+            <select class="input block-layout">
+              <option value="image_left" ${block.layout === "image_left" ? "selected" : ""}>image_left</option>
+              <option value="image_right" ${block.layout === "image_right" ? "selected" : ""}>image_right</option>
+            </select>
+            <input class="input block-title" value="${block.title.replace(/"/g, "&quot;")}" placeholder="title">
+          </div>
+
+          <textarea class="input block-text" style="min-height:90px;" placeholder="text">${block.text}</textarea>
+          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL">
+          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt">
+          <textarea class="input block-images" style="min-height:70px;" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
+          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote">
+          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption">
+        `;
+
+        function syncBlockFromCard(){
+          stayContentBlocks[index] = {
+            ...stayContentBlocks[index],
+            id: card.querySelector(".block-id")?.value?.trim() || `block_${index + 1}`,
+            type: card.querySelector(".block-type")?.value || "text",
+            enabled: !!card.querySelector(".block-enabled")?.checked,
+            layout: card.querySelector(".block-layout")?.value || "image_left",
+            title: card.querySelector(".block-title")?.value?.trim() || "",
+            text: card.querySelector(".block-text")?.value?.trim() || "",
+            image: card.querySelector(".block-image")?.value?.trim() || "",
+            image_alt: card.querySelector(".block-image-alt")?.value?.trim() || "",
+            images: linesToArray(card.querySelector(".block-images")?.value || ""),
+            quote: card.querySelector(".block-quote")?.value?.trim() || "",
+            caption: card.querySelector(".block-caption")?.value?.trim() || ""
+          };
+        }
+
+        card.querySelectorAll("input,textarea,select").forEach(field => {
+          field.addEventListener("input", syncBlockFromCard);
+          field.addEventListener("change", syncBlockFromCard);
+        });
+
+        card.querySelector(".btn-block-up")?.addEventListener("click", () => {
+          if(index < 1) return;
+          const temp = stayContentBlocks[index - 1];
+          stayContentBlocks[index - 1] = stayContentBlocks[index];
+          stayContentBlocks[index] = temp;
+          renderContentBlocksEditor();
+        });
+
+        card.querySelector(".btn-block-down")?.addEventListener("click", () => {
+          if(index >= stayContentBlocks.length - 1) return;
+          const temp = stayContentBlocks[index + 1];
+          stayContentBlocks[index + 1] = stayContentBlocks[index];
+          stayContentBlocks[index] = temp;
+          renderContentBlocksEditor();
+        });
+
+        card.querySelector(".btn-block-delete")?.addEventListener("click", () => {
+          stayContentBlocks.splice(index, 1);
+          renderContentBlocksEditor();
+        });
+
+        contentBlocksList.appendChild(card);
+      });
     }
 
     function parseDateSafe(value){
@@ -892,24 +979,6 @@
         imgEl.src = "";
         imgEl.style.display = "none";
       }
-    }
-
-    function formatDateRange(start, end){
-      if(!start && !end) return "Dates à annoncer";
-      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-      if(startText && endText) return `${startText} au ${endText}`;
-      return startText || endText || "Dates à annoncer";
-    }
-
-    function getDurationLabel(start, end){
-      if(!start || !end) return "Durée à annoncer";
-      const s = new Date(start + "T00:00:00");
-      const e = new Date(end + "T00:00:00");
-      const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
-      if(days <= 0) return "Durée à annoncer";
-      const nights = Math.max(0, days - 1);
-      return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function stayById(id){
@@ -1194,67 +1263,9 @@
       }
     }
 
-    function renderHomepagePreview(){
-      const featured = stayById(homepageFeaturedId);
-
-      const featuredImage = featured?.hero_image || "";
-      const featuredDuration = featured?.firstDate
-        ? getDurationLabel(featured.firstDate.start_date, featured.firstDate.end_date)
-        : "Durée à annoncer";
-      const featuredDates = featured?.firstDate
-        ? formatDateRange(featured.firstDate.start_date, featured.firstDate.end_date)
-        : "Dates à annoncer";
-
-      featuredPreviewMedia.style.backgroundImage = featuredImage ? `url('${featuredImage}')` : "none";
-      featuredPreviewTitle.textContent = featured?.title || "Aucun séjour";
-      featuredPreviewDuration.textContent = featuredDuration;
-      featuredPreviewDates.textContent = featuredDates;
-      featuredPreviewLocation.textContent = featured?.location || "";
-
-      cardsPreview.innerHTML = "";
-
-      for(let i = 0; i < 5; i++){
-        const stay = stayById(homepageHighlights[i]);
-        const card = document.createElement("div");
-        card.className = "card";
-
-        if(!stay){
-          card.innerHTML = `
-            <div class="card-media" style="display:grid; place-items:center; color:var(--muted); background:#f0ece6;">
-              Position ${i+1}
-            </div>
-            <div class="card-title">Emplacement vide</div>
-          `;
-        } else {
-          const image = stay.hero_image || "";
-          const duration = stay.firstDate
-            ? getDurationLabel(stay.firstDate.start_date, stay.firstDate.end_date)
-            : "Durée à annoncer";
-          const dates = stay.firstDate
-            ? formatDateRange(stay.firstDate.start_date, stay.firstDate.end_date)
-            : "Dates à annoncer";
-
-          card.innerHTML = `
-            <div class="card-media" style="${image ? `background-image:url('${image}')` : ''}">
-              <div class="card-overlay">
-                <div>
-                  <div style="text-transform:uppercase; letter-spacing:.08em;">${duration}</div>
-                  <div style="margin-top:4px;">${dates}</div>
-                </div>
-              </div>
-            </div>
-            <div class="card-title">${stay.title || "Séjour"}</div>
-          `;
-        }
-
-        cardsPreview.appendChild(card);
-      }
-    }
-
     function renderHomepageManager(){
       renderHomepagePool();
       renderHomepageSlots();
-      renderHomepagePreview();
     }
 
     function attachDropEvents(){
@@ -1415,6 +1426,8 @@
 
       stayFaq.value = "";
       pricesRows.innerHTML = "";
+      stayContentBlocks = [];
+      renderContentBlocksEditor();
 
       setMsg(editorMsg, "");
       setMsg(publishMsg, "");
@@ -1585,6 +1598,8 @@
 
       setPreview(giftPreview, stay.gift_image || "");
       stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
+      stayContentBlocks = normalizeContentBlocks(stay.content_blocks);
+      renderContentBlocksEditor();
 
       pricesRows.innerHTML = "";
       if(prices?.length){
@@ -1695,7 +1710,14 @@
       setMsg(editorMsg, "FAQ modèle enregistrée.");
     });
 
-    btnPreviewStay?.addEventListener("click", () => {
+    btnAddContentBlock?.addEventListener("click", () => {
+      const type = newBlockType?.value || "text";
+      stayContentBlocks.push(createDefaultBlock(type));
+      renderContentBlocksEditor();
+      setMsg(editorMsg, "");
+    });
+
+    btnPreviewStayTop?.addEventListener("click", () => {
       const slug = staySlug.value.trim() || slugify(stayTitle.value.trim());
 
       if(!slug){
@@ -1777,6 +1799,7 @@
 
       const programValue = getCurrentProgramFromEditors();
       const homepagePosition = getHomepagePositionValue();
+      const contentBlocksValue = serializeContentBlocks();
 
       const payload = {
         title,
@@ -1804,6 +1827,7 @@
         gift_outro: giftOutro.value.trim(),
         gift_image: giftImage.value.trim(),
         faq: faqValue,
+        content_blocks: contentBlocksValue,
         show_gift_section: showGiftSection,
         show_faq_section: showFaqSection,
         show_program_section: showProgramSection,
@@ -1908,6 +1932,7 @@
       await loadStays();
       refreshAllEyeButtons();
       createPriceRow();
+      renderContentBlocksEditor();
       await loadDefaultFaqIntoField();
       closeEditor();
     } catch(err){
