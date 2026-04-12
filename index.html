@@ -495,11 +495,10 @@
         
         <div class="stay-card-media" style="background-image:url('${image}')">
 
-          <!-- overlay FIX -->
-          <div class="stay-card-overlay" style="background:rgba(0,0,0,0.35);"></div>
+          <div class="stay-card-overlay"></div>
 
-          <!-- contenu visible -->
-          <div class="stay-card-hover" style="opacity:1; transform:none;">
+          <div class="stay-card-hover">
+            <div class="stay-card-line">${stay.title || "Séjour"}</div>
             <div class="stay-card-line">${duration}</div>
             <div class="stay-card-line stay-card-dates">${dates}</div>
             <div class="card-place">${stay.location || stay.title}</div>
@@ -510,8 +509,6 @@
           </div>
 
         </div>
-
-        <div class="stay-card-title">${stay.title || "Séjour"}</div>
       </a>
     `;
 
