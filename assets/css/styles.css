@@ -629,7 +629,7 @@ footer.band.cream{
 .bottom-wide .bg{
   position:absolute; inset:0;
   background-size:cover;
-  background-position:center 62%;
+  background-position:center top;
 }
 .bottom-wide::before{
   content:"";
