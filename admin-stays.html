@@ -230,6 +230,60 @@
       color:var(--muted);
     }
 
+    .publish-toggle{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.82);
+      border-radius:999px;
+      padding:4px;
+      display:inline-grid;
+      grid-template-columns:1fr 1fr;
+      position:relative;
+      min-width:210px;
+      cursor:pointer;
+      transition:border-color .25s ease, background-color .25s ease, box-shadow .25s ease;
+    }
+
+    .publish-toggle::before{
+      content:"";
+      position:absolute;
+      top:4px;
+      left:4px;
+      width:calc(50% - 4px);
+      height:calc(100% - 8px);
+      border-radius:999px;
+      background:#1f2022;
+      box-shadow:0 8px 18px rgba(18,18,18,.2);
+      transition:transform .28s ease;
+    }
+
+    .publish-toggle.is-published::before{
+      transform:translateX(100%);
+    }
+
+    .publish-toggle-option{
+      position:relative;
+      z-index:1;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.01em;
+      padding:9px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      transition:color .25s ease;
+    }
+
+    .publish-toggle-option.is-active{
+      color:#fff;
+    }
+
+    .publish-toggle:focus-visible{
+      outline:2px solid #1f2022;
+      outline-offset:2px;
+    }
+
     .editor-hidden{
       display:none;
     }
@@ -259,6 +313,10 @@
       .position-picker,
       .admin-grid-2-tight{
         grid-template-columns:1fr;
+      }
+
+      .publish-toggle{
+        min-width:180px;
       }
     }
   </style>
@@ -376,6 +434,10 @@
             </div>
 
             <div class="admin-inline">
+              <button class="publish-toggle" id="stayPublishToggle" type="button" aria-pressed="false" aria-label="Statut du séjour : brouillon">
+                <span class="publish-toggle-option is-active" data-publish-state="draft">Brouillon</span>
+                <span class="publish-toggle-option" data-publish-state="published">Publié</span>
+              </button>
               <button class="btn on-light" id="btnPreviewStayTop" type="button">Aperçu</button>
               <button class="btn on-light" id="btnSaveStay" type="button">Enregistrer</button>
               <button class="btn on-light" id="btnCancelEdit" type="button">Fermer</button>
@@ -600,6 +662,7 @@
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
     const btnRebuildProgram = document.getElementById("btnRebuildProgram");
+    const stayPublishToggle = document.getElementById("stayPublishToggle");
 
     const btnToggleGiftSection = document.getElementById("btnToggleGiftSection");
     const btnToggleFaqSection = document.getElementById("btnToggleFaqSection");
@@ -670,6 +733,19 @@
 
     function setMsg(el, msg){
       if(el) el.textContent = msg || "";
+    }
+
+    function updatePublishToggleUI(){
+      if(!stayPublishToggle) return;
+      const isPublished = !!stayPublished.checked;
+      stayPublishToggle.classList.toggle("is-published", isPublished);
+      stayPublishToggle.setAttribute("aria-pressed", String(isPublished));
+      stayPublishToggle.setAttribute("aria-label", `Statut du séjour : ${isPublished ? "publié" : "brouillon"}`);
+
+      const draftOption = stayPublishToggle.querySelector('[data-publish-state="draft"]');
+      const publishedOption = stayPublishToggle.querySelector('[data-publish-state="published"]');
+      draftOption?.classList.toggle("is-active", !isPublished);
+      publishedOption?.classList.toggle("is-active", isPublished);
     }
 
     function openEditor(){
@@ -1331,6 +1407,7 @@
       stayBookingUrl.value = "";
       stayMinBookings.value = "10";
       stayPublished.checked = false;
+      updatePublishToggleUI();
 
       setHomepagePositionValue("none");
 
@@ -1492,6 +1569,7 @@
       stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
       stayMinBookings.value = stay.min_bookings ?? 10;
       stayPublished.checked = !!stay.published;
+      updatePublishToggleUI();
 
       if(stay.is_featured){
         setHomepagePositionValue("featured");
@@ -1616,6 +1694,14 @@
 
       window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
     });
+
+    stayPublishToggle?.addEventListener("click", () => {
+      stayPublished.checked = !stayPublished.checked;
+      updatePublishToggleUI();
+      setMsg(editorMsg, "");
+    });
+
+    stayPublished?.addEventListener("change", updatePublishToggleUI);
 
     stayTitle?.addEventListener("input", () => {
       if(!currentStayId){
@@ -1759,6 +1845,7 @@
       await loadStays();
       refreshAllEyeButtons();
       renderContentBlocksEditor();
+      updatePublishToggleUI();
       closeEditor();
     } catch(err){
       console.warn(err);
