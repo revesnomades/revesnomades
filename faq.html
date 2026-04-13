@@ -108,6 +108,48 @@
     import { supabase } from "/assets/js/supabaseClient.js";
 
     const faqList = document.getElementById("faqList");
+    const fallbackFaqItems = [
+      {
+        question: "À qui s’adressent les séjours Âmes Nomades ?",
+        answer: "Les séjours Âmes Nomades s’adressent à toute personne en quête de reconnexion, de calme et de sens. Aucun niveau n’est requis, simplement l’envie de ralentir, se retrouver et vivre une expérience humaine forte."
+      },
+      {
+        question: "Doit-on avoir un niveau sportif particulier ?",
+        answer: "Non. Les activités sont accessibles à tous et toujours adaptables. L’objectif n’est pas la performance, mais le bien-être et le plaisir."
+      },
+      {
+        question: "Que comprend le séjour ?",
+        answer: "Chaque séjour inclut l’hébergement, certaines activités encadrées, et des moments de partage en groupe. Le détail exact est précisé sur la page du séjour."
+      },
+      {
+        question: "Que faut-il prévoir en plus ?",
+        answer: "Les transports jusqu’au lieu du séjour, certaines activités optionnelles et les dépenses personnelles ne sont généralement pas inclus. Tout est détaillé sur la page du séjour."
+      },
+      {
+        question: "Comment se passe la réservation ?",
+        answer: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois votre demande prise en compte, vous recevez toutes les informations nécessaires par email."
+      },
+      {
+        question: "Le séjour est-il confirmé automatiquement ?",
+        answer: "Un séjour est confirmé lorsqu’un nombre minimum de participants est atteint. Vous êtes informé(e) dès que le séjour est validé."
+      },
+      {
+        question: "Puis-je venir seul(e) ?",
+        answer: "Oui, la majorité des participants viennent seuls. Les séjours sont conçus pour favoriser les rencontres naturelles et les échanges authentiques."
+      },
+      {
+        question: "Quel est l’esprit des séjours ?",
+        answer: "Les séjours Âmes Nomades sont centrés sur le bien-être, la reconnexion à soi et aux autres, et la simplicité. L’ambiance est bienveillante, sans jugement et profondément humaine."
+      },
+      {
+        question: "Comment se déroulent les journées ?",
+        answer: "Les journées alternent activités, temps libres et moments collectifs. Le programme est flexible pour s’adapter au groupe et aux conditions sur place."
+      },
+      {
+        question: "Puis-je annuler ma réservation ?",
+        answer: "Les conditions d’annulation dépendent du séjour. Elles sont précisées au moment de la réservation. En cas de doute, n’hésitez pas à nous contacter."
+      }
+    ];
 
     function renderFaq(items){
       if(!items.length){
@@ -138,16 +180,11 @@
 
       if(error){
         console.error(error);
-        faqList.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">Erreur</div>
-            <p class="sub" style="margin-top:8px;">Impossible de charger la FAQ pour le moment.</p>
-          </div>
-        `;
+        renderFaq(fallbackFaqItems);
         return;
       }
 
-      renderFaq(data || []);
+      renderFaq((data && data.length) ? data : fallbackFaqItems);
     }
 
     loadFaq();
