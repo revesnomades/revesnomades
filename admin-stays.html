@@ -578,21 +578,6 @@
           <div id="staysList" class="stays-admin-list">Chargement…</div>
         </div>
 
-        <div class="admin-panel">
-          <div class="section-head">
-            <div>
-              <h2>FAQ du site</h2>
-              <p class="muted-small" style="margin-top:8px;">FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).</p>
-            </div>
-            <div class="admin-inline">
-              <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener">Voir faq.html</a>
-              <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
-              <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
-            </div>
-          </div>
-          <div id="siteFaqMsg" class="muted-small" style="margin-bottom:12px;"></div>
-          <div id="siteFaqList" class="blocks-list"></div>
-        </div>
       </div>
     </div>
   </section>
@@ -615,8 +600,6 @@
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
     const btnRebuildProgram = document.getElementById("btnRebuildProgram");
-    const btnAddSiteFaq = document.getElementById("btnAddSiteFaq");
-    const btnSaveSiteFaq = document.getElementById("btnSaveSiteFaq");
 
     const btnToggleGiftSection = document.getElementById("btnToggleGiftSection");
     const btnToggleFaqSection = document.getElementById("btnToggleFaqSection");
@@ -669,15 +652,11 @@
     const newBlockType = document.getElementById("newBlockType");
     const btnAddContentBlock = document.getElementById("btnAddContentBlock");
     const contentBlocksList = document.getElementById("contentBlocksList");
-    const siteFaqList = document.getElementById("siteFaqList");
-    const siteFaqMsg = document.getElementById("siteFaqMsg");
 
     const featuredSlotContent = document.getElementById("featuredSlotContent");
 
     let currentStayId = null;
     let stayContentBlocks = [];
-    let siteFaqItems = [];
-    let initialSiteFaqIds = [];
     let allStays = [];
     let homepageFeaturedId = null;
     let homepageHighlights = [null, null, null, null, null];
@@ -1138,194 +1117,6 @@
       updateDurationInfo();
     }
 
-    function normalizeSiteFaqItems(raw){
-      if(!Array.isArray(raw)) return [];
-      return raw.map((item, index) => ({
-        id: item?.id || null,
-        question: String(item?.question || ""),
-        answer: String(item?.answer || ""),
-        sort_order: Number(item?.sort_order ?? index + 1),
-        is_active: item?.is_active !== false,
-        use_for_stay_default: item?.use_for_stay_default === true
-      }));
-    }
-
-    function renderSiteFaqEditor(){
-      if(!siteFaqList) return;
-      siteFaqList.innerHTML = "";
-
-      if(!siteFaqItems.length){
-        siteFaqList.innerHTML = `<div class="slot-empty">Aucune question FAQ pour le moment.</div>`;
-        return;
-      }
-
-      siteFaqItems.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "custom-block-editor";
-        card.innerHTML = `
-          <div class="section-head" style="margin-bottom:0;">
-            <strong>Question ${index + 1}</strong>
-            <div class="custom-block-actions">
-              <button class="btn on-light btn-faq-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
-              <button class="btn on-light btn-faq-down" type="button" ${index === siteFaqItems.length - 1 ? "disabled" : ""}>↓</button>
-              <button class="btn on-light btn-faq-delete" type="button">Supprimer</button>
-            </div>
-          </div>
-          <input class="input faq-question" placeholder="Question" value="${item.question.replace(/"/g, "&quot;")}">
-          <textarea class="input faq-answer" style="min-height:90px;" placeholder="Réponse">${item.answer}</textarea>
-          <div class="admin-inline">
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" class="faq-active" ${item.is_active ? "checked" : ""}>
-              <span>Active</span>
-            </label>
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" class="faq-stay-default" ${item.use_for_stay_default ? "checked" : ""}>
-              <span>FAQ modèle séjour</span>
-            </label>
-          </div>
-        `;
-
-        function syncFaq(){
-          siteFaqItems[index] = {
-            ...siteFaqItems[index],
-            question: card.querySelector(".faq-question")?.value?.trim() || "",
-            answer: card.querySelector(".faq-answer")?.value?.trim() || "",
-            is_active: !!card.querySelector(".faq-active")?.checked,
-            use_for_stay_default: !!card.querySelector(".faq-stay-default")?.checked,
-            sort_order: index + 1
-          };
-
-          const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
-          if(selectedForStay.length > 5){
-            siteFaqItems[index].use_for_stay_default = false;
-            const check = card.querySelector(".faq-stay-default");
-            if(check) check.checked = false;
-            setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
-          }
-        }
-
-        card.querySelectorAll("input,textarea").forEach(el => {
-          el.addEventListener("input", syncFaq);
-          el.addEventListener("change", syncFaq);
-        });
-
-        card.querySelector(".btn-faq-up")?.addEventListener("click", () => {
-          if(index < 1) return;
-          const tmp = siteFaqItems[index - 1];
-          siteFaqItems[index - 1] = siteFaqItems[index];
-          siteFaqItems[index] = tmp;
-          renderSiteFaqEditor();
-        });
-
-        card.querySelector(".btn-faq-down")?.addEventListener("click", () => {
-          if(index >= siteFaqItems.length - 1) return;
-          const tmp = siteFaqItems[index + 1];
-          siteFaqItems[index + 1] = siteFaqItems[index];
-          siteFaqItems[index] = tmp;
-          renderSiteFaqEditor();
-        });
-
-        card.querySelector(".btn-faq-delete")?.addEventListener("click", () => {
-          siteFaqItems.splice(index, 1);
-          renderSiteFaqEditor();
-        });
-
-        siteFaqList.appendChild(card);
-      });
-    }
-
-    async function loadSiteFaqItems(){
-      const { data, error } = await supabase
-        .from("faq_items")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true });
-
-      if(error){
-        console.error(error);
-        setMsg(siteFaqMsg, "Impossible de charger la FAQ du site.");
-        return;
-      }
-
-      siteFaqItems = normalizeSiteFaqItems(data || []);
-      initialSiteFaqIds = siteFaqItems.map(item => item.id).filter(Boolean);
-      renderSiteFaqEditor();
-      setMsg(siteFaqMsg, "");
-    }
-
-    async function saveSiteFaqItems(){
-      setMsg(siteFaqMsg, "Enregistrement FAQ du site…");
-
-      const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
-      if(selectedForStay.length > 5){
-        setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
-        return;
-      }
-
-      const cleanItems = siteFaqItems
-        .map((item, index) => ({
-          id: typeof item.id === "string" && item.id.trim() ? item.id.trim() : null,
-          question: String(item.question || "").trim(),
-          answer: String(item.answer || "").trim(),
-          sort_order: index + 1,
-          is_active: item.is_active !== false,
-          use_for_stay_default: item.use_for_stay_default === true
-        }))
-        .filter(item => item.question && item.answer);
-
-      const existingItems = cleanItems
-        .filter(item => item.id)
-        .map(({ id, question, answer, sort_order, is_active, use_for_stay_default }) => ({
-          id,
-          question,
-          answer,
-          sort_order,
-          is_active,
-          use_for_stay_default
-        }));
-
-      const newItems = cleanItems
-        .filter(item => !item.id)
-        .map(({ question, answer, sort_order, is_active, use_for_stay_default }) => ({
-          question,
-          answer,
-          sort_order,
-          is_active,
-          use_for_stay_default
-        }));
-
-      try{
-        if(existingItems.length){
-          const { error: upsertError } = await supabase
-            .from("faq_items")
-            .upsert(existingItems, { onConflict: "id" });
-          if(upsertError) throw upsertError;
-        }
-
-        if(newItems.length){
-          const { error: insertError } = await supabase
-            .from("faq_items")
-            .insert(newItems);
-          if(insertError) throw insertError;
-        }
-
-        const keptIds = existingItems.map(i => i.id).filter(Boolean);
-        const idsToDelete = initialSiteFaqIds.filter(id => !keptIds.includes(id));
-        if(idsToDelete.length){
-          const { error: deleteError } = await supabase
-            .from("faq_items")
-            .delete()
-            .in("id", idsToDelete);
-          if(deleteError) throw deleteError;
-        }
-
-        setMsg(siteFaqMsg, "FAQ du site enregistrée.");
-        await loadSiteFaqItems();
-      } catch(err){
-        console.error(err);
-        setMsg(siteFaqMsg, `Erreur FAQ du site : ${err.message || err}`);
-      }
-    }
 
     function renderSlotPill(stay, onRemove){
       const pill = document.createElement("div");
@@ -1826,22 +1617,6 @@
       window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
     });
 
-    btnAddSiteFaq?.addEventListener("click", () => {
-      siteFaqItems.push({
-        id: null,
-        question: "",
-        answer: "",
-        sort_order: siteFaqItems.length + 1,
-        is_active: true,
-        use_for_stay_default: false
-      });
-      renderSiteFaqEditor();
-    });
-
-    btnSaveSiteFaq?.addEventListener("click", async () => {
-      await saveSiteFaqItems();
-    });
-
     stayTitle?.addEventListener("input", () => {
       if(!currentStayId){
         staySlug.value = slugify(stayTitle.value);
@@ -1982,7 +1757,6 @@
       setMsg(adminStatus, "Vous êtes connecté(e) en tant qu’administrateur.");
       await loadHomepageState();
       await loadStays();
-      await loadSiteFaqItems();
       refreshAllEyeButtons();
       renderContentBlocksEditor();
       closeEditor();
