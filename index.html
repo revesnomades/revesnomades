@@ -96,7 +96,9 @@
       <p class="reveal" data-delay="1">Partir pour mieux se retrouver.</p>
 
       <div class="actions reveal" data-delay="2">
-        <a href="#sejours" class="btn tiny" data-scroll>Réserver</a>
+        <a href="#sejours" class="btn tiny" data-scroll>Voir les séjours</a>
+        <a href="#apropos" class="btn tiny" data-scroll>Découvrir</a>
+        <a href="#contact" class="btn tiny" data-scroll>Nous contacter</a>
       </div>
     </div>
   </section>
@@ -135,13 +137,25 @@
         <p class="sub reveal" data-delay="5" id="featuredStayLocation"></p>
 
         <div class="actions reveal" data-delay="6">
-          <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Plus d'infos</a>
+          <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Réserver</a>
+          <a class="btn tiny on-light" href="#prochains-sejours" data-scroll>Voir les séjours</a>
         </div>
 
         <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
         <div class="missing reveal" data-delay="8" style="font-size:12px;">
           Un email vous sera envoyé dès la confirmation du séjour.
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="container" style="padding:36px 0 20px;">
+      <div class="trust-grid reveal">
+        <div class="trust-item">Réservation simple</div>
+        <div class="trust-item">Petit groupe</div>
+        <div class="trust-item">Accompagnement personnalisé</div>
+        <div class="trust-item">Confirmation par email</div>
       </div>
     </div>
   </section>
@@ -436,17 +450,7 @@
       if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
-      if (featuredStayMissing) {
-        const minBookings = Number(stay.min_bookings || 10);
-
-        if (stayDate && typeof stayDate.seats_total === "number" && typeof stayDate.seats_remaining === "number") {
-          const reserved = Number(stayDate.seats_total) - Number(stayDate.seats_remaining);
-          const missing = Math.max(0, minBookings - reserved);
-          featuredStayMissing.textContent = `Encore ${missing} réservations nécessaires pour valider ce séjour.`;
-        } else {
-          featuredStayMissing.textContent = `Encore ${minBookings} réservations nécessaires pour valider ce séjour.`;
-        }
-      }
+      if (featuredStayMissing) featuredStayMissing.textContent = "Places limitées";
     }
 
     async function loadHighlightStays() {

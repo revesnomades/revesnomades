@@ -75,18 +75,18 @@
         <p>Chargement du séjour…</p>
       </div>
 
-      <section class="reveal" style="margin-top:26px; display:none;" id="contentBlocksSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="contentBlocksSection">
         <div id="contentBlocksContainer" style="display:grid; gap:18px;"></div>
       </section>
 
-      <section class="reveal" style="margin-top:26px;" id="highlightsSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:26px;" id="highlightsSection">
         <h3 style="margin:0;">Ce que tu vas vivre</h3>
         <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
       </section>
 
-      <section class="reveal" style="margin-top:34px;" id="programSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="programSection">
         <h3 style="margin:0;">Programme</h3>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
@@ -99,7 +99,7 @@
         </p>
       </section>
 
-      <section class="reveal gift-pack" id="giftSection">
+      <section class="reveal gift-pack sejour-section sejour-divider" id="giftSection">
         <div class="gift-pack-grid">
           <div class="gift-pack-text">
             <h3 id="giftTitle">Le sac cadeau Âmes Nomades</h3>
@@ -131,7 +131,7 @@
         </div>
       </section>
 
-      <section class="reveal" style="margin-top:34px;" id="includedSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="includedSection">
         <h3 style="margin:0;">Ce qui est inclus</h3>
         <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
           <div>Chargement…</div>
@@ -143,7 +143,7 @@
         </div>
       </section>
 
-      <section class="reveal" style="margin-top:34px;" id="optionsSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="optionsSection">
         <h3 style="margin:0;">Options (en supplément)</h3>
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
@@ -163,12 +163,13 @@
           <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener">
             Réserver
           </a>
+          <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
         </div>
 
         <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
       </div>
 
-      <section class="reveal" style="margin-top:34px;" id="faqSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="faqSection">
         <h3 style="margin:0;">FAQ</h3>
 
         <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
@@ -176,6 +177,15 @@
             <div class="kicker">Chargement…</div>
             <p class="sub" style="margin-top:8px;">Les questions fréquentes s’afficheront ici.</p>
           </div>
+        </div>
+      </section>
+
+      <section class="reveal sejour-section">
+        <div class="trust-grid">
+          <div class="trust-item">Réservation simple</div>
+          <div class="trust-item">Petit groupe</div>
+          <div class="trust-item">Accompagnement personnalisé</div>
+          <div class="trust-item">Confirmation par email</div>
         </div>
       </section>
 
@@ -278,6 +288,28 @@
     const bookingBtn = document.getElementById("bookingBtn");
     const bookingMsg = document.getElementById("bookingMsg");
     const missingCount = document.getElementById("missingCount");
+    const fallbackStayFaqItems = [
+      {
+        q: "À qui s’adressent les séjours Âmes Nomades ?",
+        a: "Les séjours Âmes Nomades s’adressent à toute personne en quête de reconnexion, de calme et de sens. Aucun niveau n’est requis, simplement l’envie de ralentir, se retrouver et vivre une expérience humaine forte."
+      },
+      {
+        q: "Doit-on avoir un niveau sportif particulier ?",
+        a: "Non. Les activités sont accessibles à tous et toujours adaptables. L’objectif n’est pas la performance, mais le bien-être et le plaisir."
+      },
+      {
+        q: "Que comprend le séjour ?",
+        a: "Chaque séjour inclut l’hébergement, certaines activités encadrées, et des moments de partage en groupe. Le détail exact est précisé sur la page du séjour."
+      },
+      {
+        q: "Que faut-il prévoir en plus ?",
+        a: "Les transports jusqu’au lieu du séjour, certaines activités optionnelles et les dépenses personnelles ne sont généralement pas inclus. Tout est détaillé sur la page du séjour."
+      },
+      {
+        q: "Comment se passe la réservation ?",
+        a: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois votre demande prise en compte, vous recevez toutes les informations nécessaires par email."
+      }
+    ];
 
     function arrayFromField(value){
       if (!value) return [];
@@ -448,7 +480,8 @@
         .order("sort_order", { ascending: true })
         .limit(5);
 
-      return (data || []).map(item => ({ q: item.question, a: item.answer }));
+      const fromSiteFaq = (data || []).map(item => ({ q: item.question, a: item.answer }));
+      return fromSiteFaq.length ? fromSiteFaq : fallbackStayFaqItems;
     }
 
     function formatDateRange(start, end){
