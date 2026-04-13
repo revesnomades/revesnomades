@@ -231,12 +231,18 @@
       <h2 class="reveal" data-delay="0">Recevez votre guide en cadeau !</h2>
 
       <form id="newsletterForm" class="form-stack reveal" data-delay="1">
-        <input class="input" name="name" placeholder="Votre prénom" required />
+        <input class="input" name="lastname" placeholder="Nom" required />
+        <input class="input" name="firstname" placeholder="Prénom" required />
         <input class="input" name="email" type="email" placeholder="Votre Email" required />
         <button class="btn block" type="submit">Recevoir mon guide</button>
       </form>
 
       <div id="newsletterMsg" class="form-msg reveal" data-delay="2"></div>
+      <p class="newsletter-legal reveal" data-delay="3">
+        En cliquant sur recevoir mon guide vous acceptez notre
+        <a href="politique-confidentialite.html">politique de confidentialité</a>
+        et êtes inscrits à notre newsletter.
+      </p>
     </div>
   </section>
 
@@ -258,21 +264,22 @@
 
       <form id="contactForm" class="formbox">
         <div class="reveal" data-delay="0">
-          <select name="subject" required>
-            <option value="">Ma demande concerne…</option>
-            <option value="reservation">Réservation</option>
-            <option value="sur-mesure">Moment sur mesure</option>
-            <option value="carte-cadeau">Carte cadeau</option>
-            <option value="autre">Autre</option>
-          </select>
+          <input name="subject" placeholder="Objet" required />
         </div>
 
-        <input class="reveal" data-delay="1" name="name" placeholder="Votre nom" required />
-        <input class="reveal" data-delay="2" name="email" type="email" placeholder="Votre Email" required />
-        <textarea class="reveal" data-delay="3" name="message" placeholder="Votre message" required></textarea>
+        <input class="reveal" data-delay="1" name="lastname" placeholder="Nom" required />
+        <input class="reveal" data-delay="2" name="firstname" placeholder="Prénom" required />
+        <input class="reveal" data-delay="3" name="email" type="email" placeholder="Votre Email" required />
+        <input class="reveal" data-delay="4" name="phone" type="tel" placeholder="Téléphone (facultatif)" />
+        <textarea class="reveal" data-delay="5" name="message" placeholder="Votre message" required></textarea>
 
-        <button class="btn on-light reveal" data-delay="4" type="submit">ENVOYER</button>
-        <div id="contactMsg" class="muted small reveal" data-delay="5"></div>
+        <label class="contact-consent reveal" data-delay="6">
+          <input type="checkbox" name="privacyConsent" required />
+          <span>J’accepte la politique de confidentialité</span>
+        </label>
+
+        <button class="btn on-light reveal" data-delay="7" type="submit">ENVOYER</button>
+        <div id="contactMsg" class="muted small reveal" data-delay="8"></div>
       </form>
 
       <div class="rightcopy">
@@ -356,6 +363,8 @@
 
     const form = document.getElementById("newsletterForm");
     const msg = document.getElementById("newsletterMsg");
+    const contactForm = document.getElementById("contactForm");
+    const contactMsg = document.getElementById("contactMsg");
 
     function show(html){ if(msg) msg.innerHTML = html || ""; }
 
@@ -518,11 +527,12 @@
       show("");
 
       const fd = new FormData(form);
-      const firstname = String(fd.get("name") || "").trim();
+      const firstname = String(fd.get("firstname") || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
 
-      if(!firstname || !email){
-        show("Merci de renseigner votre prénom et votre email.");
+      if(!firstname || !lastname || !email){
+        show("Merci de renseigner votre nom, votre prénom et votre email.");
         return;
       }
 
@@ -534,7 +544,7 @@
             "apikey": SUPABASE_ANON_KEY,
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({ firstname, email }),
+          body: JSON.stringify({ firstname, lastname, email }),
         });
 
         const data = await res.json().catch(() => ({}));
@@ -564,6 +574,57 @@
         console.error(err);
         show("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
       }
+    });
+
+    function setContactMsg(text){
+      if(contactMsg) contactMsg.textContent = text || "";
+    }
+
+    contactForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setContactMsg("");
+
+      const fd = new FormData(contactForm);
+      const subject = String(fd.get("subject") || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
+      const firstname = String(fd.get("firstname") || "").trim();
+      const email = String(fd.get("email") || "").trim().toLowerCase();
+      const phone = String(fd.get("phone") || "").trim();
+      const message = String(fd.get("message") || "").trim();
+      const privacyConsent = fd.get("privacyConsent") === "on";
+
+      if(!subject || !lastname || !firstname || !email || !message){
+        setContactMsg("Merci de compléter tous les champs obligatoires.");
+        return;
+      }
+
+      if(!privacyConsent){
+        setContactMsg("Merci d’accepter la politique de confidentialité.");
+        return;
+      }
+
+      const fullName = `${firstname} ${lastname}`.trim();
+      const messageWithPhone = phone
+        ? `Téléphone : ${phone}\n\n${message}`
+        : message;
+
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          subject,
+          name: fullName,
+          email,
+          message: messageWithPhone
+        });
+
+      if(error){
+        console.error("CONTACT FORM ERROR:", error);
+        setContactMsg("Oups… impossible d’envoyer votre message pour le moment.");
+        return;
+      }
+
+      setContactMsg("Message envoyé ✅ Nous vous répondons vite.");
+      contactForm.reset();
     });
 
     await loadFeaturedStay();
