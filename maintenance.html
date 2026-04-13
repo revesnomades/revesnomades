@@ -310,7 +310,7 @@
   </main>
 
   <script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY, supabase } from "/assets/js/supabaseClient.js";
 
     const form = document.getElementById("priorityForm");
     const msg = document.getElementById("priorityMsg");
@@ -338,6 +338,13 @@
         return;
       }
 
+      const payload = {
+        firstname,
+        email,
+        priority: true,
+        source: "maintenance_page"
+      };
+
       try{
         const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
           method: "POST",
@@ -346,19 +353,48 @@
             "apikey": SUPABASE_ANON_KEY,
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({
-            firstname,
-            email,
-            priority: true,
-            source: "maintenance_page"
-          }),
+          body: JSON.stringify(payload),
         });
 
-        const data = await res.json().catch(() => ({}));
+        const rawText = await res.text();
+        let data = {};
+        try{
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch(parseError){
+          data = { raw: rawText };
+          console.warn("priority signup non-JSON response:", parseError);
+        }
 
         if(!res.ok){
-          console.warn("priority signup error:", data);
-          showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
+          console.error("priority signup function error:", {
+            status: res.status,
+            statusText: res.statusText,
+            data,
+            payload
+          });
+
+          const { error: fallbackError } = await supabase
+            .from("priority_waitlist")
+            .upsert([{
+              firstname,
+              email,
+              source: "maintenance_page",
+              status: "active"
+            }], { onConflict: "email" });
+
+          if(fallbackError){
+            console.error("priority signup fallback error:", {
+              message: fallbackError.message,
+              details: fallbackError.details,
+              hint: fallbackError.hint,
+              code: fallbackError.code
+            });
+            showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
+            return;
+          }
+
+          showMessage(`🌿 Merci ${firstname}, vous êtes bien inscrit(e) à la liste prioritaire.`);
+          form.reset();
           return;
         }
 
@@ -371,7 +407,7 @@
         form.reset();
 
       } catch(err){
-        console.error(err);
+        console.error("priority signup unexpected error:", err);
         showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
       }
     });
