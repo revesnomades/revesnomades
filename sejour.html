@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
+  <meta id="stayMetaDescription" name="description" content="Découvrez un séjour bien-être avec Âmes Nomades. Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
@@ -80,14 +81,14 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:26px;" id="highlightsSection">
-        <h3 style="margin:0;">Ce que tu vas vivre</h3>
+        <h2 class="sejour-section-title">Ce que tu vas vivre</h2>
         <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="programSection">
-        <h3 style="margin:0;">Programme</h3>
+        <h2 class="sejour-section-title">Programme</h2>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
             <div class="kicker">Chargement…</div>
@@ -102,7 +103,7 @@
       <section class="reveal gift-pack sejour-section sejour-divider" id="giftSection">
         <div class="gift-pack-grid">
           <div class="gift-pack-text">
-            <h3 id="giftTitle">Le sac cadeau Âmes Nomades</h3>
+            <h2 class="sejour-section-title" id="giftTitle">Le sac cadeau Âmes Nomades</h2>
 
             <p class="sub" style="margin-top:10px;" id="giftIntro">
               À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.
@@ -132,19 +133,19 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="includedSection">
-        <h3 style="margin:0;">Ce qui est inclus</h3>
+        <h2 class="sejour-section-title">Ce qui est inclus</h2>
         <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
 
-        <h3 style="margin:26px 0 0;">Ce qui n’est pas inclus</h3>
+        <h2 class="sejour-section-title" style="margin-top:26px;">Ce qui n’est pas inclus</h2>
         <div id="notIncludedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="optionsSection">
-        <h3 style="margin:0;">Options (en supplément)</h3>
+        <h2 class="sejour-section-title">Options (en supplément)</h2>
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
@@ -170,13 +171,27 @@
       </div>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="faqSection">
-        <h3 style="margin:0;">FAQ</h3>
+        <h2 class="sejour-section-title">FAQ</h2>
 
         <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
             <div class="kicker">Chargement…</div>
             <p class="sub" style="margin-top:8px;">Les questions fréquentes s’afficheront ici.</p>
           </div>
+        </div>
+      </section>
+
+      <section class="reveal sejour-section sejour-divider" id="otherStaysSection">
+        <div class="other-stays-head">
+          <h2 class="sejour-section-title">Découvrir d’autres séjours</h2>
+          <div class="other-stays-controls" id="otherStaysControls" style="display:none;">
+            <button class="other-stays-arrow" id="otherStaysPrev" type="button" aria-label="Séjours précédents">←</button>
+            <button class="other-stays-arrow" id="otherStaysNext" type="button" aria-label="Séjours suivants">→</button>
+          </div>
+        </div>
+        <div id="otherStaysFallback" class="sub" style="margin-top:12px; color:var(--muted);">Chargement…</div>
+        <div class="other-stays-carousel" id="otherStaysCarousel" style="display:none;">
+          <div class="other-stays-track" id="otherStaysTrack"></div>
         </div>
       </section>
 
@@ -233,7 +248,8 @@
           <div>Copyright © 2026 Âmes Nomades</div>
           <div>
             <a href="/mentions-legales.html">Mentions légales</a> ·
-            <a href="/politique-confidentialite.html">Politique de confidentialité</a>
+            <a href="/politique-confidentialite.html">Politique de confidentialité</a> ·
+            <a href="/faq.html">FAQ</a>
           </div>
         </div>
       </div>
@@ -288,6 +304,13 @@
     const bookingBtn = document.getElementById("bookingBtn");
     const bookingMsg = document.getElementById("bookingMsg");
     const missingCount = document.getElementById("missingCount");
+    const stayMetaDescription = document.getElementById("stayMetaDescription");
+    const otherStaysTrack = document.getElementById("otherStaysTrack");
+    const otherStaysCarousel = document.getElementById("otherStaysCarousel");
+    const otherStaysFallback = document.getElementById("otherStaysFallback");
+    const otherStaysPrev = document.getElementById("otherStaysPrev");
+    const otherStaysNext = document.getElementById("otherStaysNext");
+    const otherStaysControls = document.getElementById("otherStaysControls");
     const fallbackStayFaqItems = [
       {
         q: "À qui s’adressent les séjours Âmes Nomades ?",
@@ -505,6 +528,80 @@
       return `${days} jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
+    function buildStayMetaDescription(stay){
+      const title = stay?.title || "ce séjour";
+      const place = stay?.location ? ` à ${stay.location}` : "";
+      const shortDescription = stay?.short_description
+        ? ` ${String(stay.short_description).trim()}`
+        : " Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.";
+
+      return `Découvrez le séjour bien-être ${title}${place} avec Âmes Nomades.${shortDescription}`;
+    }
+
+    function renderOtherStays(stays){
+      if(!otherStaysTrack || !otherStaysCarousel || !otherStaysFallback) return;
+
+      const publishedStays = (stays || []).filter(item => item && item.published === true);
+
+      if(!publishedStays.length){
+        otherStaysFallback.textContent = "Les prochains séjours seront bientôt disponibles.";
+        otherStaysCarousel.style.display = "none";
+        if (otherStaysControls) otherStaysControls.style.display = "none";
+        return;
+      }
+
+      if(publishedStays.length < 2){
+        const onlyStay = publishedStays[0];
+        otherStaysFallback.innerHTML = `
+          Un autre séjour est disponible :
+          <a href="/sejour.html?slug=${encodeURIComponent(onlyStay.slug)}" style="text-decoration:underline;">${onlyStay.title || "Découvrir le séjour"}</a>.
+        `;
+        otherStaysCarousel.style.display = "none";
+        if (otherStaysControls) otherStaysControls.style.display = "none";
+        return;
+      }
+
+      otherStaysFallback.textContent = "";
+      otherStaysCarousel.style.display = "";
+      if (otherStaysControls) otherStaysControls.style.display = "flex";
+
+      otherStaysTrack.innerHTML = publishedStays.map(stay => `
+        <article class="other-stay-card">
+          <a href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" class="other-stay-link">
+            <img class="other-stay-image" src="${stay.hero_image || "/assets/img/sejour-camargue.jpg"}" alt="${stay.title || "Séjour Âmes Nomades"}">
+            <div class="other-stay-body">
+              <h3>${stay.title || "Séjour Âmes Nomades"}</h3>
+              ${stay.location ? `<p class="other-stay-location">${stay.location}</p>` : ""}
+              <span class="other-stay-cta">Voir le séjour</span>
+            </div>
+          </a>
+        </article>
+      `).join("");
+
+      let currentIndex = 0;
+      let cardsPerView = window.innerWidth <= 900 ? 1 : 2;
+      const maxIndex = () => Math.max(0, publishedStays.length - cardsPerView);
+
+      function updatePosition(){
+        cardsPerView = window.innerWidth <= 900 ? 1 : 2;
+        currentIndex = Math.min(currentIndex, maxIndex());
+        otherStaysTrack.style.transform = `translateX(-${currentIndex * (100 / cardsPerView)}%)`;
+      }
+
+      otherStaysPrev?.addEventListener("click", () => {
+        currentIndex = currentIndex <= 0 ? maxIndex() : currentIndex - 1;
+        updatePosition();
+      });
+
+      otherStaysNext?.addEventListener("click", () => {
+        currentIndex = currentIndex >= maxIndex() ? 0 : currentIndex + 1;
+        updatePosition();
+      });
+
+      window.addEventListener("resize", updatePosition);
+      updatePosition();
+    }
+
     async function loadStay(){
       if(!slug){
         stayTitle.textContent = "Séjour introuvable";
@@ -577,6 +674,9 @@
 
       stayTitle.textContent = stay.title || "Séjour";
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
+      if (stayMetaDescription) {
+        stayMetaDescription.setAttribute("content", buildStayMetaDescription(stay));
+      }
 
       const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date);
       stayMeta.textContent = durationText;
@@ -660,6 +760,23 @@
         const minToValidate = stay.min_bookings || 10;
         const reservedCount = (bookingsPaid || []).length;
         missingCount.textContent = String(Math.max(0, minToValidate - reservedCount));
+      }
+
+      const { data: otherPublishedStays, error: otherStaysError } = await supabase
+        .from("stays")
+        .select("title, slug, hero_image, location, published")
+        .eq("published", true)
+        .neq("slug", stay.slug)
+        .order("created_at", { ascending: false })
+        .limit(12);
+
+      if(otherStaysError){
+        console.error(otherStaysError);
+        if (otherStaysFallback) {
+          otherStaysFallback.textContent = "Impossible de charger les autres séjours pour le moment.";
+        }
+      } else {
+        renderOtherStays(otherPublishedStays || []);
       }
     }
 
