@@ -343,6 +343,22 @@ html.js .reveal.is-visible{
   color: var(--muted);
 }
 
+.seo-home-block{
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 18px 0 34px;
+  opacity: .9;
+}
+.seo-home-block h2{
+  margin: 0;
+  font-size: clamp(16px, 1.8vw, 22px);
+}
+.seo-home-block p{
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 .stay-band.reverse .stay-media{ order: 2; }
 .stay-band.reverse .stay-copy{ order: 1; }
 
@@ -600,6 +616,10 @@ footer.band.cream{
   padding: calc(var(--navH) + -40px) 0 var(--space-lg);
 }
 .sejour-content h1{ font-size: clamp(30px, 3.4vw, 48px); }
+.sejour-section-title{
+  margin: 0;
+  font-size: 1.17em;
+}
 .sejour-meta{ color: var(--muted); font-size: 16px; margin-top: 10px; }
 .sejour-dates{ color: var(--muted); font-size: 14px; margin-top: 6px; }
 .sejour-text p{ color: var(--muted); line-height: 1.85; }
@@ -625,6 +645,69 @@ footer.band.cream{
   display:flex;
   justify-content:space-between;
   align-items:center;
+}
+
+.other-stays-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.other-stays-controls{
+  display:flex;
+  gap:8px;
+}
+.other-stays-arrow{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.65);
+  color:var(--text);
+  width:36px;
+  height:36px;
+  cursor:pointer;
+}
+.other-stays-carousel{
+  overflow:hidden;
+  margin-top: 14px;
+}
+.other-stays-track{
+  display:flex;
+  transition: transform .3s ease;
+}
+.other-stay-card{
+  flex: 0 0 50%;
+  padding-right: 12px;
+}
+.other-stay-link{
+  display:block;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.55);
+  height:100%;
+}
+.other-stay-image{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+}
+.other-stay-body{
+  padding:12px;
+}
+.other-stay-body h3{
+  margin:0;
+  font-size:16px;
+}
+.other-stay-location{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:13px;
+}
+.other-stay-cta{
+  display:inline-block;
+  margin-top:8px;
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
 }
 
 /* ---------------- À PROPOS ---------------- */
@@ -1020,6 +1103,7 @@ footer.band.cream{
   .sejour-hero{ height: 50vh; min-height: 280px; }
   .sejour-content{ padding: 60px 0 70px; }
   .sejour-content h1{ font-size: 28px; }
+  .sejour-section-title{ font-size: 1.08em; }
 
   h1, h2, h3, h4{
     font-weight: 210;
@@ -1200,6 +1284,15 @@ footer.band.cream{
 
   .gift-pack-image{
     order: 2;
+  }
+
+  .other-stay-card{
+    flex-basis: 100%;
+    padding-right: 0;
+  }
+
+  .other-stay-image{
+    height:200px;
   }
 }
 @media (max-width: 900px){
