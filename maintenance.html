@@ -339,9 +339,10 @@
       }
 
       const payload = { firstname, email };
+      const endpoint = `${SUPABASE_URL}/functions/v1/priority-signup`;
 
       try{
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/priority-signup`, {
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -351,15 +352,24 @@
           body: JSON.stringify(payload),
         });
 
-        const data = await res.json().catch(() => ({}));
+        const rawText = await res.text();
+        let data = {};
+        try{
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch(parseErr){
+          data = { rawText };
+          console.warn("priority-signup non-json response", { endpoint, parseErr, rawText });
+        }
 
         if(!res.ok){
-          console.error("priority signup function error:", {
+          console.error("priority-signup HTTP error", {
+            endpoint,
             status: res.status,
             statusText: res.statusText,
-            data,
-            payload
+            payload,
+            data
           });
+
           showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
           return;
         }
@@ -373,7 +383,7 @@
         form.reset();
 
       } catch(err){
-        console.error("priority signup unexpected error:", err);
+        console.error("priority-signup fetch error", { endpoint, payload, err });
         showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
       }
     });
