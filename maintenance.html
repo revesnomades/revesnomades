@@ -294,7 +294,7 @@
         <div id="priorityMsg" class="form-msg"></div>
 
         <div class="small-note">
-          Vous serez ajouté(e) à la newsletter et marqué(e) comme contact prioritaire.
+          Vous serez ajouté(e) à la liste prioritaire.
         </div>
 
         <div class="admin-link">
@@ -310,7 +310,7 @@
   </main>
 
   <script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY, supabase } from "/assets/js/supabaseClient.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
 
     const form = document.getElementById("priorityForm");
     const msg = document.getElementById("priorityMsg");
@@ -338,15 +338,10 @@
         return;
       }
 
-      const payload = {
-        firstname,
-        email,
-        priority: true,
-        source: "maintenance_page"
-      };
+      const payload = { firstname, email };
 
       try{
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/priority-signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -356,14 +351,7 @@
           body: JSON.stringify(payload),
         });
 
-        const rawText = await res.text();
-        let data = {};
-        try{
-          data = rawText ? JSON.parse(rawText) : {};
-        } catch(parseError){
-          data = { raw: rawText };
-          console.warn("priority signup non-JSON response:", parseError);
-        }
+        const data = await res.json().catch(() => ({}));
 
         if(!res.ok){
           console.error("priority signup function error:", {
@@ -372,29 +360,7 @@
             data,
             payload
           });
-
-          const { error: fallbackError } = await supabase
-            .from("priority_waitlist")
-            .upsert([{
-              firstname,
-              email,
-              source: "maintenance_page",
-              status: "active"
-            }], { onConflict: "email" });
-
-          if(fallbackError){
-            console.error("priority signup fallback error:", {
-              message: fallbackError.message,
-              details: fallbackError.details,
-              hint: fallbackError.hint,
-              code: fallbackError.code
-            });
-            showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
-            return;
-          }
-
-          showMessage(`🌿 Merci ${firstname}, vous êtes bien inscrit(e) à la liste prioritaire.`);
-          form.reset();
+          showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
           return;
         }
 
