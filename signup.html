@@ -151,8 +151,12 @@
         email,
         password,
         options: {
-          emailRedirectTo: `${location.origin}/compte.html`,
-          data: { firstname }
+          emailRedirectTo: `${location.origin}/compte.html`, 
+    data: {
+      firstname: firstname
+    }
+  }
+});
         }
       });
 
