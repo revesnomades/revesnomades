@@ -589,6 +589,41 @@ html.js .reveal.is-visible{
   gap:10px;
   flex-wrap:wrap;
 }
+.account-newsletter{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  display:grid;
+  gap:8px;
+}
+.account-newsletter-text{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.account-newsletter-link{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  padding:0;
+  width:fit-content;
+  font:inherit;
+  font-size:12.5px;
+  letter-spacing:.02em;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  cursor:pointer;
+  opacity:.88;
+}
+.account-newsletter-link:hover{
+  opacity:1;
+}
+.account-newsletter-msg{
+  min-height:16px;
+  color:var(--muted);
+  font-size:12.5px;
+}
 .admin-faq-list{
   display:grid;
   gap:12px;
