@@ -51,9 +51,14 @@
                 style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
                 placeholder="Email">
 
-              <input id="password" class="input"
-                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                type="password" placeholder="Mot de passe">
+              <div class="password-field">
+                <input id="password" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  type="password" placeholder="Mot de passe">
+                <button type="button" class="password-toggle" data-target="password" aria-label="Afficher le mot de passe">
+                  Afficher
+                </button>
+              </div>
 
               <div class="account-actions" style="flex-wrap:wrap;">
                 <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
@@ -73,9 +78,27 @@
             <h3 style="font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
 
             <div style="display:grid; gap:10px; margin-top:10px;">
-              <input id="newPassword" class="input"
-                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                type="password" placeholder="Nouveau mot de passe">
+              <div class="password-field">
+                <input id="newPassword" class="input"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
+                  type="password" placeholder="Nouveau mot de passe">
+                <button type="button" class="password-toggle" data-target="newPassword" aria-label="Afficher le nouveau mot de passe">
+                  Afficher
+                </button>
+              </div>
+
+              <div id="accountPasswordStrength" class="password-strength" aria-live="polite">
+                <div class="password-strength-track" aria-hidden="true">
+                  <div id="accountPasswordStrengthFill" class="password-strength-fill"></div>
+                </div>
+                <p id="accountPasswordStrengthText" class="password-strength-text">Sécurité : faible</p>
+                <ul class="password-hints">
+                  <li>Au moins 8 caractères</li>
+                  <li>Une majuscule</li>
+                  <li>Un chiffre</li>
+                  <li>Un caractère spécial</li>
+                </ul>
+              </div>
 
               <button class="btn on-light" id="btnUpdatePassword" type="button">
                 Mettre à jour mon mot de passe
@@ -248,6 +271,7 @@
 
     const newsletterCount = document.getElementById("newsletterCount");
     const priorityCount = document.getElementById("priorityCount");
+    const newPasswordEl = document.getElementById("newPassword");
     let siteFaqItems = [];
     let initialSiteFaqIds = [];
     const defaultSiteFaqSeed = [
@@ -295,6 +319,45 @@
 
     function setMsg(el, msg) {
       if (el) el.textContent = msg || "";
+    }
+
+    function getPasswordStrength(password){
+      let score = 0;
+      if (password.length >= 8) score += 1;
+      if (/[A-Z]/.test(password)) score += 1;
+      if (/[0-9]/.test(password)) score += 1;
+      if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+      if (score <= 1) return { label: "faible", color: "#cc6f53", width: "33%" };
+      if (score === 2 || score === 3) return { label: "moyen", color: "#b19342", width: "66%" };
+      return { label: "fort", color: "#4f8c5b", width: "100%" };
+    }
+
+    function updateAccountPasswordStrength(){
+      const fill = document.getElementById("accountPasswordStrengthFill");
+      const text = document.getElementById("accountPasswordStrengthText");
+      if (!fill || !text) return;
+
+      const password = newPasswordEl?.value || "";
+      const strength = getPasswordStrength(password);
+      fill.style.width = password ? strength.width : "0%";
+      fill.style.backgroundColor = strength.color;
+      text.textContent = `Sécurité : ${password ? strength.label : "faible"}`;
+    }
+
+    function setupPasswordToggles(){
+      document.querySelectorAll(".password-toggle").forEach((button) => {
+        const targetId = button.getAttribute("data-target");
+        const input = document.getElementById(targetId);
+        if (!input) return;
+
+        button.addEventListener("click", () => {
+          const isHidden = input.type === "password";
+          input.type = isHidden ? "text" : "password";
+          button.textContent = isHidden ? "Masquer" : "Afficher";
+          button.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
+        });
+      });
     }
 
     function showLoggedOut() {
@@ -662,6 +725,10 @@ async function loadWelcomeName(user){
       if (session?.user) await showLoggedIn(session.user);
       else showLoggedOut();
     }
+
+    setupPasswordToggles();
+    newPasswordEl?.addEventListener("input", updateAccountPasswordStrength);
+    updateAccountPasswordStrength();
 
     // Login
     btnLogin?.addEventListener("click", async () => {
