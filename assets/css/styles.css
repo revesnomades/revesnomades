@@ -1206,6 +1206,12 @@ footer.band.cream{
     font-weight: 180;
     line-height: 1.15;
   }
+  .bottom-wide .content{
+    padding: calc(var(--navH) + 18px) 0 44px;
+  }
+  .bottom-wide h2{
+    font-size: clamp(18px, 5.2vw, 22px) !important;
+  }
 
   .about-text{ max-width: 92vw; line-height: 1.62; }
   .about-founder-meta{ text-align:center; }
