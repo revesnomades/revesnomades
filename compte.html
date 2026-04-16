@@ -119,6 +119,13 @@
               <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
             </div>
 
+            <div id="newsletterBox" class="account-newsletter" style="display:none;">
+              <p id="newsletterText" class="account-newsletter-text"></p>
+              <button class="btn on-light" id="btnNewsletterSubscribe" type="button" style="display:none;">S’abonner</button>
+              <button id="btnNewsletterUnsubscribe" type="button" class="account-newsletter-link" style="display:none;">Se désabonner</button>
+              <div id="newsletterMsg" class="account-newsletter-msg"></div>
+            </div>
+
             <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
 
             <!-- ADMIN PANEL -->
@@ -263,15 +270,21 @@
     const loggedMsg = document.getElementById("loggedMsg");
     const adminMsg = document.getElementById("adminMsg");
     const siteFaqMsg = document.getElementById("siteFaqMsg");
+    const newsletterMsg = document.getElementById("newsletterMsg");
 
     const userEmail = document.getElementById("userEmail");
     const bookingsList = document.getElementById("bookingsList");
     const siteFaqList = document.getElementById("siteFaqList");
     const adminFaqPanel = document.getElementById("adminFaqPanel");
+    const newsletterBox = document.getElementById("newsletterBox");
+    const newsletterText = document.getElementById("newsletterText");
+    const btnNewsletterSubscribe = document.getElementById("btnNewsletterSubscribe");
+    const btnNewsletterUnsubscribe = document.getElementById("btnNewsletterUnsubscribe");
 
     const newsletterCount = document.getElementById("newsletterCount");
     const priorityCount = document.getElementById("priorityCount");
     const newPasswordEl = document.getElementById("newPassword");
+    let newsletterSubRecord = null;
     let siteFaqItems = [];
     let initialSiteFaqIds = [];
     const defaultSiteFaqSeed = [
@@ -365,9 +378,129 @@
       if (resetBox) resetBox.style.display = "none";
       if (perksBox) perksBox.style.display = "block";
       if (loggedBox) loggedBox.style.display = "none";
+      if (newsletterBox) newsletterBox.style.display = "none";
       if (bookingsBox) bookingsBox.style.display = "none";
       if (adminPanel) adminPanel.style.display = "none";
       if (adminFaqPanel) adminFaqPanel.style.display = "none";
+      newsletterSubRecord = null;
+      setMsg(newsletterMsg, "");
+    }
+
+    function renderNewsletterStatus(isSubscribed){
+      if (!newsletterBox || !newsletterText || !btnNewsletterSubscribe || !btnNewsletterUnsubscribe) return;
+
+      newsletterBox.style.display = "grid";
+      if (isSubscribed) {
+        newsletterText.textContent = "Vous êtes déjà abonné(e) et serez parmi les premiers avertis des prochains séjours.";
+        btnNewsletterSubscribe.style.display = "none";
+        btnNewsletterUnsubscribe.style.display = "inline-flex";
+      } else {
+        newsletterText.textContent = "Abonnez-vous à la newsletter pour être averti(e) en priorité des prochains séjours.";
+        btnNewsletterSubscribe.style.display = "inline-flex";
+        btnNewsletterUnsubscribe.style.display = "none";
+      }
+    }
+
+    function buildNewsletterDisplayName(user){
+      const nameCandidate = [
+        user?.user_metadata?.firstname,
+        user?.user_metadata?.name
+      ].find((value) => typeof value === "string" && value.trim());
+
+      if (nameCandidate) return String(nameCandidate).trim();
+
+      const email = String(user?.email || "").trim();
+      if (!email.includes("@")) return "Membre Âmes Nomades";
+      return email.split("@")[0];
+    }
+
+    async function loadNewsletterStatus(user){
+      if (!user?.email) return;
+
+      const email = String(user.email).trim().toLowerCase();
+      const { data, error } = await supabase
+        .from("newsletter")
+        .select("id,email,name")
+        .ilike("email", email)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error("NEWSLETTER STATUS ERROR:", error);
+        setMsg(newsletterMsg, "Impossible de vérifier votre abonnement newsletter.");
+        renderNewsletterStatus(false);
+        return;
+      }
+
+      newsletterSubRecord = data?.[0] || null;
+      renderNewsletterStatus(!!newsletterSubRecord);
+    }
+
+    async function subscribeCurrentUserToNewsletter(){
+      setMsg(newsletterMsg, "");
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
+        return;
+      }
+
+      if (newsletterSubRecord) {
+        renderNewsletterStatus(true);
+        setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
+        return;
+      }
+
+      const nameValue = buildNewsletterDisplayName(user);
+
+      const { data: insertedRow, error } = await supabase
+        .from("newsletter")
+        .insert({
+          email: String(user.email).trim().toLowerCase(),
+          name: nameValue
+        })
+        .select("id,email,name")
+        .single();
+
+      if (error) {
+        if (String(error.code) === "23505") {
+          await loadNewsletterStatus(user);
+          setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
+          return;
+        }
+        console.error("NEWSLETTER SUBSCRIBE ERROR:", error);
+        setMsg(newsletterMsg, "Impossible de finaliser l’abonnement newsletter.");
+        return;
+      }
+
+      newsletterSubRecord = insertedRow || null;
+      renderNewsletterStatus(true);
+      setMsg(newsletterMsg, "Inscription newsletter confirmée.");
+    }
+
+    async function unsubscribeCurrentUserFromNewsletter(){
+      setMsg(newsletterMsg, "");
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user?.email) {
+        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke("newsletter-unsubscribe", {
+        body: { email: user.email }
+      });
+
+      if (error) {
+        console.error("NEWSLETTER UNSUBSCRIBE FUNCTION ERROR:", error);
+        setMsg(newsletterMsg, "Impossible de traiter la désinscription pour le moment.");
+        return;
+      }
+
+      newsletterSubRecord = null;
+      renderNewsletterStatus(false);
+      setMsg(newsletterMsg, "Vous êtes désabonné(e) de la newsletter.");
     }
 
     function normalizeSiteFaqItems(raw){
@@ -692,6 +825,7 @@ async function loadWelcomeName(user){
       
       await loadWelcomeName(user);
       await loadMyBookings(user);
+      await loadNewsletterStatus(user);
 
       const isAdmin = await checkAdmin(user.id);
 
@@ -806,6 +940,14 @@ async function loadWelcomeName(user){
     btnSee?.addEventListener("click", async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await loadMyBookings(user);
+    });
+
+    btnNewsletterSubscribe?.addEventListener("click", async () => {
+      await subscribeCurrentUserToNewsletter();
+    });
+
+    btnNewsletterUnsubscribe?.addEventListener("click", async () => {
+      await unsubscribeCurrentUserFromNewsletter();
     });
 
     // Admin
