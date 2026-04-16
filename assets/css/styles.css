@@ -524,7 +524,7 @@ html.js .reveal.is-visible{
   grid-template-columns: 1fr 1fr;
   gap: 34px;
   align-items:center;
-  padding: 60px 0;
+  padding: 36px 0;
 }
 .formbox{
   border:1px solid rgba(30,31,34,.22);
@@ -1274,7 +1274,7 @@ footer.band.cream{
   #contact .contact-grid{
     grid-template-columns: 1fr !important;
     gap: 14px !important;
-    padding: calc(var(--navH) + 18px) 0 34px !important;
+    padding: calc(var(--navH) + 12px) 0 22px !important;
     align-items: start !important;
   }
 
