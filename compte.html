@@ -401,13 +401,27 @@
       }
     }
 
+    function buildNewsletterDisplayName(user){
+      const nameCandidate = [
+        user?.user_metadata?.firstname,
+        user?.user_metadata?.name
+      ].find((value) => typeof value === "string" && value.trim());
+
+      if (nameCandidate) return String(nameCandidate).trim();
+
+      const email = String(user?.email || "").trim();
+      if (!email.includes("@")) return "Membre Âmes Nomades";
+      return email.split("@")[0];
+    }
+
     async function loadNewsletterStatus(user){
       if (!user?.email) return;
 
+      const email = String(user.email).trim().toLowerCase();
       const { data, error } = await supabase
         .from("newsletter")
-        .select("id,email,name,firstname")
-        .eq("email", user.email)
+        .select("id,email,name")
+        .ilike("email", email)
         .order("created_at", { ascending: false })
         .limit(1);
 
@@ -437,18 +451,15 @@
         return;
       }
 
-      const nameCandidate = [
-        user.user_metadata?.firstname,
-        user.user_metadata?.name
-      ].find(Boolean);
+      const nameValue = buildNewsletterDisplayName(user);
 
       const { data: insertedRow, error } = await supabase
         .from("newsletter")
         .insert({
-          email: user.email,
-          name: nameCandidate ? String(nameCandidate).trim() : null
+          email: String(user.email).trim().toLowerCase(),
+          name: nameValue
         })
-        .select("id,email,name,firstname")
+        .select("id,email,name")
         .single();
 
       if (error) {
