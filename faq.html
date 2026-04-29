@@ -2,8 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>FAQ — Âmes Nomades</title>
+  <title>Questions fréquentes — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Retrouvez les réponses aux questions les plus fréquentes avant de réserver un séjour bien-être Âmes Nomades : programme, niveaux, annulation, esprit du séjour.">
+  <link rel="canonical" href="https://amesnomades.com/faq.html">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
@@ -21,7 +25,7 @@
         <span>ÂmesNomades</span>
       </a>
 
-      <nav class="nav-links nav-links-desktop">
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html" aria-current="page">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
@@ -38,19 +42,20 @@
       </button>
 
       <div class="mobile-drawer" aria-hidden="true">
-        <div class="mobile-menu">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
           <a href="/index.html#apropos" data-scroll>À propos</a>
           <a href="/faq.html" aria-current="page">FAQ</a>
           <a href="/index.html#contact" data-scroll>Contact</a>
           <a href="/compte.html">Compte</a>
-        </div>
+        </nav>
       </div>
     </div>
   </header>
 
+  <main>
   <section class="band cream">
     <div class="container" style="padding:110px 0 60px;">
-      <h1 class="reveal" style="margin:0;">FAQ</h1>
+      <h1 class="reveal" style="margin:0;">Questions fréquentes</h1>
       <p class="sub reveal" style="margin-top:10px; max-width:760px;">
         Les réponses aux questions les plus fréquentes avant de réserver un séjour Âmes Nomades.
       </p>
@@ -63,6 +68,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <footer class="band cream footer-dark">
     <div class="container footer">
@@ -73,7 +79,7 @@
         </div>
 
         <div class="footer-social reveal" data-delay="1">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
@@ -81,7 +87,7 @@
             </svg>
           </a>
 
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
@@ -152,6 +158,14 @@
       }
     ];
 
+    function escapeHtml(value){
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     function renderFaq(items){
       if(!items.length){
         faqList.innerHTML = `
@@ -165,8 +179,8 @@
 
       faqList.innerHTML = items.map(item => `
         <article style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-          <h3 style="margin:0; font-size:18px;">${item.question || "Question"}</h3>
-          <p class="sub" style="margin-top:8px;">${item.answer || ""}</p>
+          <h3 style="margin:0; font-size:18px;">${escapeHtml(item.question || "Question")}</h3>
+          <p class="sub" style="margin-top:8px;">${escapeHtml(item.answer || "")}</p>
         </article>
       `).join("");
     }

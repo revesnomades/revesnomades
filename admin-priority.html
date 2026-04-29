@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <title>Inscrits prioritaires — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body class="on-light">
@@ -49,6 +52,14 @@
       return user;
     }
 
+    function escapeHtml(value){
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     async function loadPriority(){
       const { data, error } = await supabase
         .from("priority_waitlist")
@@ -70,10 +81,10 @@
         <div style="display:grid; gap:10px;">
           ${data.map(item => `
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-              <div style="font-weight:600;">${item.firstname || "—"}</div>
-              <div style="margin-top:4px; color:var(--muted);">${item.email}</div>
+              <div style="font-weight:600;">${escapeHtml(item.firstname || "—")}</div>
+              <div style="margin-top:4px; color:var(--muted);">${escapeHtml(item.email)}</div>
               <div style="margin-top:4px; font-size:13px; color:var(--muted);">
-                Source : ${item.source || "—"} · Statut : ${item.status || "—"}
+                Source : ${escapeHtml(item.source || "—")} · Statut : ${escapeHtml(item.status || "—")}
               </div>
               <div style="margin-top:4px; font-size:12px; color:var(--muted);">
                 Inscription : ${item.created_at ? new Date(item.created_at).toLocaleString("fr-FR") : "—"}

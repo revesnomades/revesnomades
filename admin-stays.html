@@ -10,6 +10,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css" />
 
@@ -876,9 +879,9 @@
               <span class="muted-small" style="margin-left:8px;">type: ${block.type}</span>
             </div>
             <div class="custom-block-actions">
-              <button class="btn on-light btn-block-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
-              <button class="btn on-light btn-block-down" type="button" ${index === stayContentBlocks.length - 1 ? "disabled" : ""}>↓</button>
-              <button class="btn on-light btn-block-delete" type="button">Supprimer</button>
+              <button class="btn on-light btn-block-up" type="button" aria-label="Monter" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="btn on-light btn-block-down" type="button" aria-label="Descendre" ${index === stayContentBlocks.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="btn on-light btn-block-delete" type="button" aria-label="Supprimer">Supprimer</button>
             </div>
           </div>
 
@@ -1105,7 +1108,7 @@
       row.innerHTML = `
         <input type="time" class="input slot-time" value="${slot.time || ""}">
         <input type="text" class="input slot-text" value="${(slot.text || "").replace(/"/g, "&quot;")}" placeholder="Texte de l’activité">
-        <button type="button" class="btn on-light btn-remove-slot">✕</button>
+        <button type="button" class="btn on-light btn-remove-slot" aria-label="Supprimer">✕</button>
       `;
 
       row.querySelector(".btn-remove-slot").addEventListener("click", () => row.remove());
@@ -1199,7 +1202,7 @@
       pill.className = "slot-pill";
       pill.innerHTML = `
         <span>${stay.title || "Séjour"}</span>
-        <button type="button" class="mini-remove">×</button>
+        <button type="button" class="mini-remove" aria-label="Supprimer">×</button>
       `;
       pill.querySelector(".mini-remove").addEventListener("click", onRemove);
       return pill;
@@ -1502,7 +1505,7 @@
           <div class="admin-inline">
             <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
             <button class="btn on-light" type="button" data-preview="${stay.slug}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
+            <a class="btn on-light" href="/sejour/${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener noreferrer">Voir</a>
             <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
           </div>
         </div>
@@ -1517,7 +1520,7 @@
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
         btn.addEventListener("click", () => {
           const slug = btn.getAttribute("data-preview");
-          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+          window.open(`/sejour/${encodeURIComponent(slug)}?preview=1`, "_blank");
         });
       });
 
@@ -1692,7 +1695,7 @@
         return;
       }
 
-      window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+      window.open(`/sejour/${encodeURIComponent(slug)}?preview=1`, "_blank");
     });
 
     stayPublishToggle?.addEventListener("click", () => {

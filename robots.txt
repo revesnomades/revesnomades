@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin-stays.html
+Disallow: /admin-bookings.html
+Disallow: /admin-newsletter.html
+Disallow: /admin-priority.html
+Disallow: /admin-dashboard.html
+Disallow: /panier.html
+Sitemap: https://amesnomades.com/sitemap.xml

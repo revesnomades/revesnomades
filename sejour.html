@@ -11,6 +11,15 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta id="stayMetaDescription" name="description" content="Découvrez un séjour bien-être avec Âmes Nomades. Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.">
+  <link id="stayCanonical" rel="canonical" href="https://amesnomades.com/">
+  <meta id="ogTitle" property="og:title" content="Séjour — Âmes Nomades">
+  <meta id="ogDescription" property="og:description" content="Découvrez un séjour bien-être avec Âmes Nomades.">
+  <meta id="ogImage" property="og:image" content="https://amesnomades.com/assets/img/sejour-camargue.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
@@ -28,7 +37,7 @@
         <span>ÂmesNomades</span>
       </a>
 
-      <nav class="nav-links nav-links-desktop">
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
@@ -45,16 +54,17 @@
       </button>
 
       <div class="mobile-drawer" aria-hidden="true">
-        <div class="mobile-menu">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
           <a href="/index.html#apropos" data-scroll>À propos</a>
           <a href="/faq.html">FAQ</a>
           <a href="/index.html#contact" data-scroll>Contact</a>
           <a href="/compte.html">Compte</a>
-        </div>
+        </nav>
       </div>
     </div>
   </header>
 
+  <main>
   <section class="sejour-hero">
     <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
   </section>
@@ -127,6 +137,7 @@
               id="giftImage"
               src="/assets/img/sac-cadeau-reves-nomades.jpg"
               alt="Sac cadeau Âmes Nomades"
+              loading="lazy"
             />
           </div>
         </div>
@@ -161,7 +172,7 @@
         <h3>Réserver</h3>
 
         <div class="actions" style="margin-top:16px;">
-          <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener">
+          <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener noreferrer">
             Réserver
           </a>
           <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
@@ -216,16 +227,18 @@
     </div>
   </section>
 
+  </main>
+
   <footer class="band cream footer-dark">
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+          <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades" loading="lazy">
           <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
@@ -233,7 +246,7 @@
             </svg>
           </a>
 
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
@@ -347,7 +360,7 @@
         container.innerHTML = `<div>—</div>`;
         return;
       }
-      container.innerHTML = items.map(item => `<div>• ${item}</div>`).join("");
+      container.innerHTML = items.map(item => `<div>• ${escapeHtml(item)}</div>`).join("");
     }
 
     function renderFaq(container, items){
@@ -364,8 +377,8 @@
 
       container.innerHTML = items.map(item => `
         <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-          <div class="kicker">${item.q || "Question"}</div>
-          <p class="sub" style="margin-top:8px;">${item.a || ""}</p>
+          <div class="kicker">${escapeHtml(item.q || "Question")}</div>
+          <p class="sub" style="margin-top:8px;">${escapeHtml(item.a || "")}</p>
         </div>
       `).join("");
     }
@@ -384,15 +397,15 @@
 
       container.innerHTML = items.map(day => `
         <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
-          <div class="kicker">${day.title || `Jour ${day.day_number || ""}`}</div>
+          <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
 
           <div style="display:grid; gap:8px; margin-top:12px;">
             ${(day.slots || []).map(slot => `
               <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
                 <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
-                  ${slot.time || ""}
+                  ${escapeHtml(slot.time || "")}
                 </div>
-                <div class="sub" style="margin:0;">${slot.text || ""}</div>
+                <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
               </div>
             `).join("")}
           </div>
@@ -554,7 +567,7 @@
         const onlyStay = publishedStays[0];
         otherStaysFallback.innerHTML = `
           Un autre séjour est disponible :
-          <a href="/sejour.html?slug=${encodeURIComponent(onlyStay.slug)}" style="text-decoration:underline;">${onlyStay.title || "Découvrir le séjour"}</a>.
+          <a href="/sejour/${encodeURIComponent(onlyStay.slug)}" style="text-decoration:underline;">${escapeHtml(onlyStay.title || "Découvrir le séjour")}</a>.
         `;
         otherStaysCarousel.style.display = "none";
         if (otherStaysControls) otherStaysControls.style.display = "none";
@@ -567,11 +580,11 @@
 
       otherStaysTrack.innerHTML = publishedStays.map(stay => `
         <article class="other-stay-card">
-          <a href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" class="other-stay-link">
-            <img class="other-stay-image" src="${stay.hero_image || "/assets/img/sejour-camargue.jpg"}" alt="${stay.title || "Séjour Âmes Nomades"}">
+          <a href="/sejour/${encodeURIComponent(stay.slug)}" class="other-stay-link">
+            <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/sejour-camargue.jpg")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy">
             <div class="other-stay-body">
-              <h3>${stay.title || "Séjour Âmes Nomades"}</h3>
-              ${stay.location ? `<p class="other-stay-location">${stay.location}</p>` : ""}
+              <h3>${escapeHtml(stay.title || "Séjour Âmes Nomades")}</h3>
+              ${stay.location ? `<p class="other-stay-location">${escapeHtml(stay.location)}</p>` : ""}
               <span class="other-stay-cta">Voir le séjour</span>
             </div>
           </a>
@@ -657,26 +670,64 @@
       if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
       if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
 
-      const { data: dates } = await supabase
-        .from("stay_dates")
-        .select("*")
-        .eq("stay_id", stay.id)
-        .order("start_date", { ascending: true })
-        .limit(1);
-
-      const { data: bookingsPaid } = await supabase
-        .from("bookings")
-        .select("id")
-        .eq("stay_id", stay.id)
-        .in("status", ["paid", "confirmed"]);
+      const [{ data: dates }, { data: bookingsPaid }, { data: otherPublishedStays, error: otherStaysError }] = await Promise.all([
+        supabase
+          .from("stay_dates")
+          .select("*")
+          .eq("stay_id", stay.id)
+          .order("start_date", { ascending: true })
+          .limit(1),
+        supabase
+          .from("bookings")
+          .select("id")
+          .eq("stay_id", stay.id)
+          .in("status", ["paid", "confirmed"]),
+        supabase
+          .from("stays")
+          .select("title, slug, hero_image, location, published")
+          .eq("published", true)
+          .neq("slug", stay.slug)
+          .order("created_at", { ascending: false })
+          .limit(12)
+      ]);
 
       const firstDate = dates?.[0] || null;
 
       stayTitle.textContent = stay.title || "Séjour";
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
-      if (stayMetaDescription) {
-        stayMetaDescription.setAttribute("content", buildStayMetaDescription(stay));
+      const metaDesc = buildStayMetaDescription(stay);
+      if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
+      const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
+      const canonicalEl = document.getElementById("stayCanonical");
+      if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
+      const ogTitleEl = document.getElementById("ogTitle");
+      if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
+      const ogDescEl = document.getElementById("ogDescription");
+      if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
+      if (stay.hero_image) {
+        const ogImgEl = document.getElementById("ogImage");
+        if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
       }
+
+      const existingSchema = document.getElementById("staySchema");
+      if (existingSchema) existingSchema.remove();
+      const schemaScript = document.createElement("script");
+      schemaScript.type = "application/ld+json";
+      schemaScript.id = "staySchema";
+      schemaScript.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "TouristTrip",
+        "name": stay.title || "Séjour Âmes Nomades",
+        "description": metaDesc,
+        "url": stayUrl,
+        "image": stay.hero_image || "",
+        "provider": {
+          "@type": "Organization",
+          "name": "Âmes Nomades",
+          "url": "https://amesnomades.com"
+        }
+      });
+      document.head.appendChild(schemaScript);
 
       const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date);
       stayMeta.textContent = durationText;
@@ -723,7 +774,7 @@
         "Un soin bien-être (surprise)"
       ];
 
-      giftList.innerHTML = giftItemsData.map(item => `<li>${item}</li>`).join("");
+      giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
       if(stay.gift_image){
         giftImage.src = stay.gift_image;
@@ -761,14 +812,6 @@
         const reservedCount = (bookingsPaid || []).length;
         missingCount.textContent = String(Math.max(0, minToValidate - reservedCount));
       }
-
-      const { data: otherPublishedStays, error: otherStaysError } = await supabase
-        .from("stays")
-        .select("title, slug, hero_image, location, published")
-        .eq("published", true)
-        .neq("slug", stay.slug)
-        .order("created_at", { ascending: false })
-        .limit(12);
 
       if(otherStaysError){
         console.error(otherStaysError);
