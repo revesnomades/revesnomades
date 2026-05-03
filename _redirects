@@ -1,1 +1,7 @@
 #/*    /maintenance.html    503!
+
+# URLs propres pour les séjours
+/sejour/:slug  /sejour.html?slug=:slug  200
+
+# Redirection www → sans www
+https://www.amesnomades.com/*  https://amesnomades.com/:splat  301!

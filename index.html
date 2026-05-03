@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>ÂmesNomades</title>
+  <title>Âmes Nomades — Séjours bien-être en France</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
@@ -12,6 +12,7 @@
   <link rel="icon" href="/assets/img/favicon.ico">
 
   <meta name="description" content="Découvrez des séjours bien-être en France pour vous reconnecter à vous-même. Expériences en petit groupe, nature, douceur et partage avec Âmes Nomades." />
+  <link rel="canonical" href="https://amesnomades.com/">
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#0e0f11" />
 
@@ -32,8 +33,31 @@
   <link rel="manifest" href="assets/img/site.webmanifest">
   <link rel="icon" href="assets/img/favicon.ico">
 
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="preload" as="image" href="assets/img/hero-1.jpg">
   <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Âmes Nomades",
+    "url": "https://amesnomades.com",
+    "logo": "https://amesnomades.com/assets/img/logo-ames-nomades.png",
+    "description": "Séjours bien-être en France pour se reconnecter à soi. Expériences en petit groupe, nature, douceur et partage.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "contact@amesnomades.com",
+      "telephone": "+33658038770",
+      "contactType": "customer support"
+    },
+    "sameAs": [
+      "https://instagram.com/TON_COMPTE",
+      "https://facebook.com/TA_PAGE"
+    ]
+  }
+  </script>
 
   <style>
     .stay-band.stay-band-compact{
@@ -61,7 +85,7 @@
         <span>ÂmesNomades</span>
       </a>
 
-      <nav class="nav-links nav-links-desktop">
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="index.html#apropos" data-scroll>À propos</a>
         <a href="faq.html">FAQ</a>
         <a href="index.html#contact" data-scroll>Contact</a>
@@ -79,16 +103,17 @@
       </button>
 
       <div class="mobile-drawer" aria-hidden="true">
-        <div class="mobile-menu">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
           <a href="index.html#apropos" data-scroll>À propos</a>
           <a href="faq.html">FAQ</a>
           <a href="index.html#contact" data-scroll>Contact</a>
           <a href="compte.html">Compte</a>
-        </div>
+        </nav>
       </div>
     </div>
   </header>
 
+  <main>
   <section class="hero hero-left">
     <div class="hero-bg" style="background-image:url('assets/img/hero-1.jpg');"></div>
     <div class="hero-overlay"></div>
@@ -218,7 +243,7 @@
         </div>
 
         <div class="about-founder reveal" data-delay="11">
-          <img src="assets/img/appoline.jpg" alt="Appoline" class="about-founder-img" />
+          <img src="assets/img/appoline.jpg" alt="Appoline" class="about-founder-img" loading="lazy" />
           <div class="about-founder-meta">
             <div class="about-founder-name">Appoline</div>
             <div class="about-founder-role">Fondatrice de Âmes Nomades</div>
@@ -235,10 +260,11 @@
     <div class="newsletter-inner container">
       <h2 class="reveal" data-delay="0">Recevez votre guide en cadeau !</h2>
 
-      <form id="newsletterForm" class="form-stack reveal" data-delay="1">
-        <input class="input" name="lastname" placeholder="Nom" required />
-        <input class="input" name="firstname" placeholder="Prénom" required />
-        <input class="input" name="email" type="email" placeholder="Votre Email" required />
+      <form id="newsletterForm" class="form-stack reveal" data-delay="1" novalidate>
+        <input class="input" name="lastname" placeholder="Nom" required autocomplete="family-name" />
+        <input class="input" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
+        <input class="input" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
         <button class="btn block" type="submit">Recevoir mon guide</button>
       </form>
 
@@ -267,21 +293,23 @@
   <section class="band band-full cream" id="contact">
     <div class="contact-grid">
 
-      <form id="contactForm" class="formbox">
+      <form id="contactForm" class="formbox" novalidate>
         <div class="reveal" data-delay="0">
           <input name="subject" placeholder="Objet" required />
         </div>
 
-        <input class="reveal" data-delay="1" name="lastname" placeholder="Nom" required />
-        <input class="reveal" data-delay="2" name="firstname" placeholder="Prénom" required />
-        <input class="reveal" data-delay="3" name="email" type="email" placeholder="Votre Email" required />
-        <input class="reveal" data-delay="4" name="phone" type="tel" placeholder="Téléphone (facultatif)" />
+        <input class="reveal" data-delay="1" name="lastname" placeholder="Nom" required autocomplete="family-name" />
+        <input class="reveal" data-delay="2" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
+        <input class="reveal" data-delay="3" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
+        <input class="reveal" data-delay="4" name="phone" type="tel" placeholder="Téléphone (facultatif)" autocomplete="tel" />
         <textarea class="reveal" data-delay="5" name="message" placeholder="Votre message" required></textarea>
 
         <label class="contact-consent reveal" data-delay="6">
           <input type="checkbox" name="privacyConsent" required />
           <span>J’accepte la politique de confidentialité</span>
         </label>
+
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
         <button class="btn on-light reveal" data-delay="7" type="submit">ENVOYER</button>
         <div id="contactMsg" class="muted small reveal" data-delay="8"></div>
@@ -312,16 +340,18 @@
     </div>
   </section>
 
+  </main>
+
   <footer class="band cream footer-dark">
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades" loading="lazy">
           <div style="font-family:'SegoCustom'; font-weight:500;">Âmes Nomades</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
@@ -329,7 +359,7 @@
             </svg>
           </a>
 
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
@@ -439,7 +469,7 @@
       if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayLocation) featuredStayLocation.textContent = stay.location || "";
-      if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+      if (featuredStayLink) featuredStayLink.href = `/sejour/${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
       if (featuredStayMissing) featuredStayMissing.textContent = "Places limitées";
@@ -495,7 +525,7 @@
     const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
 
     return `
-      <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
+      <a class="stay-card" href="/sejour/${encodeURIComponent(stay.slug)}">
         
         <div class="stay-card-media" style="background-image:url('${image}')">
 
@@ -518,11 +548,17 @@
 
   }).join("");
 }
+    let newsletterLastSubmit = 0;
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       show("");
 
       const fd = new FormData(form);
+      if (String(fd.get("website") || "").trim()) { form.reset(); show("Merci !"); return; }
+      const now = Date.now();
+      if (now - newsletterLastSubmit < 30000) { show("Merci de patienter avant de soumettre à nouveau."); return; }
+      newsletterLastSubmit = now;
+
       const firstname = String(fd.get("firstname") || "").trim();
       const lastname = String(fd.get("lastname") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
@@ -576,11 +612,17 @@
       if(contactMsg) contactMsg.textContent = text || "";
     }
 
+    let contactLastSubmit = 0;
     contactForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       setContactMsg("");
 
       const fd = new FormData(contactForm);
+      if (String(fd.get("website") || "").trim()) { contactForm.reset(); setContactMsg("Message envoyé ✅"); return; }
+      const now = Date.now();
+      if (now - contactLastSubmit < 30000) { setContactMsg("Merci de patienter avant de soumettre à nouveau."); return; }
+      contactLastSubmit = now;
+
       const subject = String(fd.get("subject") || "").trim();
       const lastname = String(fd.get("lastname") || "").trim();
       const firstname = String(fd.get("firstname") || "").trim();

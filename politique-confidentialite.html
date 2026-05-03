@@ -11,23 +11,25 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="ÂmesNomades">
   <link rel="manifest" href="/assets/img/site.webmanifest">
+  <meta name="robots" content="noindex, follow">
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
-  <div class="nav">
+  <header class="nav">
     <div class="container nav-inner">
       <a class="brand" href="index.html">
         <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
         <span>ÂmesNomades</span>
       </a>
-      <div class="nav-links">
+      <nav class="nav-links" aria-label="Navigation principale">
         <a href="index.html#apropos">À propos</a>
+        <a href="faq.html">FAQ</a>
         <a href="index.html#contact">Contact</a>
-        <a href="index.html#reserver">Réserver</a>
-      </div>
+      </nav>
     </div>
-  </div>
+  </header>
 
+  <main>
   <section class="band white">
     <div class="section on-light" style="padding-top:110px;">
       <div class="container">
@@ -57,14 +59,20 @@
 
           <h3 style="margin-top:16px;">Droits</h3>
           <p style="color:var(--muted); margin-top:8px;">
-            Accès, rectification, suppression, opposition : contactez <i>contact@amesnomades.com</i>.
+            Accès, rectification, suppression, opposition : contactez <a href="mailto:contact@amesnomades.com">contact@amesnomades.com</a>.
+          </p>
+
+          <h3 style="margin-top:16px;">Cookies</h3>
+          <p style="color:var(--muted); margin-top:8px;">
+            Ce site utilise uniquement des cookies techniques nécessaires au fonctionnement (authentification Supabase). Aucun cookie publicitaire n'est utilisé.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER (sur toutes les pages) -->
+  </main>
+
   <footer class="band cream">
     <div class="container footer">
       <div class="footer-row">
@@ -74,7 +82,7 @@
         </div>
 
         <div class="footer-social">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
@@ -82,7 +90,7 @@
             </svg>
           </a>
 
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
@@ -96,6 +104,7 @@
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <div>Copyright © 2026 Âmes Nomades</div>
           <div>
+            <a href="faq.html" style="display:block; text-align:right;">FAQ</a>
             <a href="mentions-legales.html">Mentions légales</a> ·
             <a href="politique-confidentialite.html">Politique de confidentialité</a>
           </div>
@@ -105,12 +114,5 @@
   </footer>
 
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/slider.js"></script>
-
-  <script type="module">
-    import { initIndex, initForms } from "./assets/js/ui.js";
-    await initIndex();
-    initForms();
-  </script>
 </body>
 </html>

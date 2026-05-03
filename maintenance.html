@@ -264,13 +264,14 @@
           Laissez votre prénom et votre email pour recevoir les prochaines ouvertures de séjour en avant-première et être inscrit(e) sur la liste prioritaire.
         </p>
 
-        <form id="priorityForm" class="form-stack">
+        <form id="priorityForm" class="form-stack" novalidate>
           <input
             class="input"
             type="text"
             name="name"
             placeholder="Votre prénom"
             required
+            autocomplete="given-name"
           />
 
           <input
@@ -279,12 +280,15 @@
             name="email"
             placeholder="Votre email"
             required
+            autocomplete="email"
           />
 
           <label class="check-row">
             <input type="checkbox" name="consent" required>
             <span>J’accepte de recevoir les informations Âmes Nomades et les prochaines ouvertures de séjours.</span>
           </label>
+
+          <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
           <button class="btn block" type="submit">
             Rejoindre la liste prioritaire
@@ -319,11 +323,17 @@
       if(msg) msg.innerHTML = html || "";
     }
 
+    let priorityLastSubmit = 0;
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       showMessage("");
 
       const fd = new FormData(form);
+      if (String(fd.get("website") || "").trim()) { form.reset(); showMessage("🌿 Merci, vous êtes bien inscrit(e)."); return; }
+      const now = Date.now();
+      if (now - priorityLastSubmit < 30000) { showMessage("Merci de patienter avant de soumettre à nouveau."); return; }
+      priorityLastSubmit = now;
+
       const firstname = String(fd.get("name") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
       const consent = fd.get("consent");

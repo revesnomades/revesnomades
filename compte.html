@@ -10,6 +10,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
@@ -23,15 +26,16 @@
         <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
         <span>ÂmesNomades</span>
       </a>
-      <div class="nav-links nav-links-desktop">
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="/index.html#apropos">À propos</a>
         <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact">Contact</a>
-      </div>
+      </nav>
     </div>
   </header>
 
   <!-- PAGE -->
+  <main>
   <section class="band cream">
     <div class="account-section">
       <div class="container account-grid">
@@ -162,7 +166,7 @@
                     </p>
                   </div>
                   <div class="account-actions">
-                    <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener">Voir faq.html</a>
+                    <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener noreferrer">Voir faq.html</a>
                     <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
                     <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
                   </div>
@@ -195,6 +199,8 @@
     </div>
   </section>
 
+  </main>
+
   <!-- FOOTER -->
   <footer class="band cream footer-dark">
     <div class="container footer">
@@ -205,7 +211,7 @@
         </div>
 
         <div class="footer-social">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
@@ -213,7 +219,7 @@
             </svg>
           </a>
 
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener" aria-label="Facebook">
+          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
@@ -531,9 +537,9 @@
           <div class="admin-faq-head">
             <strong>Question ${index + 1}</strong>
             <div class="account-actions">
-              <button class="btn on-light btn-faq-up" type="button" ${index === 0 ? "disabled" : ""}>↑</button>
-              <button class="btn on-light btn-faq-down" type="button" ${index === siteFaqItems.length - 1 ? "disabled" : ""}>↓</button>
-              <button class="btn on-light btn-faq-delete" type="button">Supprimer</button>
+              <button class="btn on-light btn-faq-up" type="button" aria-label="Monter" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="btn on-light btn-faq-down" type="button" aria-label="Descendre" ${index === siteFaqItems.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="btn on-light btn-faq-delete" type="button" aria-label="Supprimer">Supprimer</button>
             </div>
           </div>
           <input class="input faq-question" placeholder="Question" value="${item.question.replace(/"/g, "&quot;")}">
@@ -707,18 +713,15 @@
       }
     }
 
-    async function checkAdmin(userId) {
+    async function checkAdminAndGetProfile(userId) {
       const { data, error } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, firstname")
         .eq("id", userId)
         .single();
 
-      console.log("ADMIN CHECK → data:", data);
-      console.log("ADMIN CHECK → error:", error);
-
-      if (error) return false;
-      return data?.role === "admin";
+      if (error) return { isAdmin: false, firstname: "" };
+      return { isAdmin: data?.role === "admin", firstname: data?.firstname || "" };
     }
 
     async function loadAdminStats() {
@@ -737,32 +740,11 @@
       if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
       if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
     }
-async function loadWelcomeName(user){
-  if(!welcomeName || !user?.id) return;
-
-  let firstname = "";
-
-  const metaFirstname = user.user_metadata?.firstname;
-  if(metaFirstname) firstname = String(metaFirstname).trim();
-
-  if(!firstname){
-    const { data } = await supabase
-      .from("profiles")
-      .select("firstname")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    firstname = data?.firstname || "";
-  }
-
-  if(firstname){
-    welcomeName.textContent = `Bienvenue ${firstname} `;
-    welcomeName.style.display = "block";
-  } else {
-    welcomeName.textContent = "Bienvenue ✨";
-    welcomeName.style.display = "block";
-  }
-}
+    function applyWelcomeName(firstname){
+      if(!welcomeName) return;
+      welcomeName.textContent = firstname ? `Bienvenue ${firstname} ` : "Bienvenue ✨";
+      welcomeName.style.display = "block";
+    }
     async function loadMyBookings(user) {
       if (!bookingsList || !user?.email) return;
 
@@ -822,12 +804,16 @@ async function loadWelcomeName(user){
       if (loggedBox) loggedBox.style.display = "block";
       if (bookingsBox) bookingsBox.style.display = "block";
       if (userEmail) userEmail.textContent = user?.email || "";
-      
-      await loadWelcomeName(user);
-      await loadMyBookings(user);
-      await loadNewsletterStatus(user);
 
-      const isAdmin = await checkAdmin(user.id);
+      const metaFirstname = user.user_metadata?.firstname ? String(user.user_metadata.firstname).trim() : "";
+
+      const [{ isAdmin, firstname: profileFirstname }] = await Promise.all([
+        checkAdminAndGetProfile(user.id),
+        loadMyBookings(user),
+        loadNewsletterStatus(user)
+      ]);
+
+      applyWelcomeName(metaFirstname || profileFirstname);
 
       if (isAdmin && adminPanel) {
         adminPanel.style.display = "block";
