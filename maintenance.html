@@ -254,24 +254,53 @@
       <h1 class="brand-title">Âmes Nomades</h1>
 
       <p class="subtitle">
-        Le site est momentanément en maintenance. Nous préparons les prochains séjours et quelques améliorations pour rendre l’expérience encore plus belle.
+        Une parenthèse hors du temps.<br>
+        Un moment pour revenir à l’essentiel.
+      </p>
+
+      <p class="section-text" style="margin-top:22px; line-height:1.9;">
+        5 jours pour ralentir.<br>
+        Respirer.<br>
+        Se retrouver.<br>
+        <br>
+        Un lieu qui apaise,<br>
+        des moments simples,<br>
+        du mouvement, du calme…<br>
+        <br>
+        Et surtout, plus besoin de faire.<br>
+        Juste être.
       </p>
 
       <section class="section">
-        <h2>Être informé(e) en priorité</h2>
+        <h2>Les retraites Âmes Nomades arrivent bientôt.</h2>
 
         <p class="section-text">
-          Laissez votre prénom et votre email pour recevoir les prochaines ouvertures de séjour en avant-première et être inscrit(e) sur la liste prioritaire.
+          Première édition : septembre 2026<br>
+          10 places uniquement
+        </p>
+
+        <p class="section-text" style="margin-top:16px;">
+          Rejoins la liste prioritaire<br>
+          et sois informée en avant-première de l’ouverture des réservations.
         </p>
 
         <form id="priorityForm" class="form-stack" novalidate>
           <input
             class="input"
             type="text"
-            name="name"
+            name="firstname"
             placeholder="Votre prénom"
             required
             autocomplete="given-name"
+          />
+
+          <input
+            class="input"
+            type="text"
+            name="lastname"
+            placeholder="Votre nom"
+            required
+            autocomplete="family-name"
           />
 
           <input
@@ -282,6 +311,19 @@
             required
             autocomplete="email"
           />
+
+          <textarea
+            class="input"
+            name="intention"
+            placeholder="Qu’est-ce que tu viens chercher dans cette expérience ? (optionnel)"
+            rows="3"
+            style="resize:vertical;"
+          ></textarea>
+
+          <label class="check-row">
+            <input type="checkbox" name="newsletter_optin">
+            <span>Je souhaite aussi recevoir la newsletter Âmes Nomades et les actualités des séjours.</span>
+          </label>
 
           <label class="check-row">
             <input type="checkbox" name="consent" required>
@@ -334,12 +376,15 @@
       if (now - priorityLastSubmit < 30000) { showMessage("Merci de patienter avant de soumettre à nouveau."); return; }
       priorityLastSubmit = now;
 
-      const firstname = String(fd.get("name") || "").trim();
+      const firstname = String(fd.get("firstname") || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
+      const intention = String(fd.get("intention") || "").trim();
+      const newsletterOptin = fd.get("newsletter_optin") === "on";
       const consent = fd.get("consent");
 
-      if(!firstname || !email){
-        showMessage("Merci de renseigner votre prénom et votre email.");
+      if(!firstname || !lastname || !email){
+        showMessage("Merci de renseigner votre prénom, votre nom et votre email.");
         return;
       }
 
@@ -348,7 +393,7 @@
         return;
       }
 
-      const payload = { firstname, email };
+      const payload = { firstname, lastname, email, intention, newsletter_optin: newsletterOptin };
       const endpoint = `${SUPABASE_URL}/functions/v1/Priority-signup`;
 
       try{

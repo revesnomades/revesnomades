@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const firstname = String(body.firstname ?? "").trim();
+    const lastname = String(body.lastname ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
+    const intention = String(body.intention ?? "").trim();
+    const newsletterOptin = body.newsletter_optin === true;
 
     if (!firstname || !email) {
       return jsonResponse(req, { error: "firstname and email are required" }, 400);
@@ -81,8 +84,10 @@ Deno.serve(async (req) => {
         .from("priority_waitlist")
         .update({
           firstname,
+          ...(lastname ? { lastname } : {}),
           source: "maintenance",
           status: "active",
+          ...(intention ? { intention } : {}),
         })
         .eq("id", existing.id);
 
@@ -95,9 +100,12 @@ Deno.serve(async (req) => {
       .from("priority_waitlist")
       .insert({
         firstname,
+        lastname: lastname || null,
         email,
         source: "maintenance",
         status: "active",
+        intention: intention || null,
+        newsletter_optin: newsletterOptin,
       });
 
     if (insertError) {
@@ -105,6 +113,18 @@ Deno.serve(async (req) => {
         return jsonResponse(req, { status: "already" }, 200);
       }
       throw insertError;
+    }
+
+    if (newsletterOptin) {
+      await supabase
+        .from("newsletter")
+        .upsert({
+          email,
+          name: `${firstname} ${lastname}`.trim(),
+        }, { onConflict: "email", ignoreDuplicates: true })
+        .catch((err: unknown) => {
+          console.error("Erreur ajout newsletter depuis priority-signup:", err);
+        });
     }
 
     return jsonResponse(req, { status: "ok" }, 200);
