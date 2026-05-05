@@ -166,13 +166,16 @@
                     </p>
                   </div>
                   <div class="account-actions">
+                    <button class="btn on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
                     <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener noreferrer">Voir faq.html</a>
                     <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
                     <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
                   </div>
                 </div>
                 <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-                <div id="siteFaqList" class="admin-faq-list"></div>
+                <div id="siteFaqWrapper" style="display:none;">
+                  <div id="siteFaqList" class="admin-faq-list"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -951,6 +954,17 @@
 
     btnNewsletterList?.addEventListener("click", () => {
       window.location.href = "/admin-newsletter.html";
+    });
+
+    const btnToggleFaqList = document.getElementById("btnToggleFaqList");
+    const siteFaqWrapper   = document.getElementById("siteFaqWrapper");
+
+    btnToggleFaqList?.addEventListener("click", () => {
+      const isVisible = siteFaqWrapper.style.display !== "none";
+      siteFaqWrapper.style.display = isVisible ? "none" : "block";
+      btnToggleFaqList.textContent = isVisible
+        ? "Voir les questions / réponses"
+        : "Ne plus afficher les questions / réponses";
     });
 
     btnAddSiteFaq?.addEventListener("click", () => {
