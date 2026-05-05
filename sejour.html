@@ -90,14 +90,14 @@
         <div id="contentBlocksContainer" style="display:grid; gap:18px;"></div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:26px;" id="highlightsSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="highlightsSection">
         <h2 class="sejour-section-title">Ce que tu vas vivre</h2>
         <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="programSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="programSection">
         <h2 class="sejour-section-title">Programme</h2>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
@@ -110,7 +110,7 @@
         </p>
       </section>
 
-      <section class="reveal gift-pack sejour-section sejour-divider" id="giftSection">
+      <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
         <div class="gift-pack-grid">
           <div class="gift-pack-text">
             <h2 class="sejour-section-title" id="giftTitle">Le sac cadeau Âmes Nomades</h2>
@@ -143,7 +143,7 @@
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="includedSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="includedSection">
         <h2 class="sejour-section-title">Ce qui est inclus</h2>
         <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted);">
           <div>Chargement…</div>
@@ -155,20 +155,20 @@
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="optionsSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="optionsSection">
         <h2 class="sejour-section-title">Options (en supplément)</h2>
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
       </section>
 
-      <p class="sejour-count reveal">
+      <p class="sejour-count reveal" style="display:none;">
         Encore <strong id="missingCount">—</strong> réservations nécessaires pour valider ce séjour.
         <br>
         <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
       </p>
 
-      <div class="booking-box reveal">
+      <div class="booking-box reveal" style="display:none;">
         <h3>Réserver</h3>
 
         <div class="actions" style="margin-top:16px;">
@@ -181,7 +181,7 @@
         <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
       </div>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px;" id="faqSection">
+      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="faqSection">
         <h2 class="sejour-section-title">FAQ</h2>
 
         <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
@@ -192,7 +192,7 @@
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" id="otherStaysSection">
+      <section class="reveal sejour-section sejour-divider" style="display:none;" id="otherStaysSection">
         <div class="other-stays-head">
           <h2 class="sejour-section-title">Découvrir d’autres séjours</h2>
           <div class="other-stays-controls" id="otherStaysControls" style="display:none;">
@@ -274,9 +274,17 @@
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get("slug");
+    const params    = new URLSearchParams(window.location.search);
+    const slugParam = params.get("slug");
     const isPreview = params.get("preview") === "1";
+
+    const pathParts   = window.location.pathname.replace(/\/$/, "").split("/");
+    const lastSegment = pathParts[pathParts.length - 1];
+    const pathSlug    = (lastSegment && lastSegment !== "sejour.html" && lastSegment !== "sejour")
+      ? decodeURIComponent(lastSegment)
+      : null;
+
+    const slug = slugParam || pathSlug || null;
 
     const previewBanner = document.getElementById("previewBanner");
     if (isPreview && previewBanner) {
@@ -654,12 +662,32 @@
         stayQuery = stayQuery.eq("published", true);
       }
 
-      const { data: stay, error } = await stayQuery.single();
+      const { data: stay, error } = await stayQuery.maybeSingle();
 
       if(error || !stay){
-        console.error(error);
-        stayTitle.textContent = "Séjour introuvable";
-        stayText.innerHTML = "<p>Impossible de charger ce séjour.</p>";
+        if(error) console.error(error);
+
+        const heroSection = document.querySelector(".sejour-hero");
+        if(heroSection) heroSection.style.display = "none";
+
+        stayTitle.textContent = "";
+        stayText.innerHTML = `
+          <div style="text-align:center; padding:60px 20px;">
+            <div style="font-size:48px; margin-bottom:16px;">🌿</div>
+            <h1 style="font-family:'SegoCustom'; font-weight:500; font-size:clamp(28px,4vw,48px); margin:0;">
+              Ce séjour n'est plus disponible
+            </h1>
+            <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
+              Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
+            </p>
+            <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+              <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
+              <a class="btn on-light" href="/index.html">Retour à l'accueil</a>
+            </div>
+          </div>
+        `;
+        if(stayMeta)  stayMeta.style.display  = "none";
+        if(stayDates) stayDates.parentElement.style.display = "none";
         return;
       }
 

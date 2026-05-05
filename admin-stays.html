@@ -1505,7 +1505,7 @@
           <div class="admin-inline">
             <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
             <button class="btn on-light" type="button" data-preview="${stay.slug}">Aperçu</button>
-            <a class="btn on-light" href="/sejour/${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener noreferrer">Voir</a>
+            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener noreferrer">Voir</a>
             <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
           </div>
         </div>
@@ -1520,7 +1520,7 @@
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
         btn.addEventListener("click", () => {
           const slug = btn.getAttribute("data-preview");
-          window.open(`/sejour/${encodeURIComponent(slug)}?preview=1`, "_blank");
+          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
         });
       });
 
@@ -1695,7 +1695,7 @@
         return;
       }
 
-      window.open(`/sejour/${encodeURIComponent(slug)}?preview=1`, "_blank");
+      window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
     });
 
     stayPublishToggle?.addEventListener("click", () => {
