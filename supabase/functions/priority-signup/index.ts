@@ -28,6 +28,46 @@ function jsonResponse(req: Request, body: Record<string, unknown>, status = 200)
   });
 }
 
+async function sendAdminNotificationEmail(
+  email: string,
+  firstname: string,
+  lastname: string,
+  intention: string,
+  brevoApiKey: string,
+): Promise<void> {
+  const intentionHtml = intention
+    ? `<p><strong>Ce qu'elle vient chercher :</strong><br>${intention.replace(/\n/g, "<br>")}</p>`
+    : `<p><em>Champ "intention" non rempli.</em></p>`;
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "content-type": "application/json",
+      "api-key": brevoApiKey,
+    },
+    body: JSON.stringify({
+      sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
+      to: [{ email: "contact@amesnomades.com", name: "Âmes Nomades Admin" }],
+      subject: `🌿 Nouvelle inscription prioritaire — ${firstname} ${lastname}`,
+      htmlContent: `
+        <h2>Nouvelle inscription sur la liste prioritaire</h2>
+        <p><strong>Prénom :</strong> ${firstname}</p>
+        <p><strong>Nom :</strong> ${lastname}</p>
+        <p><strong>Email :</strong> ${email}</p>
+        ${intentionHtml}
+        <hr>
+        <p style="color:#999; font-size:12px;">Inscription via la page maintenance — Âmes Nomades</p>
+      `,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    console.error(`Brevo admin notification failed: ${response.status} ${text}`);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -48,6 +88,7 @@ Deno.serve(async (req) => {
       return jsonResponse(req, { error: "Missing Supabase environment variables" }, 500);
     }
 
+    const brevoApiKey = Deno.env.get("BREVO_API_KEY") ?? "";
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json().catch(() => ({}));
@@ -125,6 +166,18 @@ Deno.serve(async (req) => {
         .catch((err: unknown) => {
           console.error("Erreur ajout newsletter depuis priority-signup:", err);
         });
+    }
+
+    if (brevoApiKey) {
+      await sendAdminNotificationEmail(
+        email,
+        firstname,
+        lastname,
+        intention,
+        brevoApiKey,
+      ).catch((err: unknown) => {
+        console.error("Erreur notification admin:", err);
+      });
     }
 
     return jsonResponse(req, { status: "ok" }, 200);
