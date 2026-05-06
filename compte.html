@@ -28,9 +28,9 @@
         <span>ÂmesNomades</span>
       </a>
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
-        <a href="/index.html#apropos">À propos</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/index.html#contact">Contact</a>
+        <a href="/index.html#apropos" data-i18n="nav.about">À propos</a>
+        <a href="/faq.html" data-i18n="nav.faq">FAQ</a>
+        <a href="/index.html#contact" data-i18n="nav.contact">Contact</a>
         <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
       </nav>
     </div>
@@ -255,16 +255,6 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
-
-    // Passer à false quand le site est ouvert au public
-    const MAINTENANCE_MODE = true;
-
-    const ADMIN_BYPASS_PAGES = [
-      "/compte.html", "/admin-stays.html", "/admin-bookings.html",
-      "/admin-newsletter.html", "/admin-priority.html", "/admin-dashboard.html",
-      "/sejour.html", "/index.html", "/", "/faq.html",
-      "/bon-cadeau.html", "/mentions-legales.html", "/politique-confidentialite.html",
-    ];
 
     const emailEl = document.getElementById("email");
     const passEl  = document.getElementById("password");
@@ -846,13 +836,6 @@
         loadNewsletterStatus(user)
       ]);
 
-      // En mode maintenance, seul l'admin peut accéder au compte
-      if(MAINTENANCE_MODE && !isAdmin){
-        await supabase.auth.signOut();
-        window.location.href = "/maintenance.html";
-        return;
-      }
-
       applyWelcomeName(metaFirstname || profileFirstname);
 
       if (isAdmin) {
@@ -871,25 +854,31 @@
       }
     }
 
-    // Détection reset password
+    // Détection reset password — wrappé en IIFE pour ne pas bloquer l'attachement des listeners
     const hash = window.location.hash || "";
     const isRecovery =
       hash.includes("type=recovery") ||
       hash.includes("access_token");
 
-    if (isRecovery) {
-      if (authBox) authBox.style.display = "none";
-      if (perksBox) perksBox.style.display = "none";
-      if (loggedBox) loggedBox.style.display = "none";
-      if (bookingsBox) bookingsBox.style.display = "none";
-      if (resetBox) resetBox.style.display = "block";
-    } else {
-      const { data: { session }, error: sErr } = await supabase.auth.getSession();
-      if (sErr) console.warn(sErr);
-
-      if (session?.user) await showLoggedIn(session.user);
-      else showLoggedOut();
-    }
+    void (async function initAuth() {
+      if (isRecovery) {
+        if (authBox) authBox.style.display = "none";
+        if (perksBox) perksBox.style.display = "none";
+        if (loggedBox) loggedBox.style.display = "none";
+        if (bookingsBox) bookingsBox.style.display = "none";
+        if (resetBox) resetBox.style.display = "block";
+      } else {
+        try {
+          const { data: { session }, error: sErr } = await supabase.auth.getSession();
+          if (sErr) console.warn(sErr);
+          if (session?.user) await showLoggedIn(session.user);
+          else showLoggedOut();
+        } catch(e) {
+          console.error("initAuth error:", e);
+          showLoggedOut();
+        }
+      }
+    })();
 
     setupPasswordToggles();
     newPasswordEl?.addEventListener("input", updateAccountPasswordStrength);
@@ -912,16 +901,6 @@
       if (error) {
         setMsg(authMsg, error.message);
         return;
-      }
-
-      // Vérification maintenance avant d'afficher le compte
-      if(MAINTENANCE_MODE){
-        const { isAdmin } = await checkAdminAndGetProfile(data.user.id);
-        if(!isAdmin){
-          await supabase.auth.signOut();
-          setMsg(authMsg, "Le site est en cours de maintenance. Seuls les administrateurs peuvent se connecter.");
-          return;
-        }
       }
 
       await showLoggedIn(data.user);
@@ -1038,14 +1017,6 @@
     // Sync UI
     supabase.auth.onAuthStateChange(async (_evt, newSession) => {
       if(newSession?.user){
-        if(MAINTENANCE_MODE){
-          const { isAdmin } = await checkAdminAndGetProfile(newSession.user.id);
-          if(!isAdmin){
-            await supabase.auth.signOut();
-            window.location.href = "/maintenance.html";
-            return;
-          }
-        }
         await showLoggedIn(newSession.user);
       } else {
         showLoggedOut();
