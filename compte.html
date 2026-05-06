@@ -250,6 +250,9 @@
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
+    // Passer à false quand le site est ouvert au public
+    const MAINTENANCE_MODE = true;
+
     const emailEl = document.getElementById("email");
     const passEl  = document.getElementById("password");
 
@@ -816,6 +819,13 @@
         loadNewsletterStatus(user)
       ]);
 
+      // En mode maintenance, seul l'admin peut accéder au compte
+      if(MAINTENANCE_MODE && !isAdmin){
+        await supabase.auth.signOut();
+        window.location.href = "/maintenance.html";
+        return;
+      }
+
       applyWelcomeName(metaFirstname || profileFirstname);
 
       if (isAdmin && adminPanel) {
@@ -870,6 +880,16 @@
       if (error) {
         setMsg(authMsg, error.message);
         return;
+      }
+
+      // Vérification maintenance avant d'afficher le compte
+      if(MAINTENANCE_MODE){
+        const { isAdmin } = await checkAdminAndGetProfile(data.user.id);
+        if(!isAdmin){
+          await supabase.auth.signOut();
+          setMsg(authMsg, "Le site est en cours de maintenance. Seuls les administrateurs peuvent se connecter.");
+          return;
+        }
       }
 
       await showLoggedIn(data.user);
@@ -985,8 +1005,19 @@
 
     // Sync UI
     supabase.auth.onAuthStateChange(async (_evt, newSession) => {
-      if (newSession?.user) await showLoggedIn(newSession.user);
-      else showLoggedOut();
+      if(newSession?.user){
+        if(MAINTENANCE_MODE){
+          const { isAdmin } = await checkAdminAndGetProfile(newSession.user.id);
+          if(!isAdmin){
+            await supabase.auth.signOut();
+            window.location.href = "/maintenance.html";
+            return;
+          }
+        }
+        await showLoggedIn(newSession.user);
+      } else {
+        showLoggedOut();
+      }
     });
   </script>
 

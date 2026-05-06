@@ -234,6 +234,36 @@
       text-underline-offset:3px;
     }
 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .maintenance-bg {
+      animation: fadeIn 1.8s ease forwards;
+    }
+
+    .maintenance-card {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+
+    .brand-logo {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+    }
+
+    .subtitle {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+    }
+
+    .section {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+    }
+
     @media (max-width: 640px){
       .maintenance-card{
         padding:26px 18px;
@@ -252,7 +282,7 @@
 
     <div class="maintenance-card">
       <div style="text-align:center; margin-bottom:18px;">
-        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" style="max-width:540px; width:100%; height:auto;">
+        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" class="brand-logo" style="max-width:460px; width:100%; height:auto;">
       </div>
 
       <section class="section">
