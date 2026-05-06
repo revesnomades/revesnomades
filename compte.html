@@ -31,6 +31,7 @@
         <a href="/index.html#apropos">À propos</a>
         <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact">Contact</a>
+        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
       </nav>
     </div>
   </header>
@@ -250,9 +251,19 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
 
     // Passer à false quand le site est ouvert au public
     const MAINTENANCE_MODE = true;
+
+    const ADMIN_BYPASS_PAGES = [
+      "/compte.html", "/admin-stays.html", "/admin-bookings.html",
+      "/admin-newsletter.html", "/admin-priority.html", "/admin-dashboard.html",
+      "/sejour.html", "/index.html", "/", "/faq.html",
+      "/bon-cadeau.html", "/mentions-legales.html", "/politique-confidentialite.html",
+    ];
 
     const emailEl = document.getElementById("email");
     const passEl  = document.getElementById("password");
@@ -395,6 +406,7 @@
       if (bookingsBox) bookingsBox.style.display = "none";
       if (adminPanel) adminPanel.style.display = "none";
       if (adminFaqPanel) adminFaqPanel.style.display = "none";
+      if (welcomeName) { welcomeName.textContent = ""; welcomeName.style.display = "none"; }
       newsletterSubRecord = null;
       setMsg(newsletterMsg, "");
     }
@@ -747,9 +759,21 @@
       if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
       if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
     }
+    function getSalutation(){
+      const formatter = new Intl.DateTimeFormat("fr-FR", {
+        timeZone: "Europe/Paris",
+        hour: "numeric",
+        hour12: false
+      });
+      const hour = parseInt(formatter.format(new Date()), 10);
+      return (hour >= 4 && hour < 20) ? "Bonjour" : "Bonsoir";
+    }
+
     function applyWelcomeName(firstname){
       if(!welcomeName) return;
-      welcomeName.textContent = firstname ? `Bienvenue ${firstname} ` : "Bienvenue ✨";
+      const salutation = getSalutation();
+      const name = firstname ? String(firstname).trim() : "";
+      welcomeName.textContent = name ? `${salutation} ${name} ✨` : `${salutation} ✨`;
       welcomeName.style.display = "block";
     }
     async function loadMyBookings(user) {

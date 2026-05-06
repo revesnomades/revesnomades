@@ -42,6 +42,7 @@
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
+        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
         <a class="icon-btn" href="/compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
             <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
@@ -60,6 +61,7 @@
           <a href="/faq.html">FAQ</a>
           <a href="/index.html#contact" data-scroll>Contact</a>
           <a href="/compte.html">Compte</a>
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English" style="margin-top:8px;">EN</button>
         </nav>
       </div>
     </div>
@@ -274,6 +276,11 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    import { initPageWithMaintenanceCheck } from "/assets/js/admin-access.js";
+    await initPageWithMaintenanceCheck();
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
 
     const params     = new URLSearchParams(window.location.search);
     const slug       = params.get("slug") || null;

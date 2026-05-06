@@ -34,12 +34,12 @@
   <section class="band white">
     <div class="section on-light" style="padding-top:110px;">
       <div class="container">
-        <div class="center">
+        <div class="center reveal" data-delay="0">
           <h2>Politique de confidentialité</h2>
           <p>Comment nous utilisons vos données (newsletter, contact, réservations).</p>
         </div>
 
-        <div style="border:1px solid var(--line); padding:16px; margin-top:16px;">
+        <div class="reveal" data-delay="1" style="border:1px solid var(--line); padding:16px; margin-top:16px;">
           <h3>Données collectées</h3>
           <p style="color:var(--muted); margin-top:8px;">
             • Compte : email (Supabase Auth)<br>
@@ -115,5 +115,10 @@
   </footer>
 
   <script src="assets/js/main.js" defer></script>
+  <script type="module">
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
+  </script>
 </body>
 </html>

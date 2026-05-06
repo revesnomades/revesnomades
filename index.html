@@ -90,6 +90,8 @@
         <a href="faq.html">FAQ</a>
         <a href="index.html#contact" data-scroll>Contact</a>
 
+        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
+
         <a class="icon-btn" href="compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
             <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
@@ -108,6 +110,7 @@
           <a href="faq.html">FAQ</a>
           <a href="index.html#contact" data-scroll>Contact</a>
           <a href="compte.html">Compte</a>
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English" style="margin-top:8px;">EN</button>
         </nav>
       </div>
     </div>
@@ -120,10 +123,10 @@
 
     <div class="hero-content">
       <h1 class="reveal amesnomades-title" data-delay="0">ÂmesNomades</h1>
-      <p class="reveal" data-delay="1">Partir pour mieux se retrouver.</p>
+      <p class="reveal" data-delay="1" data-i18n="hero.tagline">Partir pour mieux se retrouver.</p>
 
       <div class="actions reveal" data-delay="2">
-        <a href="#sejours" class="btn tiny" data-scroll>Voir les séjours</a>
+        <a href="#sejours" class="btn tiny" data-scroll data-i18n="hero.cta">Voir les séjours</a>
       </div>
     </div>
   </section>
@@ -179,8 +182,8 @@
   <section class="band cream" id="prochains-sejours">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 var(--space-lg);">
       <div class="reveal">
-        <h2 style="margin:0;">Prochains séjours</h2>
-        <p style="margin-top:12px; color:var(--muted);">
+        <h2 style="margin:0;" data-i18n="index.upcoming">Prochains séjours</h2>
+        <p style="margin-top:12px; color:var(--muted);" data-i18n="index.upcoming_sub">
           Survolez un séjour pour découvrir les prochaines dates.
         </p>
       </div>
@@ -369,8 +372,11 @@
       </div>
 
       <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
+        </div>
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>Copyright © 2026 Âmes Nomades</div>
+          <div data-i18n="footer.copyright">Copyright © 2026 Âmes Nomades</div>
           <div>
             <a href="faq.html" style="display:block; text-align:right;">FAQ</a>
             <a href="mentions-legales.html">Mentions légales</a> ·
@@ -385,6 +391,13 @@
 
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    import { initPageWithMaintenanceCheck } from "/assets/js/admin-access.js";
+
+    await initPageWithMaintenanceCheck();
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
+    window.reloadDynamicContent = async () => { await loadFeaturedStay(); await loadHighlightStays(); };
 
     const featuredStayTitle = document.getElementById("featuredStayTitle");
     const featuredStayDuration = document.getElementById("featuredStayDuration");
