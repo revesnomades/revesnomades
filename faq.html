@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Questions fréquentes — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f4ef">
   <meta name="description" content="Retrouvez les réponses aux questions les plus fréquentes avant de réserver un séjour bien-être Âmes Nomades : programme, niveaux, annulation, esprit du séjour.">
   <link rel="canonical" href="https://amesnomades.com/faq.html">
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
@@ -29,6 +30,7 @@
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html" aria-current="page">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
+        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
         <a class="icon-btn" href="/compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
             <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
@@ -55,8 +57,8 @@
   <main>
   <section class="band cream">
     <div class="container" style="padding:110px 0 60px;">
-      <h1 class="reveal" style="margin:0;">Questions fréquentes</h1>
-      <p class="sub reveal" style="margin-top:10px; max-width:760px;">
+      <h1 class="reveal" style="margin:0;" data-i18n="faq.title">Questions fréquentes</h1>
+      <p class="sub reveal" style="margin-top:10px; max-width:760px;" data-i18n="faq.subtitle">
         Les réponses aux questions les plus fréquentes avant de réserver un séjour Âmes Nomades.
       </p>
 
@@ -98,8 +100,11 @@
       </div>
 
       <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
+        </div>
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>Copyright © 2026 Âmes Nomades</div>
+          <div data-i18n="footer.copyright">Copyright © 2026 Âmes Nomades</div>
           <div>
             <a href="/faq.html" style="display:block; text-align:right;">FAQ</a>
             <a href="/mentions-legales.html">Mentions légales</a> ·
@@ -110,9 +115,15 @@
     </div>
   </footer>
 
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/main.js" defer></script>
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
+
+    const _adminCookie = document.cookie.includes("an_admin_session=1");
+    if(!_adminCookie){
+      import("/assets/js/admin-access.js").then(m => m.initPageWithMaintenanceCheck());
+    }
 
     const faqList = document.getElementById("faqList");
     const fallbackFaqItems = [

@@ -35,7 +35,7 @@
 
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
-  <link rel="preload" as="image" href="assets/img/hero-1.jpg">
+  <link rel="preload" as="image" href="assets/img/hero-1.jpg" fetchpriority="high">
   <link rel="stylesheet" href="assets/css/styles.css" />
 
   <script type="application/ld+json">
@@ -90,6 +90,8 @@
         <a href="faq.html">FAQ</a>
         <a href="index.html#contact" data-scroll>Contact</a>
 
+        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
+
         <a class="icon-btn" href="compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
             <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
@@ -108,6 +110,7 @@
           <a href="faq.html">FAQ</a>
           <a href="index.html#contact" data-scroll>Contact</a>
           <a href="compte.html">Compte</a>
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English" style="margin-top:8px;">EN</button>
         </nav>
       </div>
     </div>
@@ -120,10 +123,10 @@
 
     <div class="hero-content">
       <h1 class="reveal amesnomades-title" data-delay="0">ÂmesNomades</h1>
-      <p class="reveal" data-delay="1">Partir pour mieux se retrouver.</p>
+      <p class="reveal" data-delay="1" data-i18n="hero.tagline">Partir pour mieux se retrouver.</p>
 
       <div class="actions reveal" data-delay="2">
-        <a href="#sejours" class="btn tiny" data-scroll>Voir les séjours</a>
+        <a href="#sejours" class="btn tiny" data-scroll data-i18n="hero.cta">Voir les séjours</a>
       </div>
     </div>
   </section>
@@ -164,7 +167,6 @@
 
         <div class="actions reveal" data-delay="6">
           <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Réserver</a>
-          <a class="btn tiny on-light" href="#prochains-sejours" data-scroll>Voir les séjours</a>
         </div>
 
         <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
@@ -180,8 +182,8 @@
   <section class="band cream" id="prochains-sejours">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 var(--space-lg);">
       <div class="reveal">
-        <h2 style="margin:0;">Prochains séjours</h2>
-        <p style="margin-top:12px; color:var(--muted);">
+        <h2 style="margin:0;" data-i18n="index.upcoming">Prochains séjours</h2>
+        <p style="margin-top:12px; color:var(--muted);" data-i18n="index.upcoming_sub">
           Survolez un séjour pour découvrir les prochaines dates.
         </p>
       </div>
@@ -196,7 +198,7 @@
     <div class="container about-band">
       <div class="about-inner">
 
-        <h2 class="reveal" data-delay="0">À propos de Âmes Nomades</h2>
+        <h2 class="reveal" data-delay="0" data-i18n="index.about_title">À propos de Âmes Nomades</h2>
 
         <div class="about-text is-collapsed" id="aboutText">
           <p class="reveal" data-delay="1">"Il y a quelques années, j’ai réalisé que beaucoup de femmes autour de moi étaient épuisées.</p>
@@ -237,7 +239,7 @@
         </div>
 
         <div class="about-actions">
-          <button class="btn tiny on-light" id="aboutToggleBtn" type="button" aria-expanded="false">
+          <button class="btn tiny on-light" id="aboutToggleBtn" type="button" aria-expanded="false" data-i18n="index.see_more">
             Voir la suite
           </button>
         </div>
@@ -258,14 +260,14 @@
     <div class="bg" style="background-image:url('assets/img/newsletter-bg.jpg');"></div>
 
     <div class="newsletter-inner container">
-      <h2 class="reveal" data-delay="0">Recevez votre guide en cadeau !</h2>
+      <h2 class="reveal" data-delay="0" data-i18n="index.newsletter_title">Recevez votre guide en cadeau !</h2>
 
       <form id="newsletterForm" class="form-stack reveal" data-delay="1" novalidate>
         <input class="input" name="lastname" placeholder="Nom" required autocomplete="family-name" />
         <input class="input" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
         <input class="input" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
         <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
-        <button class="btn block" type="submit">Recevoir mon guide</button>
+        <button class="btn block" type="submit" data-i18n="index.newsletter_btn">Recevoir mon guide</button>
       </form>
 
       <div id="newsletterMsg" class="form-msg reveal" data-delay="2"></div>
@@ -281,11 +283,11 @@
     <div class="bg" style="background-image:url('assets/img/hero-2.jpg');"></div>
 
     <div class="inner container">
-      <h2 class="reveal" data-delay="0">Et si vous offriez un moment Âmes Nomades ?</h2>
-      <p class="reveal" data-delay="1">Un bon cadeau pour une parenthèse de mouvement, de douceur et de présence.</p>
+      <h2 class="reveal" data-delay="0" data-i18n="index.gift_title">Et si vous offriez un moment Âmes Nomades ?</h2>
+      <p class="reveal" data-delay="1" data-i18n="index.gift_sub">Un bon cadeau pour une parenthèse de mouvement, de douceur et de présence.</p>
 
       <div class="actions reveal" data-delay="2">
-        <a class="btn tiny" href="bon-cadeau.html">Commander votre bon cadeau</a>
+        <a class="btn tiny" href="bon-cadeau.html" data-i18n="index.gift_btn">Commander votre bon cadeau</a>
       </div>
     </div>
   </section>
@@ -370,22 +372,32 @@
       </div>
 
       <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
+        </div>
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>Copyright © 2026 Âmes Nomades</div>
+          <div data-i18n="footer.copyright">Copyright © 2026 Âmes Nomades</div>
           <div>
             <a href="faq.html" style="display:block; text-align:right;">FAQ</a>
-            <a href="mentions-legales.html">Mentions légales</a> ·
-            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+            <a href="mentions-legales.html" data-i18n="footer.legal">Mentions légales</a> ·
+            <a href="politique-confidentialite.html" data-i18n="footer.privacy">Politique de confidentialité</a>
           </div>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script src="assets/js/main.js" defer></script>
 
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
+
+    const _adminCookie = document.cookie.includes("an_admin_session=1");
+    if(!_adminCookie){
+      import("/assets/js/admin-access.js").then(m => m.initPageWithMaintenanceCheck());
+    }
+    window.reloadDynamicContent = async () => { await loadFeaturedStay(); await loadHighlightStays(); };
 
     const featuredStayTitle = document.getElementById("featuredStayTitle");
     const featuredStayDuration = document.getElementById("featuredStayDuration");
@@ -469,7 +481,7 @@
       if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayLocation) featuredStayLocation.textContent = stay.location || "";
-      if (featuredStayLink) featuredStayLink.href = `/sejour/${encodeURIComponent(stay.slug)}`;
+      if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
       if (featuredStayMissing) featuredStayMissing.textContent = "Places limitées";
@@ -525,7 +537,7 @@
     const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
 
     return `
-      <a class="stay-card" href="/sejour/${encodeURIComponent(stay.slug)}">
+      <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
         
         <div class="stay-card-media" style="background-image:url('${image}')">
 
