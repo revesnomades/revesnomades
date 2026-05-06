@@ -280,6 +280,11 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    import { initPageWithMaintenanceCheck } from "/assets/js/admin-access.js";
+    await initPageWithMaintenanceCheck();
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
 
     const _adminCookie = document.cookie.includes("an_admin_session=1");
     if(!_adminCookie){

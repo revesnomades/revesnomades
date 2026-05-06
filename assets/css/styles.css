@@ -1484,3 +1484,68 @@ input, textarea {
 }
 }
 }
+
+/* ── Language toggle ──────────────────────────────── */
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+  border-radius: 3px;
+  padding: 0;
+}
+
+.lang-toggle-btn:hover {
+  background: rgba(255,255,255,.15);
+  border-color: rgba(255,255,255,.6);
+}
+
+.on-light .lang-toggle-btn,
+body.on-light .lang-toggle-btn {
+  border-color: rgba(30,31,34,.25);
+  color: var(--text);
+}
+
+.on-light .lang-toggle-btn:hover,
+body.on-light .lang-toggle-btn:hover {
+  background: rgba(30,31,34,.07);
+  border-color: rgba(30,31,34,.5);
+}
+
+/* ── Animations d'entrée globales ─────────────────── */
+@keyframes an-fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes an-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Hero et nav — non gérés par l'IntersectionObserver */
+.hero,
+.sejour-hero {
+  animation: an-fadeIn 1.2s ease both;
+}
+
+.nav {
+  animation: an-fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .sejour-hero,
+  .nav {
+    animation: none !important;
+  }
+}

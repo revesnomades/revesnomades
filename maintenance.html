@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Âmes Nomades — Maintenance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f4ef">
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
@@ -234,6 +235,36 @@
       text-underline-offset:3px;
     }
 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .maintenance-bg {
+      animation: fadeIn 1.8s ease forwards;
+    }
+
+    .maintenance-card {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+
+    .brand-logo {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+    }
+
+    .subtitle {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+    }
+
+    .section {
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+    }
+
     @media (max-width: 640px){
       .maintenance-card{
         padding:26px 18px;
@@ -251,27 +282,40 @@
     <div class="maintenance-bg"></div>
 
     <div class="maintenance-card">
-      <h1 class="brand-title">Âmes Nomades</h1>
-
-      <p class="subtitle">
-        Le site est momentanément en maintenance. Nous préparons les prochains séjours et quelques améliorations pour rendre l’expérience encore plus belle.
-      </p>
+      <div style="text-align:center; margin-bottom:18px;">
+        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" class="brand-logo" style="max-width:460px; width:100%; height:auto;">
+      </div>
 
       <section class="section">
-        <h2>Être informé(e) en priorité</h2>
+        <h2 style="font-size:18px; text-transform:uppercase;">Les retraites Âmes Nomades arrivent bientôt.</h2>
 
         <p class="section-text">
-          Laissez votre prénom et votre email pour recevoir les prochaines ouvertures de séjour en avant-première et être inscrit(e) sur la liste prioritaire.
+          Première édition : septembre 2026<br>
+          10 places uniquement
+        </p>
+
+        <p class="section-text" style="margin-top:16px;">
+          Rejoins la liste prioritaire<br>
+          et sois informée en avant-première de l’ouverture des réservations.
         </p>
 
         <form id="priorityForm" class="form-stack" novalidate>
           <input
             class="input"
             type="text"
-            name="name"
+            name="firstname"
             placeholder="Votre prénom"
             required
             autocomplete="given-name"
+          />
+
+          <input
+            class="input"
+            type="text"
+            name="lastname"
+            placeholder="Votre nom"
+            required
+            autocomplete="family-name"
           />
 
           <input
@@ -282,6 +326,14 @@
             required
             autocomplete="email"
           />
+
+          <textarea
+            class="input"
+            name="intention"
+            placeholder="Qu’est-ce que tu viens chercher dans cette expérience ? (optionnel)"
+            rows="3"
+            style="resize:vertical;"
+          ></textarea>
 
           <label class="check-row">
             <input type="checkbox" name="consent" required>
@@ -296,10 +348,6 @@
         </form>
 
         <div id="priorityMsg" class="form-msg"></div>
-
-        <div class="small-note">
-          Vous serez ajouté(e) à la liste prioritaire.
-        </div>
 
         <div class="admin-link">
           <a href="/compte.html">Accès administrateur</a>
@@ -331,15 +379,18 @@
       const fd = new FormData(form);
       if (String(fd.get("website") || "").trim()) { form.reset(); showMessage("🌿 Merci, vous êtes bien inscrit(e)."); return; }
       const now = Date.now();
-      if (now - priorityLastSubmit < 30000) { showMessage("Merci de patienter avant de soumettre à nouveau."); return; }
+      if (now - priorityLastSubmit < 5000) { showMessage("Merci de patienter quelques secondes."); return; }
       priorityLastSubmit = now;
 
-      const firstname = String(fd.get("name") || "").trim();
+      const firstname = String(fd.get("firstname") || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
+      const intention = String(fd.get("intention") || "").trim();
+      const newsletterOptin = fd.get("newsletter_optin") === "on";
       const consent = fd.get("consent");
 
-      if(!firstname || !email){
-        showMessage("Merci de renseigner votre prénom et votre email.");
+      if(!firstname || !lastname || !email){
+        showMessage("Merci de renseigner votre prénom, votre nom et votre email.");
         return;
       }
 
@@ -348,8 +399,8 @@
         return;
       }
 
-      const payload = { firstname, email };
-      const endpoint = `${SUPABASE_URL}/functions/v1/Priority-signup`;
+      const payload = { firstname, lastname, email, intention, newsletter_optin: newsletterOptin };
+      const endpoint = `${SUPABASE_URL}/functions/v1/priority-signup`;
 
       try{
         const res = await fetch(endpoint, {

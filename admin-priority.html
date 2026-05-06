@@ -81,18 +81,61 @@
         <div style="display:grid; gap:10px;">
           ${data.map(item => `
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-              <div style="font-weight:600;">${escapeHtml(item.firstname || "—")}</div>
-              <div style="margin-top:4px; color:var(--muted);">${escapeHtml(item.email)}</div>
-              <div style="margin-top:4px; font-size:13px; color:var(--muted);">
-                Source : ${escapeHtml(item.source || "—")} · Statut : ${escapeHtml(item.status || "—")}
-              </div>
-              <div style="margin-top:4px; font-size:12px; color:var(--muted);">
-                Inscription : ${item.created_at ? new Date(item.created_at).toLocaleString("fr-FR") : "—"}
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                <div style="flex:1;">
+                  <div style="font-weight:600;">${escapeHtml((item.firstname || "—") + (item.lastname ? " " + item.lastname : ""))}</div>
+                  <div style="margin-top:4px; color:var(--muted);">${escapeHtml(item.email)}</div>
+                  <div style="margin-top:4px; font-size:13px; color:var(--muted);">
+                    Statut : ${escapeHtml(item.status || "—")}
+                  </div>
+                  <div style="margin-top:4px; font-size:12px; color:var(--muted);">
+                    Inscription : ${item.created_at ? new Date(item.created_at).toLocaleString("fr-FR") : "—"}
+                  </div>
+                  ${item.intention ? `
+                  <div style="margin-top:10px; padding:10px; background:rgba(255,255,255,.75); border:1px solid var(--line); font-size:13px; color:var(--text);">
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;">Ce qu'elle vient chercher</div>
+                    ${String(item.intention).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}
+                  </div>` : ""}
+                </div>
+                <div>
+                  <button
+                    class="btn on-light"
+                    type="button"
+                    data-delete-priority="${escapeHtml(String(item.id))}"
+                    style="font-size:12px; padding:8px 12px; color:#c0392b; border-color:#c0392b;"
+                  >Supprimer</button>
+                </div>
               </div>
             </div>
           `).join("")}
         </div>
       `;
+
+      priorityList.querySelectorAll("[data-delete-priority]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-delete-priority");
+          const ok = confirm("Supprimer cette personne de la liste prioritaire ?");
+          if(!ok) return;
+
+          btn.textContent = "…";
+          btn.disabled = true;
+
+          const { error } = await supabase
+            .from("priority_waitlist")
+            .delete()
+            .eq("id", id);
+
+          if(error){
+            console.error(error);
+            alert("Impossible de supprimer cet inscrit.");
+            btn.textContent = "Supprimer";
+            btn.disabled = false;
+            return;
+          }
+
+          await loadPriority();
+        });
+      });
     }
 
     try{

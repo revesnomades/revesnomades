@@ -1,7 +1,9 @@
-#/*    /maintenance.html    503!
-
-# URLs propres pour les séjours
-/sejour/:slug  /sejour.html?slug=:slug  200
+# Fichiers statiques — toujours servis directement, JAMAIS redirigés
+/sitemap.xml  /sitemap.xml  200!
+/robots.txt   /robots.txt   200!
 
 # Redirection www → sans www
 https://www.amesnomades.com/*  https://amesnomades.com/:splat  301!
+
+# Maintenance (décommenter pour activer)
+#/*    /maintenance.html    503!
