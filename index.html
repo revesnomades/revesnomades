@@ -468,7 +468,7 @@
       if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayLocation) featuredStayLocation.textContent = stay.location || "";
-      if (featuredStayLink) featuredStayLink.href = `/sejour/${encodeURIComponent(stay.slug)}`;
+      if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
       if (featuredStayMissing) featuredStayMissing.textContent = "Places limitées";
@@ -524,7 +524,7 @@
     const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
 
     return `
-      <a class="stay-card" href="/sejour/${encodeURIComponent(stay.slug)}">
+      <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
         
         <div class="stay-card-media" style="background-image:url('${image}')">
 

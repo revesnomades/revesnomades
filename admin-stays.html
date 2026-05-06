@@ -648,6 +648,11 @@
   </section>
 
   <script type="module">
+    // Les pages séjour ne sont pas des fichiers HTML individuels créés sur le serveur.
+    // C'est une Single Page Application : un seul fichier sejour.html charge dynamiquement
+    // le contenu depuis Supabase via le paramètre ?slug=.
+    // Quand un séjour est créé avec le slug "camargue", son URL est /sejour.html?slug=camargue
+    // Le slug doit être unique dans la table stays de Supabase.
     import { supabase } from "/assets/js/supabaseClient.js";
 
     const adminStatus = document.getElementById("adminStatus");
@@ -1504,8 +1509,8 @@
 
           <div class="admin-inline">
             <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-            <button class="btn on-light" type="button" data-preview="${stay.slug}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener noreferrer">Voir</a>
+            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
+            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
             <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
           </div>
         </div>
@@ -1519,7 +1524,7 @@
 
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
         btn.addEventListener("click", () => {
-          const slug = btn.getAttribute("data-preview");
+          const slug = decodeURIComponent(btn.getAttribute("data-preview"));
           window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
         });
       });
@@ -1785,6 +1790,32 @@
         show_options_section: showOptionsSection,
         show_highlights_section: showHighlightsSection
       };
+
+      // Vérification unicité du slug
+      if(!currentStayId){
+        const { data: existingSlug } = await supabase
+          .from("stays")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+
+        if(existingSlug){
+          setMsg(editorMsg, `Ce slug "${slug}" est déjà utilisé par un autre séjour. Modifie-le.`);
+          return;
+        }
+      } else {
+        const { data: existingSlug } = await supabase
+          .from("stays")
+          .select("id")
+          .eq("slug", slug)
+          .neq("id", currentStayId)
+          .maybeSingle();
+
+        if(existingSlug){
+          setMsg(editorMsg, `Ce slug "${slug}" est déjà utilisé par un autre séjour. Modifie-le.`);
+          return;
+        }
+      }
 
       let stayId = currentStayId;
 

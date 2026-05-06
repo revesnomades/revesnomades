@@ -2,9 +2,6 @@
 /sitemap.xml  /sitemap.xml  200!
 /robots.txt   /robots.txt   200!
 
-# URLs canoniques séjours
-/sejour/:slug  /sejour.html?slug=:slug  200
-
 # Redirection www → sans www
 https://www.amesnomades.com/*  https://amesnomades.com/:splat  301!
 

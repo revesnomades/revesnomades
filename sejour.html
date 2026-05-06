@@ -274,17 +274,9 @@
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
-    const params    = new URLSearchParams(window.location.search);
-    const slugParam = params.get("slug");
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get("slug") || null;
     const isPreview = params.get("preview") === "1";
-
-    const pathParts   = window.location.pathname.replace(/\/$/, "").split("/");
-    const lastSegment = pathParts[pathParts.length - 1];
-    const pathSlug    = (lastSegment && lastSegment !== "sejour.html" && lastSegment !== "sejour")
-      ? decodeURIComponent(lastSegment)
-      : null;
-
-    const slug = slugParam || pathSlug || null;
 
     const previewBanner = document.getElementById("previewBanner");
     if (isPreview && previewBanner) {
@@ -575,7 +567,7 @@
         const onlyStay = publishedStays[0];
         otherStaysFallback.innerHTML = `
           Un autre séjour est disponible :
-          <a href="/sejour/${encodeURIComponent(onlyStay.slug)}" style="text-decoration:underline;">${escapeHtml(onlyStay.title || "Découvrir le séjour")}</a>.
+          <a href="/sejour.html?slug=${encodeURIComponent(onlyStay.slug)}" style="text-decoration:underline;">${escapeHtml(onlyStay.title || "Découvrir le séjour")}</a>.
         `;
         otherStaysCarousel.style.display = "none";
         if (otherStaysControls) otherStaysControls.style.display = "none";
@@ -588,7 +580,7 @@
 
       otherStaysTrack.innerHTML = publishedStays.map(stay => `
         <article class="other-stay-card">
-          <a href="/sejour/${encodeURIComponent(stay.slug)}" class="other-stay-link">
+          <a href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" class="other-stay-link">
             <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/sejour-camargue.jpg")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy">
             <div class="other-stay-body">
               <h3>${escapeHtml(stay.title || "Séjour Âmes Nomades")}</h3>
