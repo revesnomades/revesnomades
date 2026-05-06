@@ -1,2 +1,8 @@
 [functions.priority-signup]
 verify_jwt = false
+
+[functions.newsletter-signup]
+verify_jwt = false
+
+[functions.newsletter-unsubscribe]
+verify_jwt = false
