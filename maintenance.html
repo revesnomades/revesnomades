@@ -348,7 +348,7 @@
       const fd = new FormData(form);
       if (String(fd.get("website") || "").trim()) { form.reset(); showMessage("🌿 Merci, vous êtes bien inscrit(e)."); return; }
       const now = Date.now();
-      if (now - priorityLastSubmit < 30000) { showMessage("Merci de patienter avant de soumettre à nouveau."); return; }
+      if (now - priorityLastSubmit < 5000) { showMessage("Merci de patienter quelques secondes."); return; }
       priorityLastSubmit = now;
 
       const firstname = String(fd.get("firstname") || "").trim();
@@ -369,7 +369,7 @@
       }
 
       const payload = { firstname, lastname, email, intention, newsletter_optin: newsletterOptin };
-      const endpoint = `${SUPABASE_URL}/functions/v1/Priority-signup`;
+      const endpoint = `${SUPABASE_URL}/functions/v1/priority-signup`;
 
       try{
         const res = await fetch(endpoint, {
