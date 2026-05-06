@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title id="pageTitle">Séjour — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f4ef">
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
@@ -269,14 +270,15 @@
     </div>
   </footer>
 
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/main.js" defer></script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
-    const params = new URLSearchParams(window.location.search);
-    const slug   = params.get("slug") || null;
-    const isPreview = params.get("preview") === "1";
+    const params     = new URLSearchParams(window.location.search);
+    const slug       = params.get("slug") || null;
+    const isPreview  = params.get("preview") === "1";
+    const adminToken = params.get("admin_token") || "";
 
     const previewBanner = document.getElementById("previewBanner");
     if (isPreview && previewBanner) {
@@ -623,12 +625,26 @@
       }
 
       if (isPreview) {
+        let user = null;
+
+        // Essai 1 : session active normale
         const { data: authData } = await supabase.auth.getUser();
-        const user = authData?.user;
+        user = authData?.user || null;
+
+        // Essai 2 : token passé dans l'URL (mode maintenance)
+        if (!user && adminToken) {
+          const { data: tokenData } = await supabase.auth.getUser(adminToken);
+          user = tokenData?.user || null;
+        }
 
         if (!user) {
           stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+          stayText.innerHTML = `
+            <div style="text-align:center; padding:40px 20px;">
+              <p style="color:var(--muted);">Connecte-toi en tant qu'administrateur pour voir cet aperçu.</p>
+              <a class="btn on-light" href="/compte.html" style="margin-top:16px; display:inline-flex;">Se connecter</a>
+            </div>
+          `;
           return;
         }
 
@@ -640,7 +656,7 @@
 
         if (profile?.role !== "admin") {
           stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
+          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour.</p>";
           return;
         }
       }

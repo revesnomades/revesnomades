@@ -1501,17 +1501,14 @@
             <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
             <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
             <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "Publié" : "Brouillon"}</div>
-            <div class="muted-small" style="margin-top:4px;">
-              Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
-            </div>
+            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "✅ Publié" : "⬜ Brouillon"}</div>
           </div>
 
           <div class="admin-inline">
-            <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
-            <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
+            <button class="btn on-light" type="button" data-edit="${stay.id}" aria-label="Modifier ${stay.title || 'ce séjour'}">Modifier</button>
+            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}" aria-label="Aperçu ${stay.title || 'ce séjour'}">Aperçu</button>
+            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener" aria-label="Voir ${stay.title || 'ce séjour'} en ligne">Voir</a>
+            <button class="btn on-light" type="button" data-delete="${stay.id}" aria-label="Supprimer ${stay.title || 'ce séjour'}">Supprimer</button>
           </div>
         </div>
       `).join("");
@@ -1523,9 +1520,12 @@
       });
 
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const slug = decodeURIComponent(btn.getAttribute("data-preview"));
-          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token || "";
+          const url = `/sejour.html?slug=${encodeURIComponent(slug)}&preview=1&admin_token=${encodeURIComponent(token)}`;
+          window.open(url, "_blank");
         });
       });
 
