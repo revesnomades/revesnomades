@@ -208,10 +208,10 @@
 
   <script src="/assets/js/i18n.js"></script>
   <script src="assets/js/main.js" defer></script>
-  <script type="module">
-    const _adminCookie = document.cookie.includes("an_admin_session=1");
-    if(!_adminCookie){
-      import("/assets/js/admin-access.js").then(m => m.initPageWithMaintenanceCheck());
+  <script>
+    var MAINTENANCE_MODE = true;
+    if(MAINTENANCE_MODE && !document.cookie.includes("an_admin_session=1")){
+      window.location.href = "/maintenance.html";
     }
   </script>
   <script src="assets/js/bon-cadeau.js"></script>

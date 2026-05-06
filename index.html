@@ -86,9 +86,9 @@
       </a>
 
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
-        <a href="index.html#apropos" data-scroll>À propos</a>
-        <a href="faq.html">FAQ</a>
-        <a href="index.html#contact" data-scroll>Contact</a>
+        <a href="index.html#apropos" data-scroll data-i18n="nav.about">À propos</a>
+        <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+        <a href="index.html#contact" data-scroll data-i18n="nav.contact">Contact</a>
 
         <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
 
@@ -106,10 +106,10 @@
 
       <div class="mobile-drawer" aria-hidden="true">
         <nav class="mobile-menu" aria-label="Navigation mobile">
-          <a href="index.html#apropos" data-scroll>À propos</a>
-          <a href="faq.html">FAQ</a>
-          <a href="index.html#contact" data-scroll>Contact</a>
-          <a href="compte.html">Compte</a>
+          <a href="index.html#apropos" data-scroll data-i18n="nav.about">À propos</a>
+          <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+          <a href="index.html#contact" data-scroll data-i18n="nav.contact">Contact</a>
+          <a href="compte.html" data-i18n="nav.account">Compte</a>
           <button class="lang-toggle-btn" type="button" aria-label="Switch to English" style="margin-top:8px;">EN</button>
         </nav>
       </div>
@@ -393,9 +393,9 @@
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
 
-    const _adminCookie = document.cookie.includes("an_admin_session=1");
-    if(!_adminCookie){
-      import("/assets/js/admin-access.js").then(m => m.initPageWithMaintenanceCheck());
+    const MAINTENANCE_MODE = true;
+    if(MAINTENANCE_MODE && !document.cookie.includes("an_admin_session=1")){
+      window.location.href = "/maintenance.html";
     }
     window.reloadDynamicContent = async () => { await loadFeaturedStay(); await loadHighlightStays(); };
 
@@ -679,6 +679,7 @@
 
     await loadFeaturedStay();
     await loadHighlightStays();
+    if(window.AnI18n) window.AnI18n.applyTranslations();
   </script>
 </body>
 </html>
