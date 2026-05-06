@@ -127,6 +127,11 @@
   </footer>
 
   <script src="assets/js/main.js" defer></script>
+  <script type="module">
+    import { applyTranslations, toggleLang } from "/assets/js/i18n.js";
+    applyTranslations();
+    document.querySelectorAll(".lang-toggle-btn").forEach(btn => btn.addEventListener("click", () => toggleLang()));
+  </script>
 
   <!-- (Optionnel) ajuster le message si tu veux distinguer carte cadeau -->
   <script>
