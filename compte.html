@@ -2,249 +2,119 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Compte — Âmes Nomades</title>
+  <title>Mon compte — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f7f4ef">
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
-  <link rel="manifest" href="/assets/img/site.webmanifest">
-  <link rel="icon" href="/assets/img/favicon.ico">
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
-  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
-
+  <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
-<!-- rebuild -->
 </head>
-
 <body class="on-light">
 
-  <!-- NAV -->
   <header class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="index.html">
-        <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades" width="40" height="40">
         <span>ÂmesNomades</span>
       </a>
-      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
-        <a href="/index.html#apropos" data-i18n="nav.about">À propos</a>
-        <a href="/faq.html" data-i18n="nav.faq">FAQ</a>
-        <a href="/index.html#contact" data-i18n="nav.contact">Contact</a>
-        <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
-      </nav>
     </div>
   </header>
 
-  <!-- PAGE -->
   <main>
-  <section class="band cream">
-    <div class="account-section">
-      <div class="container account-grid">
+    <section class="band cream">
+      <div class="account-section">
+        <div class="container account-grid">
 
-        <!-- COLONNE GAUCHE -->
-        <div class="account-card">
-           <div id="welcomeName" style="font-size:22px; margin-bottom:10px; display:none;"></div>
-          <h2>Mon compte</h2>
-          <p style="color:var(--muted); margin:10px 0 0;">
-            Accédez à vos réservations et suivez la validation des séjours.
-          </p>
+          <div class="account-card">
+            <div id="welcomeName" style="font-size:22px; margin-bottom:10px; display:none;"></div>
+            <h2>Mon compte</h2>
 
-          <!-- Auth (visible si déconnecté) -->
-          <div id="authBox" style="margin-top:16px;">
-            <div style="display:grid; gap:10px;">
-              <input id="email" class="input"
-                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder="Email">
+            <div id="authBox" style="margin-top:16px;">
+              <div style="display:grid; gap:10px;">
+                <input id="email" class="input" type="email"
+                  placeholder="Email" autocomplete="email"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
 
-              <div class="password-field">
-                <input id="password" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  type="password" placeholder="Mot de passe">
-                <button type="button" class="password-toggle" data-target="password" aria-label="Afficher le mot de passe">
-                  Afficher
+                <div class="password-field">
+                  <input id="password" class="input" type="password"
+                    placeholder="Mot de passe" autocomplete="current-password"
+                    style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
+                  <button type="button" id="togglePassword"
+                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); font-size:13px;">
+                    Afficher
+                  </button>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
+                  <a class="btn on-light" href="/signup.html">Inscription</a>
+                </div>
+
+                <button class="btn on-light" id="btnForgot" type="button"
+                  style="justify-content:flex-start;">
+                  Mot de passe oublié ?
                 </button>
+
+                <div id="authMsg" style="color:var(--muted); font-size:12.5px;"></div>
               </div>
-
-              <div class="account-actions" style="flex-wrap:wrap;">
-                <button class="btn on-light" id="btnLogin" type="button">Connexion</button>
-                <a class="btn on-light" href="/signup.html">Inscription</a>
-              </div>
-
-              <button class="btn on-light" id="btnForgot" type="button" style="justify-content:flex-start;">
-                Mot de passe oublié ?
-              </button>
-
-              <div id="authMsg" style="color:var(--muted); font-size:12.5px;"></div>
             </div>
-          </div>
 
-          <!-- Zone RESET -->
-          <div id="resetBox" style="display:none; margin-top:16px;">
-            <h3 style="font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
-
-            <div style="display:grid; gap:10px; margin-top:10px;">
-              <div class="password-field">
-                <input id="newPassword" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  type="password" placeholder="Nouveau mot de passe">
-                <button type="button" class="password-toggle" data-target="newPassword" aria-label="Afficher le nouveau mot de passe">
-                  Afficher
+            <div id="resetBox" style="display:none; margin-top:16px;">
+              <h3 style="font-weight:500; margin:0;">Nouveau mot de passe</h3>
+              <div style="display:grid; gap:10px; margin-top:10px;">
+                <input id="newPassword" class="input" type="password"
+                  placeholder="Nouveau mot de passe"
+                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);">
+                <button class="btn on-light" id="btnUpdatePassword" type="button">
+                  Mettre à jour
                 </button>
+                <div id="resetMsg" style="color:var(--muted); font-size:12.5px;"></div>
               </div>
-
-              <div id="accountPasswordStrength" class="password-strength" aria-live="polite">
-                <div class="password-strength-track" aria-hidden="true">
-                  <div id="accountPasswordStrengthFill" class="password-strength-fill"></div>
-                </div>
-                <p id="accountPasswordStrengthText" class="password-strength-text">Sécurité : faible</p>
-                <ul class="password-hints">
-                  <li>Au moins 8 caractères</li>
-                  <li>Une majuscule</li>
-                  <li>Un chiffre</li>
-                  <li>Un caractère spécial</li>
-                </ul>
-              </div>
-
-              <button class="btn on-light" id="btnUpdatePassword" type="button">
-                Mettre à jour mon mot de passe
-              </button>
-
-              <div id="resetMsg" style="color:var(--muted); font-size:12.5px;"></div>
-            </div>
-          </div>
-
-          <!-- Logged -->
-          <div id="loggedBox" style="display:none; margin-top:16px;">
-            <div style="color:var(--muted); font-size:13px;">
-              Connecté(e) : <b id="userEmail"></b>
             </div>
 
-            <div class="account-actions" style="margin-top:12px; flex-wrap:wrap;">
-              <button class="btn on-light" id="btnSeeBookings" type="button">Voir mes réservations</button>
-              <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
-            </div>
-
-            <div id="newsletterBox" class="account-newsletter" style="display:none;">
-              <p id="newsletterText" class="account-newsletter-text"></p>
-              <button class="btn on-light" id="btnNewsletterSubscribe" type="button" style="display:none;">S’abonner</button>
-              <button id="btnNewsletterUnsubscribe" type="button" class="account-newsletter-link" style="display:none;">Se désabonner</button>
-              <div id="newsletterMsg" class="account-newsletter-msg"></div>
-            </div>
-
-            <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-
-            <!-- ADMIN PANEL -->
-            <div id="adminPanel" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
-              <h3 style="margin:0;">Espace admin</h3>
-
-              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;">
-                <div class="account-card" style="padding:16px;">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
-                  <div id="newsletterCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
-
-                <div class="account-card" style="padding:16px;">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
-                  <div id="priorityCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
+            <div id="loggedBox" style="display:none; margin-top:16px;">
+              <div style="color:var(--muted); font-size:13px;">
+                Connecté(e) : <b id="userEmail"></b>
               </div>
-
-              <div class="account-actions" style="margin-top:14px; flex-wrap:wrap;">
-                <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
-                <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
-                <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
-                <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
+              <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
               </div>
+              <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
 
-              <div id="adminMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-
-              <div id="adminFaqPanel" class="account-card" style="display:none; margin-top:14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                  <div>
-                    <h4 style="margin:0;">FAQ du site</h4>
-                    <p style="margin:6px 0 0; color:var(--muted); font-size:12.5px;">
-                      FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
-                    </p>
-                  </div>
-                  <div class="account-actions">
-                    <button class="btn on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
-                    <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener noreferrer">Voir faq.html</a>
-                    <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
-                    <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
-                  </div>
-                </div>
-                <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-                <div id="siteFaqWrapper" style="display:none;">
-                  <div id="siteFaqList" class="admin-faq-list"></div>
+              <div id="adminPanel" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+                <h3 style="margin:0;">Espace admin</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                  <button class="btn on-light" id="btnManageStays" type="button">⚙️ Séjours</button>
+                  <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
+                  <button class="btn on-light" id="btnPriorityList" type="button">⭐ Prioritaires</button>
+                  <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
                 </div>
               </div>
             </div>
           </div>
+
+          <div>
+            <div id="perksBox" class="account-card">
+              <h3 style="font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
+              <p style="color:var(--muted); margin-top:10px;">
+                • Suivre vos réservations<br>
+                • Voir les places restantes<br>
+                • Recevoir les informations pratiques
+              </p>
+            </div>
+          </div>
+
         </div>
-
-        <!-- COLONNE DROITE -->
-        <div>
-          <div id="perksBox" class="account-card">
-            <h3 style="font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
-            <p style="color:var(--muted); margin-top:10px;">
-              • Suivre vos réservations passées et à venir<br>
-              • Voir le nombre de réservations restantes pour valider un séjour<br>
-              • Recevoir les informations pratiques et mises à jour
-            </p>
-          </div>
-
-          <div id="bookingsBox" class="account-card" style="display:none;">
-            <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
-            <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
-          </div>
-        </div>
-
       </div>
-    </div>
-  </section>
-
+    </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="band cream footer-dark">
+  <footer class="band cream">
     <div class="container footer">
-      <div class="footer-row">
-        <div class="footer-brand">
-          <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
-          <div style="font-family:'SegoCustom'; font-weight:500;">ÂmesNomades</div>
-        </div>
-
-        <div class="footer-social">
-          <a class="icon-btn light" href="https://instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <svg class="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
-              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
-              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </a>
-
-          <a class="icon-btn light" href="https://facebook.com/TA_PAGE" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <svg class="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
-            </svg>
-          </a>
-
-          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
-        </div>
-      </div>
-
       <div class="legal">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-          <button class="lang-toggle-btn" type="button" aria-label="Switch to English">EN</button>
-        </div>
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div data-i18n="footer.copyright">Copyright © 2026 Âmes Nomades</div>
+          <div>Copyright © 2026 Âmes Nomades</div>
           <div>
-            <a href="/faq.html" style="display:block; text-align:right;">FAQ</a>
-            <a href="/mentions-legales.html" data-i18n="footer.legal">Mentions légales</a> ·
-            <a href="/politique-confidentialite.html" data-i18n="footer.privacy">Politique de confidentialité</a>
+            <a href="/mentions-legales.html">Mentions légales</a> ·
+            <a href="/politique-confidentialite.html">Politique de confidentialité</a>
           </div>
         </div>
       </div>
@@ -252,867 +122,148 @@
   </footer>
 
   <script src="/assets/js/main.js" defer></script>
-  <script>
-(function(){
-  var STORAGE_KEY="an_lang";
-  var T={
-    fr:{
-      "nav.about":"À propos","nav.faq":"FAQ","nav.contact":"Contact","nav.account":"Compte",
-      "hero.tagline":"Partir pour mieux se retrouver.","hero.cta":"Voir les séjours",
-      "index.next_stay":"Prochain séjour…","index.reserve":"Réserver",
-      "index.upcoming":"Prochains séjours","index.upcoming_sub":"Survolez un séjour pour découvrir les prochaines dates.",
-      "index.about_title":"À propos de Âmes Nomades","index.see_more":"Voir la suite",
-      "index.newsletter_title":"Recevez votre guide en cadeau !","index.newsletter_btn":"Recevoir mon guide",
-      "index.gift_title":"Et si vous offriez un moment Âmes Nomades ?",
-      "index.gift_sub":"Un bon cadeau pour une parenthèse de mouvement, de douceur et de présence.",
-      "index.gift_btn":"Commander votre bon cadeau",
-      "stay.book":"Réserver","stay.contact":"Nous contacter",
-      "stay.highlights":"Ce que tu vas vivre","stay.program":"Programme",
-      "stay.included":"Ce qui est inclus","stay.not_included":"Ce qui n'est pas inclus",
-      "stay.options":"Options (en supplément)","stay.faq":"FAQ",
-      "stay.other":"Découvrir d'autres séjours",
-      "stay.trust1":"Réservation simple","stay.trust2":"Petit groupe",
-      "stay.trust3":"Accompagnement personnalisé","stay.trust4":"Confirmation par email",
-      "stay.not_found":"Ce séjour n'est plus disponible",
-      "stay.not_found_sub":"Le séjour que vous cherchez n'existe pas ou n'est plus disponible.",
-      "stay.see_all":"Voir les séjours du moment","stay.back_home":"Retour à l'accueil",
-      "faq.title":"Questions fréquentes",
-      "faq.subtitle":"Les réponses aux questions les plus fréquentes avant de réserver.",
-      "footer.legal":"Mentions légales","footer.privacy":"Politique de confidentialité",
-      "footer.copyright":"Copyright © 2026 Âmes Nomades","lang.switch":"EN"
-    },
-    en:{
-      "nav.about":"About","nav.faq":"FAQ","nav.contact":"Contact","nav.account":"Account",
-      "hero.tagline":"Leave to find yourself.","hero.cta":"See retreats",
-      "index.next_stay":"Next retreat…","index.reserve":"Book",
-      "index.upcoming":"Upcoming retreats","index.upcoming_sub":"Hover over a retreat to discover the next dates.",
-      "index.about_title":"About Âmes Nomades","index.see_more":"Read more",
-      "index.newsletter_title":"Receive your free guide!","index.newsletter_btn":"Get my guide",
-      "index.gift_title":"Give an Âmes Nomades experience?",
-      "index.gift_sub":"A gift voucher for a moment of movement, softness and presence.",
-      "index.gift_btn":"Order a gift voucher",
-      "stay.book":"Book","stay.contact":"Contact us",
-      "stay.highlights":"What you will experience","stay.program":"Program",
-      "stay.included":"What's included","stay.not_included":"What's not included",
-      "stay.options":"Optional add-ons","stay.faq":"FAQ",
-      "stay.other":"Discover other retreats",
-      "stay.trust1":"Simple booking","stay.trust2":"Small group",
-      "stay.trust3":"Personal support","stay.trust4":"Email confirmation",
-      "stay.not_found":"This retreat is no longer available",
-      "stay.not_found_sub":"The retreat you are looking for does not exist or is no longer available.",
-      "stay.see_all":"See current retreats","stay.back_home":"Back to home",
-      "faq.title":"Frequently asked questions",
-      "faq.subtitle":"Answers to the most common questions before booking a retreat.",
-      "footer.legal":"Legal notice","footer.privacy":"Privacy policy",
-      "footer.copyright":"Copyright © 2026 Âmes Nomades","lang.switch":"FR"
-    }
-  };
-  function getLang(){try{return localStorage.getItem(STORAGE_KEY)||"fr";}catch(e){return "fr";}}
-  function setLang(l){try{localStorage.setItem(STORAGE_KEY,l);}catch(e){} document.documentElement.lang=l;}
-  function applyTranslations(){
-    var l=getLang(); document.documentElement.lang=l;
-    document.querySelectorAll("[data-i18n]").forEach(function(el){
-      var k=el.getAttribute("data-i18n"),v=(T[l]&&T[l][k])||(T.fr&&T.fr[k]);
-      if(v!==undefined) el.textContent=v;
-    });
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
-      var k=el.getAttribute("data-i18n-placeholder"),v=(T[l]&&T[l][k])||(T.fr&&T.fr[k]);
-      if(v!==undefined) el.setAttribute("placeholder",v);
-    });
-    document.querySelectorAll("[data-i18n-html]").forEach(function(el){
-      var k=el.getAttribute("data-i18n-html"),v=(T[l]&&T[l][k])||(T.fr&&T.fr[k]);
-      if(v!==undefined) el.innerHTML=v;
-    });
-    document.querySelectorAll(".lang-toggle-btn").forEach(function(btn){
-      btn.textContent=(T[l]&&T[l]["lang.switch"])||"EN";
-      btn.setAttribute("aria-label",l==="fr"?"Switch to English":"Passer en français");
-    });
-  }
-  function toggleLang(){
-    var n=getLang()==="fr"?"en":"fr";
-    setLang(n); applyTranslations();
-    if(typeof window.reloadDynamicContent==="function") try{window.reloadDynamicContent();}catch(e){}
-  }
-  function attachButtons(){
-    document.querySelectorAll(".lang-toggle-btn").forEach(function(btn){
-      var f=btn.cloneNode(true); btn.parentNode.replaceChild(f,btn);
-      f.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();toggleLang();});
-    });
-  }
-  function init(){applyTranslations();attachButtons();}
-  window.AnI18n={getLang:getLang,setLang:setLang,applyTranslations:applyTranslations,apply:applyTranslations,toggleLang:toggleLang,toggle:toggleLang,attachButtons:attachButtons,init:init};
-  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);}else{init();}
-})();
-  </script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
 
-    const emailEl = document.getElementById("email");
-    const passEl  = document.getElementById("password");
+    const emailEl    = document.getElementById("email");
+    const passEl     = document.getElementById("password");
+    const btnLogin   = document.getElementById("btnLogin");
+    const btnLogout  = document.getElementById("btnLogout");
+    const btnForgot  = document.getElementById("btnForgot");
+    const btnUpdate  = document.getElementById("btnUpdatePassword");
+    const btnManage  = document.getElementById("btnManageStays");
+    const btnBookings= document.getElementById("btnAdminBookings");
+    const btnPriority= document.getElementById("btnPriorityList");
+    const btnNewsletter = document.getElementById("btnNewsletterList");
+    const togglePass = document.getElementById("togglePassword");
 
-    const btnLogin = document.getElementById("btnLogin");
-    const btnLogout = document.getElementById("btnLogout");
-    const btnSee = document.getElementById("btnSeeBookings");
-    const btnForgot = document.getElementById("btnForgot");
-    const btnUpdatePassword = document.getElementById("btnUpdatePassword");
-
-    const btnManageStays = document.getElementById("btnManageStays");
-    const btnAdminBookings = document.getElementById("btnAdminBookings");
-    const btnPriorityList = document.getElementById("btnPriorityList");
-    const btnNewsletterList = document.getElementById("btnNewsletterList");
-    const btnAddSiteFaq = document.getElementById("btnAddSiteFaq");
-    const btnSaveSiteFaq = document.getElementById("btnSaveSiteFaq");
-
-    const authBox = document.getElementById("authBox");
-    const resetBox = document.getElementById("resetBox");
-    const loggedBox = document.getElementById("loggedBox");
-    const perksBox = document.getElementById("perksBox");
-    const bookingsBox = document.getElementById("bookingsBox");
+    const authBox    = document.getElementById("authBox");
+    const resetBox   = document.getElementById("resetBox");
+    const loggedBox  = document.getElementById("loggedBox");
+    const perksBox   = document.getElementById("perksBox");
     const adminPanel = document.getElementById("adminPanel");
-    const welcomeName = document.getElementById("welcomeName");
+    const welcomeName= document.getElementById("welcomeName");
+    const userEmail  = document.getElementById("userEmail");
 
-    const authMsg = document.getElementById("authMsg");
-    const resetMsg = document.getElementById("resetMsg");
-    const loggedMsg = document.getElementById("loggedMsg");
-    const adminMsg = document.getElementById("adminMsg");
-    const siteFaqMsg = document.getElementById("siteFaqMsg");
-    const newsletterMsg = document.getElementById("newsletterMsg");
+    const authMsg    = document.getElementById("authMsg");
+    const resetMsg   = document.getElementById("resetMsg");
+    const loggedMsg  = document.getElementById("loggedMsg");
 
-    const userEmail = document.getElementById("userEmail");
-    const bookingsList = document.getElementById("bookingsList");
-    const siteFaqList = document.getElementById("siteFaqList");
-    const adminFaqPanel = document.getElementById("adminFaqPanel");
-    const newsletterBox = document.getElementById("newsletterBox");
-    const newsletterText = document.getElementById("newsletterText");
-    const btnNewsletterSubscribe = document.getElementById("btnNewsletterSubscribe");
-    const btnNewsletterUnsubscribe = document.getElementById("btnNewsletterUnsubscribe");
+    function setMsg(el, txt){ if(el) el.textContent = txt || ""; }
 
-    const newsletterCount = document.getElementById("newsletterCount");
-    const priorityCount = document.getElementById("priorityCount");
-    const newPasswordEl = document.getElementById("newPassword");
-    let newsletterSubRecord = null;
-    let siteFaqItems = [];
-    let initialSiteFaqIds = [];
-    const defaultSiteFaqSeed = [
-      {
-        question: "À qui s’adressent les séjours Âmes Nomades ?",
-        answer: "Les séjours Âmes Nomades s’adressent à toute personne en quête de reconnexion, de calme et de sens. Aucun niveau n’est requis, simplement l’envie de ralentir, se retrouver et vivre une expérience humaine forte."
-      },
-      {
-        question: "Doit-on avoir un niveau sportif particulier ?",
-        answer: "Non. Les activités sont accessibles à tous et toujours adaptables. L’objectif n’est pas la performance, mais le bien-être et le plaisir."
-      },
-      {
-        question: "Que comprend le séjour ?",
-        answer: "Chaque séjour inclut l’hébergement, certaines activités encadrées, et des moments de partage en groupe. Le détail exact est précisé sur la page du séjour."
-      },
-      {
-        question: "Que faut-il prévoir en plus ?",
-        answer: "Les transports jusqu’au lieu du séjour, certaines activités optionnelles et les dépenses personnelles ne sont généralement pas inclus. Tout est détaillé sur la page du séjour."
-      },
-      {
-        question: "Comment se passe la réservation ?",
-        answer: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois votre demande prise en compte, vous recevez toutes les informations nécessaires par email."
-      },
-      {
-        question: "Le séjour est-il confirmé automatiquement ?",
-        answer: "Un séjour est confirmé lorsqu’un nombre minimum de participants est atteint. Vous êtes informé(e) dès que le séjour est validé."
-      },
-      {
-        question: "Puis-je venir seul(e) ?",
-        answer: "Oui, la majorité des participants viennent seuls. Les séjours sont conçus pour favoriser les rencontres naturelles et les échanges authentiques."
-      },
-      {
-        question: "Quel est l’esprit des séjours ?",
-        answer: "Les séjours Âmes Nomades sont centrés sur le bien-être, la reconnexion à soi et aux autres, et la simplicité. L’ambiance est bienveillante, sans jugement et profondément humaine."
-      },
-      {
-        question: "Comment se déroulent les journées ?",
-        answer: "Les journées alternent activités, temps libres et moments collectifs. Le programme est flexible pour s’adapter au groupe et aux conditions sur place."
-      },
-      {
-        question: "Puis-je annuler ma réservation ?",
-        answer: "Les conditions d’annulation dépendent du séjour. Elles sont précisées au moment de la réservation. En cas de doute, n’hésitez pas à nous contacter."
-      }
-    ];
-
-    function setMsg(el, msg) {
-      if (el) el.textContent = msg || "";
-    }
-
-    function getPasswordStrength(password){
-      let score = 0;
-      if (password.length >= 8) score += 1;
-      if (/[A-Z]/.test(password)) score += 1;
-      if (/[0-9]/.test(password)) score += 1;
-      if (/[^A-Za-z0-9]/.test(password)) score += 1;
-
-      if (score <= 1) return { label: "faible", color: "#cc6f53", width: "33%" };
-      if (score === 2 || score === 3) return { label: "moyen", color: "#b19342", width: "66%" };
-      return { label: "fort", color: "#4f8c5b", width: "100%" };
-    }
-
-    function updateAccountPasswordStrength(){
-      const fill = document.getElementById("accountPasswordStrengthFill");
-      const text = document.getElementById("accountPasswordStrengthText");
-      if (!fill || !text) return;
-
-      const password = newPasswordEl?.value || "";
-      const strength = getPasswordStrength(password);
-      fill.style.width = password ? strength.width : "0%";
-      fill.style.backgroundColor = strength.color;
-      text.textContent = `Sécurité : ${password ? strength.label : "faible"}`;
-    }
-
-    function setupPasswordToggles(){
-      document.querySelectorAll(".password-toggle").forEach((button) => {
-        const targetId = button.getAttribute("data-target");
-        const input = document.getElementById(targetId);
-        if (!input) return;
-
-        button.addEventListener("click", () => {
-          const isHidden = input.type === "password";
-          input.type = isHidden ? "text" : "password";
-          button.textContent = isHidden ? "Masquer" : "Afficher";
-          button.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
-        });
-      });
-    }
-
-    function showLoggedOut() {
+    function showLoggedOut(){
+      if(authBox)    authBox.style.display    = "block";
+      if(resetBox)   resetBox.style.display   = "none";
+      if(loggedBox)  loggedBox.style.display  = "none";
+      if(perksBox)   perksBox.style.display   = "block";
+      if(adminPanel) adminPanel.style.display = "none";
+      if(welcomeName){ welcomeName.style.display = "none"; welcomeName.textContent = ""; }
       document.cookie = "an_admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-      if (authBox) authBox.style.display = "block";
-      if (resetBox) resetBox.style.display = "none";
-      if (perksBox) perksBox.style.display = "block";
-      if (loggedBox) loggedBox.style.display = "none";
-      if (newsletterBox) newsletterBox.style.display = "none";
-      if (bookingsBox) bookingsBox.style.display = "none";
-      if (adminPanel) adminPanel.style.display = "none";
-      if (adminFaqPanel) adminFaqPanel.style.display = "none";
-      if (welcomeName) { welcomeName.textContent = ""; welcomeName.style.display = "none"; }
-      newsletterSubRecord = null;
-      setMsg(newsletterMsg, "");
     }
 
-    function renderNewsletterStatus(isSubscribed){
-      if (!newsletterBox || !newsletterText || !btnNewsletterSubscribe || !btnNewsletterUnsubscribe) return;
+    async function showLoggedIn(user){
+      if(authBox)   authBox.style.display   = "none";
+      if(resetBox)  resetBox.style.display  = "none";
+      if(loggedBox) loggedBox.style.display = "block";
+      if(perksBox)  perksBox.style.display  = "none";
+      if(userEmail) userEmail.textContent   = user.email || "";
 
-      newsletterBox.style.display = "grid";
-      if (isSubscribed) {
-        newsletterText.textContent = "Vous êtes déjà abonné(e) et serez parmi les premiers avertis des prochains séjours.";
-        btnNewsletterSubscribe.style.display = "none";
-        btnNewsletterUnsubscribe.style.display = "inline-flex";
-      } else {
-        newsletterText.textContent = "Abonnez-vous à la newsletter pour être averti(e) en priorité des prochains séjours.";
-        btnNewsletterSubscribe.style.display = "inline-flex";
-        btnNewsletterUnsubscribe.style.display = "none";
-      }
-    }
+      const hour = parseInt(new Intl.DateTimeFormat("fr-FR",{
+        timeZone:"Europe/Paris", hour:"numeric", hour12:false
+      }).format(new Date()), 10);
+      const salutation = (hour >= 4 && hour < 20) ? "Bonjour" : "Bonsoir";
 
-    function buildNewsletterDisplayName(user){
-      const nameCandidate = [
-        user?.user_metadata?.firstname,
-        user?.user_metadata?.name
-      ].find((value) => typeof value === "string" && value.trim());
+      const { data: profile } = await supabase
+        .from("profiles").select("role, firstname").eq("id", user.id).single();
 
-      if (nameCandidate) return String(nameCandidate).trim();
+      const firstname = user.user_metadata?.firstname || profile?.firstname || "";
+      const isAdmin   = profile?.role === "admin";
 
-      const email = String(user?.email || "").trim();
-      if (!email.includes("@")) return "Membre Âmes Nomades";
-      return email.split("@")[0];
-    }
-
-    async function loadNewsletterStatus(user){
-      if (!user?.email) return;
-
-      const email = String(user.email).trim().toLowerCase();
-      const { data, error } = await supabase
-        .from("newsletter")
-        .select("id,email,name")
-        .ilike("email", email)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      if (error) {
-        console.error("NEWSLETTER STATUS ERROR:", error);
-        setMsg(newsletterMsg, "Impossible de vérifier votre abonnement newsletter.");
-        renderNewsletterStatus(false);
-        return;
+      if(welcomeName){
+        welcomeName.textContent   = firstname ? `${salutation} ${firstname} ✨` : `${salutation} ✨`;
+        welcomeName.style.display = "block";
       }
 
-      newsletterSubRecord = data?.[0] || null;
-      renderNewsletterStatus(!!newsletterSubRecord);
-    }
-
-    async function subscribeCurrentUserToNewsletter(){
-      setMsg(newsletterMsg, "");
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
-        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
-        return;
-      }
-
-      if (newsletterSubRecord) {
-        renderNewsletterStatus(true);
-        setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
-        return;
-      }
-
-      const nameValue = buildNewsletterDisplayName(user);
-
-      const { data: insertedRow, error } = await supabase
-        .from("newsletter")
-        .insert({
-          email: String(user.email).trim().toLowerCase(),
-          name: nameValue
-        })
-        .select("id,email,name")
-        .single();
-
-      if (error) {
-        if (String(error.code) === "23505") {
-          await loadNewsletterStatus(user);
-          setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
-          return;
-        }
-        console.error("NEWSLETTER SUBSCRIBE ERROR:", error);
-        setMsg(newsletterMsg, "Impossible de finaliser l’abonnement newsletter.");
-        return;
-      }
-
-      newsletterSubRecord = insertedRow || null;
-      renderNewsletterStatus(true);
-      setMsg(newsletterMsg, "Inscription newsletter confirmée.");
-    }
-
-    async function unsubscribeCurrentUserFromNewsletter(){
-      setMsg(newsletterMsg, "");
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user?.email) {
-        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
-        return;
-      }
-
-      const { error } = await supabase.functions.invoke("newsletter-unsubscribe", {
-        body: { email: user.email }
-      });
-
-      if (error) {
-        console.error("NEWSLETTER UNSUBSCRIBE FUNCTION ERROR:", error);
-        setMsg(newsletterMsg, "Impossible de traiter la désinscription pour le moment.");
-        return;
-      }
-
-      newsletterSubRecord = null;
-      renderNewsletterStatus(false);
-      setMsg(newsletterMsg, "Vous êtes désabonné(e) de la newsletter.");
-    }
-
-    function normalizeSiteFaqItems(raw){
-      if(!Array.isArray(raw)) return [];
-      return raw.map((item, index) => ({
-        id: item?.id || null,
-        question: String(item?.question || ""),
-        answer: String(item?.answer || ""),
-        sort_order: Number(item?.sort_order ?? index + 1),
-        is_active: item?.is_active !== false,
-        use_for_stay_default: item?.use_for_stay_default === true
-      }));
-    }
-
-    function renderSiteFaqEditor(){
-      if(!siteFaqList) return;
-      siteFaqList.innerHTML = "";
-
-      if(!siteFaqItems.length){
-        siteFaqList.innerHTML = `<div style="color:var(--muted); font-size:13px;">Aucune question FAQ pour le moment.</div>`;
-        return;
-      }
-
-      siteFaqItems.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "admin-faq-card";
-        card.innerHTML = `
-          <div class="admin-faq-head">
-            <strong>Question ${index + 1}</strong>
-            <div class="account-actions">
-              <button class="btn on-light btn-faq-up" type="button" aria-label="Monter" ${index === 0 ? "disabled" : ""}>↑</button>
-              <button class="btn on-light btn-faq-down" type="button" aria-label="Descendre" ${index === siteFaqItems.length - 1 ? "disabled" : ""}>↓</button>
-              <button class="btn on-light btn-faq-delete" type="button" aria-label="Supprimer">Supprimer</button>
-            </div>
-          </div>
-          <input class="input faq-question" placeholder="Question" value="${item.question.replace(/"/g, "&quot;")}">
-          <textarea class="input faq-answer" style="min-height:90px;" placeholder="Réponse">${item.answer}</textarea>
-          <div class="account-actions">
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" class="faq-active" ${item.is_active ? "checked" : ""}>
-              <span>Active</span>
-            </label>
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" class="faq-stay-default" ${item.use_for_stay_default ? "checked" : ""}>
-              <span>FAQ modèle séjour</span>
-            </label>
-          </div>
-        `;
-
-        function syncFaq(){
-          siteFaqItems[index] = {
-            ...siteFaqItems[index],
-            question: card.querySelector(".faq-question")?.value?.trim() || "",
-            answer: card.querySelector(".faq-answer")?.value?.trim() || "",
-            is_active: !!card.querySelector(".faq-active")?.checked,
-            use_for_stay_default: !!card.querySelector(".faq-stay-default")?.checked,
-            sort_order: index + 1
-          };
-
-          const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
-          if(selectedForStay.length > 5){
-            siteFaqItems[index].use_for_stay_default = false;
-            const check = card.querySelector(".faq-stay-default");
-            if(check) check.checked = false;
-            setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
-          }
-        }
-
-        card.querySelectorAll("input,textarea").forEach(el => {
-          el.addEventListener("input", syncFaq);
-          el.addEventListener("change", syncFaq);
-        });
-
-        card.querySelector(".btn-faq-up")?.addEventListener("click", () => {
-          if(index < 1) return;
-          const tmp = siteFaqItems[index - 1];
-          siteFaqItems[index - 1] = siteFaqItems[index];
-          siteFaqItems[index] = tmp;
-          renderSiteFaqEditor();
-        });
-
-        card.querySelector(".btn-faq-down")?.addEventListener("click", () => {
-          if(index >= siteFaqItems.length - 1) return;
-          const tmp = siteFaqItems[index + 1];
-          siteFaqItems[index + 1] = siteFaqItems[index];
-          siteFaqItems[index] = tmp;
-          renderSiteFaqEditor();
-        });
-
-        card.querySelector(".btn-faq-delete")?.addEventListener("click", () => {
-          siteFaqItems.splice(index, 1);
-          renderSiteFaqEditor();
-        });
-
-        siteFaqList.appendChild(card);
-      });
-    }
-
-    async function loadSiteFaqItems(){
-      const { data, error } = await supabase
-        .from("faq_items")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true });
-
-      if(error){
-        console.error(error);
-        setMsg(siteFaqMsg, "Impossible de charger la FAQ du site.");
-        return;
-      }
-
-      siteFaqItems = normalizeSiteFaqItems(data || []);
-      initialSiteFaqIds = siteFaqItems.map(item => item.id).filter(Boolean);
-
-      // Pré-remplissage simple : uniquement si la FAQ site est vide.
-      if(!siteFaqItems.length){
-        siteFaqItems = defaultSiteFaqSeed.map((item, index) => ({
-          id: null,
-          question: item.question,
-          answer: item.answer,
-          sort_order: index + 1,
-          is_active: true,
-          use_for_stay_default: index < 5
-        }));
-        setMsg(siteFaqMsg, "FAQ pré-remplie. Vérifiez puis cliquez sur « Enregistrer FAQ site ».");
-      } else {
-        setMsg(siteFaqMsg, "");
-      }
-
-      renderSiteFaqEditor();
-    }
-
-    async function saveSiteFaqItems(){
-      setMsg(siteFaqMsg, "Enregistrement FAQ du site…");
-
-      const selectedForStay = siteFaqItems.filter(f => f.use_for_stay_default);
-      if(selectedForStay.length > 5){
-        setMsg(siteFaqMsg, "Maximum 5 questions pour la FAQ modèle séjour.");
-        return;
-      }
-
-      const cleanItems = siteFaqItems
-        .map((item, index) => ({
-          id: typeof item.id === "string" && item.id.trim() ? item.id.trim() : null,
-          question: String(item.question || "").trim(),
-          answer: String(item.answer || "").trim(),
-          sort_order: index + 1,
-          is_active: item.is_active !== false,
-          use_for_stay_default: item.use_for_stay_default === true
-        }))
-        .filter(item => item.question && item.answer);
-
-      const existingItems = cleanItems
-        .filter(item => item.id)
-        .map(({ id, question, answer, sort_order, is_active, use_for_stay_default }) => ({
-          id,
-          question,
-          answer,
-          sort_order,
-          is_active,
-          use_for_stay_default
-        }));
-
-      const newItems = cleanItems
-        .filter(item => !item.id)
-        .map(({ question, answer, sort_order, is_active, use_for_stay_default }) => ({
-          question,
-          answer,
-          sort_order,
-          is_active,
-          use_for_stay_default
-        }));
-
-      try{
-        if(existingItems.length){
-          const { error: upsertError } = await supabase
-            .from("faq_items")
-            .upsert(existingItems, { onConflict: "id" });
-          if(upsertError) throw upsertError;
-        }
-
-        if(newItems.length){
-          const { error: insertError } = await supabase
-            .from("faq_items")
-            .insert(newItems);
-          if(insertError) throw insertError;
-        }
-
-        const keptIds = existingItems.map(i => i.id).filter(Boolean);
-        const idsToDelete = initialSiteFaqIds.filter(id => !keptIds.includes(id));
-        if(idsToDelete.length){
-          const { error: deleteError } = await supabase
-            .from("faq_items")
-            .delete()
-            .in("id", idsToDelete);
-          if(deleteError) throw deleteError;
-        }
-
-        setMsg(siteFaqMsg, "FAQ du site enregistrée.");
-        await loadSiteFaqItems();
-      } catch(err){
-        console.error(err);
-        setMsg(siteFaqMsg, `Erreur FAQ du site : ${err.message || err}`);
+      if(isAdmin){
+        if(adminPanel) adminPanel.style.display = "block";
+        const exp = new Date(Date.now() + 8*60*60*1000).toUTCString();
+        document.cookie = `an_admin_session=1; path=/; expires=${exp}; SameSite=Lax`;
       }
     }
 
-    async function checkAdminAndGetProfile(userId) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role, firstname")
-        .eq("id", userId)
-        .single();
+    // Toggle password
+    togglePass?.addEventListener("click", () => {
+      const hidden = passEl.type === "password";
+      passEl.type  = hidden ? "text" : "password";
+      togglePass.textContent = hidden ? "Masquer" : "Afficher";
+    });
 
-      if (error) return { isAdmin: false, firstname: "" };
-      return { isAdmin: data?.role === "admin", firstname: data?.firstname || "" };
-    }
-
-    async function loadAdminStats() {
-      const { count: newsletterTotal, error: newsletterError } = await supabase
-        .from("newsletter")
-        .select("*", { count: "exact", head: true });
-
-      const { count: priorityTotal, error: priorityError } = await supabase
-        .from("priority_waitlist")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "active");
-
-      if (newsletterError) console.error("NEWSLETTER COUNT ERROR:", newsletterError);
-      if (priorityError) console.error("PRIORITY COUNT ERROR:", priorityError);
-
-      if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
-      if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
-    }
-    function getSalutation(){
-      const formatter = new Intl.DateTimeFormat("fr-FR", {
-        timeZone: "Europe/Paris",
-        hour: "numeric",
-        hour12: false
-      });
-      const hour = parseInt(formatter.format(new Date()), 10);
-      return (hour >= 4 && hour < 20) ? "Bonjour" : "Bonsoir";
-    }
-
-    function applyWelcomeName(firstname){
-      if(!welcomeName) return;
-      const salutation = getSalutation();
-      const name = firstname ? String(firstname).trim() : "";
-      welcomeName.textContent = name ? `${salutation} ${name} ✨` : `${salutation} ✨`;
-      welcomeName.style.display = "block";
-    }
-    async function loadMyBookings(user) {
-      if (!bookingsList || !user?.email) return;
-
-      bookingsList.textContent = "Chargement…";
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          id,
-          status,
-          amount,
-          price_label,
-          created_at,
-          stays(title)
-        `)
-        .eq("customer_email", user.email)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("BOOKINGS ERROR:", error);
-        bookingsList.textContent = "Impossible de charger vos réservations.";
-        return;
-      }
-
-      if (!data || !data.length) {
-        bookingsList.textContent = "Aucune réservation pour le moment.";
-        return;
-      }
-
-      bookingsList.innerHTML = data.map(item => {
-        const title = item.stays?.title || "Séjour";
-        const amount = item.amount ? `${item.amount} €` : "—";
-        const status = item.status || "—";
-        const label = item.price_label || "";
-        const date = item.created_at
-          ? new Date(item.created_at).toLocaleDateString("fr-FR")
-          : "";
-
-        return `
-          <div style="padding:12px 0; border-bottom:1px solid var(--line);">
-            <div style="font-weight:500; color:var(--text);">${title}</div>
-            <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-              ${label ? `${label} · ` : ""}${amount} · ${status}
-            </div>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
-              Réservation du ${date}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    async function showLoggedIn(user) {
-      if (authBox) authBox.style.display = "none";
-      if (resetBox) resetBox.style.display = "none";
-      if (perksBox) perksBox.style.display = "none";
-      if (loggedBox) loggedBox.style.display = "block";
-      if (bookingsBox) bookingsBox.style.display = "block";
-      if (userEmail) userEmail.textContent = user?.email || "";
-
-      const metaFirstname = user.user_metadata?.firstname ? String(user.user_metadata.firstname).trim() : "";
-
-      const [{ isAdmin, firstname: profileFirstname }] = await Promise.all([
-        checkAdminAndGetProfile(user.id),
-        loadMyBookings(user),
-        loadNewsletterStatus(user)
-      ]);
-
-      applyWelcomeName(metaFirstname || profileFirstname);
-
-      if (isAdmin) {
-        const expires = new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString();
-        document.cookie = `an_admin_session=1; path=/; expires=${expires}; SameSite=Lax`;
-      }
-
-      if (isAdmin && adminPanel) {
-        adminPanel.style.display = "block";
-        if (adminFaqPanel) adminFaqPanel.style.display = "block";
-        await loadAdminStats();
-        await loadSiteFaqItems();
-      } else if (adminPanel) {
-        adminPanel.style.display = "none";
-        if (adminFaqPanel) adminFaqPanel.style.display = "none";
-      }
-    }
-
-    // Détection reset password — wrappé en IIFE pour ne pas bloquer l'attachement des listeners
-    const hash = window.location.hash || "";
-    const isRecovery =
-      hash.includes("type=recovery") ||
-      hash.includes("access_token");
-
-    void (async function initAuth() {
-      if (isRecovery) {
-        if (authBox) authBox.style.display = "none";
-        if (perksBox) perksBox.style.display = "none";
-        if (loggedBox) loggedBox.style.display = "none";
-        if (bookingsBox) bookingsBox.style.display = "none";
-        if (resetBox) resetBox.style.display = "block";
-      } else {
-        try {
-          const { data: { session }, error: sErr } = await supabase.auth.getSession();
-          if (sErr) console.warn(sErr);
-          if (session?.user) await showLoggedIn(session.user);
-          else showLoggedOut();
-        } catch(e) {
-          console.error("initAuth error:", e);
-          showLoggedOut();
-        }
-      }
-    })();
-
-    setupPasswordToggles();
-    newPasswordEl?.addEventListener("input", updateAccountPasswordStrength);
-    updateAccountPasswordStrength();
-
-    // Login
+    // Connexion
     btnLogin?.addEventListener("click", async () => {
       setMsg(authMsg, "");
-
-      const email = (emailEl?.value || "").trim();
+      const email    = (emailEl?.value || "").trim();
       const password = passEl?.value || "";
-
-      if (!email || !password) {
+      if(!email || !password){
         setMsg(authMsg, "Merci de renseigner un email et un mot de passe.");
         return;
       }
-
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        setMsg(authMsg, error.message);
-        return;
-      }
-
+      if(error){ setMsg(authMsg, error.message); return; }
       await showLoggedIn(data.user);
-      setMsg(authMsg, "");
     });
 
     // Mot de passe oublié
     btnForgot?.addEventListener("click", async () => {
       setMsg(authMsg, "");
       const email = (emailEl?.value || "").trim();
-
-      if (!email) {
-        setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
-        return;
-      }
-
+      if(!email){ setMsg(authMsg, "Renseignez votre email."); return; }
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${location.origin}/compte.html`
       });
-
-      if (error) {
-        setMsg(authMsg, error.message);
-        return;
-      }
-
+      if(error){ setMsg(authMsg, error.message); return; }
       setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
     });
 
-    // Update password
-    btnUpdatePassword?.addEventListener("click", async () => {
+    // Mise à jour mot de passe
+    btnUpdate?.addEventListener("click", async () => {
       setMsg(resetMsg, "");
-      const newPassword = (document.getElementById("newPassword")?.value || "").trim();
-
-      if (!newPassword) {
-        setMsg(resetMsg, "Merci de renseigner un nouveau mot de passe.");
-        return;
-      }
-
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-      if (error) {
-        setMsg(resetMsg, error.message);
-        return;
-      }
-
-      setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
+      const pw = (document.getElementById("newPassword")?.value || "").trim();
+      if(!pw || pw.length < 8){ setMsg(resetMsg, "Minimum 8 caractères."); return; }
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      if(error){ setMsg(resetMsg, error.message); return; }
+      setMsg(resetMsg, "Mot de passe mis à jour.");
+      setTimeout(() => { resetBox.style.display="none"; authBox.style.display="block"; }, 2000);
     });
 
-    // Logout
+    // Déconnexion
     btnLogout?.addEventListener("click", async () => {
       await supabase.auth.signOut();
       showLoggedOut();
-      setMsg(loggedMsg, "");
     });
 
-    // Voir réservations
-    btnSee?.addEventListener("click", async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) await loadMyBookings(user);
-    });
+    // Navigation admin
+    btnManage?.addEventListener("click",    () => { window.location.href = "/admin-stays.html"; });
+    btnBookings?.addEventListener("click",  () => { window.location.href = "/admin-bookings.html"; });
+    btnPriority?.addEventListener("click",  () => { window.location.href = "/admin-priority.html"; });
+    btnNewsletter?.addEventListener("click",() => { window.location.href = "/admin-newsletter.html"; });
 
-    btnNewsletterSubscribe?.addEventListener("click", async () => {
-      await subscribeCurrentUserToNewsletter();
-    });
+    // Détection reset password
+    const hash = window.location.hash || "";
+    const isRecovery = hash.includes("type=recovery") || hash.includes("access_token");
+    if(isRecovery){
+      if(authBox)  authBox.style.display  = "none";
+      if(resetBox) resetBox.style.display = "block";
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      if(session?.user) await showLoggedIn(session.user);
+      else showLoggedOut();
+    }
 
-    btnNewsletterUnsubscribe?.addEventListener("click", async () => {
-      await unsubscribeCurrentUserFromNewsletter();
-    });
-
-    // Admin
-    btnManageStays?.addEventListener("click", () => {
-      window.location.href = "/admin-stays.html";
-    });
-
-    btnAdminBookings?.addEventListener("click", () => {
-      window.location.href = "/admin-bookings.html";
-    });
-
-    btnPriorityList?.addEventListener("click", () => {
-      window.location.href = "/admin-priority.html";
-    });
-
-    btnNewsletterList?.addEventListener("click", () => {
-      window.location.href = "/admin-newsletter.html";
-    });
-
-    const btnToggleFaqList = document.getElementById("btnToggleFaqList");
-    const siteFaqWrapper   = document.getElementById("siteFaqWrapper");
-
-    btnToggleFaqList?.addEventListener("click", () => {
-      const isVisible = siteFaqWrapper.style.display !== "none";
-      siteFaqWrapper.style.display = isVisible ? "none" : "block";
-      btnToggleFaqList.textContent = isVisible
-        ? "Voir les questions / réponses"
-        : "Ne plus afficher les questions / réponses";
-    });
-
-    btnAddSiteFaq?.addEventListener("click", () => {
-      siteFaqItems.push({
-        id: null,
-        question: "",
-        answer: "",
-        sort_order: siteFaqItems.length + 1,
-        is_active: true,
-        use_for_stay_default: false
-      });
-      renderSiteFaqEditor();
-    });
-
-    btnSaveSiteFaq?.addEventListener("click", async () => {
-      await saveSiteFaqItems();
-    });
-
-    // Sync UI
-    supabase.auth.onAuthStateChange(async (_evt, newSession) => {
-      if(newSession?.user){
-        await showLoggedIn(newSession.user);
-      } else {
-        showLoggedOut();
-      }
+    // Sync auth state
+    supabase.auth.onAuthStateChange(async (_evt, session) => {
+      if(session?.user) await showLoggedIn(session.user);
+      else showLoggedOut();
     });
   </script>
 
