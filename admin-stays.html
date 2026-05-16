@@ -1605,7 +1605,7 @@
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
         btn.addEventListener("click", () => {
           const slug = decodeURIComponent(btn.getAttribute("data-preview"));
-          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+          window.open(`/admin-preview?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
         });
       });
 
@@ -1780,7 +1780,7 @@
         return;
       }
 
-      window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+      window.open(`/admin-preview?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
     });
 
     stayPublishToggle?.addEventListener("click", () => {

@@ -5,5 +5,16 @@
 # Redirection www → sans www
 https://www.amesnomades.com/*  https://amesnomades.com/:splat  301!
 
+# ---------------------------------------------------------------
+# BYPASS MAINTENANCE — ces règles doivent rester AVANT la règle /*
+# /admin-preview sert sejour.html : accessible même en maintenance
+/admin-preview            /sejour.html    200
+# Pages admin et assets toujours accessibles
+/admin-*.html             /admin-*.html   200!
+/compte.html              /compte.html    200!
+/assets/*                 /assets/*       200!
+# ---------------------------------------------------------------
+
 # Maintenance (décommenter pour activer)
 #/*    /maintenance.html    503!
+
