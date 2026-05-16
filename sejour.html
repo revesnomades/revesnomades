@@ -64,23 +64,40 @@
     </div>
   </header>
 
+  <!-- STICKY BOOKING BAR -->
+  <div class="sticky-booking-bar" id="stickyBookingBar">
+    <div style="min-width:0;">
+      <div class="sticky-bar-title" id="stickyBarTitle">Séjour</div>
+      <div class="sticky-bar-meta" id="stickyBarMeta"></div>
+    </div>
+    <div class="sticky-bar-actions">
+      <a id="stickyBookingBtn" class="btn on-light" href="#booking-anchor" style="display:none;">Réserver</a>
+      <a class="btn tiny on-light" href="/index.html#contact">Contact</a>
+    </div>
+  </div>
+
   <main>
-  <section class="sejour-hero">
+  <section class="sejour-hero-full" id="stayHeroSection">
     <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+    <div class="sejour-hero-overlay"></div>
+    <div class="sejour-hero-content">
+      <div class="sejour-hero-kicker" id="stayHeroKicker">Âmes Nomades</div>
+      <h1 class="sejour-hero-title" id="stayHeroTitle">Séjour</h1>
+      <p class="sejour-hero-meta" id="stayHeroMeta"></p>
+      <p class="sejour-hero-dates" id="stayHeroDates"></p>
+      <a class="sejour-hero-btn" id="stayHeroBtn" href="#booking-anchor" style="display:none;">Réserver</a>
+    </div>
+    <div class="sejour-hero-scroll" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </section>
 
   <section class="band cream">
     <div class="container sejour-content">
 
-      <h1 class="reveal" id="stayTitle">Séjour</h1>
-
-      <p class="sejour-meta reveal" id="stayMeta">
-        5 jours · 4 nuits
-      </p>
-
-      <p class="sejour-dates reveal">
-        Dates : <span id="stayDates">Dates à annoncer</span>
-      </p>
+      <h1 class="reveal" id="stayTitle" style="display:none;"></h1>
+      <p class="sejour-meta reveal" id="stayMeta" style="display:none;"></p>
+      <p class="sejour-dates reveal" style="display:none;">Dates : <span id="stayDates"></span></p>
 
       <div class="sejour-text reveal" id="stayText">
         <p>Chargement du séjour…</p>
@@ -92,18 +109,15 @@
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="highlightsSection">
         <h2 class="sejour-section-title">Ce que tu vas vivre</h2>
-        <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+        <div id="highlightsList" class="highlights-cards-grid">
           <div>Chargement…</div>
         </div>
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="programSection">
         <h2 class="sejour-section-title">Programme</h2>
-        <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">Chargement…</div>
-            <p class="sub" style="margin-top:8px;">Le programme s’affichera ici.</p>
-          </div>
+        <div id="programList" class="program-timeline">
+          <div>Chargement…</div>
         </div>
         <p class="small muted" id="programNote" style="margin-top:10px;">
           * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
@@ -168,7 +182,7 @@
         <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
       </p>
 
-      <div class="booking-box reveal" style="display:none;">
+      <div class="booking-box reveal" id="booking-anchor" style="display:none;">
         <h3>Réserver</h3>
 
         <div class="actions" style="margin-top:16px;">
@@ -184,11 +198,8 @@
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="faqSection">
         <h2 class="sejour-section-title">FAQ</h2>
 
-        <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">Chargement…</div>
-            <p class="sub" style="margin-top:8px;">Les questions fréquentes s’afficheront ici.</p>
-          </div>
+        <div id="faqList" class="faq-accordion">
+          <div>Chargement…</div>
         </div>
       </section>
 
@@ -317,6 +328,15 @@
     const bookingBtn = document.getElementById("bookingBtn");
     const bookingMsg = document.getElementById("bookingMsg");
     const missingCount = document.getElementById("missingCount");
+
+    const stayHeroTitle = document.getElementById("stayHeroTitle");
+    const stayHeroMeta = document.getElementById("stayHeroMeta");
+    const stayHeroDates = document.getElementById("stayHeroDates");
+    const stayHeroBtn = document.getElementById("stayHeroBtn");
+    const stickyBookingBar = document.getElementById("stickyBookingBar");
+    const stickyBarTitle = document.getElementById("stickyBarTitle");
+    const stickyBarMeta = document.getElementById("stickyBarMeta");
+    const stickyBookingBtn = document.getElementById("stickyBookingBtn");
     const stayMetaDescription = document.getElementById("stayMetaDescription");
     const otherStaysTrack = document.getElementById("otherStaysTrack");
     const otherStaysCarousel = document.getElementById("otherStaysCarousel");
@@ -357,55 +377,79 @@
     function renderSimpleList(container, items){
       if(!container) return;
       if(!items || !items.length){
-        container.innerHTML = `<div>—</div>`;
+        container.innerHTML = `<div class="highlight-card"><span>—</span></div>`;
         return;
       }
-      container.innerHTML = items.map(item => `<div>• ${escapeHtml(item)}</div>`).join("");
+      container.innerHTML = items.map(item => `
+        <div class="highlight-card">
+          <span class="highlight-card-icon">✦</span>
+          <span>${escapeHtml(item)}</span>
+        </div>
+      `).join("");
     }
 
     function renderFaq(container, items){
       if(!container) return;
       if(!items || !items.length){
-        container.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">FAQ</div>
-            <p class="sub" style="margin-top:8px;">Les questions fréquentes seront bientôt disponibles.</p>
-          </div>
-        `;
+        container.innerHTML = `<div class="faq-item"><button class="faq-question" type="button">Les questions fréquentes seront bientôt disponibles.</button></div>`;
         return;
       }
 
-      container.innerHTML = items.map(item => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-          <div class="kicker">${escapeHtml(item.q || "Question")}</div>
-          <p class="sub" style="margin-top:8px;">${escapeHtml(item.a || "")}</p>
+      container.innerHTML = items.map((item, i) => `
+        <div class="faq-item" id="faq-item-${i}">
+          <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-answer-${i}">
+            <span>${escapeHtml(item.q || "Question")}</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer" id="faq-answer-${i}" role="region">
+            <div class="faq-answer-inner">${escapeHtml(item.a || "")}</div>
+          </div>
         </div>
       `).join("");
+
+      container.querySelectorAll(".faq-question").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const item = btn.closest(".faq-item");
+          const answer = item.querySelector(".faq-answer");
+          const isOpen = item.classList.contains("is-open");
+          container.querySelectorAll(".faq-item.is-open").forEach(openItem => {
+            openItem.classList.remove("is-open");
+            openItem.querySelector(".faq-answer").style.maxHeight = "0";
+            openItem.querySelector(".faq-question").setAttribute("aria-expanded", "false");
+          });
+          if(!isOpen){
+            item.classList.add("is-open");
+            answer.style.maxHeight = answer.scrollHeight + "px";
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
     }
 
     function renderProgram(container, items){
       if(!container) return;
       if(!items || !items.length){
         container.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">Programme</div>
-            <p class="sub" style="margin-top:8px;">Le programme détaillé sera bientôt disponible.</p>
+          <div class="timeline-day">
+            <div class="timeline-dot-col"><div class="timeline-dot"></div><div class="timeline-line"></div></div>
+            <div class="timeline-body"><div class="timeline-day-title">Programme</div><p style="font-size:14px;color:var(--muted);">Le programme détaillé sera bientôt disponible.</p></div>
           </div>
         `;
         return;
       }
 
       container.innerHTML = items.map(day => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
-          <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
-
-          <div style="display:grid; gap:8px; margin-top:12px;">
+        <div class="timeline-day">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-day-title">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
             ${(day.slots || []).map(slot => `
-              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
-                <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
-                  ${escapeHtml(slot.time || "")}
-                </div>
-                <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
+              <div class="timeline-slot">
+                <div class="timeline-slot-time">${escapeHtml(slot.time || "")}</div>
+                <div class="timeline-slot-text">${escapeHtml(slot.text || "")}</div>
               </div>
             `).join("")}
           </div>
@@ -659,8 +703,9 @@
       if(error || !stay){
         if(error) console.error(error);
 
-        const heroSection = document.querySelector(".sejour-hero");
+        const heroSection = document.getElementById("stayHeroSection");
         if(heroSection) heroSection.style.display = "none";
+        if(stickyBookingBar) stickyBookingBar.style.display = "none";
 
         stayTitle.textContent = "";
         stayText.innerHTML = `
@@ -714,6 +759,7 @@
       const firstDate = dates?.[0] || null;
 
       stayTitle.textContent = stay.title || "Séjour";
+      if(stayHeroTitle) stayHeroTitle.textContent = stay.title || "Séjour";
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
       const metaDesc = buildStayMetaDescription(stay);
       if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
@@ -754,8 +800,23 @@
 
       stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
 
+      const durationStr = durationText;
+      const datesStr = formatDateRange(firstDate?.start_date, firstDate?.end_date);
+      if(stayHeroMeta) stayHeroMeta.textContent = durationStr;
+      if(stayHeroDates) stayHeroDates.textContent = datesStr !== "Dates à annoncer" ? `📅 ${datesStr}` : "";
+      if(stickyBarTitle) stickyBarTitle.textContent = stay.title || "Séjour";
+      if(stickyBarMeta) stickyBarMeta.textContent = durationStr || "";
+
       if(stay.hero_image){
         stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
+      }
+
+      const heroSection = document.getElementById("stayHeroSection");
+      if(heroSection && stickyBookingBar){
+        const obs = new IntersectionObserver(([entry]) => {
+          stickyBookingBar.classList.toggle("is-visible", !entry.isIntersecting);
+        }, { threshold: 0 });
+        obs.observe(heroSection);
       }
 
       const blocks = normalizeContentBlocks(stay.content_blocks);
@@ -811,9 +872,13 @@
       if(bookingUrl){
         bookingBtn.href = bookingUrl;
         bookingMsg.textContent = "Tu peux réserver directement via ce lien.";
+        if(stayHeroBtn){ stayHeroBtn.href = bookingUrl; stayHeroBtn.style.display = ""; }
+        if(stickyBookingBtn){ stickyBookingBtn.href = bookingUrl; stickyBookingBtn.style.display = ""; }
       } else {
         bookingBtn.removeAttribute("href");
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
+        if(stayHeroBtn) stayHeroBtn.style.display = "none";
+        if(stickyBookingBtn) stickyBookingBtn.style.display = "none";
       }
 
       if(firstDate){

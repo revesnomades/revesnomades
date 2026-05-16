@@ -452,34 +452,17 @@
           <input id="stayPublished" type="checkbox" hidden>
           <div id="publishMsg" class="muted-small" style="display:none;"></div>
 
-          <div style="display:grid; gap:16px; margin-top:18px;">
+          <!-- EDITOR TABS -->
+          <nav class="editor-tabs" id="editorTabs">
+            <button class="editor-tab is-active" type="button" data-tab="infos">Infos</button>
+            <button class="editor-tab" type="button" data-tab="dates">Dates</button>
+            <button class="editor-tab" type="button" data-tab="contenu">Contenu</button>
+            <button class="editor-tab" type="button" data-tab="inclus">Inclus</button>
+            <button class="editor-tab" type="button" data-tab="faq">FAQ</button>
+          </nav>
 
-            <div class="admin-block">
-              <h3>Dates du séjour</h3>
-              <div class="admin-grid-2" style="margin-top:12px;">
-                <div>
-                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de début</label>
-                  <input id="mainStartDate" class="input" type="date">
-                </div>
-
-                <div>
-                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de fin</label>
-                  <input id="mainEndDate" class="input" type="date">
-                </div>
-
-                <div>
-                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places totales</label>
-                  <input id="mainSeatsTotal" class="input" type="number" min="0" value="10">
-                </div>
-
-                <div>
-                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places restantes</label>
-                  <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10">
-                </div>
-              </div>
-
-              <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
-            </div>
+          <!-- TAB: Infos -->
+          <div class="editor-tab-panel is-active" data-tab-panel="infos">
 
             <div class="admin-block">
               <h3>Position homepage</h3>
@@ -522,6 +505,43 @@
                 <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
               </div>
             </div>
+
+          </div><!-- /tab infos -->
+
+          <!-- TAB: Dates -->
+          <div class="editor-tab-panel" data-tab-panel="dates">
+
+            <div class="admin-block">
+              <h3>Dates du séjour</h3>
+              <div class="admin-grid-2" style="margin-top:12px;">
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de début</label>
+                  <input id="mainStartDate" class="input" type="date">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Date de fin</label>
+                  <input id="mainEndDate" class="input" type="date">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places totales</label>
+                  <input id="mainSeatsTotal" class="input" type="number" min="0" value="10">
+                </div>
+
+                <div>
+                  <label class="muted-small" style="display:block; margin-bottom:6px;">Places restantes</label>
+                  <input id="mainSeatsRemaining" class="input" type="number" min="0" value="10">
+                </div>
+              </div>
+
+              <div id="durationInfo" style="margin-top:12px;">Durée : —</div>
+            </div>
+
+          </div><!-- /tab dates -->
+
+          <!-- TAB: Contenu -->
+          <div class="editor-tab-panel" data-tab-panel="contenu">
 
             <div class="admin-block">
               <div class="section-head">
@@ -573,27 +593,6 @@
 
             <div class="admin-block">
               <div class="section-head">
-                <h3>Inclus / non inclus</h3>
-                <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-              </div>
-
-              <div style="display:grid; gap:12px;">
-                <textarea id="stayIncludedItems" class="input" style="min-height:140px;" placeholder="Inclus : une ligne par élément"></textarea>
-                <textarea id="stayNotIncludedItems" class="input" style="min-height:120px;" placeholder="Non inclus : une ligne par élément"></textarea>
-              </div>
-            </div>
-
-            <div class="admin-block">
-              <div class="section-head">
-                <h3>Options en supplément</h3>
-                <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-              </div>
-
-              <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
-            </div>
-
-            <div class="admin-block">
-              <div class="section-head">
                 <h3>Sac cadeau</h3>
                 <button class="btn on-light" id="btnToggleGiftSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
               </div>
@@ -616,6 +615,37 @@
               </div>
             </div>
 
+          </div><!-- /tab contenu -->
+
+          <!-- TAB: Inclus -->
+          <div class="editor-tab-panel" data-tab-panel="inclus">
+
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Inclus / non inclus</h3>
+                <button class="btn on-light" id="btnToggleIncludedSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+
+              <div style="display:grid; gap:12px;">
+                <textarea id="stayIncludedItems" class="input" style="min-height:140px;" placeholder="Inclus : une ligne par élément"></textarea>
+                <textarea id="stayNotIncludedItems" class="input" style="min-height:120px;" placeholder="Non inclus : une ligne par élément"></textarea>
+              </div>
+            </div>
+
+            <div class="admin-block">
+              <div class="section-head">
+                <h3>Options en supplément</h3>
+                <button class="btn on-light" id="btnToggleOptionsSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+              </div>
+
+              <textarea id="stayExtraOptions" class="input" style="min-height:120px;" placeholder="Une ligne par option"></textarea>
+            </div>
+
+          </div><!-- /tab inclus -->
+
+          <!-- TAB: FAQ -->
+          <div class="editor-tab-panel" data-tab-panel="faq">
+
             <div class="admin-block">
               <div class="section-head">
                 <div class="admin-inline">
@@ -629,8 +659,9 @@
               </p>
               <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
             </div>
-          </div>
-        </div>
+          </div><!-- /tab faq -->
+
+        </div><!-- /editorPanel -->
 
         <div class="admin-panel">
           <div class="section-head">
@@ -739,6 +770,10 @@
     let showOptionsSection = true;
     let showHighlightsSection = true;
 
+    function esc(str){
+      return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+
     function setMsg(el, msg){
       if(el) el.textContent = msg || "";
     }
@@ -756,8 +791,24 @@
       publishedOption?.classList.toggle("is-active", isPublished);
     }
 
+    function switchEditorTab(tabName){
+      const tabs = editorPanel.querySelectorAll(".editor-tab");
+      const panels = editorPanel.querySelectorAll(".editor-tab-panel");
+      tabs.forEach(t => t.classList.remove("is-active"));
+      panels.forEach(p => p.classList.remove("is-active"));
+      const tab = editorPanel.querySelector(`.editor-tab[data-tab="${tabName}"]`);
+      const panel = editorPanel.querySelector(`[data-tab-panel="${tabName}"]`);
+      if(tab) tab.classList.add("is-active");
+      if(panel) panel.classList.add("is-active");
+    }
+
+    editorPanel.querySelectorAll(".editor-tab").forEach(tab => {
+      tab.addEventListener("click", () => switchEditorTab(tab.dataset.tab));
+    });
+
     function openEditor(){
       editorPanel.classList.remove("editor-hidden");
+      switchEditorTab("infos");
       editorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
@@ -1495,26 +1546,55 @@
         return;
       }
 
-      staysList.innerHTML = data.map(stay => `
-        <div class="stay-admin-item">
-          <div>
-            <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
-            <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "Publié" : "Brouillon"}</div>
-            <div class="muted-small" style="margin-top:4px;">
-              Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
+      const fieldCount = 6;
+      function completionPct(s){
+        let filled = 0;
+        if(s.title) filled++;
+        if(s.description || s.short_description) filled++;
+        if(s.hero_image) filled++;
+        if(s.location) filled++;
+        if(s.booking_url || s.reservation_url) filled++;
+        if(s.slug) filled++;
+        return Math.round((filled / fieldCount) * 100);
+      }
+
+      staysList.innerHTML = `<div class="stay-admin-cards">${data.map(stay => {
+        const pct = completionPct(stay);
+        const thumb = stay.hero_image
+          ? `<img class="stay-card-thumb" src="${esc(stay.hero_image)}" alt="" loading="lazy">`
+          : `<div class="stay-card-thumb-placeholder">🏕</div>`;
+        const badge = stay.published
+          ? `<span class="stay-card-badge published">Publié</span>`
+          : `<span class="stay-card-badge draft">Brouillon</span>`;
+        const homepage = stay.is_featured
+          ? "Bandeau principal"
+          : stay.is_highlight
+            ? `Bandeau séjours — pos. ${stay.highlight_order || "?"}`
+            : "Non mis en avant";
+        return `
+          <div class="stay-admin-card">
+            ${thumb}
+            <div class="stay-card-body">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <p class="stay-card-title">${esc(stay.title || "Sans titre")}</p>
+                ${badge}
+              </div>
+              <div class="stay-card-meta">${esc(stay.location || "—")} · slug : ${esc(stay.slug || "—")}</div>
+              <div class="stay-card-meta">Homepage : ${esc(homepage)}</div>
+              <div class="stay-card-completion">
+                <div class="stay-card-completion-label">Complété à ${pct}%</div>
+                <div class="completion-bar"><div class="completion-bar-fill" style="width:${pct}%"></div></div>
+              </div>
+              <div class="stay-card-actions">
+                <button class="btn on-light" type="button" data-edit="${esc(stay.id)}">Modifier</button>
+                <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug || "")}">Aperçu</button>
+                <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug || "")}" target="_blank" rel="noopener">Voir</a>
+                <button class="btn on-light" type="button" data-delete="${esc(stay.id)}">Supprimer</button>
+              </div>
             </div>
           </div>
-
-          <div class="admin-inline">
-            <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
-            <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("")}</div>`;
 
       staysList.querySelectorAll("[data-edit]").forEach(btn => {
         btn.addEventListener("click", async () => {

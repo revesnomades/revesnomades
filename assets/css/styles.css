@@ -1484,3 +1484,452 @@ input, textarea {
 }
 }
 }
+
+/* ============================================================
+   SEJOUR — HERO FULLSCREEN
+   ============================================================ */
+.sejour-hero-full {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.sejour-hero-full .sejour-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 65%;
+}
+
+.sejour-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.18) 55%, transparent 100%);
+}
+
+.sejour-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: calc(var(--navH, 64px) + 20px) 5vw 72px;
+  color: #fff;
+}
+
+.sejour-hero-kicker {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .75;
+  margin-bottom: 10px;
+}
+
+.sejour-hero-title {
+  font-family: 'SegoCustom', serif;
+  font-weight: 500;
+  font-size: clamp(32px, 5.5vw, 72px);
+  line-height: 1.08;
+  margin: 0 0 14px;
+}
+
+.sejour-hero-meta {
+  font-size: 14px;
+  opacity: .82;
+  margin: 0 0 4px;
+}
+
+.sejour-hero-dates {
+  font-size: 14px;
+  opacity: .82;
+  margin: 0 0 24px;
+}
+
+.sejour-hero-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #fff;
+  color: #111;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: opacity .2s;
+}
+
+.sejour-hero-btn:hover { opacity: .88; }
+
+.sejour-hero-scroll {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: .55;
+  animation: heroScrollBounce 2s ease-in-out infinite;
+}
+
+.sejour-hero-scroll svg { width: 22px; height: 22px; }
+
+@keyframes heroScrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(7px); }
+}
+
+/* ============================================================
+   SEJOUR — STICKY BOOKING BAR
+   ============================================================ */
+.sticky-booking-bar {
+  position: fixed;
+  top: var(--navH, 64px);
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line, #e5e5e5);
+  padding: 10px 5vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transform: translateY(-130%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.sticky-booking-bar.is-visible {
+  transform: translateY(0);
+}
+
+.sticky-bar-title {
+  font-family: 'SegoCustom', serif;
+  font-weight: 500;
+  font-size: clamp(14px, 2vw, 18px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sticky-bar-meta {
+  font-size: 12px;
+  color: var(--muted, #666);
+  white-space: nowrap;
+}
+
+.sticky-bar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .sticky-bar-title { font-size: 13px; }
+  .sticky-bar-meta  { display: none; }
+}
+
+/* ============================================================
+   SEJOUR — HIGHLIGHTS CARDS
+   ============================================================ */
+.highlights-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.highlight-card {
+  background: rgba(255,255,255,.7);
+  border: 1px solid var(--line, #e5e5e5);
+  border-radius: 6px;
+  padding: 16px 14px;
+  font-size: 14px;
+  color: var(--text, #111);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.highlight-card-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .highlights-cards-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================================
+   SEJOUR — PROGRAMME TIMELINE
+   ============================================================ */
+.program-timeline {
+  margin-top: 14px;
+  display: grid;
+  gap: 0;
+}
+
+.timeline-day {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 0 18px;
+}
+
+.timeline-dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent, #b5895a);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.timeline-line {
+  flex: 1;
+  width: 2px;
+  background: var(--line, #e5e5e5);
+  margin-top: 4px;
+}
+
+.timeline-day:last-child .timeline-line { display: none; }
+
+.timeline-body {
+  padding-bottom: 28px;
+}
+
+.timeline-day-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--accent, #b5895a);
+  margin-bottom: 10px;
+}
+
+.timeline-slot {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+  align-items: start;
+}
+
+.timeline-slot-time {
+  font-size: 11px;
+  color: var(--muted, #666);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding-top: 1px;
+}
+
+.timeline-slot-text {
+  font-size: 14px;
+  color: var(--text, #111);
+}
+
+/* ============================================================
+   SEJOUR — FAQ ACCORDION
+   ============================================================ */
+.faq-accordion {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.faq-item {
+  border: 1px solid var(--line, #e5e5e5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.faq-question {
+  width: 100%;
+  background: rgba(255,255,255,.7);
+  border: none;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #111);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background .2s;
+}
+
+.faq-question:hover { background: rgba(255,255,255,.95); }
+
+.faq-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform .3s;
+}
+
+.faq-item.is-open .faq-chevron { transform: rotate(180deg); }
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .35s ease;
+}
+
+.faq-answer-inner {
+  padding: 0 16px 14px;
+  font-size: 14px;
+  color: var(--muted, #666);
+  line-height: 1.65;
+}
+
+/* ============================================================
+   ADMIN — EDITOR TABS
+   ============================================================ */
+.editor-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--line, #e5e5e5);
+  margin: 18px 0 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.editor-tabs::-webkit-scrollbar { display: none; }
+
+.editor-tab {
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted, #666);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .2s, border-color .2s;
+}
+
+.editor-tab:hover { color: var(--text, #111); }
+.editor-tab.is-active { color: var(--text, #111); border-bottom-color: var(--accent, #b5895a); }
+
+.editor-tab-panel { display: none; }
+.editor-tab-panel.is-active { display: grid; gap: 16px; margin-top: 18px; }
+
+/* ============================================================
+   ADMIN — STAY CARDS
+   ============================================================ */
+.stay-admin-cards {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.stay-admin-card {
+  background: #fff;
+  border: 1px solid var(--line, #e5e5e5);
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+}
+
+.stay-card-thumb {
+  width: 120px;
+  height: 100%;
+  min-height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.stay-card-thumb-placeholder {
+  width: 120px;
+  min-height: 100px;
+  background: var(--cream, #f7f4ee);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #999);
+  font-size: 28px;
+}
+
+.stay-card-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stay-card-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.stay-card-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+
+.stay-card-badge.published { background: #d1fae5; color: #065f46; }
+.stay-card-badge.draft     { background: #fef3c7; color: #92400e; }
+
+.stay-card-meta {
+  font-size: 12px;
+  color: var(--muted, #666);
+}
+
+.stay-card-completion {
+  margin-top: 8px;
+}
+
+.stay-card-completion-label {
+  font-size: 11px;
+  color: var(--muted, #666);
+  margin-bottom: 4px;
+}
+
+.completion-bar {
+  height: 5px;
+  background: var(--line, #e5e5e5);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 240px;
+}
+
+.completion-bar-fill {
+  height: 100%;
+  background: var(--accent, #b5895a);
+  border-radius: 10px;
+  transition: width .4s ease;
+}
+
+.stay-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 540px) {
+  .stay-admin-card { grid-template-columns: 1fr; }
+  .stay-card-thumb,
+  .stay-card-thumb-placeholder { width: 100%; height: 140px; }
+}
