@@ -11,6 +11,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta id="stayMetaDescription" name="description" content="Découvrez un séjour bien-être avec Âmes Nomades. Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.">
+  <meta name="theme-color" content="#0e0f11">
   <link id="stayCanonical" rel="canonical" href="https://amesnomades.com/">
   <meta id="ogTitle" property="og:title" content="Séjour — Âmes Nomades">
   <meta id="ogDescription" property="og:description" content="Découvrez un séjour bien-être avec Âmes Nomades.">
@@ -30,7 +31,7 @@
     Mode aperçu admin
   </div>
 
-  <header class="nav" id="top">
+  <header class="nav hide-on-top" id="top">
     <div class="container nav-inner">
       <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
         <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
@@ -66,7 +67,7 @@
 
   <main>
   <section class="sejour-hero">
-    <div class="sejour-hero-bg" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+    <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
   </section>
 
   <section class="band cream">
@@ -842,6 +843,29 @@
         renderOtherStays(otherPublishedStays || []);
       }
     }
+
+    // ── NOUVELLES ANIMATIONS (HEADER + SCROLL 5S) ──
+    const navHeader = document.getElementById("top");
+    
+    // Au bout de 5 secondes, scroller doucement sous l'image
+    setTimeout(() => {
+      // Ne scroller que si l'utilisateur n'a pas déjà scrollé manuellement
+      if(window.scrollY < 100) {
+        window.scrollTo({
+          top: window.innerHeight,
+          behavior: "smooth"
+        });
+      }
+    }, 5000);
+
+    // Faire apparaitre le header au scroll
+    window.addEventListener("scroll", () => {
+      if(window.scrollY > 50) {
+        navHeader?.classList.remove("hide-on-top");
+      } else {
+        navHeader?.classList.add("hide-on-top");
+      }
+    });
 
     loadStay();
   </script>

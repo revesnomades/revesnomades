@@ -115,7 +115,7 @@
 
   <main>
   <section class="hero hero-left">
-    <div class="hero-bg" style="background-image:url('assets/img/hero-1.jpg');"></div>
+    <div class="hero-bg parallax-bg" id="homeHeroBg" style="background-image:url('assets/img/hero-1.jpg');"></div>
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
@@ -666,6 +666,17 @@
 
     await loadFeaturedStay();
     await loadHighlightStays();
+
+    // ── ANIMATION PARALLAX ──
+    const parallaxBg = document.getElementById("homeHeroBg");
+    window.addEventListener("scroll", () => {
+      if(!parallaxBg) return;
+      const scrollPos = window.scrollY;
+      // Appliquer l'effet seulement si on est dans la zone du hero (performance)
+      if(scrollPos < window.innerHeight) {
+        parallaxBg.style.transform = `translateY(${scrollPos * 0.4}px)`;
+      }
+    });
   </script>
 </body>
 </html>

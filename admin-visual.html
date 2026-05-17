@@ -760,17 +760,21 @@
     avBtnUnpublish?.addEventListener("click", () => togglePublish(false));
 
     // ── Init ─────────────────────────────────────────────────────
-    const user = await checkAdmin();
-    if(!user) return;
+    async function init() {
+      const user = await checkAdmin();
+      if(!user) return;
 
-    await loadAllStays();
+      await loadAllStays();
 
-    // Charge le slug depuis l'URL si présent
-    const params     = new URLSearchParams(window.location.search);
-    const slugParam  = params.get("slug");
-    if(slugParam){
-      await loadStayPreview(slugParam);
+      // Charge le slug depuis l'URL si présent
+      const params     = new URLSearchParams(window.location.search);
+      const slugParam  = params.get("slug");
+      if(slugParam){
+        await loadStayPreview(slugParam);
+      }
     }
+
+    init();
   </script>
 
 </body>
