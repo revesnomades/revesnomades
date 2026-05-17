@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Aperçu séjour — Admin Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+
+    /* ── Reset & base ───────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Glacial Indifference", "Segoe UI", Arial, sans-serif;
+      background: #0e0f11;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Toolbar ────────────────────────────────── */
+    .av-toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #1a1b1e;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      z-index: 1000;
+    }
+
+    .av-toolbar-brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: rgba(255,255,255,.5);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .av-toolbar-sep {
+      width: 1px;
+      height: 24px;
+      background: rgba(255,255,255,.12);
+      flex-shrink: 0;
+    }
+
+    .av-stay-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 240px;
+    }
+
+    .av-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .av-status-badge.draft {
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.5);
+    }
+
+    .av-status-badge.published {
+      background: rgba(76,175,80,.15);
+      color: #81c784;
+    }
+
+    .av-toolbar-spacer { flex: 1; }
+
+    /* Sélecteur de viewport */
+    .av-viewport-group {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,.06);
+      border-radius: 6px;
+      padding: 3px;
+    }
+
+    .av-viewport-btn {
+      width: 34px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,.4);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background .15s ease, color .15s ease;
+    }
+
+    .av-viewport-btn:hover {
+      color: rgba(255,255,255,.8);
+    }
+
+    .av-viewport-btn.is-active {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+    }
+
+    /* Boutons action */
+    .av-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,.15);
+      background: transparent;
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background .15s ease, color .15s ease, border-color .15s ease;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .av-btn:hover {
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      border-color: rgba(255,255,255,.3);
+    }
+
+    .av-btn.av-btn-publish {
+      background: rgba(76,175,80,.15);
+      border-color: rgba(76,175,80,.4);
+      color: #81c784;
+    }
+
+    .av-btn.av-btn-publish:hover {
+      background: rgba(76,175,80,.25);
+      border-color: #81c784;
+      color: #a5d6a7;
+    }
+
+    .av-btn.av-btn-unpublish {
+      background: rgba(244,67,54,.1);
+      border-color: rgba(244,67,54,.3);
+      color: #ef9a9a;
+    }
+
+    .av-btn.av-btn-unpublish:hover {
+      background: rgba(244,67,54,.2);
+      color: #ffcdd2;
+    }
+
+    /* ── Sidebar ────────────────────────────────── */
+    .av-layout {
+      display: flex;
+      height: calc(100vh - 56px);
+      margin-top: 56px;
+    }
+
+    .av-sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: #141517;
+      border-right: 1px solid rgba(255,255,255,.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .av-sidebar-head {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+
+    .av-sidebar-search {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .av-search-input {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 4px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+
+    .av-search-input::placeholder { color: rgba(255,255,255,.25); }
+    .av-search-input:focus { border-color: rgba(255,255,255,.25); }
+
+    .av-stays-list {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.1) transparent;
+    }
+
+    .av-stay-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      transition: background .15s ease;
+    }
+
+    .av-stay-item:hover { background: rgba(255,255,255,.04); }
+
+    .av-stay-item.is-active {
+      background: rgba(255,255,255,.08);
+      border-left: 2px solid #fff;
+    }
+
+    .av-stay-item-thumb {
+      width: 48px;
+      height: 36px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255,255,255,.06);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .av-stay-item-info { flex: 1; min-width: 0; }
+
+    .av-stay-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .av-stay-item-meta {
+      font-size: 11px;
+      color: rgba(255,255,255,.35);
+      margin-top: 2px;
+    }
+
+    .av-stay-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .av-stay-dot.published { background: #4caf50; }
+    .av-stay-dot.draft     { background: rgba(255,255,255,.2); }
+
+    /* ── Preview area ───────────────────────────── */
+    .av-preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: #0e0f11;
+      padding: 24px;
+      overflow: auto;
+      gap: 20px;
+    }
+
+    .av-preview-wrapper {
+      background: #fff;
+      transition: width .3s cubic-bezier(0.22,1,0.36,1),
+                  box-shadow .3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      position: relative;
+    }
+
+    .av-preview-wrapper.vp-desktop {
+      width: 100%;
+      max-width: 1280px;
+    }
+
+    .av-preview-wrapper.vp-tablet {
+      width: 768px;
+      max-width: 100%;
+    }
+
+    .av-preview-wrapper.vp-mobile {
+      width: 390px;
+      max-width: 100%;
+    }
+
+    .av-preview-iframe {
+      width: 100%;
+      border: none;
+      display: block;
+      min-height: calc(100vh - 56px - 48px - 40px);
+    }
+
+    /* Barre de dimensions */
+    .av-dimension-bar {
+      font-size: 11px;
+      color: rgba(255,255,255,.25);
+      letter-spacing: .06em;
+      text-align: center;
+      height: 20px;
+    }
+
+    /* ── Loading state ──────────────────────────── */
+    .av-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 16px;
+      color: rgba(255,255,255,.3);
+    }
+
+    .av-spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid rgba(255,255,255,.1);
+      border-top-color: rgba(255,255,255,.5);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Empty state ────────────────────────────── */
+    .av-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      color: rgba(255,255,255,.25);
+      text-align: center;
+    }
+
+    .av-empty-icon { font-size: 48px; opacity: .4; }
+    .av-empty-text { font-size: 14px; }
+
+    /* ── Toast notification ─────────────────────── */
+    .av-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1a1b1e;
+      border: 1px solid rgba(255,255,255,.12);
+      color: #fff;
+      padding: 14px 20px;
+      font-size: 13px;
+      border-radius: 6px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: transform .25s ease, opacity .25s ease;
+      z-index: 2000;
+      max-width: 320px;
+    }
+
+    .av-toast.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .av-toast.success { border-left: 3px solid #4caf50; }
+    .av-toast.error   { border-left: 3px solid #f44336; }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 900px) {
+      .av-sidebar { width: 220px; }
+    }
+
+    @media (max-width: 640px) {
+      .av-sidebar { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- TOOLBAR -->
+  <header class="av-toolbar">
+    <div class="av-toolbar-brand">Aperçu Admin</div>
+    <div class="av-toolbar-sep"></div>
+    <div class="av-stay-title" id="avStayTitle">Sélectionner un séjour</div>
+    <div id="avStatusBadge"></div>
+
+    <div class="av-toolbar-spacer"></div>
+
+    <!-- Viewport -->
+    <div class="av-viewport-group">
+      <button class="av-viewport-btn is-active" type="button"
+        data-vp="vp-desktop" title="Desktop" aria-label="Vue desktop">
+        🖥
+      </button>
+      <button class="av-viewport-btn" type="button"
+        data-vp="vp-tablet" title="Tablette" aria-label="Vue tablette">
+        📱
+      </button>
+      <button class="av-viewport-btn" type="button"
+        data-vp="vp-mobile" title="Mobile" aria-label="Vue mobile">
+        📲
+      </button>
+    </div>
+
+    <div class="av-toolbar-sep"></div>
+
+    <!-- Actions -->
+    <a class="av-btn" id="avBtnEdit" href="#" title="Modifier dans l'éditeur">
+      ✏️ Modifier
+    </a>
+    <button class="av-btn" id="avBtnRefresh" type="button" title="Recharger l'aperçu">
+      🔄 Actualiser
+    </button>
+    <button class="av-btn av-btn-publish" id="avBtnPublish" type="button" style="display:none;">
+      🚀 Publier
+    </button>
+    <button class="av-btn av-btn-unpublish" id="avBtnUnpublish" type="button" style="display:none;">
+      ⏸ Dépublier
+    </button>
+    <a class="av-btn" href="/admin-stays.html">
+      ← Retour admin
+    </a>
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="av-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="av-sidebar">
+      <div class="av-sidebar-head">Tous les séjours</div>
+      <div class="av-sidebar-search">
+        <input class="av-search-input" type="text" id="avSearchInput"
+          placeholder="Rechercher…" autocomplete="off">
+      </div>
+      <div class="av-stays-list" id="avStaysList">
+        <div class="av-loading">
+          <div class="av-spinner"></div>
+          <div>Chargement…</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PREVIEW -->
+    <div class="av-preview-area" id="avPreviewArea">
+      <div class="av-dimension-bar" id="avDimensionBar">
+        Sélectionnez un séjour dans la liste
+      </div>
+      <div class="av-preview-wrapper vp-desktop" id="avPreviewWrapper">
+        <div class="av-empty" style="height:calc(100vh - 200px);">
+          <div class="av-empty-icon">🌿</div>
+          <div class="av-empty-text">
+            Sélectionnez un séjour dans la liste<br>pour visualiser son rendu
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="av-toast" id="avToast"></div>
+
+  <script src="/assets/js/main.js" defer></script>
+
+  <script type="module">
+    import { supabase } from "/assets/js/supabaseClient.js";
+
+    // ── Auth admin ───────────────────────────────────────────────
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+      if(!user){ window.location.href = "/compte.html"; return null; }
+      const { data: profile } = await supabase
+        .from("profiles").select("role").eq("id", user.id).single();
+      if(profile?.role !== "admin"){
+        window.location.href = "/compte.html";
+        return null;
+      }
+      return user;
+    }
+
+    // ── State ────────────────────────────────────────────────────
+    let allStays        = [];
+    let currentStay     = null;
+    let currentViewport = "vp-desktop";
+    let iframe          = null;
+
+    // ── Elements ─────────────────────────────────────────────────
+    const avStayTitle    = document.getElementById("avStayTitle");
+    const avStatusBadge  = document.getElementById("avStatusBadge");
+    const avStaysList    = document.getElementById("avStaysList");
+    const avPreviewWrapper= document.getElementById("avPreviewWrapper");
+    const avDimensionBar = document.getElementById("avDimensionBar");
+    const avBtnEdit      = document.getElementById("avBtnEdit");
+    const avBtnRefresh   = document.getElementById("avBtnRefresh");
+    const avBtnPublish   = document.getElementById("avBtnPublish");
+    const avBtnUnpublish = document.getElementById("avBtnUnpublish");
+    const avSearchInput  = document.getElementById("avSearchInput");
+    const avToast        = document.getElementById("avToast");
+
+    // ── Toast ────────────────────────────────────────────────────
+    let toastTimer = null;
+    function showToast(msg, type = "success"){
+      avToast.textContent = msg;
+      avToast.className   = `av-toast ${type} is-visible`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        avToast.classList.remove("is-visible");
+      }, 3000);
+    }
+
+    // ── Viewport ─────────────────────────────────────────────────
+    const VIEWPORT_DIMENSIONS = {
+      "vp-desktop": { label: "Desktop — 1280px", width: "1280" },
+      "vp-tablet":  { label: "Tablette — 768px", width: "768" },
+      "vp-mobile":  { label: "Mobile — 390px",   width: "390" },
+    };
+
+    function setViewport(vp){
+      currentViewport = vp;
+      document.querySelectorAll(".av-viewport-btn").forEach(btn => {
+        btn.classList.toggle("is-active", btn.getAttribute("data-vp") === vp);
+      });
+      avPreviewWrapper.className = `av-preview-wrapper ${vp}`;
+      avDimensionBar.textContent = currentStay
+        ? VIEWPORT_DIMENSIONS[vp]?.label || ""
+        : "Sélectionnez un séjour dans la liste";
+    }
+
+    document.querySelectorAll(".av-viewport-btn").forEach(btn => {
+      btn.addEventListener("click", () => setViewport(btn.getAttribute("data-vp")));
+    });
+
+    // ── Sidebar list ─────────────────────────────────────────────
+    function esc(v){
+      return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function renderSidebar(stays){
+      if(!stays.length){
+        avStaysList.innerHTML = `
+          <div class="av-empty" style="padding:40px 16px;">
+            <div class="av-empty-icon">🔍</div>
+            <div class="av-empty-text">Aucun séjour trouvé</div>
+          </div>`;
+        return;
+      }
+
+      avStaysList.innerHTML = stays.map(stay => `
+        <div class="av-stay-item ${currentStay?.id === stay.id ? "is-active" : ""}"
+          data-slug="${esc(stay.slug)}" data-id="${esc(stay.id)}">
+          <div class="av-stay-item-thumb"
+            style="${stay.hero_image ? `background-image:url('${esc(stay.hero_image)}')` : ""}">
+          </div>
+          <div class="av-stay-item-info">
+            <div class="av-stay-item-title">${esc(stay.title || "Sans titre")}</div>
+            <div class="av-stay-item-meta">
+              ${stay.location ? esc(stay.location) : "Lieu à définir"}
+            </div>
+          </div>
+          <div class="av-stay-dot ${stay.published ? "published" : "draft"}"
+            title="${stay.published ? "Publié" : "Brouillon"}">
+          </div>
+        </div>
+      `).join("");
+
+      avStaysList.querySelectorAll(".av-stay-item").forEach(item => {
+        item.addEventListener("click", () => loadStayPreview(item.getAttribute("data-slug")));
+      });
+    }
+
+    // ── Search ───────────────────────────────────────────────────
+    avSearchInput?.addEventListener("input", () => {
+      const q = avSearchInput.value.toLowerCase().trim();
+      const filtered = q
+        ? allStays.filter(s =>
+            (s.title || "").toLowerCase().includes(q) ||
+            (s.location || "").toLowerCase().includes(q) ||
+            (s.slug || "").toLowerCase().includes(q)
+          )
+        : allStays;
+      renderSidebar(filtered);
+    });
+
+    // ── Load stays ───────────────────────────────────────────────
+    async function loadAllStays(){
+      const { data, error } = await supabase
+        .from("stays").select("id, title, slug, hero_image, location, published")
+        .order("created_at", { ascending: false });
+
+      if(error){
+        avStaysList.innerHTML = `
+          <div style="padding:16px; color:rgba(255,255,255,.3); font-size:13px;">
+            Erreur chargement
+          </div>`;
+        return;
+      }
+
+      allStays = data || [];
+      renderSidebar(allStays);
+    }
+
+    // ── Load preview ─────────────────────────────────────────────
+    async function loadStayPreview(slug){
+      if(!slug) return;
+
+      // Récupère les données du séjour
+      const { data: stay, error } = await supabase
+        .from("stays").select("*").eq("slug", slug).single();
+
+      if(error || !stay){
+        showToast("Impossible de charger ce séjour", "error");
+        return;
+      }
+
+      currentStay = stay;
+
+      // Mise à jour toolbar
+      avStayTitle.textContent = stay.title || "Séjour";
+      avStatusBadge.innerHTML = `
+        <span class="av-status-badge ${stay.published ? "published" : "draft"}">
+          ${stay.published ? "✅ Publié" : "⬜ Brouillon"}
+        </span>`;
+
+      // Boutons publish/unpublish
+      avBtnPublish.style.display   = stay.published ? "none"         : "inline-flex";
+      avBtnUnpublish.style.display = stay.published ? "inline-flex"  : "none";
+
+      // Lien modifier
+      avBtnEdit.href = `/admin-stays.html?edit=${encodeURIComponent(stay.id)}`;
+
+      // Update sidebar active state
+      renderSidebar(allStays.filter(s => {
+        const q = avSearchInput.value.toLowerCase().trim();
+        return !q || (s.title||"").toLowerCase().includes(q) ||
+               (s.location||"").toLowerCase().includes(q);
+      }));
+
+      // Dimension bar
+      avDimensionBar.textContent = VIEWPORT_DIMENSIONS[currentViewport]?.label || "";
+
+      // Update URL sans recharger
+      const newUrl = `/admin-visual.html?slug=${encodeURIComponent(slug)}`;
+      window.history.replaceState({}, "", newUrl);
+
+      // Crée ou recharge l'iframe
+      loadIframe(slug);
+    }
+
+    function loadIframe(slug){
+      // Récupère le token admin pour le preview
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const token = session?.access_token || "";
+        const src   = `/sejour.html?slug=${encodeURIComponent(slug)}&preview=1&admin_token=${encodeURIComponent(token)}`;
+
+        // Loading state
+        avPreviewWrapper.innerHTML = `
+          <div class="av-loading" style="height:calc(100vh - 200px);">
+            <div class="av-spinner"></div>
+            <div>Chargement du rendu…</div>
+          </div>`;
+
+        // Crée iframe
+        setTimeout(() => {
+          iframe = document.createElement("iframe");
+          iframe.className = "av-preview-iframe";
+          iframe.title     = "Aperçu séjour";
+          iframe.onload    = () => {
+            // Ajuste la hauteur à celle du contenu
+            try {
+              const h = iframe.contentDocument?.documentElement?.scrollHeight;
+              if(h && h > 400) iframe.style.height = h + "px";
+            } catch(e) {}
+          };
+          iframe.src = src;
+          avPreviewWrapper.innerHTML = "";
+          avPreviewWrapper.appendChild(iframe);
+        }, 100);
+      });
+    }
+
+    // ── Refresh ──────────────────────────────────────────────────
+    avBtnRefresh?.addEventListener("click", () => {
+      if(currentStay) loadIframe(currentStay.slug);
+    });
+
+    // ── Publish / Unpublish ──────────────────────────────────────
+    async function togglePublish(publish){
+      if(!currentStay) return;
+      const label = publish ? "Publier" : "Dépublier";
+
+      const ok = confirm(`${label} le séjour "${currentStay.title}" ?`);
+      if(!ok) return;
+
+      const { error } = await supabase
+        .from("stays")
+        .update({
+          published:    publish,
+          published_at: publish ? new Date().toISOString() : null
+        })
+        .eq("id", currentStay.id);
+
+      if(error){
+        showToast(`Erreur : ${error.message}`, "error");
+        return;
+      }
+
+      currentStay.published = publish;
+
+      // Met à jour dans allStays
+      const idx = allStays.findIndex(s => s.id === currentStay.id);
+      if(idx !== -1) allStays[idx].published = publish;
+
+      avStatusBadge.innerHTML = `
+        <span class="av-status-badge ${publish ? "published" : "draft"}">
+          ${publish ? "✅ Publié" : "⬜ Brouillon"}
+        </span>`;
+
+      avBtnPublish.style.display   = publish ? "none"        : "inline-flex";
+      avBtnUnpublish.style.display = publish ? "inline-flex" : "none";
+
+      showToast(publish ? "Séjour publié ✅" : "Séjour dépublié", publish ? "success" : "error");
+
+      // Recharge aperçu
+      loadIframe(currentStay.slug);
+
+      // Recharge sidebar
+      renderSidebar(allStays);
+    }
+
+    avBtnPublish?.addEventListener("click",   () => togglePublish(true));
+    avBtnUnpublish?.addEventListener("click", () => togglePublish(false));
+
+    // ── Init ─────────────────────────────────────────────────────
+    const user = await checkAdmin();
+    if(!user) return;
+
+    await loadAllStays();
+
+    // Charge le slug depuis l'URL si présent
+    const params     = new URLSearchParams(window.location.search);
+    const slugParam  = params.get("slug");
+    if(slugParam){
+      await loadStayPreview(slugParam);
+    }
+  </script>
+
+</body>
+</html>

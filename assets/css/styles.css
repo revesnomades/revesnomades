@@ -1484,3 +1484,71 @@ input, textarea {
 }
 }
 }
+
+/* ══════════════════════════════════════════════
+   ADMIN — CHAMPS AVEC LABELS FLOTTANTS
+══════════════════════════════════════════════ */
+.field-group {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 22px 14px 8px !important;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.65);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--text);
+  background: rgba(255,255,255,.95);
+}
+
+.field-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: all .18s ease;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.field-textarea ~ .field-label {
+  top: 18px;
+  transform: none;
+}
+
+.field-input:focus ~ .field-label,
+.field-input:not(:placeholder-shown) ~ .field-label {
+  top: 8px;
+  transform: none;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field-textarea:focus ~ .field-label,
+.field-textarea:not(:placeholder-shown) ~ .field-label {
+  top: 4px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  padding: 0 2px;
+}

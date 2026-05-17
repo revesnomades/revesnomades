@@ -449,6 +449,22 @@
 
           <div id="adminStatus" class="muted-small" style="margin-top:12px;"></div>
           <div id="editorMsg" class="muted-small" style="margin-top:8px;"></div>
+          <div class="editor-completion-bar" id="editorCompletionBar" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="font-size:12px; color:var(--muted);">Complétion du séjour</span>
+              <span class="editor-completion-pct" id="editorCompletionPct">0%</span>
+            </div>
+            <div style="height:4px; background:var(--line); border-radius:999px; overflow:hidden;">
+              <div id="editorCompletionFill"
+                style="height:100%; background:#4caf50; border-radius:999px;
+                       width:0%; transition:width .4s ease;">
+              </div>
+            </div>
+            <div id="editorCompletionHints"
+              style="margin-top:8px; font-size:11px; color:var(--muted);
+                     display:flex; flex-wrap:wrap; gap:6px;">
+            </div>
+          </div>
           <input id="stayPublished" type="checkbox" hidden>
           <div id="publishMsg" class="muted-small" style="display:none;"></div>
 
@@ -502,11 +518,41 @@
               <h3>Informations principales</h3>
 
               <div style="display:grid; gap:12px; margin-top:12px;">
-                <input id="stayTitle" class="input" placeholder="Titre du séjour">
-                <input id="staySlug" class="input" placeholder="Slug (ex : camargue)">
-                <input id="stayLocation" class="input" placeholder="Lieu">
-                <textarea id="stayShortDescription" class="input" style="min-height:90px;" placeholder="Description courte"></textarea>
-                <textarea id="stayDescription" class="input" style="min-height:180px;" placeholder="Description principale"></textarea>
+                <div class="field-group">
+                  <input id="stayTitle" class="input field-input" placeholder=" ">
+                  <label class="field-label" for="stayTitle">Titre du séjour *</label>
+                </div>
+
+                <div class="field-group">
+                  <input id="staySlug" class="input field-input" placeholder=" ">
+                  <label class="field-label" for="staySlug">
+                    Slug URL (ex: camargue-2026) *
+                  </label>
+                  <div class="field-hint">
+                    URL du séjour : /sejour.html?slug=<span id="slugPreview">…</span>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <input id="stayLocation" class="input field-input" placeholder=" ">
+                  <label class="field-label" for="stayLocation">Lieu du séjour</label>
+                </div>
+
+                <div class="field-group">
+                  <textarea id="stayShortDescription" class="input field-input field-textarea"
+                    placeholder=" " style="min-height:80px;"></textarea>
+                  <label class="field-label" for="stayShortDescription">
+                    Description courte (aperçu carte)
+                  </label>
+                </div>
+
+                <div class="field-group">
+                  <textarea id="stayDescription" class="input field-input field-textarea"
+                    placeholder=" " style="min-height:160px;"></textarea>
+                  <label class="field-label" for="stayDescription">
+                    Description principale
+                  </label>
+                </div>
 
                 <div class="admin-block" style="padding:12px;">
                   <div class="muted-small" style="margin-bottom:8px;">Image hero</div>
@@ -1525,7 +1571,10 @@
       staysList.querySelectorAll("[data-preview]").forEach(btn => {
         btn.addEventListener("click", () => {
           const slug = decodeURIComponent(btn.getAttribute("data-preview"));
-          window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+          window.open(
+            `/admin-visual.html?slug=${encodeURIComponent(slug)}`,
+            "_blank"
+          );
         });
       });
 
@@ -1538,6 +1587,7 @@
 
     async function editStay(id){
       resetEditor();
+      openEditor();
 
       const { data: stay, error } = await supabase
         .from("stays")
@@ -1694,13 +1744,14 @@
 
     btnPreviewStayTop?.addEventListener("click", () => {
       const slug = staySlug.value.trim() || slugify(stayTitle.value.trim());
-
       if(!slug){
         setMsg(publishMsg, "Renseigne au moins un titre ou un slug.");
         return;
       }
-
-      window.open(`/sejour.html?slug=${encodeURIComponent(slug)}&preview=1`, "_blank");
+      window.open(
+        `/admin-visual.html?slug=${encodeURIComponent(slug)}`,
+        "_blank"
+      );
     });
 
     stayPublishToggle?.addEventListener("click", () => {
@@ -1711,15 +1762,66 @@
 
     stayPublished?.addEventListener("change", updatePublishToggleUI);
 
+    staySlug?.addEventListener("input", () => {
+      const preview = document.getElementById("slugPreview");
+      if(preview) preview.textContent = staySlug.value.trim() || "…";
+    });
+
     stayTitle?.addEventListener("input", () => {
       if(!currentStayId){
-        staySlug.value = slugify(stayTitle.value);
+        const generated = slugify(stayTitle.value);
+        staySlug.value  = generated;
+        const preview   = document.getElementById("slugPreview");
+        if(preview) preview.textContent = generated || "…";
       }
     });
 
     mainStartDate?.addEventListener("change", rebuildProgramFromDatesPreserveData);
     mainEndDate?.addEventListener("change", rebuildProgramFromDatesPreserveData);
     btnRebuildProgram?.addEventListener("click", rebuildProgramFromDatesPreserveData);
+
+    function updateEditorCompletion(){
+      const bar   = document.getElementById("editorCompletionBar");
+      const pct   = document.getElementById("editorCompletionPct");
+      const fill  = document.getElementById("editorCompletionFill");
+      const hints = document.getElementById("editorCompletionHints");
+      if(!bar) return;
+
+      const checks = [
+        { label:"Titre",       ok: !!(stayTitle?.value?.trim()) },
+        { label:"Slug",        ok: !!(staySlug?.value?.trim()) },
+        { label:"Lieu",        ok: !!(stayLocation?.value?.trim()) },
+        { label:"Description", ok: !!(stayDescription?.value?.trim()) },
+        { label:"Image hero",  ok: !!(stayHeroImage?.value?.trim()) },
+        { label:"Lien résa",   ok: !!(stayBookingUrl?.value?.trim()) },
+        { label:"Highlights",  ok: !!(stayHighlights?.value?.trim()) },
+        { label:"Programme",   ok: !!(mainStartDate?.value && mainEndDate?.value) },
+      ];
+
+      const done  = checks.filter(c => c.ok).length;
+      const total = checks.length;
+      const score = Math.round((done / total) * 100);
+
+      bar.style.display = "block";
+      if(pct)  pct.textContent      = `${score}%`;
+      if(fill) fill.style.width     = `${score}%`;
+      if(fill) fill.style.background= score >= 75 ? "#4caf50" : score >= 40 ? "#ff9800" : "#f44336";
+
+      if(hints){
+        hints.innerHTML = checks.map(c =>
+          `<span style="color:${c.ok ? "#4caf50" : "var(--muted)"};">
+            ${c.ok ? "✓" : "○"} ${c.label}
+          </span>`
+        ).join("");
+      }
+    }
+
+    [stayTitle, staySlug, stayLocation, stayDescription,
+     stayHeroImage, stayBookingUrl, stayHighlights,
+     mainStartDate, mainEndDate].forEach(el => {
+      el?.addEventListener("input", updateEditorCompletion);
+      el?.addEventListener("change", updateEditorCompletion);
+    });
 
     btnSaveStay?.addEventListener("click", async () => {
       setMsg(editorMsg, "");
@@ -1881,6 +1983,12 @@
       renderContentBlocksEditor();
       updatePublishToggleUI();
       closeEditor();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId    = urlParams.get("edit");
+      if(editId){
+        await editStay(editId);
+      }
     } catch(err){
       console.warn(err);
     }
