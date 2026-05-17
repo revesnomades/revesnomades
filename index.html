@@ -669,12 +669,20 @@
 
     // ── ANIMATION PARALLAX ──
     const parallaxBg = document.getElementById("homeHeroBg");
+    let ticking = false;
+
     window.addEventListener("scroll", () => {
       if(!parallaxBg) return;
-      const scrollPos = window.scrollY;
-      // Appliquer l'effet seulement si on est dans la zone du hero (performance)
-      if(scrollPos < window.innerHeight) {
-        parallaxBg.style.transform = `translateY(${scrollPos * 0.4}px)`;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollPos = window.scrollY;
+          // Appliquer l'effet seulement si on est dans la zone du hero (performance)
+          if(scrollPos < window.innerHeight) {
+            parallaxBg.style.transform = `translate3d(0, ${scrollPos * 0.4}px, 0)`;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     });
   </script>

@@ -434,6 +434,9 @@
     <div class="av-toolbar-sep"></div>
 
     <!-- Actions -->
+    <a class="av-btn" id="avBtnFullscreen" href="#" target="_blank" title="Ouvrir en plein écran">
+      ⛶ Plein écran
+    </a>
     <a class="av-btn" id="avBtnEdit" href="#" title="Modifier dans l'éditeur">
       ✏️ Modifier
     </a>
@@ -656,6 +659,12 @@
 
       // Lien modifier
       avBtnEdit.href = `/admin-stays.html?edit=${encodeURIComponent(stay.id)}`;
+
+      // Lien plein écran
+      const btnFullscreen = document.getElementById("avBtnFullscreen");
+      if (btnFullscreen) {
+        btnFullscreen.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}&preview=1`;
+      }
 
       // Update sidebar active state
       renderSidebar(allStays.filter(s => {

@@ -846,15 +846,35 @@
 
     // ── NOUVELLES ANIMATIONS (HEADER + SCROLL 5S) ──
     const navHeader = document.getElementById("top");
+
+    function slowScrollTo(targetY, duration) {
+      const startY = window.scrollY;
+      const difference = targetY - startY;
+      const startTime = performance.now();
+
+      function step(currentTime) {
+        const elapsed = currentTime - startTime;
+        let progress = elapsed / duration;
+        if (progress > 1) progress = 1;
+
+        // Easing easeInOutQuad
+        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+
+        window.scrollTo(0, startY + difference * ease);
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
     
     // Au bout de 5 secondes, scroller doucement sous l'image
     setTimeout(() => {
       // Ne scroller que si l'utilisateur n'a pas déjà scrollé manuellement
       if(window.scrollY < 100) {
-        window.scrollTo({
-          top: window.innerHeight,
-          behavior: "smooth"
-        });
+        slowScrollTo(window.innerHeight, 1500);
       }
     }, 5000);
 
