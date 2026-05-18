@@ -887,6 +887,63 @@
       }
     });
 
+    window.addEventListener("message", (e) => {
+      if (e.data && e.data.type === "LIVE_UPDATE") {
+        const stay = e.data.payload;
+        if(stayTitle) stayTitle.textContent = stay.title || "Séjour (Aperçu en direct)";
+        if(stay.hero_image && stayHeroBg) stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
+        
+        const blocks = normalizeContentBlocks(stay.content_blocks);
+        if(blocks.length > 0){
+          renderContentBlocks(contentBlocksContainer, blocks);
+          if(contentBlocksSection) contentBlocksSection.style.display = "";
+          if(stayText) stayText.style.display = "none";
+        } else {
+          if(contentBlocksSection) contentBlocksSection.style.display = "none";
+          if(stayText) stayText.style.display = "";
+          renderRichText(stayText, stay.description || stay.short_description || "");
+        }
+        
+        if (stay.show_highlights_section !== false) {
+          if(highlightsSection) highlightsSection.style.display = "";
+          renderSimpleList(highlightsList, stay.highlights || []);
+        } else if(highlightsSection) highlightsSection.style.display = "none";
+        
+        if (stay.show_program_section !== false) {
+          if(programSection) programSection.style.display = "";
+          renderProgram(programList, stay.program || []);
+          if(stay.program_note && programNote) programNote.textContent = stay.program_note;
+        } else if(programSection) programSection.style.display = "none";
+
+        if (stay.show_gift_section !== false) {
+          if(giftSection) giftSection.style.display = "";
+          if(giftTitle) giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
+          if(giftIntro) giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
+          if(giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
+          const giftItemsData = stay.gift_items && stay.gift_items.length ? stay.gift_items : [ "Tee-shirt Âmes Nomades", "Sac en tissu", "Gourde réutilisable", "Carnet & stylo pour l’écriture et l’introspection", "Un soin bien-être (surprise)" ];
+          if(giftList) giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
+          if(stay.gift_image && giftImage) giftImage.src = stay.gift_image;
+        } else if(giftSection) giftSection.style.display = "none";
+
+        if (stay.show_included_section !== false) {
+          if(includedSection) includedSection.style.display = "";
+          renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
+          renderSimpleList(notIncludedList, stay.not_included_items || []);
+        } else if(includedSection) includedSection.style.display = "none";
+
+        if (stay.show_options_section !== false) {
+          if(optionsSection) optionsSection.style.display = "";
+          renderSimpleList(optionsList, stay.extra_options || []);
+        } else if(optionsSection) optionsSection.style.display = "none";
+
+        if (stay.show_faq_section !== false) {
+          if(faqSection) faqSection.style.display = "";
+          const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
+          renderFaq(faqList, stayFaqItems.length ? stayFaqItems : fallbackStayFaqItems);
+        } else if(faqSection) faqSection.style.display = "none";
+      }
+    });
+
     loadStay();
   </script>
 

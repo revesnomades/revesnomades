@@ -344,7 +344,7 @@
     <div class="container" style="padding:110px 0 60px;">
       <div class="admin-page">
 
-        <div class="admin-panel">
+        <div class="admin-panel" id="listPanel">
           <div class="section-head">
             <div>
               <h2>Homepage CMS</h2>
@@ -468,7 +468,9 @@
           <input id="stayPublished" type="checkbox" hidden>
           <div id="publishMsg" class="muted-small" style="display:none;"></div>
 
-          <div style="display:grid; gap:16px; margin-top:18px;">
+          <div class="editor-split-layout" style="display:flex; height:calc(100vh - 120px); gap:16px; margin-top:18px; border-top:1px solid var(--line); padding-top:16px;">
+            <div class="editor-split-form" style="flex:0 0 500px; overflow-y:auto; padding-right:16px;">
+              <div style="display:grid; gap:16px;">
 
             <div class="admin-block">
               <h3>Dates du séjour</h3>
@@ -676,6 +678,19 @@
               <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
             </div>
           </div>
+            </div>
+            
+            <div class="editor-split-preview" style="flex:1; display:flex; flex-direction:column; background:var(--white); border-left:1px solid var(--line); padding-left:16px;">
+              <header class="av-toolbar" style="padding:10px 0; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center;">
+                <button class="btn tiny" id="vpDesktop" type="button">Desktop</button>
+                <button class="btn tiny" id="vpMobile" type="button">Mobile</button>
+                <a class="btn tiny" id="btnFullscreenPreviewSplit" href="#" target="_blank" style="margin-left:auto;">⛶ Plein écran</a>
+              </header>
+              <div style="flex:1; background:#0e0f11; display:flex; justify-content:center; overflow:hidden; padding:20px; transition:all 0.3s;" id="previewContainer">
+                <iframe id="livePreviewIframe" src="/admin-sejour-preview.html?preview=1" style="width:100%; height:100%; border:none; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: width 0.3s;" class="vp-desktop"></iframe>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="admin-panel">
@@ -804,11 +819,16 @@
 
     function openEditor(){
       editorPanel.classList.remove("editor-hidden");
+      const listPanel = document.getElementById("listPanel");
+      if(listPanel) listPanel.style.display = "none";
       editorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(sendLivePreview, 100);
     }
 
     function closeEditor(){
       editorPanel.classList.add("editor-hidden");
+      const listPanel = document.getElementById("listPanel");
+      if(listPanel) listPanel.style.display = "";
     }
 
     function getHomepagePositionValue(){
@@ -1572,7 +1592,7 @@
         btn.addEventListener("click", () => {
           const slug = decodeURIComponent(btn.getAttribute("data-preview"));
           window.open(
-            `/admin-visual.html?slug=${encodeURIComponent(slug)}`,
+            `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
             "_blank"
           );
         });
@@ -1749,7 +1769,7 @@
         return;
       }
       window.open(
-        `/admin-visual.html?slug=${encodeURIComponent(slug)}`,
+        `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
         "_blank"
       );
     });
@@ -1970,6 +1990,76 @@
       closeEditor();
       await loadHomepageState();
       await loadStays();
+    });
+
+    const livePreviewIframe = document.getElementById("livePreviewIframe");
+    const vpDesktop = document.getElementById("vpDesktop");
+    const vpMobile = document.getElementById("vpMobile");
+    const btnFullscreenPreviewSplit = document.getElementById("btnFullscreenPreviewSplit");
+
+    vpDesktop?.addEventListener("click", () => {
+      if(livePreviewIframe) {
+        livePreviewIframe.className = "vp-desktop";
+        livePreviewIframe.style.width = "100%";
+      }
+    });
+
+    vpMobile?.addEventListener("click", () => {
+      if(livePreviewIframe) {
+        livePreviewIframe.className = "vp-mobile";
+        livePreviewIframe.style.width = "375px";
+      }
+    });
+
+    btnFullscreenPreviewSplit?.addEventListener("click", (e) => {
+      e.preventDefault();
+      const slug = staySlug?.value?.trim() || slugify(stayTitle?.value?.trim());
+      if(slug) {
+        window.open(`/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`, '_blank');
+      }
+    });
+
+    function sendLivePreview() {
+      let faqValue = [];
+      try {
+        faqValue = stayFaq.value.trim() ? JSON.parse(stayFaq.value.trim()) : [];
+      } catch(e) {}
+
+      const payload = {
+        title: stayTitle.value.trim(),
+        slug: staySlug.value.trim() || slugify(stayTitle.value.trim()),
+        location: stayLocation.value.trim(),
+        short_description: stayShortDescription.value.trim(),
+        description: stayDescription.value.trim(),
+        hero_image: stayHeroImage.value.trim(),
+        highlights: linesToArray(stayHighlights.value),
+        program: getCurrentProgramFromEditors(),
+        program_note: stayProgramNote.value.trim(),
+        included_items: linesToArray(stayIncludedItems.value),
+        not_included_items: linesToArray(stayNotIncludedItems.value),
+        extra_options: linesToArray(stayExtraOptions.value),
+        gift_title: giftTitle.value.trim(),
+        gift_intro: giftIntro.value.trim(),
+        gift_items: linesToArray(giftItems.value),
+        gift_outro: giftOutro.value.trim(),
+        gift_image: giftImage.value.trim(),
+        faq: faqValue,
+        content_blocks: serializeContentBlocks(),
+        show_gift_section: showGiftSection,
+        show_faq_section: showFaqSection,
+        show_program_section: showProgramSection,
+        show_included_section: showIncludedSection,
+        show_options_section: showOptionsSection,
+        show_highlights_section: showHighlightsSection
+      };
+
+      if (livePreviewIframe && livePreviewIframe.contentWindow) {
+        livePreviewIframe.contentWindow.postMessage({ type: 'LIVE_UPDATE', payload }, '*');
+      }
+    }
+
+    editorPanel.addEventListener("input", () => {
+      sendLivePreview();
     });
 
     attachDropEvents();
