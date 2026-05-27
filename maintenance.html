@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8" />
   <title>Âmes Nomades — Maintenance</title>
@@ -15,7 +16,7 @@
     @font-face {
       font-family: 'SegoCustom';
       src: url('/assets/sego.woff2') format('woff2'),
-           url('/assets/sego.otf') format('opentype');
+        url('/assets/sego.otf') format('opentype');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
@@ -29,219 +30,234 @@
       font-display: swap;
     }
 
-    :root{
-      --cream:#f7f4ef;
-      --white:#ffffff;
-      --text:#1e1f22;
-      --muted:#6c7078;
-      --line: rgba(30,31,34,.16);
+    :root {
+      --cream: #f7f4ef;
+      --white: #ffffff;
+      --text: #1e1f22;
+      --muted: #6c7078;
+      --line: rgba(30, 31, 34, .16);
     }
 
-    *{ box-sizing:border-box; }
-
-    html, body{
-      margin:0;
-      padding:0;
-      min-height:100%;
+    * {
+      box-sizing: border-box;
     }
 
-    body{
-      font-family:"Glacial Indifference","Segoe UI",Arial,sans-serif;
-      color:var(--text);
-      background:var(--cream);
-      line-height:1.7;
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
     }
 
-    .maintenance-page{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:28px 18px;
-      position:relative;
-      overflow:hidden;
+    body {
+      font-family: "Glacial Indifference", "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      line-height: 1.7;
     }
 
-    .maintenance-bg{
-      position:absolute;
-      inset:0;
+    .maintenance-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .maintenance-bg {
+      position: absolute;
+      inset: 0;
       background-image:
-        linear-gradient(rgba(247,244,239,.72), rgba(247,244,239,.86)),
+        linear-gradient(rgba(247, 244, 239, .72), rgba(247, 244, 239, .86)),
         url('/assets/img/hero-2.jpg');
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
-      transform:scale(1.02);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.02);
     }
 
-    .maintenance-card{
-      position:relative;
-      z-index:2;
-      width:min(760px, 100%);
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.76);
+    .maintenance-card {
+      position: relative;
+      z-index: 2;
+      width: min(760px, 100%);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .76);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding:34px 26px;
-      box-shadow:0 18px 40px rgba(0,0,0,.08);
+      padding: 34px 26px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .08);
     }
 
-    .brand-title{
-      font-family:"SegoCustom", serif;
-      font-size:clamp(34px, 5vw, 58px);
-      line-height:1;
-      text-align:center;
-      margin:0;
+    .brand-title {
+      font-family: "SegoCustom", serif;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      text-align: center;
+      margin: 0;
     }
 
-    .subtitle{
-      margin:14px auto 0;
-      max-width:56ch;
-      text-align:center;
-      color:var(--muted);
-      font-size:15px;
+    .subtitle {
+      margin: 14px auto 0;
+      max-width: 56ch;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
     }
 
-    .section{
-      margin-top:28px;
-      padding-top:24px;
-      border-top:1px solid var(--line);
+    .section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
     }
 
-    h2{
-      margin:0;
-      font-family:"Glacial Indifference","Segoe UI",Arial,sans-serif;
-      font-size:24px;
-      font-weight:400;
-      text-align:center;
+    h2 {
+      margin: 0;
+      font-family: "Glacial Indifference", "Segoe UI", Arial, sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      text-align: center;
     }
 
-    .section-text{
-      margin:10px auto 0;
-      max-width:58ch;
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
+    .section-text {
+      margin: 10px auto 0;
+      max-width: 58ch;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
     }
 
-    .form-stack{
-      margin:22px auto 0;
-      width:min(520px, 100%);
-      display:grid;
-      gap:10px;
+    .form-stack {
+      margin: 22px auto 0;
+      width: min(520px, 100%);
+      display: grid;
+      gap: 10px;
     }
 
-    .input{
-      width:100%;
-      padding:14px 14px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.92);
-      color:var(--text);
-      font-family:inherit;
-      font-size:15px;
-      border-radius:0;
-      outline:none;
+    .input {
+      width: 100%;
+      padding: 14px 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .92);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      border-radius: 0;
+      outline: none;
     }
 
-    .input::placeholder{
-      color:var(--muted);
+    .input::placeholder {
+      color: var(--muted);
     }
 
-    .check-row{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      margin-top:2px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
     }
 
-    .check-row input{
-      margin-top:3px;
-      accent-color:#1e1f22;
+    .check-row input {
+      margin-top: 3px;
+      accent-color: #1e1f22;
     }
 
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid var(--text);
-      background:transparent;
-      color:var(--text);
-      padding:12px 16px;
-      font-size:12px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      cursor:pointer;
-      transition:background .18s ease, color .18s ease, transform .18s ease;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--text);
+      background: transparent;
+      color: var(--text);
+      padding: 12px 16px;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
     }
 
-    .btn:hover{
-      background:#111;
-      color:#fff;
-      transform:translateY(-1px);
+    .btn:hover {
+      background: #111;
+      color: #fff;
+      transform: translateY(-1px);
     }
 
-    .btn.block{
-      width:100%;
+    .btn.block {
+      width: 100%;
     }
 
-    .form-msg{
-      margin-top:12px;
-      text-align:center;
-      color:var(--muted);
-      font-size:13px;
-      min-height:20px;
+    .form-msg {
+      margin-top: 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 20px;
     }
 
-    .small-note{
-      margin-top:18px;
-      text-align:center;
-      color:var(--muted);
-      font-size:12px;
+    .small-note {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
     }
 
-    .admin-secret{
-      position:fixed;
-      right:12px;
-      bottom:10px;
-      z-index:5;
-      opacity:.22;
-      transition:opacity .18s ease;
+    .admin-secret {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      z-index: 5;
+      opacity: .22;
+      transition: opacity .18s ease;
     }
 
-    .admin-secret:hover{
-      opacity:.9;
+    .admin-secret:hover {
+      opacity: .9;
     }
 
-    .admin-secret a{
-      display:inline-block;
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background:#111;
+    .admin-secret a {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #111;
     }
 
-    .admin-link{
-      margin-top:18px;
-      text-align:center;
-      font-size:12px;
-      color:var(--muted);
+    .admin-link {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
     }
 
-    .admin-link a{
-      text-decoration:underline;
-      text-underline-offset:3px;
+    .admin-link a {
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     .maintenance-bg {
@@ -264,17 +280,18 @@
       animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
     }
 
-    @media (max-width: 640px){
-      .maintenance-card{
-        padding:26px 18px;
+    @media (max-width: 640px) {
+      .maintenance-card {
+        padding: 26px 18px;
       }
 
-      .brand-title{
-        font-size:42px;
+      .brand-title {
+        font-size: 42px;
       }
     }
   </style>
 </head>
+
 <body>
 
   <main class="maintenance-page">
@@ -282,7 +299,8 @@
 
     <div class="maintenance-card">
       <div style="text-align:center; margin-bottom:18px;">
-        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" class="brand-logo" style="max-width:460px; width:100%; height:auto;">
+        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" class="brand-logo"
+          style="max-width:460px; width:100%; height:auto;">
       </div>
 
       <section class="section">
@@ -290,7 +308,7 @@
 
         <p class="section-text">
           Première édition : septembre 2026<br>
-          10 places uniquement
+          Places limitées
         </p>
 
         <p class="section-text" style="margin-top:16px;">
@@ -299,47 +317,25 @@
         </p>
 
         <form id="priorityForm" class="form-stack" novalidate>
-          <input
-            class="input"
-            type="text"
-            name="firstname"
-            placeholder="Votre prénom"
-            required
-            autocomplete="given-name"
-          />
+          <input class="input" type="text" name="firstname" placeholder="Votre prénom" required
+            autocomplete="given-name" />
 
-          <input
-            class="input"
-            type="text"
-            name="lastname"
-            placeholder="Votre nom"
-            required
-            autocomplete="family-name"
-          />
+          <input class="input" type="text" name="lastname" placeholder="Votre nom" required
+            autocomplete="family-name" />
 
-          <input
-            class="input"
-            type="email"
-            name="email"
-            placeholder="Votre email"
-            required
-            autocomplete="email"
-          />
+          <input class="input" type="email" name="email" placeholder="Votre email" required autocomplete="email" />
 
-          <textarea
-            class="input"
-            name="intention"
-            placeholder="Qu’est-ce que tu viens chercher dans cette expérience ? (optionnel)"
-            rows="3"
-            style="resize:vertical;"
-          ></textarea>
+          <textarea class="input" name="intention"
+            placeholder="Qu’est-ce que tu viens chercher dans cette expérience ? (optionnel)" rows="3"
+            style="resize:vertical;"></textarea>
 
           <label class="check-row">
             <input type="checkbox" name="consent" required>
             <span>J’accepte de recevoir les informations Âmes Nomades et les prochaines ouvertures de séjours.</span>
           </label>
 
-          <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+          <input type="text" name="website" tabindex="-1" autocomplete="off"
+            style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
           <button class="btn block" type="submit">
             Rejoindre la liste prioritaire
@@ -366,8 +362,8 @@
     const form = document.getElementById("priorityForm");
     const msg = document.getElementById("priorityMsg");
 
-    function showMessage(html){
-      if(msg) msg.innerHTML = html || "";
+    function showMessage(html) {
+      if (msg) msg.innerHTML = html || "";
     }
 
     let priorityLastSubmit = 0;
@@ -388,12 +384,12 @@
       const newsletterOptin = fd.get("newsletter_optin") === "on";
       const consent = fd.get("consent");
 
-      if(!firstname || !lastname || !email){
+      if (!firstname || !lastname || !email) {
         showMessage("Merci de renseigner votre prénom, votre nom et votre email.");
         return;
       }
 
-      if(!consent){
+      if (!consent) {
         showMessage("Merci de cocher la case de consentement.");
         return;
       }
@@ -401,7 +397,7 @@
       const payload = { firstname, lastname, email, intention, newsletter_optin: newsletterOptin };
       const endpoint = `${SUPABASE_URL}/functions/v1/priority-signup`;
 
-      try{
+      try {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: {
@@ -413,14 +409,14 @@
 
         const rawText = await res.text();
         let data = {};
-        try{
+        try {
           data = rawText ? JSON.parse(rawText) : {};
-        } catch(parseErr){
+        } catch (parseErr) {
           data = { rawText };
           console.warn("priority-signup non-json response", { endpoint, parseErr, rawText });
         }
 
-        if(!res.ok){
+        if (!res.ok) {
           console.error("priority-signup HTTP error", {
             endpoint,
             status: res.status,
@@ -433,7 +429,7 @@
           return;
         }
 
-        if(data.status === "already"){
+        if (data.status === "already") {
           showMessage("💌 Vous êtes déjà inscrit(e). Votre priorité est bien prise en compte.");
           return;
         }
@@ -441,7 +437,7 @@
         showMessage(`🌿 Merci ${firstname}, vous êtes bien inscrit(e) à la liste prioritaire.`);
         form.reset();
 
-      } catch(err){
+      } catch (err) {
         console.error("priority-signup fetch error", { endpoint, payload, err });
         showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
       }
@@ -449,4 +445,5 @@
   </script>
 
 </body>
+
 </html>
