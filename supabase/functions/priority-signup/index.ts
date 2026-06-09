@@ -75,6 +75,41 @@ async function sendConfirmationToUser(
   console.log(`Email confirmation envoyé à ${email} (template ${templateId})`);
 }
 
+async function addContactToWaitlist(
+  brevoApiKey: string,
+  email: string,
+  firstname: string,
+  lastname: string,
+): Promise<void> {
+  const brevoPayload = {
+    email: email,
+    listIds: [12],
+    updateEnabled: true,
+    attributes: {
+      PRENOM: firstname,
+      NOM: lastname,
+      FIRSTNAME: firstname,
+      LASTNAME: lastname
+    }
+  };
+
+  const response = await fetch("https://api.brevo.com/v3/contacts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": brevoApiKey
+    },
+    body: JSON.stringify(brevoPayload)
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    console.error(`Erreur ajout contact Brevo: ${response.status} ${text}`);
+  } else {
+    console.log(`Contact ajouté/mis à jour dans la liste Brevo 12 : ${email}`);
+  }
+}
+
 async function sendAdminNotification(
   brevoApiKey: string,
   email: string,
@@ -243,6 +278,9 @@ Deno.serve(async (req) => {
         ),
         sendAdminNotification(brevoApiKey, email, firstname, lastname, intention).catch(err =>
           console.error("Erreur email admin:", err)
+        ),
+        addContactToWaitlist(brevoApiKey, email, firstname, lastname).catch(err =>
+          console.error("Erreur ajout contact liste 12:", err)
         ),
       ]);
     } else {
