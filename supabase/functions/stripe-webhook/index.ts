@@ -47,44 +47,30 @@ serve(async (req) => {
         if (!brevoApiKey) {
           console.error("BREVO_API_KEY non configurée.");
         } else {
-          // On utilise un template s'il est configuré, sinon un contenu par défaut
-          const brevoTemplateId = Deno.env.get("BREVO_TEMPLATE_ID_SOMMIERES");
+          // On ajoute le client à la liste Brevo #13 (Pool, Brunch & Yoga)
+          // L'automatisation Brevo prendra ensuite le relais pour envoyer l'email
           
-          let brevoPayload;
-          
-          if (brevoTemplateId) {
-            brevoPayload = {
-              to: [{ email: customerEmail, name: customerName }],
-              templateId: parseInt(brevoTemplateId, 10),
-              params: {
-                name: customerName,
-                event: "Pool, Brunch & Yoga"
-              }
-            };
-          } else {
-            brevoPayload = {
-              sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
-              to: [{ email: customerEmail, name: customerName }],
-              subject: "Confirmation de réservation - Pool, Brunch & Yoga",
-              htmlContent: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                  <h2 style="text-align: center;">Votre réservation est confirmée !</h2>
-                  <p>Bonjour ${customerName},</p>
-                  <p>Nous avons le plaisir de vous confirmer votre réservation pour notre journée exclusive <strong>Pool, Brunch & Yoga</strong> à Sommières.</p>
-                  <p>Préparez-vous pour une véritable parenthèse ensoleillée, un moment hors du temps pour ralentir, respirer et prendre soin de vous.</p>
-                  <ul>
-                    <li><strong>Événement :</strong> Pool, Brunch & Yoga</li>
-                    <li><strong>Lieu :</strong> Hôtel particulier à Sommières</li>
-                    <li><strong>À prévoir :</strong> Pensez à prendre votre tapis de yoga !</li>
-                  </ul>
-                  <p>Nous avons hâte de partager ce moment avec vous.</p>
-                  <p>À très bientôt,<br><strong>L'équipe Âmes Nomades</strong></p>
-                </div>
-              `
-            };
+          let firstName = "";
+          let lastName = "";
+          if (customerName) {
+            const parts = customerName.split(" ");
+            firstName = parts[0];
+            lastName = parts.slice(1).join(" ");
           }
 
-          const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+          const brevoPayload = {
+            email: customerEmail,
+            listIds: [13],
+            updateEnabled: true,
+            attributes: {
+              PRENOM: firstName,
+              NOM: lastName,
+              FIRSTNAME: firstName,
+              LASTNAME: lastName
+            }
+          };
+
+          const brevoResponse = await fetch("https://api.brevo.com/v3/contacts", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -96,7 +82,7 @@ serve(async (req) => {
           if (!brevoResponse.ok) {
             console.error("Erreur Brevo:", await brevoResponse.text());
           } else {
-            console.log(`Email envoyé avec succès à ${customerEmail}`);
+            console.log(`Client ajouté avec succès à la liste Brevo 13 : ${customerEmail}`);
           }
         }
       }
