@@ -85,31 +85,48 @@ serve(async (req) => {
         if (!brevoApiKey) {
           console.error("BREVO_API_KEY non configurée.");
         } else {
-          const brevoPayloadContact = {
-            email: customerEmail,
-            listIds: [13],
-            updateEnabled: true,
-            attributes: {
-              PRENOM: firstName,
-              NOM: lastName,
-              FIRSTNAME: firstName,
-              LASTNAME: lastName
-            }
-          };
-
-          const brevoResponseContact = await fetch("https://api.brevo.com/v3/contacts", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "api-key": brevoApiKey
+          const payloads = [
+            {
+              email: customerEmail,
+              listIds: [13],
+              updateEnabled: true,
+              attributes: { PRENOM: firstName, NOM: lastName }
             },
-            body: JSON.stringify(brevoPayloadContact)
-          });
+            {
+              email: customerEmail,
+              listIds: [13],
+              updateEnabled: true,
+              attributes: { FIRSTNAME: firstName, LASTNAME: lastName }
+            },
+            {
+              email: customerEmail,
+              listIds: [13],
+              updateEnabled: true
+            }
+          ];
 
-          if (!brevoResponseContact.ok) {
-            console.error("Erreur Brevo Contact:", await brevoResponseContact.text());
-          } else {
-            console.log(`Client ajouté avec succès à la liste Brevo 13 : ${customerEmail}`);
+          let success = false;
+          for (const brevoPayloadContact of payloads) {
+            const brevoResponseContact = await fetch("https://api.brevo.com/v3/contacts", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "api-key": brevoApiKey
+              },
+              body: JSON.stringify(brevoPayloadContact)
+            });
+
+            if (brevoResponseContact.ok) {
+              console.log(`Client ajouté avec succès à la liste Brevo 13 : ${customerEmail}`);
+              success = true;
+              break;
+            } else {
+              console.error("Essai échoué Brevo Contact:", await brevoResponseContact.text());
+            }
+          }
+
+          if (!success) {
+            console.error(`Impossible d'ajouter le contact à Brevo pour ${customerEmail}`);
           }
 
           // 3. Envoi de l'email Admin
