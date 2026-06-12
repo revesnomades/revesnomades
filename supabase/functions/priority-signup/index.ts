@@ -81,32 +81,54 @@ async function addContactToWaitlist(
   firstname: string,
   lastname: string,
 ): Promise<void> {
-  const brevoPayload = {
-    email: email,
-    listIds: [12],
-    updateEnabled: true,
-    attributes: {
-      PRENOM: firstname,
-      NOM: lastname,
-      FIRSTNAME: firstname,
-      LASTNAME: lastname
-    }
-  };
-
-  const response = await fetch("https://api.brevo.com/v3/contacts", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": brevoApiKey
+  // Brevo rejecte l'appel 400 si on envoie un attribut qui n'existe pas.
+  // On essaye d'abord avec PRENOM/NOM (français), puis FIRSTNAME/LASTNAME (anglais), puis sans attribut.
+  
+  const payloads = [
+    {
+      email: email,
+      listIds: [12],
+      updateEnabled: true,
+      attributes: { PRENOM: firstname, NOM: lastname }
     },
-    body: JSON.stringify(brevoPayload)
-  });
+    {
+      email: email,
+      listIds: [12],
+      updateEnabled: true,
+      attributes: { FIRSTNAME: firstname, LASTNAME: lastname }
+    },
+    {
+      email: email,
+      listIds: [12],
+      updateEnabled: true
+    }
+  ];
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    console.error(`Erreur ajout contact Brevo: ${response.status} ${text}`);
-  } else {
-    console.log(`Contact ajouté/mis à jour dans la liste Brevo 12 : ${email}`);
+  let success = false;
+  let lastError = "";
+
+  for (const brevoPayload of payloads) {
+    const response = await fetch("https://api.brevo.com/v3/contacts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": brevoApiKey
+      },
+      body: JSON.stringify(brevoPayload)
+    });
+
+    if (response.ok) {
+      console.log(`Contact ajouté/mis à jour dans la liste Brevo 12 : ${email}`);
+      success = true;
+      break; // Réussi, on arrête les essais
+    } else {
+      lastError = await response.text().catch(() => "");
+      console.log(`Echec ajout contact (essai): ${response.status} ${lastError}`);
+    }
+  }
+
+  if (!success) {
+    console.error(`Erreur finale ajout contact Brevo: ${lastError}`);
   }
 }
 
