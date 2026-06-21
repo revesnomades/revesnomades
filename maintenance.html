@@ -68,7 +68,13 @@
     .maintenance-bg {
       position: absolute;
       inset: 0;
-      background: var(--cream);
+      background-image:
+        linear-gradient(rgba(247, 244, 239, .72), rgba(247, 244, 239, .86)),
+        url('/assets/img/hero-2.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.02);
     }
 
     .maintenance-card {
@@ -292,10 +298,6 @@
     <div class="maintenance-bg"></div>
 
     <div class="maintenance-card">
-      <div style="text-align:center; margin-bottom:18px;">
-        <img src="/assets/img/amesnomades.png" alt="Âmes Nomades" class="brand-logo"
-          style="max-width:460px; width:100%; height:auto;">
-      </div>
 
       <section class="section" style="padding-top:0; border-top:none; margin-top:0; margin-bottom: 28px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">
         <h2 style="font-size:18px; text-transform:uppercase; margin-bottom: 8px;">Événement : Pool, Brunch & Yoga</h2>
