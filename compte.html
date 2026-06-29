@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -150,6 +150,7 @@
 
               <div class="account-actions" style="margin-top:14px; flex-wrap:wrap;">
                 <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
+                <button class="btn on-light" id="btnAdminBoutique" type="button">🛍️ Gérer la boutique</button>
                 <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
                 <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
                 <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
@@ -274,6 +275,7 @@
     const btnUpdatePassword = document.getElementById("btnUpdatePassword");
 
     const btnManageStays = document.getElementById("btnManageStays");
+    const btnAdminBoutique = document.getElementById("btnAdminBoutique");
     const btnAdminBookings = document.getElementById("btnAdminBookings");
     const btnPriorityList = document.getElementById("btnPriorityList");
     const btnNewsletterList = document.getElementById("btnNewsletterList");
@@ -1027,6 +1029,10 @@
     // Admin
     btnManageStays?.addEventListener("click", () => {
       window.location.href = "/admin-stays.html";
+    });
+
+    btnAdminBoutique?.addEventListener("click", () => {
+      window.location.href = "/admin-boutique.html";
     });
 
     btnAdminBookings?.addEventListener("click", () => {

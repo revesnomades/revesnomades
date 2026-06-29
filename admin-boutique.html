@@ -88,6 +88,21 @@
 
       <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
 
+      <div style="margin-top:30px; margin-bottom:20px; border-top:1px solid var(--line); padding-top:20px;">
+        <h2 style="font-size:20px; margin:0 0 14px 0;">Catégories</h2>
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <input id="newCategoryName" class="input" placeholder="Nouvelle catégorie" style="max-width:300px;">
+          <button class="btn on-light" id="btnAddCategory">Ajouter</button>
+        </div>
+        <div id="categoriesList" style="display:flex; flex-wrap:wrap; gap:10px;">
+          <span style="color:var(--muted); font-size:14px;">Chargement des catégories...</span>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:40px; margin-bottom:20px;">
+        <h2 style="font-size:20px; margin:0;">Produits</h2>
+      </div>
+
       <div class="product-grid" id="productsList">
         <p>Chargement des produits...</p>
       </div>
@@ -117,12 +132,19 @@
             <input id="productPrice" type="number" step="0.01" class="input" required>
           </div>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:6px;">Type</label>
+            <label class="muted-small" style="display:block; margin-bottom:6px;">Type (optionnel)</label>
             <select id="productType" class="input">
               <option value="physique">Physique (Tapis, Gourde...)</option>
               <option value="numerique">Numérique (E-book)</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Catégorie</label>
+          <select id="productCategory" class="input">
+            <option value="">Sélectionnez une catégorie...</option>
+          </select>
         </div>
 
         <div>
@@ -159,8 +181,15 @@
     const fDesc = document.getElementById("productDescription");
     const fPrice = document.getElementById("productPrice");
     const fType = document.getElementById("productType");
+    const fCategory = document.getElementById("productCategory");
     const fImage = document.getElementById("productImage");
     const fStripe = document.getElementById("productStripeUrl");
+
+    // Category inputs
+    const btnAddCategory = document.getElementById("btnAddCategory");
+    const newCategoryName = document.getElementById("newCategoryName");
+    const categoriesList = document.getElementById("categoriesList");
+    window.allCategories = [];
 
     async function checkAdmin(){
       const { data: { user } } = await supabase.auth.getUser();
@@ -176,6 +205,52 @@
       return user;
     }
 
+    async function loadCategories() {
+      const { data, error } = await supabase.from("product_categories").select("*").order("name", { ascending: true });
+      if (error) {
+        // Table might not exist yet
+        categoriesList.innerHTML = "<span style='color:var(--muted);'>Catégories non disponibles (la table n'existe peut-être pas encore).</span>";
+        return;
+      }
+      
+      window.allCategories = data || [];
+      
+      if (window.allCategories.length === 0) {
+        categoriesList.innerHTML = "<span style='color:var(--muted);'>Aucune catégorie.</span>";
+      } else {
+        categoriesList.innerHTML = window.allCategories.map(c => `
+          <div style="display:flex; align-items:center; gap:6px; background:var(--bg-main); padding:6px 12px; border-radius:20px; border:1px solid var(--line); font-size:13.5px;">
+            ${c.name}
+            <button class="btn tiny" style="background:transparent; color:#c00; padding:0 4px;" onclick="deleteCategory('${c.id}')">✕</button>
+          </div>
+        `).join('');
+      }
+
+      // Populate select
+      fCategory.innerHTML = '<option value="">Sélectionnez une catégorie...</option>' + 
+        window.allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+
+    window.deleteCategory = async (id) => {
+      if(!confirm("Supprimer cette catégorie définitivement ? Les produits liés perdront leur catégorie.")) return;
+      await supabase.from("product_categories").delete().eq("id", id);
+      await loadCategories();
+      await loadProducts();
+    };
+
+    btnAddCategory.addEventListener("click", async () => {
+      const name = newCategoryName.value.trim();
+      if(!name) return;
+      
+      const { error } = await supabase.from("product_categories").insert({ name });
+      if(error) {
+        alert("Erreur lors de l'ajout de la catégorie : " + error.message);
+      } else {
+        newCategoryName.value = "";
+        await loadCategories();
+      }
+    });
+
     async function loadProducts() {
       const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
       if (error) {
@@ -188,17 +263,21 @@
         return;
       }
 
-      productsList.innerHTML = data.map(p => `
+      productsList.innerHTML = data.map(p => {
+        const cat = window.allCategories.find(c => c.id === p.category_id);
+        const catLabel = cat ? ` · ${cat.name}` : '';
+        return `
         <div class="product-card">
           <img src="${p.image_url || '/assets/img/placeholder.jpg'}" alt="${p.name}" class="product-image">
           <h3 style="margin:0; font-size:18px;">${p.name}</h3>
-          <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}</p>
+          <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}${catLabel}</p>
           <div style="display:flex; gap:8px; margin-top:auto;">
             <button class="btn tiny on-light" onclick="editProduct('${p.id}')">Modifier</button>
             <button class="btn tiny" style="background:#ffdddd; color:#c00;" onclick="deleteProduct('${p.id}')">Supprimer</button>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
 
       window.allProducts = data;
     }
@@ -212,6 +291,7 @@
       fDesc.value = product.description || "";
       fPrice.value = product.price;
       fType.value = product.type || "physique";
+      fCategory.value = product.category_id || "";
       fImage.value = product.image_url || "";
       fStripe.value = product.stripe_url || "";
       productModal.classList.add("active");
@@ -242,6 +322,7 @@
         description: fDesc.value,
         price: parseFloat(fPrice.value),
         type: fType.value,
+        category_id: fCategory.value || null,
         image_url: fImage.value,
         stripe_url: fStripe.value
       };
@@ -258,8 +339,11 @@
       loadProducts();
     });
 
-    checkAdmin().then(user => {
-      if(user) loadProducts();
+    checkAdmin().then(async user => {
+      if(user) {
+        await loadCategories();
+        await loadProducts();
+      }
     });
   </script>
 </body>
