@@ -356,6 +356,10 @@
     .tab-pane.active {
       display: block;
     }
+    .tab-pane.grid-tab.active {
+      display: grid;
+      gap: 16px;
+    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
@@ -513,7 +517,7 @@
                 <button type="button" class="admin-tab" data-target="tab-dates">Dates & Prix</button>
                 <button type="button" class="admin-tab" data-target="tab-program">Programme & Contenu</button>
               </div>
-              <div id="tab-general" class="tab-pane active" style="display:grid; gap:16px;">
+              <div id="tab-general" class="tab-pane grid-tab active">
             <div class="admin-block">
               <h3>Dates du séjour</h3>
               <div class="admin-grid-2" style="margin-top:12px;">
@@ -612,11 +616,9 @@
                 <input id="stayMinBookings" class="input" type="number" min="0" value="10" placeholder="Nombre minimum de réservations">
               </div>
             </div>
-
-            </div>
             </div> <!-- End Tab 1 -->
             
-            <div id="tab-program" class="tab-pane" style="display:grid; gap:16px;">
+            <div id="tab-program" class="tab-pane grid-tab">
             <div class="admin-block">
               <div class="section-head">
                 <div>
@@ -680,7 +682,7 @@
             </div>
             </div> <!-- End Tab 2 -->
 
-            <div id="tab-dates" class="tab-pane" style="display:grid; gap:16px;">
+            <div id="tab-dates" class="tab-pane grid-tab">
             <div class="admin-block">
               <div class="section-head">
                 <h3>Inclus / non inclus</h3>
