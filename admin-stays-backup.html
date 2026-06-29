@@ -322,44 +322,6 @@
         min-width:180px;
       }
     }
-    /* Notion Style Tabs */
-    .admin-tabs {
-      display: flex;
-      gap: 20px;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 20px;
-      overflow-x: auto;
-    }
-    .admin-tab {
-      background: transparent;
-      border: none;
-      padding: 10px 4px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .admin-tab:hover {
-      color: var(--text);
-    }
-    .admin-tab.active {
-      color: var(--text);
-      border-bottom-color: var(--text);
-    }
-    .tab-pane {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-    .tab-pane.active {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 
@@ -508,12 +470,8 @@
 
           <div class="editor-split-layout" style="display:flex; height:calc(100vh - 120px); gap:16px; margin-top:18px; border-top:1px solid var(--line); padding-top:16px;">
             <div class="editor-split-form" style="flex:0 0 500px; overflow-y:auto; padding-right:16px;">
-              <div class="admin-tabs">
-                <button type="button" class="admin-tab active" data-target="tab-general">Général & Infos</button>
-                <button type="button" class="admin-tab" data-target="tab-dates">Dates & Prix</button>
-                <button type="button" class="admin-tab" data-target="tab-program">Programme & Contenu</button>
-              </div>
-              <div id="tab-general" class="tab-pane active" style="display:grid; gap:16px;">
+              <div style="display:grid; gap:16px;">
+
             <div class="admin-block">
               <h3>Dates du séjour</h3>
               <div class="admin-grid-2" style="margin-top:12px;">
@@ -613,10 +571,6 @@
               </div>
             </div>
 
-            </div>
-            </div> <!-- End Tab 1 -->
-            
-            <div id="tab-program" class="tab-pane" style="display:grid; gap:16px;">
             <div class="admin-block">
               <div class="section-head">
                 <div>
@@ -664,23 +618,7 @@
               <div id="programEditors" style="display:grid; gap:14px; margin-top:14px;"></div>
               <textarea id="stayProgramNote" class="input" style="min-height:80px; margin-top:12px;" placeholder="Note affichée sous le programme"></textarea>
             </div>
-            
-            <div class="admin-block">
-              <div class="section-head">
-                <div class="admin-inline">
-                  <h3>FAQ du séjour (personnalisée)</h3>
-                  <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
-                </div>
-              </div>
 
-              <p class="muted-small" style="margin:0 0 10px;">
-                Si vide, la page séjour utilisera automatiquement la FAQ modèle du site (max 5).
-              </p>
-              <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
-            </div>
-            </div> <!-- End Tab 2 -->
-
-            <div id="tab-dates" class="tab-pane" style="display:grid; gap:16px;">
             <div class="admin-block">
               <div class="section-head">
                 <h3>Inclus / non inclus</h3>
@@ -726,7 +664,20 @@
               </div>
             </div>
 
-            </div> <!-- End Tab 3 -->
+            <div class="admin-block">
+              <div class="section-head">
+                <div class="admin-inline">
+                  <h3>FAQ du séjour (personnalisée)</h3>
+                  <button class="btn on-light" id="btnToggleFaqSection" type="button" style="min-width:auto; padding:10px 12px;">👁</button>
+                </div>
+              </div>
+
+              <p class="muted-small" style="margin:0 0 10px;">
+                Si vide, la page séjour utilisera automatiquement la FAQ modèle du site (max 5).
+              </p>
+              <textarea id="stayFaq" class="input" style="min-height:220px;" placeholder='[{"q":"Question","a":"Réponse"}]'></textarea>
+            </div>
+          </div>
             </div>
             
             <div class="editor-split-preview" style="flex:1; display:flex; flex-direction:column; background:var(--white); border-left:1px solid var(--line); padding-left:16px;">
@@ -2131,17 +2082,6 @@
     } catch(err){
       console.warn(err);
     }
-    // Tab Switching Logic
-    document.addEventListener('click', e => {
-      if (e.target.matches('.admin-tab')) {
-        const tabs = document.querySelectorAll('.admin-tab');
-        const panes = document.querySelectorAll('.tab-pane');
-        tabs.forEach(t => t.classList.remove('active'));
-        panes.forEach(p => p.classList.remove('active'));
-        e.target.classList.add('active');
-        document.getElementById(e.target.dataset.target).classList.add('active');
-      }
-    });
   </script>
 
 </body>

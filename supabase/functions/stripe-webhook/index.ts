@@ -60,21 +60,36 @@ serve(async (req) => {
         
         if (supabaseUrl && serviceRoleKey) {
           const supabase = createClient(supabaseUrl, serviceRoleKey);
-          const { error } = await supabase
-            .from('event_registrations')
-            .insert({
-              email: customerEmail,
-              firstname: firstName,
-              lastname: lastName,
-              event_name: eventName,
-              amount: amount,
-              status: 'paid'
-            });
-            
-          if (error) {
-            console.error("Erreur insertion Supabase:", error);
+          
+          if (session.metadata?.type === 'product') {
+            // Achat boutique
+            const productName = session.metadata?.product_name || "Produit Inconnu";
+            const { error } = await supabase
+              .from('purchases')
+              .insert({
+                email: customerEmail,
+                firstname: firstName,
+                lastname: lastName,
+                product_name: productName,
+                amount: amount,
+                status: 'paid'
+              });
+            if (error) console.error("Erreur insertion achat Supabase:", error);
+            else console.log(`Achat de produit enregistré pour ${customerEmail}`);
           } else {
-            console.log(`Paiement enregistré dans Supabase pour ${customerEmail}`);
+            // Réservation séjour / événement
+            const { error } = await supabase
+              .from('event_registrations')
+              .insert({
+                email: customerEmail,
+                firstname: firstName,
+                lastname: lastName,
+                event_name: eventName,
+                amount: amount,
+                status: 'paid'
+              });
+            if (error) console.error("Erreur insertion séjour Supabase:", error);
+            else console.log(`Paiement événement enregistré pour ${customerEmail}`);
           }
         } else {
           console.error("Variables Supabase manquantes pour l'insertion.");

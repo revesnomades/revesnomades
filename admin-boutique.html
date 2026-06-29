@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Boutique — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .product-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .product-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: var(--line);
+      border-radius: 4px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--white);
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body class="on-light">
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/compte.html">Compte</a>
+        <a href="/admin-dashboard.html">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1 style="margin:0;">Gestion de la Boutique</h1>
+          <p style="color:var(--muted); margin-top:10px;">
+            Ajoute ou modifie les produits (e-books, tapis, etc.) de ta boutique.
+          </p>
+        </div>
+        <button class="btn on-light" id="btnAddProduct">Ajouter un produit</button>
+      </div>
+
+      <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+      <div class="product-grid" id="productsList">
+        <p>Chargement des produits...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal d'édition / création -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Nouveau produit</h2>
+      <form id="productForm" style="display:grid; gap:14px; margin-top:16px;">
+        <input type="hidden" id="productId">
+        
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Nom du produit</label>
+          <input id="productName" class="input" required>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Description courte</label>
+          <textarea id="productDescription" class="input" rows="3"></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:6px;">Prix (€)</label>
+            <input id="productPrice" type="number" step="0.01" class="input" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:6px;">Type</label>
+            <select id="productType" class="input">
+              <option value="physique">Physique (Tapis, Gourde...)</option>
+              <option value="numerique">Numérique (E-book)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">URL de l'image</label>
+          <input id="productImage" class="input" placeholder="https://...">
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Lien Stripe (Lien de paiement)</label>
+          <input id="productStripeUrl" class="input" placeholder="https://buy.stripe.com/...">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+          <button type="button" class="btn" id="btnCancel" style="background:transparent; border:1px solid var(--line);">Annuler</button>
+          <button type="submit" class="btn on-light">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const adminStatus = document.getElementById("adminStatus");
+    const productsList = document.getElementById("productsList");
+    const productModal = document.getElementById("productModal");
+    const productForm = document.getElementById("productForm");
+    const btnAddProduct = document.getElementById("btnAddProduct");
+    const btnCancel = document.getElementById("btnCancel");
+
+    // Form inputs
+    const fId = document.getElementById("productId");
+    const fName = document.getElementById("productName");
+    const fDesc = document.getElementById("productDescription");
+    const fPrice = document.getElementById("productPrice");
+    const fType = document.getElementById("productType");
+    const fImage = document.getElementById("productImage");
+    const fStripe = document.getElementById("productStripeUrl");
+
+    async function checkAdmin(){
+      const { data: { user } } = await supabase.auth.getUser();
+      if(!user){
+        window.location.href = "/compte.html";
+        return null;
+      }
+      const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      if(error || data?.role !== "admin"){
+        adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
+        throw new Error("Not admin");
+      }
+      return user;
+    }
+
+    async function loadProducts() {
+      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+      if (error) {
+        adminStatus.textContent = "Erreur lors du chargement des produits.";
+        return;
+      }
+      
+      if (!data || data.length === 0) {
+        productsList.innerHTML = "<p>Aucun produit dans la boutique pour le moment.</p>";
+        return;
+      }
+
+      productsList.innerHTML = data.map(p => `
+        <div class="product-card">
+          <img src="${p.image_url || '/assets/img/placeholder.jpg'}" alt="${p.name}" class="product-image">
+          <h3 style="margin:0; font-size:18px;">${p.name}</h3>
+          <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}</p>
+          <div style="display:flex; gap:8px; margin-top:auto;">
+            <button class="btn tiny on-light" onclick="editProduct('${p.id}')">Modifier</button>
+            <button class="btn tiny" style="background:#ffdddd; color:#c00;" onclick="deleteProduct('${p.id}')">Supprimer</button>
+          </div>
+        </div>
+      `).join('');
+
+      window.allProducts = data;
+    }
+
+    window.editProduct = (id) => {
+      const product = window.allProducts.find(p => p.id == id);
+      if(!product) return;
+      document.getElementById("modalTitle").textContent = "Modifier le produit";
+      fId.value = product.id;
+      fName.value = product.name;
+      fDesc.value = product.description || "";
+      fPrice.value = product.price;
+      fType.value = product.type || "physique";
+      fImage.value = product.image_url || "";
+      fStripe.value = product.stripe_url || "";
+      productModal.classList.add("active");
+    };
+
+    window.deleteProduct = async (id) => {
+      if(!confirm("Supprimer ce produit définitivement ?")) return;
+      await supabase.from("products").delete().eq("id", id);
+      loadProducts();
+    };
+
+    btnAddProduct.addEventListener("click", () => {
+      document.getElementById("modalTitle").textContent = "Nouveau produit";
+      productForm.reset();
+      fId.value = "";
+      productModal.classList.add("active");
+    });
+
+    btnCancel.addEventListener("click", () => {
+      productModal.classList.remove("active");
+    });
+
+    productForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const payload = {
+        name: fName.value,
+        description: fDesc.value,
+        price: parseFloat(fPrice.value),
+        type: fType.value,
+        image_url: fImage.value,
+        stripe_url: fStripe.value
+      };
+
+      if (fId.value) {
+        // Update
+        await supabase.from("products").update(payload).eq("id", fId.value);
+      } else {
+        // Insert
+        await supabase.from("products").insert(payload);
+      }
+      
+      productModal.classList.remove("active");
+      loadProducts();
+    });
+
+    checkAdmin().then(user => {
+      if(user) loadProducts();
+    });
+  </script>
+</body>
+</html>

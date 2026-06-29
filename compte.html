@@ -124,9 +124,9 @@
             </div>
 
             <div id="newsletterBox" class="account-newsletter" style="display:none;">
-              <p id="newsletterText" class="account-newsletter-text"></p>
-              <button class="btn on-light" id="btnNewsletterSubscribe" type="button" style="display:none;">S’abonner</button>
-              <button id="btnNewsletterUnsubscribe" type="button" class="account-newsletter-link" style="display:none;">Se désabonner</button>
+              <p id="newsletterText" class="account-newsletter-text" style="display:none;"></p>
+              <button id="btnNewsletterSubscribe" type="button" class="account-newsletter-link" style="display:none;">S’abonner à la newsletter</button>
+              <button id="btnNewsletterUnsubscribe" type="button" class="account-newsletter-link" style="display:none;">Se désabonner de la newsletter</button>
               <div id="newsletterMsg" class="account-newsletter-msg"></div>
             </div>
 
@@ -195,6 +195,11 @@
           <div id="bookingsBox" class="account-card" style="display:none;">
             <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
             <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
+          </div>
+
+          <div id="purchasesBox" class="account-card" style="display:none; margin-top:16px;">
+            <h3 style="font-weight:500; margin:0;">Mes achats</h3>
+            <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de vos achats...</div>
           </div>
         </div>
 
@@ -803,6 +808,59 @@
       }).join("");
     }
 
+    async function loadMyPurchases(user) {
+      const purchasesBox = document.getElementById("purchasesBox");
+      const purchasesList = document.getElementById("purchasesList");
+      if (!purchasesList || !purchasesBox || !user?.email) return;
+
+      purchasesList.textContent = "Chargement…";
+
+      const { data, error } = await supabase
+        .from("purchases")
+        .select(`
+          id,
+          product_name,
+          amount,
+          status,
+          created_at
+        `)
+        .eq("email", user.email)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("PURCHASES ERROR:", error);
+        purchasesList.textContent = "Impossible de charger vos achats.";
+        return;
+      }
+
+      if (!data || !data.length) {
+        purchasesList.textContent = "Aucun achat pour le moment.";
+        return;
+      }
+
+      purchasesBox.style.display = "block";
+      purchasesList.innerHTML = data.map(item => {
+        const title = item.product_name || "Produit";
+        const amount = item.amount ? `${item.amount} €` : "—";
+        const status = item.status === "paid" ? "Payé" : (item.status || "—");
+        const date = item.created_at
+          ? new Date(item.created_at).toLocaleDateString("fr-FR")
+          : "";
+
+        return `
+          <div style="padding:12px 0; border-bottom:1px solid var(--line);">
+            <div style="font-weight:500; color:var(--text);">${title}</div>
+            <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+              ${amount} · ${status}
+            </div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+              Achat du ${date}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
     async function showLoggedIn(user) {
       if (authBox) authBox.style.display = "none";
       if (resetBox) resetBox.style.display = "none";
@@ -816,6 +874,7 @@
       const [{ isAdmin, firstname: profileFirstname }] = await Promise.all([
         checkAdminAndGetProfile(user.id),
         loadMyBookings(user),
+        loadMyPurchases(user),
         loadNewsletterStatus(user)
       ]);
 

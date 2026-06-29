@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Boutique — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .shop-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .shop-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+    }
+    .shop-image {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      background: var(--line);
+    }
+    .shop-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .shop-title {
+      font-family: 'SegoCustom', serif;
+      font-size: 22px;
+      margin: 0 0 10px 0;
+      color: var(--text);
+    }
+    .shop-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    .shop-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .shop-price {
+      font-size: 18px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body class="on-light">
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+        <span>ÂmesNomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/index.html#retraites">Retraites</a>
+        <a href="/boutique.html" class="active">Boutique</a>
+        <a href="/compte.html">Compte</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="band cream" style="min-height: 80vh;">
+    <div class="container" style="padding: calc(var(--navH) + 60px) 0 80px;">
+      
+      <div style="text-align:center; max-width:600px; margin:0 auto;">
+        <h1 style="font-family:'SegoCustom'; font-size:42px; margin:0;">Boutique</h1>
+        <p style="color:var(--muted); margin-top:16px; font-size:16px; line-height:1.6;">
+          Découvre notre sélection de produits exclusifs pour t'accompagner dans ta pratique et ton quotidien.
+        </p>
+      </div>
+
+      <div class="shop-grid" id="publicShopGrid">
+        <div style="text-align:center; grid-column:1/-1; padding:40px; color:var(--muted);">
+          Chargement de la boutique...
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="band cream footer" style="border-top:1px solid var(--line);">
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+      <div style="font-size:13px; color:var(--muted);">© 2026 Âmes Nomades. Tous droits réservés.</div>
+      <div style="display:flex; gap:16px; font-size:13px;">
+        <a href="/mentions-legales.html" style="color:var(--muted); text-decoration:none;">Mentions légales</a>
+        <a href="/politique-confidentialite.html" style="color:var(--muted); text-decoration:none;">Confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const shopGrid = document.getElementById("publicShopGrid");
+
+    async function loadShop() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        shopGrid.innerHTML = `
+          <div style="text-align:center; grid-column:1/-1; padding:40px; color:var(--muted);">
+            La boutique est actuellement vide. Reviens bientôt !
+          </div>
+        `;
+        return;
+      }
+
+      shopGrid.innerHTML = data.map(p => `
+        <div class="shop-card">
+          <img src="${p.image_url || '/assets/img/placeholder.jpg'}" alt="${p.name}" class="shop-image">
+          <div class="shop-content">
+            <h2 class="shop-title">${p.name}</h2>
+            <p class="shop-desc">${p.description || ''}</p>
+            <div class="shop-footer">
+              <span class="shop-price">${p.price} €</span>
+              ${p.stripe_url 
+                ? `<a href="${p.stripe_url}" class="btn on-light" style="padding:8px 16px;">Acheter</a>` 
+                : `<button class="btn" disabled>Bientôt disponible</button>`
+              }
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    loadShop();
+  </script>
+</body>
+</html>
