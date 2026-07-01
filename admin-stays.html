@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -361,35 +361,70 @@
       gap: 16px;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
     .modal.active {
       display: flex;
+      animation: fadeIn 0.25s ease-out;
     }
     .modal-content {
       background: var(--white);
-      padding: 24px;
-      border-radius: 8px;
+      padding: 32px;
+      border-radius: 16px;
       width: 100%;
-      max-width: 600px;
-      max-height: 90vh;
+      max-width: 680px;
+      max-height: 88vh;
       overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--line);
     }
     .wizard-step {
       display: none;
     }
     .wizard-step.active {
       display: grid;
-      gap: 14px;
+      gap: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .wizard-progress {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+      gap: 8px;
+    }
+    .wiz-dot {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 8px 4px;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: all 0.2s;
+    }
+    .wiz-dot.active {
+      background: var(--text);
+      color: var(--white);
+      font-weight: 600;
+    }
+    .wiz-dot.done {
+      background: #eaf4ec;
+      color: #3b7045;
     }
   </style>
 </head>
@@ -790,16 +825,28 @@
   <div class="modal" id="stayWizardModal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="margin:0; font-size:20px;">Nouveau séjour — Étape <span id="wizardStepNum">1</span>/3</h2>
-        <button class="btn tiny" id="btnCancelWizard" style="background:transparent; font-size:16px;">✕</button>
+        <div>
+          <h2 style="margin:0; font-size:22px; font-family:'SegoCustom', serif;">Nouveau séjour</h2>
+          <p class="muted-small" style="margin:0;">Assistant de création par étapes</p>
+        </div>
+        <button class="btn tiny" id="btnCancelWizard" style="background:transparent; font-size:18px; padding:4px 8px;">✕</button>
       </div>
 
-      <div id="wizardErrorMsg" style="color:#c00; font-size:13px; margin-bottom:12px;"></div>
+      <div class="wizard-progress" id="wizardProgress">
+        <div class="wiz-dot active" data-step="1">1. Général</div>
+        <div class="wiz-dot" data-step="2">2. Visuels</div>
+        <div class="wiz-dot" data-step="3">3. Tarifs</div>
+        <div class="wiz-dot" data-step="4">4. Programme</div>
+        <div class="wiz-dot" data-step="5">5. Inclus</div>
+      </div>
+
+      <div id="wizardErrorMsg" style="color:#c00; font-size:13px; margin-bottom:12px; font-weight:500;"></div>
 
       <form id="stayWizardForm">
         <!-- ÉTAPE 1 : Bases -->
         <div class="wizard-step active" id="wizardStep1">
-          <h3 style="margin:0; font-size:16px; color:var(--muted);">1. Informations générales</h3>
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 1 : Identité & Lieu</h3>
+          <p class="muted-small" style="margin:0 0 8px 0;">Définissez le titre principal et le lieu du séjour.</p>
           <div>
             <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
@@ -809,76 +856,95 @@
             <input id="wizLocation" class="input" placeholder="Ex : Mas des Songes, Camargue" required>
           </div>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Accroche courte *</label>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Accroche courte (Slogan) *</label>
             <input id="wizShortDesc" class="input" placeholder="Ex : 4 jours pour ralentir au cœur de la nature sauvage" required>
           </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Description</label>
-            <textarea id="wizDesc" class="input" rows="3" placeholder="Présentation détaillée du séjour..."></textarea>
-          </div>
         </div>
 
-        <!-- ÉTAPE 2 : Dates & Prix -->
+        <!-- ÉTAPE 2 : Description & Photos -->
         <div class="wizard-step" id="wizardStep2">
-          <h3 style="margin:0; font-size:16px; color:var(--muted);">2. Dates et Tarifs</h3>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Date début *</label>
-              <input id="wizStartDate" type="date" class="input" required>
-            </div>
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Date fin *</label>
-              <input id="wizEndDate" type="date" class="input" required>
-            </div>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Prix (€) *</label>
-              <input id="wizPrice" type="number" step="0.01" class="input" placeholder="650" required>
-            </div>
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Places totales *</label>
-              <input id="wizSeats" type="number" class="input" value="12" required>
-            </div>
-          </div>
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 2 : Présentation & Visuels</h3>
+          <p class="muted-small" style="margin:0 0 8px 0;">Renseignez l'image de couverture et la présentation du séjour.</p>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Label de prix (optionnel)</label>
-            <input id="wizPriceLabel" class="input" placeholder="Ex : À partir de, ou Par personne">
-          </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Lien de paiement / réservation</label>
-            <input id="wizBookingUrl" class="input" placeholder="https://buy.stripe.com/...">
-          </div>
-        </div>
-
-        <!-- ÉTAPE 3 : Contenu & Photos -->
-        <div class="wizard-step" id="wizardStep3">
-          <h3 style="margin:0; font-size:16px; color:var(--muted);">3. Programme & Photos</h3>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Image principale (URL) *</label>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Image principale (URL photo de couverture) *</label>
             <input id="wizHeroImage" class="input" placeholder="https://..." required>
           </div>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Au programme (1 point clé par ligne)</label>
-            <textarea id="wizProgramNote" class="input" rows="2" placeholder="Séances de yoga quotidiennes&#10;Ateliers de respiration&#10;Temps libres et balades"></textarea>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Description complète</label>
+            <textarea id="wizDesc" class="input" rows="5" placeholder="Présentation détaillée du séjour, de l'atmosphère et des objectifs..."></textarea>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        </div>
+
+        <!-- ÉTAPE 3 : Dates & Tarifs -->
+        <div class="wizard-step" id="wizardStep3">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 3 : Dates & Tarifs de la session</h3>
+          <p class="muted-small" style="margin:0 0 8px 0;">Configurez la première session disponible pour ce séjour.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Inclus (1 par ligne)</label>
-              <textarea id="wizIncluded" class="input" rows="3" placeholder="Hébergement 3 nuits&#10;Repas bio inclus&#10;Matériel de yoga"></textarea>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Date de début *</label>
+              <input id="wizStartDate" type="date" class="input" required>
             </div>
             <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Non inclus (1 par ligne)</label>
-              <textarea id="wizNotIncluded" class="input" rows="3" placeholder="Transport jusqu'au lieu&#10;Assurance annulation"></textarea>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Date de fin *</label>
+              <input id="wizEndDate" type="date" class="input" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Prix par personne (€) *</label>
+              <input id="wizPrice" type="number" step="0.01" class="input" placeholder="650" required>
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Nombre de places *</label>
+              <input id="wizSeats" type="number" class="input" value="12" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Label de prix (optionnel)</label>
+              <input id="wizPriceLabel" class="input" placeholder="Ex : À partir de, ou Par personne">
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Lien de réservation (Stripe/autre)</label>
+              <input id="wizBookingUrl" class="input" placeholder="https://buy.stripe.com/...">
             </div>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
-          <button type="button" class="btn" id="btnWizPrev" style="background:transparent; border:1px solid var(--line); display:none;">Précédent</button>
+        <!-- ÉTAPE 4 : Programme & Hébergement -->
+        <div class="wizard-step" id="wizardStep4">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 4 : Programme & Activités</h3>
+          <p class="muted-small" style="margin:0 0 8px 0;">Qu'est-ce qui attend les participants ?</p>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Au programme (Points clés, 1 par ligne)</label>
+            <textarea id="wizProgramNote" class="input" rows="5" placeholder="Séances de yoga douces et dynamiques&#10;Ateliers de respiration et méditation&#10;Temps libres, balades et connexion à la nature"></textarea>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 5 : Inclus & Non inclus -->
+        <div class="wizard-step" id="wizardStep5">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 5 : Inclusions & Validation</h3>
+          <p class="muted-small" style="margin:0 0 8px 0;">Précisez ce qui est compris dans le tarif avant la création.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Inclus dans le prix (1 par ligne)</label>
+              <textarea id="wizIncluded" class="input" rows="4" placeholder="Hébergement 3 nuits&#10;Repas bio et végétariens inclus&#10;Matériel de yoga et accessoires"></textarea>
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Non inclus (1 par ligne)</label>
+              <textarea id="wizNotIncluded" class="input" rows="4" placeholder="Transport jusqu'au lieu du séjour&#10;Assurance annulation individuelle"></textarea>
+            </div>
+          </div>
+          <div style="background:#eaf4ec; padding:12px; border-radius:8px; color:#3b7045; font-size:13px; margin-top:8px;">
+            ℹ️ Vous pourrez ajouter un planning détaillé jour par jour, des FAQ et d'autres photos une fois le séjour créé !
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:24px; border-top:1px solid var(--line); padding-top:16px; align-items:center;">
+          <button type="button" class="btn" id="btnWizPrev" style="background:transparent; border:1px solid var(--line); display:none;">← Précédent</button>
           <div style="margin-left:auto; display:flex; gap:10px;">
-            <button type="button" class="btn on-light" id="btnWizNext">Suivant</button>
-            <button type="submit" class="btn on-light" id="btnWizSubmit" style="display:none; background:#4f8c5b; color:#fff;">✨ Créer le séjour</button>
+            <button type="button" class="btn on-light" id="btnWizNext">Suivant →</button>
+            <button type="submit" class="btn on-light" id="btnWizSubmit" style="display:none; background:#4f8c5b; color:#fff;">✨ Créer et éditer le séjour</button>
           </div>
         </div>
       </form>
@@ -1933,14 +1999,19 @@
 
     function updateWizardStep(step){
       currentWizStep = step;
-      wizardStepNum.textContent = step;
+      if(typeof wizardStepNum !== 'undefined' && wizardStepNum) wizardStepNum.textContent = step;
       wizardErrorMsg.textContent = "";
       document.querySelectorAll(".wizard-step").forEach((el, i) => {
         el.classList.toggle("active", i + 1 === step);
       });
+      document.querySelectorAll(".wiz-dot").forEach((dot, i) => {
+        const dotStep = i + 1;
+        dot.classList.toggle("active", dotStep === step);
+        dot.classList.toggle("done", dotStep < step);
+      });
       btnWizPrev.style.display = step > 1 ? "inline-flex" : "none";
-      btnWizNext.style.display = step < 3 ? "inline-flex" : "none";
-      btnWizSubmit.style.display = step === 3 ? "inline-flex" : "none";
+      btnWizNext.style.display = step < 5 ? "inline-flex" : "none";
+      btnWizSubmit.style.display = step === 5 ? "inline-flex" : "none";
     }
 
     btnNewStay?.addEventListener("click", () => {
@@ -1964,6 +2035,11 @@
           return;
         }
       } else if(currentWizStep === 2){
+        if(!document.getElementById("wizHeroImage").value.trim()){
+          wizardErrorMsg.textContent = "Merci d'ajouter l'URL de l'image principale.";
+          return;
+        }
+      } else if(currentWizStep === 3){
         if(!document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizPrice").value){
           wizardErrorMsg.textContent = "Merci de renseigner les dates de début et de fin ainsi que le prix.";
           return;
