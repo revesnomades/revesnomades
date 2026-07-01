@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -364,6 +364,13 @@
     productForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       
+      const nameVal = fName.value.trim();
+      const priceVal = parseFloat(fPrice.value);
+      if (!nameVal || isNaN(priceVal)) {
+        alert("Veuillez renseigner au minimum un nom et un prix valide pour le produit.");
+        return;
+      }
+
       // Gather image URLs
       const rows = Array.from(imagesContainer.querySelectorAll(".img-field-row"));
       let urls = [];
@@ -382,26 +389,34 @@
       }
 
       const payload = {
-        name: fName.value.trim(),
-        description: fDesc.value.trim(),
-        price: parseFloat(fPrice.value),
-        type: fType.value,
+        name: nameVal,
+        description: fDesc.value.trim() || null,
+        price: priceVal,
+        type: fType.value || "physique",
         category_id: fCategory.value || null,
         stock: fStock.value === "" ? null : parseInt(fStock.value, 10),
         delivery_info: fDelivery.value.trim() || null,
-        image_urls: urls,
+        image_urls: urls.length ? urls : null,
         image_url: urls[0] || null,
-        stripe_url: fStripe.value.trim()
+        stripe_url: fStripe.value.trim() || null
       };
 
+      let resError = null;
       if (fId.value) {
-        await supabase.from("products").update(payload).eq("id", fId.value);
+        const { error } = await supabase.from("products").update(payload).eq("id", fId.value);
+        resError = error;
       } else {
-        await supabase.from("products").insert(payload);
+        const { error } = await supabase.from("products").insert([payload]);
+        resError = error;
       }
       
+      if (resError) {
+        alert("❌ Erreur lors de l'enregistrement du produit :\n\n" + resError.message + "\n\n⚠️ Si vous voyez une erreur de sécurité (RLS), exécutez le script SQL fourni pour autoriser l'ajout de produits !");
+        return;
+      }
+
       productModal.classList.remove("active");
-      loadProducts();
+      await loadProducts();
     });
 
     checkAdmin().then(async user => {

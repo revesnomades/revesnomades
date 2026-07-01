@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -69,6 +69,25 @@
             </div>
           </div>
         </div>
+
+        <div class="account-card" style="margin-top:24px; padding:20px; background:rgba(0,0,0,0.02);">
+          <h3 style="margin:0; font-size:18px;">🏠 Bandeaux de la page d'accueil (index.html)</h3>
+          <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
+            Gérez l'affichage des rubriques sous le séjour principal. Au lancement (1 seul séjour), désactivez "5 séjours" et activez "Boutique Vedette".
+          </p>
+          <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:center;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14.5px; font-weight:500;">
+              <input type="checkbox" id="chkShowStaysBand" style="width:18px; height:18px;">
+              Afficher "Prochains séjours" (5 séjours)
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14.5px; font-weight:500;">
+              <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
+              Afficher "Boutique — Sélection Vedette"
+            </label>
+            <button class="btn on-light" id="btnSaveHomepageBands" type="button" style="margin-left:auto; padding:8px 16px;">Enregistrer l'affichage</button>
+          </div>
+          <div id="homepageBandsMsg" style="margin-top:10px; color:var(--muted); font-size:13px;"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -79,6 +98,10 @@
     const adminStatus = document.getElementById("adminStatus");
     const newsletterCount = document.getElementById("newsletterCount");
     const priorityCount = document.getElementById("priorityCount");
+    const chkShowStaysBand = document.getElementById("chkShowStaysBand");
+    const chkShowBoutiqueBand = document.getElementById("chkShowBoutiqueBand");
+    const btnSaveHomepageBands = document.getElementById("btnSaveHomepageBands");
+    const homepageBandsMsg = document.getElementById("homepageBandsMsg");
 
     async function checkAdmin(){
       const { data: { user } } = await supabase.auth.getUser();
@@ -117,7 +140,38 @@
 
       newsletterCount.textContent = newsletterTotal ?? "0";
       priorityCount.textContent = priorityTotal ?? "0";
+      await loadHomepageBandsConfig();
     }
+
+    async function loadHomepageBandsConfig() {
+      if (!chkShowStaysBand || !chkShowBoutiqueBand) return;
+      try {
+        const { data } = await supabase.from("site_settings").select("value").eq("key", "homepage_bands").maybeSingle();
+        if (data && data.value) {
+          if (data.value.show_stays !== undefined) chkShowStaysBand.checked = data.value.show_stays;
+          if (data.value.show_boutique !== undefined) chkShowBoutiqueBand.checked = data.value.show_boutique;
+        } else {
+          chkShowStaysBand.checked = false;
+          chkShowBoutiqueBand.checked = true;
+        }
+      } catch (e) {
+        console.warn("Error loading homepage bands:", e);
+      }
+    }
+
+    btnSaveHomepageBands?.addEventListener("click", async () => {
+      homepageBandsMsg.textContent = "Enregistrement en cours…";
+      const value = {
+        show_stays: chkShowStaysBand.checked,
+        show_boutique: chkShowBoutiqueBand.checked
+      };
+      const { error } = await supabase.from("site_settings").upsert({ key: "homepage_bands", value });
+      if (error) {
+        homepageBandsMsg.textContent = "❌ Erreur : " + error.message + " (Vérifiez que la table site_settings existe dans Supabase)";
+      } else {
+        homepageBandsMsg.textContent = "✅ Affichage enregistré !";
+      }
+    });
 
     try{
       await checkAdmin();
