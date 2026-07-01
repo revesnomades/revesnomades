@@ -29,7 +29,7 @@
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="/index.html#apropos">À propos</a>
         <a href="/boutique.html">Shop</a><a href="/faq.html">FAQ</a>
-        <a href="/index.html#contact">Contact</a>
+        <a href="/contact.html">Contact</a>
       </nav>
     </div>
   </header>
@@ -131,73 +131,6 @@
             </div>
 
             <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-
-            <!-- ADMIN PANEL -->
-            <div id="adminPanel" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
-              <h3 style="margin:0;">Espace admin</h3>
-
-              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;">
-                <div class="account-card" style="padding:16px;">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
-                  <div id="newsletterCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
-
-                <div class="account-card" style="padding:16px;">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
-                  <div id="priorityCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
-              </div>
-
-              <div class="account-actions" style="margin-top:14px; flex-wrap:wrap;">
-                <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
-                <button class="btn on-liG&eacute;rer le Shop</button>
-                <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
-                <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
-                <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
-              </div>
-
-              <div id="adminMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-
-              <div class="account-card" style="margin-top:16px; padding:16px; background:rgba(0,0,0,0.02);">
-                <h4 style="margin:0; font-size:16px;">🏠 Bandeaux de la page d'accueil (index.html)</h4>
-                <p style="margin:6px 0 12px; color:var(--muted); font-size:13px;">
-                  Gérez l'affichage des rubriques sous le séjour principal. Au lancement (1 seul séjour), désactivez "5 séjours" et activez "Boutique Vedette".
-                </p>
-                <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
-                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
-                    <input type="checkbox" id="chkShowStaysBand" style="width:18px; height:18px;">
-                    Afficher "Prochains séjours" (Bandeau 5 séjours)
-                  </label>
-                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
-                    <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
-                    Afficher "Boutique — Sélection Vedette"
-                  </label>
-                  <button class="btn tiny on-light" id="btnSaveHomepageBands" type="button" style="margin-left:auto;">Enregistrer l'affichage</button>
-                </div>
-                <div id="homepageBandsMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
-              </div>
-
-              <div id="adminFaqPanel" class="account-card" style="display:none; margin-top:14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                  <div>
-                    <h4 style="margin:0;">FAQ du site</h4>
-                    <p style="margin:6px 0 0; color:var(--muted); font-size:12.5px;">
-                      FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
-                    </p>
-                  </div>
-                  <div class="account-actions">
-                    <button class="btn on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
-                    <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener noreferrer">Voir faq.html</a>
-                    <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
-                    <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
-                  </div>
-                </div>
-                <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-                <div id="siteFaqWrapper" style="display:none;">
-                  <div id="siteFaqList" class="admin-faq-list"></div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -220,6 +153,75 @@
           <div id="purchasesBox" class="account-card" style="display:none; margin-top:16px;">
             <h3 style="font-weight:500; margin:0;">Mes achats</h3>
             <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de vos achats...</div>
+          </div>
+
+          <!-- ADMIN PANEL (remplace la rubrique réservations pour l'admin) -->
+          <div id="adminPanel" style="display:none;">
+            <div class="account-card" style="margin-top:0;">
+              <h3 style="margin:0;">Espace admin</h3>
+
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;">
+                <div class="account-card" style="padding:16px; background:rgba(0,0,0,0.02);">
+                  <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
+                  <div id="newsletterCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
+                </div>
+
+                <div class="account-card" style="padding:16px; background:rgba(0,0,0,0.02);">
+                  <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
+                  <div id="priorityCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
+                </div>
+              </div>
+
+              <div class="account-actions" style="margin-top:16px; flex-wrap:wrap;">
+                <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
+                <button class="btn on-light" id="btnAdminBoutique" type="button">🛍️ Gérer le Shop</button>
+                <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
+                <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
+                <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
+              </div>
+
+              <div id="adminMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+            </div>
+
+            <div class="account-card" style="margin-top:16px; padding:16px; background:rgba(0,0,0,0.02);">
+              <h4 style="margin:0; font-size:16px;">🏠 Bandeaux de la page d'accueil (index.html)</h4>
+              <p style="margin:6px 0 12px; color:var(--muted); font-size:13px;">
+                Gérez l'affichage des rubriques sous le séjour principal. Au lancement (1 seul séjour), désactivez "5 séjours" et activez "Shop Vedette".
+              </p>
+              <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
+                  <input type="checkbox" id="chkShowStaysBand" style="width:18px; height:18px;">
+                  Afficher "Prochains séjours" (Bandeau 5 séjours)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
+                  <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
+                  Afficher "Shop — Sélection Vedette"
+                </label>
+                <button class="btn tiny on-light" id="btnSaveHomepageBands" type="button" style="margin-left:auto;">Enregistrer l'affichage</button>
+              </div>
+              <div id="homepageBandsMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
+            </div>
+
+            <div id="adminFaqPanel" class="account-card" style="margin-top:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                  <h4 style="margin:0;">FAQ du site</h4>
+                  <p style="margin:6px 0 0; color:var(--muted); font-size:12.5px;">
+                    FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
+                  </p>
+                </div>
+                <div class="account-actions">
+                  <button class="btn on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
+                  <a class="btn on-light" href="/faq.html" target="_blank" rel="noopener noreferrer">Voir faq.html</a>
+                  <button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
+                  <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
+                </div>
+              </div>
+              <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+              <div id="siteFaqWrapper" style="display:none;">
+                <div id="siteFaqList" class="admin-faq-list"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -951,6 +953,8 @@
       applyWelcomeName(metaFirstname || profileFirstname);
 
       if (isAdmin && adminPanel) {
+        if (bookingsBox) bookingsBox.style.display = "none";
+        if (purchasesBox) purchasesBox.style.display = "none";
         adminPanel.style.display = "block";
         if (adminFaqPanel) adminFaqPanel.style.display = "block";
         await loadAdminStats();

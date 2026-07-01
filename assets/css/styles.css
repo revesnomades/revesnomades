@@ -46,7 +46,7 @@
   --navBgScrolled: rgba(14, 15, 17, .62);
 
   --max: 1180px;
-  --navH: 66px;
+  --navH: 110px;
 
   --glassBlur: 10px;
 
@@ -151,10 +151,11 @@ select, option{ color: var(--text) !important; }
   gap:10px;
   color:#fff;
 }
-.brand img{ height:34px; width:auto; }
+.brand img{ height:62px; width:auto; transition: height .2s ease; }
 .brand span{
   font-family:"SegoCustom", serif;
   font-weight:500;
+  font-size:26px;
   letter-spacing:.03em;
 }
 
@@ -1109,6 +1110,9 @@ footer.band.cream{
   transform: translateY(-7px) rotate(-45deg);
 }
 @media (max-width: 780px){
+  --navH: 84px;
+  .brand img{ height: 46px; }
+  .brand span{ font-size: 20px; }
   .nav-links-desktop{ display: none; }
   .hamburger{ display: inline-block; }
 }

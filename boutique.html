@@ -90,58 +90,55 @@
       font-weight: 600;
       color: var(--text);
     }
-    /* Filtres style Notion / luxe */
+    /* Filtres discrets sur le côté */
     .shop-filters {
       display: flex;
-      gap: 14px;
-      justify-content: center;
+      gap: 12px;
+      justify-content: flex-end;
       align-items: center;
       margin-top: 36px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
     .filter-pill {
       position: relative;
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 40px;
-      padding: 2px 12px;
-      transition: all 0.25s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      padding: 0 10px;
+      transition: all 0.2s ease;
     }
     .filter-pill:hover, .filter-pill:focus-within {
-      background: #ffffff;
-      border-color: rgba(0, 0, 0, 0.28);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transform: translateY(-1px);
+      border-color: rgba(0, 0, 0, 0.45);
+      background: rgba(255, 255, 255, 0.5);
     }
     .filter-pill select {
-      padding: 10px 24px 10px 6px;
+      padding: 8px 22px 8px 4px;
       border: none;
       background: transparent;
       font-family: inherit;
-      font-size: 13.5px;
+      font-size: 11.5px;
       font-weight: 500;
-      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
       cursor: pointer;
       outline: none;
       appearance: none;
       -webkit-appearance: none;
     }
-    .filter-icon {
-      font-size: 14px;
-      color: var(--muted);
-      pointer-events: none;
+    .filter-pill select:focus {
+      color: var(--text);
     }
     .filter-arrow {
       position: absolute;
-      right: 14px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
-      font-size: 10px;
+      font-size: 8px;
       color: var(--muted);
     }
     .sold-out-badge {
@@ -217,18 +214,16 @@
 
       <div class="shop-filters" id="shopFilters">
         <div class="filter-pill">
-          <span class="filter-icon">🏷️</span>
           <select id="filterCategory" aria-label="Filtrer par catégorie">
             <option value="">Toutes les catégories</option>
           </select>
           <span class="filter-arrow">▼</span>
         </div>
         <div class="filter-pill">
-          <span class="filter-icon">⚡</span>
           <select id="sortProducts" aria-label="Trier par">
-            <option value="newest">Trier : Nouveautés</option>
-            <option value="price-asc">Trier : Prix croissant</option>
-            <option value="price-desc">Trier : Prix décroissant</option>
+            <option value="newest">Trier : Récents</option>
+            <option value="price-asc">Prix : Croissant</option>
+            <option value="price-desc">Prix : Décroissant</option>
           </select>
           <span class="filter-arrow">▼</span>
         </div>

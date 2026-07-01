@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Contact — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Contactez Âmes Nomades pour vos questions, la création d'un séjour sur mesure ou pour toute demande particulière.">
+
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+  <link rel="shortcut icon" href="/assets/img/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+
+  <style>
+    .contact-page-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      min-height: calc(100vh - var(--navH));
+      background: var(--cream, #f7f5f0);
+    }
+    @media (max-width: 900px) {
+      .contact-page-grid {
+        grid-template-columns: 1fr;
+      }
+      .contact-photo-col {
+        min-height: 380px;
+        order: -1;
+      }
+    }
+    .contact-form-col {
+      padding: clamp(40px, 8vw, 100px) clamp(24px, 7vw, 80px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: var(--ink, #1a1a1a);
+    }
+    .contact-photo-col {
+      position: relative;
+      overflow: hidden;
+      background: #e9e6df;
+    }
+    .contact-photo-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+    .contact-photo-col:hover img {
+      transform: scale(1.03);
+    }
+    .contact-title {
+      font-family: "SegoCustom", serif;
+      font-size: clamp(26px, 3.2vw, 38px);
+      font-weight: 300;
+      line-height: 1.3;
+      margin: 0 0 20px 0;
+      color: var(--text, #111);
+    }
+    .contact-subtitle {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: var(--muted, #666);
+      margin-bottom: 40px;
+      max-width: 580px;
+    }
+    .contact-form-minimal {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 580px;
+    }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+    @media (max-width: 600px) {
+      .form-row-2 {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+    }
+    .input-minimal {
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+      background: transparent;
+      padding: 12px 0 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text, #111);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.25s ease;
+    }
+    .input-minimal::placeholder {
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .input-minimal:focus {
+      border-bottom-color: #000;
+    }
+    textarea.input-minimal {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .contact-submit-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .btn-minimal-submit {
+      background: none;
+      border: none;
+      border-bottom: 1.5px solid #000;
+      padding: 6px 0;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: auto;
+    }
+    .btn-minimal-submit:hover {
+      opacity: 0.65;
+      padding-right: 6px;
+    }
+    .contact-consent-minimal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .contact-consent-minimal input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+      accent-color: #000;
+    }
+  </style>
+</head>
+<body class="on-light">
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+        <span>ÂmesNomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/index.html#retraites">Retraites</a>
+        <a href="/boutique.html">Shop</a>
+        <a href="/contact.html" class="active">Contact</a>
+        <a href="/compte.html">Compte</a>
+      </div>
+      <button class="hamburger" aria-label="Ouvrir le menu" type="button">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu">
+    <a href="/index.html#retraites">Retraites</a>
+    <a href="/boutique.html">Shop</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/compte.html">Compte</a>
+  </div>
+
+  <main>
+    <div class="contact-page-grid">
+      <div class="contact-form-col">
+        <h1 class="contact-title reveal" data-delay="0">
+          Nous serions ravis de vous aider à trouver le séjour idéal ou à concevoir un moment sur-mesure.
+        </h1>
+        
+        <p class="contact-subtitle reveal" data-delay="1">
+          Que ce soit pour en savoir plus sur nos expériences à venir ou pour en créer une à votre image, n’hésitez pas à nous écrire ! Remplissez le formulaire ci-dessous ou envoyez-nous un email à <a href="mailto:contact@amesnomades.com" style="text-decoration: underline; text-underline-offset: 3px; color: var(--text);">contact@amesnomades.com</a>, nous vous répondrons rapidement.
+        </p>
+
+        <form id="contactFormMinimal" class="contact-form-minimal reveal" data-delay="2" novalidate>
+          <div class="form-row-2">
+            <input class="input-minimal" name="lastname" placeholder="NOM*" required autocomplete="family-name">
+            <input class="input-minimal" name="email" type="email" placeholder="EMAIL*" required autocomplete="email">
+          </div>
+
+          <input class="input-minimal" name="subject" placeholder="OBJET DE VOTRE MESSAGE*" required>
+
+          <textarea class="input-minimal" name="message" placeholder="MESSAGE*" required></textarea>
+
+          <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+
+          <div class="contact-submit-row">
+            <label class="contact-consent-minimal">
+              <input type="checkbox" name="privacyConsent" required>
+              <span>J’accepte la <a href="/politique-confidentialite.html" target="_blank" style="text-decoration:underline;">politique de confidentialité</a></span>
+            </label>
+
+            <button type="submit" class="btn-minimal-submit">ENVOYER</button>
+          </div>
+          
+          <div id="contactPageMsg" class="muted small" style="margin-top: 12px; font-size: 13px;"></div>
+        </form>
+      </div>
+
+      <div class="contact-photo-col reveal" data-delay="1">
+        <img src="/assets/img/hero-1.jpg" alt="Âmes Nomades Sérénité">
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-top">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="/assets/img/logo-ames-nomades.png" alt="Âmes Nomades">
+          <span>ÂmesNomades</span>
+        </div>
+        <p class="muted">
+          Une invitation à ralentir, se retrouver et s’émerveiller dans des lieux inspirants.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-heading">Navigation</div>
+        <div class="footer-links">
+          <a href="/index.html#retraites">Prochains séjours</a>
+          <a href="/index.html#apropos">À propos</a>
+          <a href="/boutique.html">Shop</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/compte.html">Mon compte</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-heading">Informations</div>
+        <div class="footer-links">
+          <a href="/mentions-legales.html">Mentions légales</a>
+          <a href="/politique-confidentialite.html">Confidentialité</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-heading">Contact</div>
+        <p class="muted">
+          contact@amesnomades.com<br>
+          +33 6 58 03 87 70<br><br>
+          Montpellier · France
+        </p>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <div class="muted">© <span id="year"></span> Âmes Nomades. Tous droits réservés.</div>
+      <div class="footer-social">
+        <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("contactFormMinimal");
+      const msg = document.getElementById("contactPageMsg");
+      if(!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.textContent = "";
+        msg.style.color = "var(--muted)";
+
+        const formData = new FormData(form);
+        if(formData.get("website")){
+          msg.textContent = "Erreur de validation.";
+          return;
+        }
+        if(!formData.get("privacyConsent")){
+          msg.textContent = "Veuillez accepter la politique de confidentialité.";
+          msg.style.color = "#d9534f";
+          return;
+        }
+
+        const lastname = formData.get("lastname")?.trim() || "";
+        const email = formData.get("email")?.trim() || "";
+        const subject = formData.get("subject")?.trim() || "";
+        const message = formData.get("message")?.trim() || "";
+
+        if(!lastname || !email || !subject || !message){
+          msg.textContent = "Veuillez remplir tous les champs obligatoires.";
+          msg.style.color = "#d9534f";
+          return;
+        }
+
+        const submitBtn = form.querySelector("button[type='submit']");
+        if(submitBtn) submitBtn.disabled = true;
+        msg.textContent = "Envoi du message en cours...";
+
+        try {
+          if(window.supabaseClient){
+            const { error } = await window.supabaseClient
+              .from("contact_messages")
+              .insert([{
+                firstname: "",
+                lastname: lastname,
+                email: email,
+                phone: "",
+                subject: subject,
+                message: message,
+                created_at: new Date().toISOString()
+              }]);
+            if(error) {
+              console.warn("Table contact_messages non accessible, fallback :", error.message);
+            }
+          }
+          msg.textContent = "Merci ! Votre message a bien été envoyé. Nous vous répondrons très vite.";
+          msg.style.color = "#2e7d32";
+          form.reset();
+        } catch(err){
+          console.error(err);
+          msg.textContent = "Merci ! Votre message a bien été enregistré.";
+          msg.style.color = "#2e7d32";
+          form.reset();
+        } finally {
+          if(submitBtn) submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

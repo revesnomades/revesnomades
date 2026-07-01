@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -88,7 +88,7 @@
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="index.html#apropos" data-scroll>À propos</a>
         <a href="boutique.html">Shop</a><a href="faq.html">FAQ</a>
-        <a href="index.html#contact" data-scroll>Contact</a>
+        <a href="contact.html" data-scroll>Contact</a>
 
         <a class="icon-btn" href="compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
@@ -106,7 +106,7 @@
         <nav class="mobile-menu" aria-label="Navigation mobile">
           <a href="index.html#apropos" data-scroll>À propos</a>
           <a href="boutique.html">Shop</a><a href="faq.html">FAQ</a>
-          <a href="index.html#contact" data-scroll>Contact</a>
+          <a href="contact.html" data-scroll>Contact</a>
           <a href="compte.html">Compte</a>
         </nav>
       </div>
@@ -209,7 +209,7 @@
             Découvrez nos créations, accessoires et e-books pour prolonger l'expérience chez vous.
           </p>
         </div>
-        <a class="btn on-light" href="boutique.html" style="font-weight:500;">👉 Explorer tout le Shop</a>
+        <a class="btn on-light" href="boutique.html" style="font-weight:500;">Explorer tout le Shop</a>
       </div>
 
       <div id="boutiqueVedetteGrid" class="shop-grid-4" style="margin-top:32px;">
@@ -316,46 +316,15 @@
     </div>
   </section>
 
-  <section class="band band-full cream" id="contact">
-    <div class="contact-grid">
-
-      <form id="contactForm" class="formbox" novalidate>
-        <div class="reveal" data-delay="0">
-          <input name="subject" placeholder="Objet" required />
-        </div>
-
-        <input class="reveal" data-delay="1" name="lastname" placeholder="Nom" required autocomplete="family-name" />
-        <input class="reveal" data-delay="2" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
-        <input class="reveal" data-delay="3" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
-        <input class="reveal" data-delay="4" name="phone" type="tel" placeholder="Téléphone (facultatif)" autocomplete="tel" />
-        <textarea class="reveal" data-delay="5" name="message" placeholder="Votre message" required></textarea>
-
-        <label class="contact-consent reveal" data-delay="6">
-          <input type="checkbox" name="privacyConsent" required />
-          <span>J’accepte la politique de confidentialité</span>
-        </label>
-
-        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
-
-        <button class="btn on-light reveal" data-delay="7" type="submit">ENVOYER</button>
-        <div id="contactMsg" class="muted small reveal" data-delay="8"></div>
-      </form>
-
-      <div class="rightcopy">
-        <h2 class="reveal" data-delay="0">Partir pour mieux se retrouver.</h2>
-
-        <p class="muted reveal" data-delay="1">
-          Pour vos questions, la création d’un moment sur mesure, commander votre carte cadeau…
-          N’hésitez pas à nous écrire !
-        </p>
-
-        <div class="coords muted reveal" data-delay="2">
-          <div><b>Âmes Nomades</b></div>
-          <div>contact@amesnomades.com</div>
-          <div>06 58 03 87 70</div>
-        </div>
+  <section class="band band-full cream" id="contact" style="padding: 110px 20px; text-align: center;">
+    <div class="container" style="max-width: 680px; margin: 0 auto;">
+      <h2 class="reveal" data-delay="0" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4.5vw, 46px); font-weight: 300; letter-spacing: 0.05em; margin: 0 0 24px 0;">CONTACT</h2>
+      <p class="reveal" data-delay="1" style="font-size: 16.5px; line-height: 1.7; color: var(--muted); margin: 0 0 38px 0;">
+        Pour vos questions, la création d’un moment sur mesure, commander votre carte cadeau… N’hésitez pas à nous écrire !
+      </p>
+      <div class="reveal" data-delay="2">
+        <a class="btn on-light" href="contact.html" style="padding: 14px 36px; letter-spacing: 0.12em; font-weight: 500;">CONTACTER-NOUS</a>
       </div>
-
     </div>
   </section>
 
