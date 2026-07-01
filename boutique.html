@@ -65,6 +65,52 @@
     .shop-price {
       font-size: 18px;
       font-weight: 600;
+    .shop-filters {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    .shop-filters select {
+      padding: 10px 16px;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .sold-out-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #c00;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--white);
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 450px;
     }
   </style>
 </head>
@@ -95,6 +141,17 @@
         </p>
       </div>
 
+      <div class="shop-filters" id="shopFilters">
+        <select id="filterCategory" aria-label="Filtrer par catégorie">
+          <option value="">Toutes les catégories</option>
+        </select>
+        <select id="sortProducts" aria-label="Trier par">
+          <option value="newest">Nouveautés</option>
+          <option value="price-asc">Prix croissant</option>
+          <option value="price-desc">Prix décroissant</option>
+        </select>
+      </div>
+
       <div class="shop-grid" id="publicShopGrid">
         <div style="text-align:center; grid-column:1/-1; padding:40px; color:var(--muted);">
           Chargement de la boutique...
@@ -103,6 +160,25 @@
 
     </div>
   </main>
+
+  <!-- MODALE ALERTE RESTOCK -->
+  <div class="modal" id="restockModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; font-size:18px;" id="restockTitle">Avertissez-moi du retour en stock</h3>
+        <button class="btn tiny" id="btnCancelRestock" style="background:transparent; font-size:16px;">✕</button>
+      </div>
+      <p class="muted-small" style="margin-bottom:16px;">Laissez votre adresse email pour recevoir un message dès que ce produit sera à nouveau disponible !</p>
+      <form id="restockForm">
+        <input type="hidden" id="restockProductId">
+        <div style="margin-bottom:16px;">
+          <input type="email" id="restockEmail" class="input" placeholder="votre@email.com" required style="width:100%; padding:10px;">
+        </div>
+        <div id="restockMsg" style="font-size:13px; margin-bottom:10px;"></div>
+        <button type="submit" class="btn on-light" style="width:100%;">🔔 M'avertir</button>
+      </form>
+    </div>
+  </div>
 
   <footer class="band cream footer-dark" style="border-top:1px solid var(--line);">
     <div class="container footer">
@@ -154,6 +230,25 @@
     import { supabase } from "./assets/js/supabaseClient.js";
 
     const shopGrid = document.getElementById("publicShopGrid");
+    const filterCategory = document.getElementById("filterCategory");
+    const sortProducts = document.getElementById("sortProducts");
+    const restockModal = document.getElementById("restockModal");
+    const btnCancelRestock = document.getElementById("btnCancelRestock");
+    const restockForm = document.getElementById("restockForm");
+    const restockProductId = document.getElementById("restockProductId");
+    const restockEmail = document.getElementById("restockEmail");
+    const restockMsg = document.getElementById("restockMsg");
+    const restockTitle = document.getElementById("restockTitle");
+
+    let allProducts = [];
+
+    async function loadCategories() {
+      const { data } = await supabase.from("product_categories").select("*").order("name");
+      if(data && data.length){
+        filterCategory.innerHTML = `<option value="">Toutes les catégories</option>` + 
+          data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+    }
 
     async function loadShop() {
       const { data, error } = await supabase
@@ -170,24 +265,111 @@
         return;
       }
 
-      shopGrid.innerHTML = data.map(p => `
-        <div class="shop-card">
-          <img src="${p.image_url || '/assets/img/placeholder.jpg'}" alt="${p.name}" class="shop-image">
+      allProducts = data;
+      renderProducts();
+    }
+
+    function renderProducts() {
+      let filtered = [...allProducts];
+      
+      const catVal = filterCategory.value;
+      if(catVal){
+        filtered = filtered.filter(p => p.category_id === catVal);
+      }
+
+      const sortVal = sortProducts.value;
+      if(sortVal === "price-asc"){
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+      } else if(sortVal === "price-desc"){
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+      } else {
+        filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      }
+
+      if (filtered.length === 0) {
+        shopGrid.innerHTML = `
+          <div style="text-align:center; grid-column:1/-1; padding:40px; color:var(--muted);">
+            Aucun produit ne correspond à vos critères.
+          </div>
+        `;
+        return;
+      }
+
+      shopGrid.innerHTML = filtered.map(p => {
+        const isSoldOut = p.stock === 0;
+        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
+        return `
+        <div class="shop-card" style="position:relative;">
+          ${isSoldOut ? `<div class="sold-out-badge">SOLD OUT</div>` : ''}
+          <img src="${imgSrc}" alt="${p.name}" class="shop-image">
           <div class="shop-content">
             <h2 class="shop-title">${p.name}</h2>
             <p class="shop-desc">${p.description || ''}</p>
+            ${p.delivery_info ? `<div style="font-size:12px; color:var(--muted); margin-bottom:12px;">📦 ${p.delivery_info}</div>` : ''}
             <div class="shop-footer">
               <span class="shop-price">${p.price} €</span>
-              ${p.stripe_url 
-                ? `<a href="${p.stripe_url}" class="btn on-light" style="padding:8px 16px;">Acheter</a>` 
-                : `<button class="btn" disabled>Bientôt disponible</button>`
+              ${isSoldOut
+                ? `<button class="btn on-light" style="padding:8px 12px; font-size:13px; background:#fff; border:1px solid var(--line); color:var(--text);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
+                : (p.stripe_url 
+                    ? `<a href="${p.stripe_url}" class="btn on-light" style="padding:8px 16px;">Acheter</a>` 
+                    : `<button class="btn" disabled>Bientôt disponible</button>`)
               }
             </div>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
+    filterCategory?.addEventListener("change", renderProducts);
+    sortProducts?.addEventListener("change", renderProducts);
+
+    window.openRestockModal = async (id, name) => {
+      restockProductId.value = id;
+      restockTitle.textContent = `Alerte stock : ${name}`;
+      restockMsg.textContent = "";
+      restockEmail.value = "";
+
+      // Pré-remplir l'email si connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if(user && user.email) restockEmail.value = user.email;
+
+      restockModal.classList.add("active");
+    };
+
+    btnCancelRestock?.addEventListener("click", () => {
+      restockModal.classList.remove("active");
+    });
+
+    restockForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      restockMsg.style.color = "var(--text)";
+      restockMsg.textContent = "Enregistrement en cours...";
+
+      const email = restockEmail.value.trim();
+      const product_id = restockProductId.value;
+
+      const { error } = await supabase.from("restock_subscriptions").insert([{ product_id, email }]);
+
+      if(error){
+        if(error.code === "23505"){
+          restockMsg.style.color = "#c00";
+          restockMsg.textContent = "Vous êtes déjà inscrit pour recevoir l'alerte sur ce produit !";
+        } else {
+          restockMsg.style.color = "#c00";
+          restockMsg.textContent = "Erreur lors de l'inscription : " + error.message;
+        }
+        return;
+      }
+
+      restockMsg.style.color = "#4f8c5b";
+      restockMsg.textContent = "✨ Super ! Vous recevrez un email dès le retour en stock.";
+      setTimeout(() => {
+        restockModal.classList.remove("active");
+      }, 2500);
+    });
+
+    loadCategories();
     loadShop();
   </script>
 </body>

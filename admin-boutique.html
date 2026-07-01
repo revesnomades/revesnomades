@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -68,7 +68,7 @@
         <span>Âmes Nomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
-        <a href="/compte.html">Compte</a>
+        <a href="/boutique.html">Boutique</a><a href="/compte.html">Compte</a>
         <a href="/admin-dashboard.html">Admin</a>
       </div>
     </div>
@@ -140,16 +140,28 @@
           </div>
         </div>
 
-        <div>
-          <label class="muted-small" style="display:block; margin-bottom:6px;">Catégorie</label>
-          <select id="productCategory" class="input">
-            <option value="">Sélectionnez une catégorie...</option>
-          </select>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:6px;">Catégorie</label>
+            <select id="productCategory" class="input">
+              <option value="">Sélectionnez une catégorie...</option>
+            </select>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:6px;">Stock (vide = illimité)</label>
+            <input id="productStock" type="number" class="input" placeholder="Ex: 10">
+          </div>
         </div>
 
         <div>
-          <label class="muted-small" style="display:block; margin-bottom:6px;">URL de l'image</label>
-          <input id="productImage" class="input" placeholder="https://...">
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Délai de livraison / note</label>
+          <input id="productDelivery" class="input" placeholder="Ex : Expédié sous 3 à 5 jours ouvrés">
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Photos (sélectionnez la principale avec le bouton 🔘)</label>
+          <div id="imagesContainer" style="display:grid; gap:8px; margin-bottom:8px;"></div>
+          <button type="button" class="btn tiny on-light" id="btnAddImageField">+ Ajouter une photo</button>
         </div>
 
         <div>
@@ -182,8 +194,11 @@
     const fPrice = document.getElementById("productPrice");
     const fType = document.getElementById("productType");
     const fCategory = document.getElementById("productCategory");
-    const fImage = document.getElementById("productImage");
+    const fStock = document.getElementById("productStock");
+    const fDelivery = document.getElementById("productDelivery");
     const fStripe = document.getElementById("productStripeUrl");
+    const imagesContainer = document.getElementById("imagesContainer");
+    const btnAddImageField = document.getElementById("btnAddImageField");
 
     // Category inputs
     const btnAddCategory = document.getElementById("btnAddCategory");
@@ -266,11 +281,13 @@
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
+        const stockLabel = p.stock === 0 ? " · <strong style='color:#c00;'>SOLD OUT</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
+        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         return `
         <div class="product-card">
-          <img src="${p.image_url || '/assets/img/placeholder.jpg'}" alt="${p.name}" class="product-image">
+          <img src="${imgSrc}" alt="${p.name}" class="product-image">
           <h3 style="margin:0; font-size:18px;">${p.name}</h3>
-          <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}${catLabel}</p>
+          <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}${catLabel}${stockLabel}</p>
           <div style="display:flex; gap:8px; margin-top:auto;">
             <button class="btn tiny on-light" onclick="editProduct('${p.id}')">Modifier</button>
             <button class="btn tiny" style="background:#ffdddd; color:#c00;" onclick="deleteProduct('${p.id}')">Supprimer</button>
@@ -282,6 +299,30 @@
       window.allProducts = data;
     }
 
+    function renderImageFields(urls = ['']){
+      if(!urls || !urls.length) urls = [''];
+      imagesContainer.innerHTML = urls.map((url, i) => `
+        <div style="display:flex; gap:8px; align-items:center;" class="img-field-row">
+          <input type="radio" name="mainImgRadio" value="${i}" ${i === 0 ? 'checked' : ''} title="Choisir comme image principale">
+          <input type="text" class="input img-url-input" value="${url}" placeholder="https://..." style="flex:1;">
+          <button type="button" class="btn tiny" onclick="this.parentElement.remove()" style="background:transparent; color:#c00;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    btnAddImageField?.addEventListener("click", () => {
+      const idx = imagesContainer.children.length;
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex; gap:8px; align-items:center;";
+      div.className = "img-field-row";
+      div.innerHTML = `
+        <input type="radio" name="mainImgRadio" value="${idx}" ${idx === 0 ? 'checked' : ''} title="Choisir comme image principale">
+        <input type="text" class="input img-url-input" placeholder="https://..." style="flex:1;">
+        <button type="button" class="btn tiny" onclick="this.parentElement.remove()" style="background:transparent; color:#c00;">✕</button>
+      `;
+      imagesContainer.appendChild(div);
+    });
+
     window.editProduct = (id) => {
       const product = window.allProducts.find(p => p.id == id);
       if(!product) return;
@@ -292,8 +333,13 @@
       fPrice.value = product.price;
       fType.value = product.type || "physique";
       fCategory.value = product.category_id || "";
-      fImage.value = product.image_url || "";
+      fStock.value = product.stock != null ? product.stock : "";
+      fDelivery.value = product.delivery_info || "";
       fStripe.value = product.stripe_url || "";
+      
+      const imgs = product.image_urls && product.image_urls.length ? product.image_urls : (product.image_url ? [product.image_url] : ['']);
+      renderImageFields(imgs);
+
       productModal.classList.add("active");
     };
 
@@ -307,6 +353,7 @@
       document.getElementById("modalTitle").textContent = "Nouveau produit";
       productForm.reset();
       fId.value = "";
+      renderImageFields(['']);
       productModal.classList.add("active");
     });
 
@@ -317,21 +364,39 @@
     productForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       
+      // Gather image URLs
+      const rows = Array.from(imagesContainer.querySelectorAll(".img-field-row"));
+      let urls = [];
+      let mainIdx = 0;
+      rows.forEach((row, i) => {
+        const val = row.querySelector(".img-url-input").value.trim();
+        const radio = row.querySelector("input[name='mainImgRadio']");
+        if(val){
+          if(radio && radio.checked) mainIdx = urls.length;
+          urls.push(val);
+        }
+      });
+      if(urls.length > 1 && mainIdx > 0){
+        const mainUrl = urls.splice(mainIdx, 1)[0];
+        urls.unshift(mainUrl);
+      }
+
       const payload = {
-        name: fName.value,
-        description: fDesc.value,
+        name: fName.value.trim(),
+        description: fDesc.value.trim(),
         price: parseFloat(fPrice.value),
         type: fType.value,
         category_id: fCategory.value || null,
-        image_url: fImage.value,
-        stripe_url: fStripe.value
+        stock: fStock.value === "" ? null : parseInt(fStock.value, 10),
+        delivery_info: fDelivery.value.trim() || null,
+        image_urls: urls,
+        image_url: urls[0] || null,
+        stripe_url: fStripe.value.trim()
       };
 
       if (fId.value) {
-        // Update
         await supabase.from("products").update(payload).eq("id", fId.value);
       } else {
-        // Insert
         await supabase.from("products").insert(payload);
       }
       

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -363,6 +363,33 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--white);
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .wizard-step {
+      display: none;
+    }
+    .wizard-step.active {
+      display: grid;
+      gap: 14px;
     }
   </style>
 </head>
@@ -376,7 +403,7 @@
         <span>ÂmesNomades</span>
       </a>
       <div class="nav-links nav-links-desktop">
-        <a href="/compte.html">Compte</a>
+        <a href="/boutique.html">Boutique</a><a href="/compte.html">Compte</a>
         <a href="/admin-bookings.html">Réservations</a>
       </div>
     </div>
@@ -759,6 +786,105 @@
     </div>
   </section>
 
+  <!-- WIZARD CRÉATION SÉJOUR -->
+  <div class="modal" id="stayWizardModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0; font-size:20px;">Nouveau séjour — Étape <span id="wizardStepNum">1</span>/3</h2>
+        <button class="btn tiny" id="btnCancelWizard" style="background:transparent; font-size:16px;">✕</button>
+      </div>
+
+      <div id="wizardErrorMsg" style="color:#c00; font-size:13px; margin-bottom:12px;"></div>
+
+      <form id="stayWizardForm">
+        <!-- ÉTAPE 1 : Bases -->
+        <div class="wizard-step active" id="wizardStep1">
+          <h3 style="margin:0; font-size:16px; color:var(--muted);">1. Informations générales</h3>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
+            <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Destination / Lieu *</label>
+            <input id="wizLocation" class="input" placeholder="Ex : Mas des Songes, Camargue" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Accroche courte *</label>
+            <input id="wizShortDesc" class="input" placeholder="Ex : 4 jours pour ralentir au cœur de la nature sauvage" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Description</label>
+            <textarea id="wizDesc" class="input" rows="3" placeholder="Présentation détaillée du séjour..."></textarea>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 2 : Dates & Prix -->
+        <div class="wizard-step" id="wizardStep2">
+          <h3 style="margin:0; font-size:16px; color:var(--muted);">2. Dates et Tarifs</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Date début *</label>
+              <input id="wizStartDate" type="date" class="input" required>
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Date fin *</label>
+              <input id="wizEndDate" type="date" class="input" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Prix (€) *</label>
+              <input id="wizPrice" type="number" step="0.01" class="input" placeholder="650" required>
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Places totales *</label>
+              <input id="wizSeats" type="number" class="input" value="12" required>
+            </div>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Label de prix (optionnel)</label>
+            <input id="wizPriceLabel" class="input" placeholder="Ex : À partir de, ou Par personne">
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Lien de paiement / réservation</label>
+            <input id="wizBookingUrl" class="input" placeholder="https://buy.stripe.com/...">
+          </div>
+        </div>
+
+        <!-- ÉTAPE 3 : Contenu & Photos -->
+        <div class="wizard-step" id="wizardStep3">
+          <h3 style="margin:0; font-size:16px; color:var(--muted);">3. Programme & Photos</h3>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Image principale (URL) *</label>
+            <input id="wizHeroImage" class="input" placeholder="https://..." required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Au programme (1 point clé par ligne)</label>
+            <textarea id="wizProgramNote" class="input" rows="2" placeholder="Séances de yoga quotidiennes&#10;Ateliers de respiration&#10;Temps libres et balades"></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Inclus (1 par ligne)</label>
+              <textarea id="wizIncluded" class="input" rows="3" placeholder="Hébergement 3 nuits&#10;Repas bio inclus&#10;Matériel de yoga"></textarea>
+            </div>
+            <div>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Non inclus (1 par ligne)</label>
+              <textarea id="wizNotIncluded" class="input" rows="3" placeholder="Transport jusqu'au lieu&#10;Assurance annulation"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+          <button type="button" class="btn" id="btnWizPrev" style="background:transparent; border:1px solid var(--line); display:none;">Précédent</button>
+          <div style="margin-left:auto; display:flex; gap:10px;">
+            <button type="button" class="btn on-light" id="btnWizNext">Suivant</button>
+            <button type="submit" class="btn on-light" id="btnWizSubmit" style="display:none; background:#4f8c5b; color:#fff;">✨ Créer le séjour</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script type="module">
     // Les pages séjour ne sont pas des fichiers HTML individuels créés sur le serveur.
     // C'est une Single Page Application : un seul fichier sejour.html charge dynamiquement
@@ -778,6 +904,15 @@
     const btnReloadHomepage = document.getElementById("btnReloadHomepage");
     const btnSaveHomepage = document.getElementById("btnSaveHomepage");
     const btnNewStay = document.getElementById("btnNewStay");
+    const stayWizardModal = document.getElementById("stayWizardModal");
+    const stayWizardForm = document.getElementById("stayWizardForm");
+    const wizardStepNum = document.getElementById("wizardStepNum");
+    const wizardErrorMsg = document.getElementById("wizardErrorMsg");
+    const btnCancelWizard = document.getElementById("btnCancelWizard");
+    const btnWizPrev = document.getElementById("btnWizPrev");
+    const btnWizNext = document.getElementById("btnWizNext");
+    const btnWizSubmit = document.getElementById("btnWizSubmit");
+    let currentWizStep = 1;
     const btnPreviewStayTop = document.getElementById("btnPreviewStayTop");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
@@ -1796,9 +1931,98 @@
       await saveHomepageState();
     });
 
-    btnNewStay?.addEventListener("click", async () => {
-      resetEditor();
-      openEditor();
+    function updateWizardStep(step){
+      currentWizStep = step;
+      wizardStepNum.textContent = step;
+      wizardErrorMsg.textContent = "";
+      document.querySelectorAll(".wizard-step").forEach((el, i) => {
+        el.classList.toggle("active", i + 1 === step);
+      });
+      btnWizPrev.style.display = step > 1 ? "inline-flex" : "none";
+      btnWizNext.style.display = step < 3 ? "inline-flex" : "none";
+      btnWizSubmit.style.display = step === 3 ? "inline-flex" : "none";
+    }
+
+    btnNewStay?.addEventListener("click", () => {
+      stayWizardForm.reset();
+      updateWizardStep(1);
+      stayWizardModal.classList.add("active");
+    });
+
+    btnCancelWizard?.addEventListener("click", () => {
+      stayWizardModal.classList.remove("active");
+    });
+
+    btnWizPrev?.addEventListener("click", () => {
+      if(currentWizStep > 1) updateWizardStep(currentWizStep - 1);
+    });
+
+    btnWizNext?.addEventListener("click", () => {
+      if(currentWizStep === 1){
+        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !document.getElementById("wizShortDesc").value.trim()){
+          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination et l'accroche.";
+          return;
+        }
+      } else if(currentWizStep === 2){
+        if(!document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizPrice").value){
+          wizardErrorMsg.textContent = "Merci de renseigner les dates de début et de fin ainsi que le prix.";
+          return;
+        }
+      }
+      updateWizardStep(currentWizStep + 1);
+    });
+
+    stayWizardForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      wizardErrorMsg.textContent = "Création en cours...";
+      
+      const title = document.getElementById("wizTitle").value.trim();
+      const slug = slugify(title);
+      const location = document.getElementById("wizLocation").value.trim();
+      const short_description = document.getElementById("wizShortDesc").value.trim();
+      const description = document.getElementById("wizDesc").value.trim();
+      const hero_image = document.getElementById("wizHeroImage").value.trim();
+      const booking_url = document.getElementById("wizBookingUrl").value.trim();
+      const min_bookings = 10;
+      const published = false;
+      
+      const program_note = document.getElementById("wizProgramNote").value.trim();
+      const included_items = linesToArray(document.getElementById("wizIncluded").value);
+      const not_included_items = linesToArray(document.getElementById("wizNotIncluded").value);
+
+      const { data: existing } = await supabase.from("stays").select("id").eq("slug", slug).maybeSingle();
+      if(existing){
+        wizardErrorMsg.textContent = `Un séjour avec un titre similaire (slug "${slug}") existe déjà. Veuillez modifier le titre.`;
+        return;
+      }
+
+      const payload = {
+        title, slug, location, short_description, description, hero_image,
+        booking_url, reservation_url: booking_url, min_bookings, published,
+        program_note, included_items, not_included_items
+      };
+
+      const { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
+      if(error){
+        wizardErrorMsg.textContent = "Erreur création : " + error.message;
+        return;
+      }
+
+      await supabase.from("stay_dates").insert([{
+        stay_id: newStay.id,
+        start_date: document.getElementById("wizStartDate").value,
+        end_date: document.getElementById("wizEndDate").value,
+        seats_total: Number(document.getElementById("wizSeats").value || 12),
+        seats_remaining: Number(document.getElementById("wizSeats").value || 12),
+        price_label: document.getElementById("wizPriceLabel").value.trim() || null,
+        amount: Number(document.getElementById("wizPrice").value || 0)
+      }]);
+
+      stayWizardModal.classList.remove("active");
+      setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant ! Vous pouvez le peaufiner ici.");
+      await loadStays();
+      // Ouvrir l'éditeur pour qu'il puisse vérifier/modifier
+      await editStay(newStay.id);
     });
 
     btnCancelEdit?.addEventListener("click", () => {
