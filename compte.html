@@ -15,6 +15,12 @@
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css" />
+  <style>
+    /* Léger arrondi sur tous les boutons admin */
+    button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
+      border-radius: 6px !important;
+    }
+  </style>
 </head>
 
 <body class="on-light">
@@ -27,6 +33,7 @@
         <span>ÂmesNomades</span>
       </a>
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
+        <a href="/faq.html">FAQ</a>
         <a href="/index.html#apropos">À propos</a>
         <a href="/boutique.html">Shop</a>
         <a href="/contact.html">Contact</a>
@@ -230,7 +237,7 @@
             <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:20px; margin-top:20px;">
               <h3 style="margin:0; font-size:16px;">Photos du bandeau "Retour en images"</h3>
               <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
-                Ajoutez ou supprimez les photos qui défilent dans la galerie de la page d'accueil.
+                Ajoutez, supprimez, ou glissez-déposez les cartes pour changer l'ordre des photos sur la page d'accueil.
               </p>
 
               <div id="adminGalleryPhotosList" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
@@ -884,6 +891,7 @@
       }
     }
 
+    let galDragIdx = -1;
     function renderAdminGalleryPhotos() {
       if (!adminGalleryPhotosList) return;
       if (currentGalleryPhotos.length === 0) {
@@ -891,18 +899,54 @@
         return;
       }
       adminGalleryPhotosList.innerHTML = currentGalleryPhotos.map((p, idx) => `
-        <div style="border:1px solid var(--line); border-radius:4px; padding:6px; background:#f9f9f9; width:130px; text-align:center; position:relative;">
-          <img src="${p.url}" alt="${p.alt || ''}" style="width:100%; height:80px; object-fit:cover; border-radius:2px; background:#eee;">
+        <div class="gal-item-card" draggable="true" data-idx="${idx}" style="border:1px solid var(--line); border-radius:6px; padding:8px; background:#f9f9f9; width:135px; text-align:center; position:relative; cursor:grab; transition:all 0.2s ease; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+          <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <span>☰</span> #${idx+1}
+          </div>
+          <img src="${p.url}" alt="${p.alt || ''}" style="width:100%; height:80px; object-fit:cover; border-radius:4px; background:#eee; pointer-events:none;">
           <div style="font-size:11px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;" title="${p.alt || ''}">${p.alt || 'Sans description'}</div>
-          <button type="button" class="btn-del-gal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:11px; padding:3px 6px; margin-top:6px; cursor:pointer; width:100%;">Supprimer</button>
+          <button type="button" class="btn-del-gal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:6px; font-size:11px; padding:4px 6px; margin-top:6px; cursor:pointer; width:100%;">Supprimer</button>
         </div>
       `).join("");
 
       adminGalleryPhotosList.querySelectorAll(".btn-del-gal").forEach(btn => {
         btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
           currentGalleryPhotos.splice(idx, 1);
           await saveGalleryPhotos();
+        });
+      });
+
+      adminGalleryPhotosList.querySelectorAll(".gal-item-card").forEach(card => {
+        card.addEventListener("dragstart", (e) => {
+          galDragIdx = parseInt(card.getAttribute("data-idx"), 10);
+          e.dataTransfer.effectAllowed = "move";
+          card.style.opacity = "0.4";
+          card.style.transform = "scale(0.95)";
+        });
+        card.addEventListener("dragend", () => {
+          card.style.opacity = "1";
+          card.style.transform = "none";
+          adminGalleryPhotosList.querySelectorAll(".gal-item-card").forEach(el => el.style.border = "1px solid var(--line)");
+        });
+        card.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          card.style.border = "2px dashed #111";
+        });
+        card.addEventListener("dragleave", () => {
+          card.style.border = "1px solid var(--line)";
+        });
+        card.addEventListener("drop", async (e) => {
+          e.preventDefault();
+          const dropIdx = parseInt(card.getAttribute("data-idx"), 10);
+          if (galDragIdx !== -1 && galDragIdx !== dropIdx) {
+            const [movedItem] = currentGalleryPhotos.splice(galDragIdx, 1);
+            currentGalleryPhotos.splice(dropIdx, 0, movedItem);
+            renderAdminGalleryPhotos();
+            await saveGalleryPhotos();
+          }
         });
       });
     }

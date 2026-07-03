@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -17,6 +17,12 @@
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    /* Léger arrondi sur tous les boutons admin */
+    button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
+      border-radius: 6px !important;
+    }
+  </style>
 </head>
 
 <body class="on-light">
@@ -33,6 +39,7 @@
       </a>
 
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
+        <a href="/faq.html">FAQ</a>
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/boutique.html">Shop</a>
         <a href="/contact.html" data-scroll>Contact</a>
@@ -50,6 +57,7 @@
 
       <div class="mobile-drawer" aria-hidden="true">
         <nav class="mobile-menu" aria-label="Navigation mobile">
+          <a href="/faq.html">FAQ</a>
           <a href="/index.html#apropos" data-scroll>À propos</a>
           <a href="/boutique.html">Shop</a>
           <a href="/contact.html" data-scroll>Contact</a>
