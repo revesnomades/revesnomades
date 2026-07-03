@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -87,7 +87,7 @@
 
       <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
         <a href="index.html#apropos" data-scroll>À propos</a>
-        <a href="boutique.html">Shop</a><a href="faq.html">FAQ</a>
+        <a href="boutique.html">Shop</a>
         <a href="contact.html" data-scroll>Contact</a>
 
         <a class="icon-btn" href="compte.html" aria-label="Compte">
@@ -105,7 +105,7 @@
       <div class="mobile-drawer" aria-hidden="true">
         <nav class="mobile-menu" aria-label="Navigation mobile">
           <a href="index.html#apropos" data-scroll>À propos</a>
-          <a href="boutique.html">Shop</a><a href="faq.html">FAQ</a>
+          <a href="boutique.html">Shop</a>
           <a href="contact.html" data-scroll>Contact</a>
           <a href="compte.html">Compte</a>
         </nav>
@@ -218,6 +218,48 @@
     </div>
   </section>
 
+  <!-- BANDEAU GALERIE - RETOUR EN IMAGE -->
+  <section class="band white" id="galerie-retour-image" style="display:none; overflow:hidden;">
+    <div class="container" style="padding: calc(var(--navH) + 20px) 0 var(--space-lg);">
+      <div class="gallery-band-layout">
+        <div class="gallery-title-col reveal" data-delay="0">
+          <div class="kicker">Souvenirs & Émotions</div>
+          <h2 class="gallery-main-title">Retour en<br>images</h2>
+          <p class="muted" style="margin-top:16px;">
+            Quelques éclats de rire, de douceur et d'énergie partagés lors de nos moments Âmes Nomades.
+          </p>
+          <div class="gallery-controls" style="margin-top:24px; display:flex; gap:12px;">
+            <button class="btn tiny on-light" id="galPrevBtn" type="button" aria-label="Photo précédente" style="padding:8px 14px; font-size:16px;">←</button>
+            <button class="btn tiny on-light" id="galNextBtn" type="button" aria-label="Photo suivante" style="padding:8px 14px; font-size:16px;">→</button>
+          </div>
+        </div>
+
+        <div class="gallery-track-col reveal" data-delay="2">
+          <div class="gallery-carousel" id="galleryCarousel">
+            <div class="gallery-item">
+              <img src="assets/img/hero-1.jpg" alt="Souvenir Âmes Nomades 1" loading="lazy">
+            </div>
+            <div class="gallery-item">
+              <img src="assets/img/pool-brunch-yoga.jpg" alt="Souvenir Âmes Nomades 2" loading="lazy">
+            </div>
+            <div class="gallery-item">
+              <img src="assets/img/bottom-wide.jpg" alt="Souvenir Âmes Nomades 3" loading="lazy">
+            </div>
+            <div class="gallery-item">
+              <img src="assets/img/pool-brunch-yoga-2.jpg" alt="Souvenir Âmes Nomades 4" loading="lazy">
+            </div>
+            <div class="gallery-item">
+              <img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Souvenir Âmes Nomades 5" loading="lazy">
+            </div>
+            <div class="gallery-item">
+              <img src="assets/img/hero-2.jpg" alt="Souvenir Âmes Nomades 6" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="band white fixed-bg" id="apropos">
     <div class="container about-band">
       <div class="about-inner">
@@ -297,7 +339,7 @@
       <div id="newsletterMsg" class="form-msg reveal" data-delay="2"></div>
       <p class="newsletter-legal reveal" data-delay="3">
         En cliquant sur recevoir mon guide vous acceptez notre
-        <a href="politique-confidentialite.html">politique de confidentialité</a>
+        <a href="/politique-confidentialite.html">Politique de confidentialité</a>
         et êtes inscrits à notre newsletter.
       </p>
     </div>
@@ -373,10 +415,8 @@
       <div class="legal reveal" data-delay="2">
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div>
-            <a href="faq.html" style="display:block; text-align:right;">FAQ</a>
-            <a href="mentions-legales.html">Mentions légales</a> ·
-            <a href="politique-confidentialite.html">Politique de confidentialité</a>
+          <div> <a href="/faq.html">FAQ</a> · <a href="/mentions-legales.html">Mentions légales</a> ·
+            <a href="/politique-confidentialite.html">Politique de confidentialité</a>
           </div>
         </div>
       </div>
@@ -595,6 +635,7 @@
     async function checkHomepageBands() {
       let showStays = false;    // Par défaut : caché au lancement (car 1 seul séjour)
       let showBoutique = true;  // Par défaut : affiché au lancement
+      let showGallery = true;   // Par défaut : affiché au lancement
 
       try {
         const { data } = await supabase
@@ -606,6 +647,7 @@
         if (data && data.value) {
           if (data.value.show_stays !== undefined) showStays = data.value.show_stays;
           if (data.value.show_boutique !== undefined) showBoutique = data.value.show_boutique;
+          if (data.value.show_gallery !== undefined) showGallery = data.value.show_gallery;
         }
       } catch (e) {
         console.warn("Utilisation de l'affichage par défaut des bandeaux:", e);
@@ -613,8 +655,37 @@
 
       const staysBand = document.getElementById("prochains-sejours");
       const boutiqueBand = document.getElementById("boutique-vedette");
+      const galleryBand = document.getElementById("galerie-retour-image");
       if (staysBand) staysBand.style.display = showStays ? "" : "none";
       if (boutiqueBand) boutiqueBand.style.display = showBoutique ? "" : "none";
+      if (galleryBand) galleryBand.style.display = showGallery ? "" : "none";
+    }
+
+    // Gestion du défilement du bandeau galerie
+    const galCarousel = document.getElementById("galleryCarousel");
+    const galPrev = document.getElementById("galPrevBtn");
+    const galNext = document.getElementById("galNextBtn");
+    if (galCarousel && galPrev && galNext) {
+      galPrev.addEventListener("click", () => {
+        galCarousel.scrollBy({ left: -340, behavior: "smooth" });
+      });
+      galNext.addEventListener("click", () => {
+        if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
+          galCarousel.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          galCarousel.scrollBy({ left: 340, behavior: "smooth" });
+        }
+      });
+      // Défilement automatique doux toutes les 4 secondes
+      setInterval(() => {
+        if (!document.hidden && galCarousel.offsetParent !== null) {
+          if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
+            galCarousel.scrollTo({ left: 0, behavior: "smooth" });
+          } else {
+            galCarousel.scrollBy({ left: 340, behavior: "smooth" });
+          }
+        }
+      }, 4000);
     }
 
     let newsletterLastSubmit = 0;

@@ -142,21 +142,29 @@ select, option{ color: var(--text) !important; }
   height: var(--navH);
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-end;
   gap:12px;
+  position: relative;
 }
 .brand{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display:flex;
   align-items:center;
   gap:10px;
   color:#fff;
+  text-decoration: none;
+  z-index: 20;
 }
-.brand img{ height:62px; width:auto; transition: height .2s ease; }
+.brand img{ display: none !important; }
 .brand span{
   font-family:"SegoCustom", serif;
-  font-weight:500;
-  font-size:26px;
-  letter-spacing:.03em;
+  font-weight:400;
+  font-size:30px;
+  letter-spacing:.08em;
+  text-transform: uppercase;
 }
 
 .nav-links{
@@ -1110,8 +1118,8 @@ footer.band.cream{
   transform: translateY(-7px) rotate(-45deg);
 }
 @media (max-width: 780px){
-  --navH: 84px;
-  .brand img{ height: 46px; }
+  :root { --navH: 84px; }
+  .brand img{ display: none !important; }
   .brand span{ font-size: 20px; }
   .nav-links-desktop{ display: none; }
   .hamburger{ display: inline-block; }
@@ -1597,4 +1605,64 @@ input, textarea {
 
 .hero-bg.parallax-bg {
   will-change: transform;
+}
+
+/* =========================================================
+   GALERIE — RETOUR EN IMAGES
+========================================================= */
+.gallery-band-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  align-items: center;
+}
+@media (max-width: 980px) {
+  .gallery-band-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+.gallery-main-title {
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.1;
+  margin: 8px 0 0;
+  font-weight: 300;
+}
+.gallery-carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.gallery-carousel::-webkit-scrollbar {
+  display: none;
+}
+.gallery-item {
+  flex: 0 0 320px;
+  height: 420px;
+  scroll-snap-align: start;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  background: #f0ebde;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+@media (max-width: 600px) {
+  .gallery-item {
+    flex: 0 0 260px;
+    height: 360px;
+  }
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.gallery-item:hover img {
+  transform: scale(1.06);
 }

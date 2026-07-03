@@ -84,6 +84,10 @@
               <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
               Afficher "Shop — Sélection Vedette"
             </label>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14.5px; font-weight:500;">
+              <input type="checkbox" id="chkShowGalleryBand" checked style="width:18px; height:18px;">
+              Afficher "Galerie — Retour en images"
+            </label>
             <button class="btn on-light" id="btnSaveHomepageBands" type="button" style="margin-left:auto; padding:8px 16px;">Enregistrer l'affichage</button>
           </div>
           <div id="homepageBandsMsg" style="margin-top:10px; color:var(--muted); font-size:13px;"></div>
@@ -100,44 +104,28 @@
     const priorityCount = document.getElementById("priorityCount");
     const chkShowStaysBand = document.getElementById("chkShowStaysBand");
     const chkShowBoutiqueBand = document.getElementById("chkShowBoutiqueBand");
+    const chkShowGalleryBand = document.getElementById("chkShowGalleryBand");
     const btnSaveHomepageBands = document.getElementById("btnSaveHomepageBands");
     const homepageBandsMsg = document.getElementById("homepageBandsMsg");
 
     async function checkAdmin(){
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if(!user){
-        window.location.href = "/compte.html";
-        return null;
+      const { data: { session } } = await supabase.auth.getSession();
+      if(!session){
+        window.location.href = "compte.html";
+        return;
       }
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if(error || data?.role !== "admin"){
-        adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
-        throw new Error("Not admin");
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
+      if(!profile || profile.role !== "admin"){
+        window.location.href = "compte.html";
+        return;
       }
-
-      return user;
+      adminStatus.textContent = `Connecté (Admin: ${session.user.email})`;
+      loadCounts();
     }
 
     async function loadCounts(){
-      const { count: newsletterTotal, error: newsletterError } = await supabase
-        .from("newsletter")
-        .select("*", { count: "exact", head: true });
-
-      const { count: priorityTotal, error: priorityError } = await supabase
-        .from("priority_waitlist")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "active");
-
-      if(newsletterError) console.error(newsletterError);
-      if(priorityError) console.error(priorityError);
-
+      const { count: newsletterTotal } = await supabase.from("newsletter_subscribers").select("*", { count: "exact", head: true });
+      const { count: priorityTotal } = await supabase.from("priority_subscribers").select("*", { count: "exact", head: true });
       newsletterCount.textContent = newsletterTotal ?? "0";
       priorityCount.textContent = priorityTotal ?? "0";
       await loadHomepageBandsConfig();
@@ -150,9 +138,11 @@
         if (data && data.value) {
           if (data.value.show_stays !== undefined) chkShowStaysBand.checked = data.value.show_stays;
           if (data.value.show_boutique !== undefined) chkShowBoutiqueBand.checked = data.value.show_boutique;
+          if (data.value.show_gallery !== undefined && chkShowGalleryBand) chkShowGalleryBand.checked = data.value.show_gallery;
         } else {
           chkShowStaysBand.checked = false;
           chkShowBoutiqueBand.checked = true;
+          if (chkShowGalleryBand) chkShowGalleryBand.checked = true;
         }
       } catch (e) {
         console.warn("Error loading homepage bands:", e);
@@ -163,7 +153,8 @@
       homepageBandsMsg.textContent = "Enregistrement en cours…";
       const value = {
         show_stays: chkShowStaysBand.checked,
-        show_boutique: chkShowBoutiqueBand.checked
+        show_boutique: chkShowBoutiqueBand.checked,
+        show_gallery: chkShowGalleryBand ? chkShowGalleryBand.checked : true
       };
       const { error } = await supabase.from("site_settings").upsert({ key: "homepage_bands", value });
       if (error) {
