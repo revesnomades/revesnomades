@@ -177,6 +177,14 @@
       }
     }
 
+    async function saveSiteSettingSafe(key, value) {
+      let { data, error } = await supabase.from("site_settings").update({ value }).eq("key", key).select();
+      if (!error && (!data || data.length === 0)) {
+        ({ error } = await supabase.from("site_settings").upsert({ key, value }, { onConflict: "key" }));
+      }
+      return { error };
+    }
+
     btnSaveHomepageBands?.addEventListener("click", async () => {
       homepageBandsMsg.textContent = "Enregistrement en cours…";
       const value = {
@@ -184,7 +192,7 @@
         show_boutique: chkShowBoutiqueBand.checked,
         show_gallery: chkShowGalleryBand ? chkShowGalleryBand.checked : true
       };
-      const { error } = await supabase.from("site_settings").upsert({ key: "homepage_bands", value });
+      const { error } = await saveSiteSettingSafe("homepage_bands", value);
       if (error) {
         homepageBandsMsg.textContent = "❌ Erreur : " + error.message;
       } else {
@@ -243,7 +251,7 @@
 
     async function saveGalleryPhotos() {
       if (adminGalPhotoMsg) adminGalPhotoMsg.textContent = "Enregistrement de la galerie en cours…";
-      const { error } = await supabase.from("site_settings").upsert({ key: "homepage_gallery", value: currentGalleryPhotos });
+      const { error } = await saveSiteSettingSafe("homepage_gallery", currentGalleryPhotos);
       if (error) {
         if (adminGalPhotoMsg) adminGalPhotoMsg.textContent = "❌ Erreur : " + error.message;
       } else {

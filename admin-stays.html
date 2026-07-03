@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -832,21 +832,22 @@
         <button class="btn tiny" id="btnCancelWizard" style="background:transparent; font-size:18px; padding:4px 8px;">✕</button>
       </div>
 
-      <div class="wizard-progress" id="wizardProgress">
-        <div class="wiz-dot active" data-step="1">1. Général</div>
-        <div class="wiz-dot" data-step="2">2. Visuels</div>
-        <div class="wiz-dot" data-step="3">3. Tarifs</div>
-        <div class="wiz-dot" data-step="4">4. Programme</div>
-        <div class="wiz-dot" data-step="5">5. Inclus</div>
+      <div class="wizard-progress" id="wizardProgress" style="display:flex; gap:4px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;">
+        <div class="wiz-dot active" data-step="1" style="flex:1; min-width:80px; text-align:center; font-size:11.5px; padding:6px 4px;">1. Général</div>
+        <div class="wiz-dot" data-step="2" style="flex:1; min-width:80px; text-align:center; font-size:11.5px; padding:6px 4px;">2. Visuels</div>
+        <div class="wiz-dot" data-step="3" style="flex:1; min-width:90px; text-align:center; font-size:11.5px; padding:6px 4px;">3. Intervenante</div>
+        <div class="wiz-dot" data-step="4" style="flex:1; min-width:80px; text-align:center; font-size:11.5px; padding:6px 4px;">4. Inclus</div>
+        <div class="wiz-dot" data-step="5" style="flex:1; min-width:85px; text-align:center; font-size:11.5px; padding:6px 4px;">5. Programme</div>
+        <div class="wiz-dot" data-step="6" style="flex:1; min-width:110px; text-align:center; font-size:11.5px; padding:6px 4px;">6. Hébergement & Tarifs</div>
       </div>
 
       <div id="wizardErrorMsg" style="color:#c00; font-size:13px; margin-bottom:12px; font-weight:500;"></div>
 
       <form id="stayWizardForm">
-        <!-- ÉTAPE 1 : Bases -->
-        <div class="wizard-step active" id="wizardStep1">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 1 : Identité & Lieu</h3>
-          <p class="muted-small" style="margin:0 0 8px 0;">Définissez le titre principal et le lieu du séjour.</p>
+        <!-- ÉTAPE 1 : Général -->
+        <div class="wizard-step active" id="wizardStep1" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 1 : Général</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Définissez les informations de base et les dates de ce séjour.</p>
           <div>
             <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
@@ -855,30 +856,6 @@
             <label class="muted-small" style="display:block; margin-bottom:4px;">Destination / Lieu *</label>
             <input id="wizLocation" class="input" placeholder="Ex : Mas des Songes, Camargue" required>
           </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Accroche courte (Slogan) *</label>
-            <input id="wizShortDesc" class="input" placeholder="Ex : 4 jours pour ralentir au cœur de la nature sauvage" required>
-          </div>
-        </div>
-
-        <!-- ÉTAPE 2 : Description & Photos -->
-        <div class="wizard-step" id="wizardStep2">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 2 : Présentation & Visuels</h3>
-          <p class="muted-small" style="margin:0 0 8px 0;">Renseignez l'image de couverture et la présentation du séjour.</p>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Image principale (URL photo de couverture) *</label>
-            <input id="wizHeroImage" class="input" placeholder="https://..." required>
-          </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Description complète</label>
-            <textarea id="wizDesc" class="input" rows="5" placeholder="Présentation détaillée du séjour, de l'atmosphère et des objectifs..."></textarea>
-          </div>
-        </div>
-
-        <!-- ÉTAPE 3 : Dates & Tarifs -->
-        <div class="wizard-step" id="wizardStep3">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 3 : Dates & Tarifs de la session</h3>
-          <p class="muted-small" style="margin:0 0 8px 0;">Configurez la première session disponible pour ce séjour.</p>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
               <label class="muted-small" style="display:block; margin-bottom:4px;">Date de début *</label>
@@ -889,54 +866,158 @@
               <input id="wizEndDate" type="date" class="input" required>
             </div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Prix par personne (€) *</label>
-              <input id="wizPrice" type="number" step="0.01" class="input" placeholder="650" required>
-            </div>
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Nombre de places *</label>
-              <input id="wizSeats" type="number" class="input" value="12" required>
-            </div>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Label de prix (optionnel)</label>
-              <input id="wizPriceLabel" class="input" placeholder="Ex : À partir de, ou Par personne">
-            </div>
-            <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Lien de réservation (Stripe/autre)</label>
-              <input id="wizBookingUrl" class="input" placeholder="https://buy.stripe.com/...">
-            </div>
-          </div>
-        </div>
-
-        <!-- ÉTAPE 4 : Programme & Hébergement -->
-        <div class="wizard-step" id="wizardStep4">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 4 : Programme & Activités</h3>
-          <p class="muted-small" style="margin:0 0 8px 0;">Qu'est-ce qui attend les participants ?</p>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Au programme (Points clés, 1 par ligne)</label>
-            <textarea id="wizProgramNote" class="input" rows="5" placeholder="Séances de yoga douces et dynamiques&#10;Ateliers de respiration et méditation&#10;Temps libres, balades et connexion à la nature"></textarea>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Accroche courte (Slogan) *</label>
+            <input id="wizShortDesc" class="input" placeholder="Ex : 4 jours pour ralentir au cœur de la nature sauvage" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Description complète</label>
+            <textarea id="wizDesc" class="input" rows="4" placeholder="Présentation détaillée du séjour, de l'atmosphère et des objectifs..."></textarea>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Slug URL (optionnel - généré automatiquement si vide)</label>
+            <input id="wizSlug" class="input" placeholder="Ex : camargue-retraite-yoga">
           </div>
         </div>
 
-        <!-- ÉTAPE 5 : Inclus & Non inclus -->
-        <div class="wizard-step" id="wizardStep5">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 5 : Inclusions & Validation</h3>
-          <p class="muted-small" style="margin:0 0 8px 0;">Précisez ce qui est compris dans le tarif avant la création.</p>
+        <!-- ÉTAPE 2 : Visuels -->
+        <div class="wizard-step" id="wizardStep2" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 2 : Visuels</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Ajoutez la photo principale et les images de la galerie.</p>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo principale (couverture) *</label>
+            <div style="display:flex; gap:8px;">
+              <input id="wizHeroImage" class="input" placeholder="URL ou importer ->" style="flex:1;" required>
+              <input type="file" id="wizHeroFile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny on-light" id="btnUploadWizHero" style="padding:6px 12px; white-space:nowrap;">Importer un fichier</button>
+            </div>
+            <div id="wizHeroMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
+          <div style="margin-top:16px; border-top:1px dashed var(--line); padding-top:16px;">
+            <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Images de la galerie</label>
+            <p class="muted-small" style="margin:0 0 10px 0;">Ajoutez des photos pour illustrer le séjour dans sa galerie dédiée.</p>
+            <div id="wizGalContainer" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; min-height:40px; background:#f9f9f9; padding:8px; border-radius:4px; border:1px solid var(--line);">
+              <div style="color:var(--muted); font-size:12px; align-self:center;">Aucune photo de galerie ajoutée.</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <input type="text" id="wizGalUrl" class="input" placeholder="URL photo (ou importez via bouton)" style="flex:1; min-width:180px; font-size:13px;">
+              <input type="file" id="wizGalFile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny" id="btnUploadWizGalFile" style="background:#eee; border:1px solid var(--line); padding:6px 12px; font-size:12px;">Choisir un fichier</button>
+              <button type="button" class="btn tiny on-light" id="btnWizAddGalPhoto" style="padding:6px 14px; font-size:12px;">+ Ajouter à la galerie</button>
+            </div>
+            <div id="wizGalMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 3 : Intervenante -->
+        <div class="wizard-step" id="wizardStep3" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 3 : Intervenante</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Présentez la ou les personnes qui animent le séjour.</p>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Nom / Titre *</label>
+            <input id="wizIntervenantName" class="input" placeholder="Ex : Avec Appoline & Sarah — Professeures de Yoga">
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo de l'intervenante</label>
+            <div style="display:flex; gap:8px;">
+              <input id="wizIntervenantPhoto" class="input" placeholder="URL photo ou importer ->" style="flex:1;">
+              <input type="file" id="wizIntervenantFile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny on-light" id="btnUploadWizIntervenant" style="padding:6px 12px; white-space:nowrap;">Importer</button>
+            </div>
+            <div id="wizIntervenantMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Description / Biographie</label>
+            <textarea id="wizIntervenantBio" class="input" rows="5" placeholder="Présentation détaillée de l'expérience et de l'approche de l'intervenante..."></textarea>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 4 : Inclus / non inclus -->
+        <div class="wizard-step" id="wizardStep4" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 4 : Inclus / Non inclus</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Précisez les prestations comprises ou non dans l'expérience.</p>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Inclus dans le prix (1 par ligne)</label>
-              <textarea id="wizIncluded" class="input" rows="4" placeholder="Hébergement 3 nuits&#10;Repas bio et végétariens inclus&#10;Matériel de yoga et accessoires"></textarea>
+              <label class="muted-small" style="display:block; margin-bottom:4px;">Inclus (1 par ligne) *</label>
+              <textarea id="wizIncluded" class="input" rows="7" placeholder="Hébergement 3 nuits&#10;Repas bio et végétariens inclus&#10;Matériel et accessoires fournis"></textarea>
             </div>
             <div>
               <label class="muted-small" style="display:block; margin-bottom:4px;">Non inclus (1 par ligne)</label>
-              <textarea id="wizNotIncluded" class="input" rows="4" placeholder="Transport jusqu'au lieu du séjour&#10;Assurance annulation individuelle"></textarea>
+              <textarea id="wizNotIncluded" class="input" rows="7" placeholder="Transport jusqu'au lieu du séjour&#10;Assurance annulation individuelle"></textarea>
             </div>
           </div>
-          <div style="background:#eaf4ec; padding:12px; border-radius:8px; color:#3b7045; font-size:13px; margin-top:8px;">
-            ℹ️ Vous pourrez ajouter un planning détaillé jour par jour, des FAQ et d'autres photos une fois le séjour créé !
+        </div>
+
+        <!-- ÉTAPE 5 : Programme -->
+        <div class="wizard-step" id="wizardStep5" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 5 : Programme</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Présentation générale et déroulé par étapes ou par journées.</p>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Texte général de présentation du programme</label>
+            <textarea id="wizProgramNote" class="input" rows="3" placeholder="Un déroulé pensé pour ralentir, alternant pratiques dynamiques et temps de repos..."></textarea>
+          </div>
+          <hr style="margin:16px 0; border:none; border-top:1px dashed var(--line);">
+          <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Programmes quotidiens / uniques (matin / après-midi / soirée)</label>
+          <div id="wizProgContainer" style="display:grid; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
+            <div style="color:var(--muted); font-size:12px;">Aucun créneau ou programme ajouté pour l'instant.</div>
+          </div>
+          <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px;">
+            <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+              <div>
+                <label class="label" style="font-size:11px;">Période / Titre (ex : Jour 1 — Matin, ou Soirée)</label>
+                <input type="text" id="wizProgTitle" class="input" placeholder="Ex : Jour 1 — Matinée & Accueil" style="font-size:13px;">
+              </div>
+              <div>
+                <label class="label" style="font-size:11px;">Description de l'activité</label>
+                <textarea id="wizProgDesc" class="input" rows="2" placeholder="Ex : Cercle d'ouverture, installation et pratique de Yin Yoga douce." style="font-size:13px;"></textarea>
+              </div>
+            </div>
+            <button type="button" class="btn tiny on-light" id="btnWizAddProg" style="margin-top:8px; padding:6px 14px; font-size:12px;">+ Ajouter ce programme</button>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 6 : Hébergement & Tarifs -->
+        <div class="wizard-step" id="wizardStep6" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 6 : Hébergement & Tarifs</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Présentez le lieu de vie et créez vos options tarifaires redirigeant vers Stripe.</p>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Description de l'hébergement</label>
+            <textarea id="wizAccomDesc" class="input" rows="3" placeholder="Un mas provençal authentique niché au milieu des oliviers, chambres spacieuses..."></textarea>
+          </div>
+          <div style="margin-top:8px;">
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo de l'hébergement</label>
+            <div style="display:flex; gap:8px;">
+              <input id="wizAccomPhoto" class="input" placeholder="URL photo ou importer ->" style="flex:1;">
+              <input type="file" id="wizAccomFile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny on-light" id="btnUploadWizAccom" style="padding:6px 12px; white-space:nowrap;">Importer</button>
+            </div>
+            <div id="wizAccomMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
+          <hr style="margin:16px 0; border:none; border-top:1px dashed var(--line);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="muted-small" style="display:block; font-weight:600; margin:0;">Options d'hébergement & Tarifs (avec redirection Stripe)</label>
+            <div style="font-size:12px; color:var(--muted);">Nombre de places total : <input type="number" id="wizSeats" value="12" style="width:50px; padding:2px 4px; border:1px solid var(--line); border-radius:3px;"></div>
+          </div>
+          <p class="muted-small" style="margin:0 0 10px 0;">Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.</p>
+          <div id="wizOptContainer" style="display:grid; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
+            <div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>
+          </div>
+          <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px;">
+            <div style="display:grid; grid-template-columns:1fr 100px; gap:8px;">
+              <div>
+                <label class="label" style="font-size:11px;">Texte de l'option (ex : Chambre partagée 2 lits)</label>
+                <input type="text" id="wizOptLabel" class="input" placeholder="Ex : Chambre partagée (2 personnes)" style="font-size:13px;">
+              </div>
+              <div>
+                <label class="label" style="font-size:11px;">Tarif (€) *</label>
+                <input type="number" id="wizOptPrice" class="input" placeholder="650" style="font-size:13px;">
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <label class="label" style="font-size:11px;">Lien de paiement Stripe *</label>
+              <input type="text" id="wizOptStripe" class="input" placeholder="Ex : https://buy.stripe.com/..." style="font-size:13px;">
+            </div>
+            <button type="button" class="btn tiny on-light" id="btnWizAddOpt" style="margin-top:8px; padding:6px 14px; font-size:12px;">+ Ajouter cette option</button>
           </div>
         </div>
 
@@ -1113,7 +1194,25 @@
 
     function arrayToLines(value){
       if(!value || !Array.isArray(value)) return "";
-      return value.join("\n");
+      return value.map(item => {
+        if(typeof item === "object" && item !== null){
+          if(item.label) return `${item.label} | ${item.price || ''} | ${item.stripe_url || ''}`;
+          if(item.title) return `${item.title} : ${item.text || ''}`;
+          return JSON.stringify(item);
+        }
+        return String(item);
+      }).join("\n");
+    }
+
+    function linesToOptionsArray(text){
+      if(!text) return [];
+      return text.split("\n").map(line => line.trim()).filter(Boolean).map(line => {
+        const parts = line.split("|").map(p => p.trim());
+        if(parts.length >= 2){
+          return { label: parts[0], price: parts[1], stripe_url: parts[2] || "" };
+        }
+        return line;
+      });
     }
 
     function createDefaultBlock(type = "text"){
@@ -1997,6 +2096,191 @@
       await saveHomepageState();
     });
 
+    let wizGalList = [];
+    let wizProgList = [];
+    let wizOptList = [];
+
+    function renderWizGal() {
+      const container = document.getElementById("wizGalContainer");
+      if (!container) return;
+      if (wizGalList.length === 0) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:12px; align-self:center;">Aucune photo de galerie ajoutée.</div>`;
+        return;
+      }
+      container.innerHTML = wizGalList.map((url, idx) => `
+        <div style="border:1px solid var(--line); border-radius:4px; padding:4px; background:#fff; width:80px; text-align:center;">
+          <img src="${url}" style="width:100%; height:50px; object-fit:cover; border-radius:2px; background:#eee;">
+          <button type="button" class="btn-del-wizgal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:10px; padding:2px 4px; margin-top:4px; cursor:pointer; width:100%;">X</button>
+        </div>
+      `).join("");
+      container.querySelectorAll(".btn-del-wizgal").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          wizGalList.splice(idx, 1);
+          renderWizGal();
+        });
+      });
+    }
+
+    function renderWizProg() {
+      const container = document.getElementById("wizProgContainer");
+      if (!container) return;
+      if (wizProgList.length === 0) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun créneau ou programme ajouté pour l'instant.</div>`;
+        return;
+      }
+      container.innerHTML = wizProgList.map((p, idx) => `
+        <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div>
+            <div style="font-weight:600; font-size:13px; color:var(--text);">${escapeHtml(p.title || "")}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px; white-space:pre-line;">${escapeHtml(p.text || "")}</div>
+          </div>
+          <button type="button" class="btn-del-wizprog" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 6px; cursor:pointer;">Supprimer</button>
+        </div>
+      `).join("");
+      container.querySelectorAll(".btn-del-wizprog").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          wizProgList.splice(idx, 1);
+          renderWizProg();
+        });
+      });
+    }
+
+    function renderWizOpt() {
+      const container = document.getElementById("wizOptContainer");
+      if (!container) return;
+      if (wizOptList.length === 0) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>`;
+        return;
+      }
+      container.innerHTML = wizOptList.map((o, idx) => `
+        <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div>
+            <div style="font-weight:600; font-size:13.5px; color:var(--text);">${escapeHtml(o.label || "")} <span style="color:#4f8c5b; font-weight:700;">(${o.price} €)</span></div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; max-width:280px;" title="${o.stripe_url || ''}">🔗 ${escapeHtml(o.stripe_url || "Pas de lien Stripe")}</div>
+          </div>
+          <button type="button" class="btn-del-wizopt" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 8px; cursor:pointer;">Supprimer</button>
+        </div>
+      `).join("");
+      container.querySelectorAll(".btn-del-wizopt").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          wizOptList.splice(idx, 1);
+          renderWizOpt();
+        });
+      });
+    }
+
+    async function uploadWizFile(fileInputEl, msgEl) {
+      const file = fileInputEl?.files?.[0];
+      if (!file) return null;
+      if (msgEl) msgEl.textContent = "Importation en cours…";
+      try {
+        const safeName = file.name.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
+        const filePath = `wizard/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage.from("stays").upload(filePath, file, { cacheControl: "3600", upsert: false });
+        if (upErr) throw upErr;
+        const { data: pubData } = supabase.storage.from("stays").getPublicUrl(filePath);
+        if (msgEl) msgEl.textContent = "✅ Importé avec succès !";
+        return pubData.publicUrl;
+      } catch (err) {
+        console.error("Erreur upload wizard:", err);
+        if (msgEl) msgEl.textContent = "❌ Erreur : " + err.message;
+        return null;
+      }
+    }
+
+    document.getElementById("btnUploadWizHero")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizHeroFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizHeroMsg"));
+          if (url) document.getElementById("wizHeroImage").value = url;
+        };
+      }
+    });
+
+    document.getElementById("btnUploadWizGalFile")?.addEventListener("click", () => {
+      const fileInput = document.getElementById("wizGalFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizGalMsg"));
+          if (url) {
+            wizGalList.push(url);
+            renderWizGal();
+            if (fileInput) fileInput.value = "";
+          }
+        };
+      }
+    });
+
+    document.getElementById("btnWizAddGalPhoto")?.addEventListener("click", async () => {
+      const urlInput = document.getElementById("wizGalUrl");
+      const fileInput = document.getElementById("wizGalFile");
+      let url = urlInput?.value?.trim() || "";
+      if (!url && fileInput?.files?.[0]) {
+        url = await uploadWizFile(fileInput, document.getElementById("wizGalMsg")) || "";
+      }
+      if (url) {
+        wizGalList.push(url);
+        if (urlInput) urlInput.value = "";
+        if (fileInput) fileInput.value = "";
+        renderWizGal();
+      }
+    });
+
+    document.getElementById("btnUploadWizIntervenant")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizIntervenantFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizIntervenantMsg"));
+          if (url) document.getElementById("wizIntervenantPhoto").value = url;
+        };
+      }
+    });
+
+    document.getElementById("btnUploadWizAccom")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizAccomFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizAccomMsg"));
+          if (url) document.getElementById("wizAccomPhoto").value = url;
+        };
+      }
+    });
+
+    document.getElementById("btnWizAddProg")?.addEventListener("click", () => {
+      const titleEl = document.getElementById("wizProgTitle");
+      const descEl = document.getElementById("wizProgDesc");
+      const title = titleEl?.value?.trim();
+      const text = descEl?.value?.trim();
+      if (!title && !text) return;
+      wizProgList.push({ title: title || "Créneau", text });
+      if (titleEl) titleEl.value = "";
+      if (descEl) descEl.value = "";
+      renderWizProg();
+    });
+
+    document.getElementById("btnWizAddOpt")?.addEventListener("click", () => {
+      const labelEl = document.getElementById("wizOptLabel");
+      const priceEl = document.getElementById("wizOptPrice");
+      const stripeEl = document.getElementById("wizOptStripe");
+      const label = labelEl?.value?.trim() || "Option hébergement";
+      const price = priceEl?.value?.trim() || "0";
+      const stripe_url = stripeEl?.value?.trim() || "";
+      if (!label && !price) return;
+      wizOptList.push({ label, price, stripe_url });
+      if (labelEl) labelEl.value = "";
+      if (priceEl) priceEl.value = "";
+      if (stripeEl) stripeEl.value = "";
+      renderWizOpt();
+    });
+
     function updateWizardStep(step){
       currentWizStep = step;
       if(typeof wizardStepNum !== 'undefined' && wizardStepNum) wizardStepNum.textContent = step;
@@ -2010,12 +2294,18 @@
         dot.classList.toggle("done", dotStep < step);
       });
       btnWizPrev.style.display = step > 1 ? "inline-flex" : "none";
-      btnWizNext.style.display = step < 5 ? "inline-flex" : "none";
-      btnWizSubmit.style.display = step === 5 ? "inline-flex" : "none";
+      btnWizNext.style.display = step < 6 ? "inline-flex" : "none";
+      btnWizSubmit.style.display = step === 6 ? "inline-flex" : "none";
     }
 
     btnNewStay?.addEventListener("click", () => {
       stayWizardForm.reset();
+      wizGalList = [];
+      wizProgList = [];
+      wizOptList = [];
+      renderWizGal();
+      renderWizProg();
+      renderWizOpt();
       updateWizardStep(1);
       stayWizardModal.classList.add("active");
     });
@@ -2030,18 +2320,13 @@
 
     btnWizNext?.addEventListener("click", () => {
       if(currentWizStep === 1){
-        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !document.getElementById("wizShortDesc").value.trim()){
-          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination et l'accroche.";
+        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizShortDesc").value.trim()){
+          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, les dates et l'accroche courte.";
           return;
         }
       } else if(currentWizStep === 2){
         if(!document.getElementById("wizHeroImage").value.trim()){
-          wizardErrorMsg.textContent = "Merci d'ajouter l'URL de l'image principale.";
-          return;
-        }
-      } else if(currentWizStep === 3){
-        if(!document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizPrice").value){
-          wizardErrorMsg.textContent = "Merci de renseigner les dates de début et de fin ainsi que le prix.";
+          wizardErrorMsg.textContent = "Merci d'ajouter la photo principale (couverture).";
           return;
         }
       }
@@ -2050,15 +2335,16 @@
 
     stayWizardForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      wizardErrorMsg.textContent = "Création en cours...";
+      wizardErrorMsg.textContent = "Création du séjour en cours...";
       
       const title = document.getElementById("wizTitle").value.trim();
-      const slug = slugify(title);
+      const customSlug = document.getElementById("wizSlug").value.trim();
+      const slug = customSlug || slugify(title);
       const location = document.getElementById("wizLocation").value.trim();
       const short_description = document.getElementById("wizShortDesc").value.trim();
       const description = document.getElementById("wizDesc").value.trim();
       const hero_image = document.getElementById("wizHeroImage").value.trim();
-      const booking_url = document.getElementById("wizBookingUrl").value.trim();
+      const booking_url = wizOptList.length > 0 && wizOptList[0].stripe_url ? wizOptList[0].stripe_url : "";
       const min_bookings = 10;
       const published = false;
       
@@ -2068,14 +2354,60 @@
 
       const { data: existing } = await supabase.from("stays").select("id").eq("slug", slug).maybeSingle();
       if(existing){
-        wizardErrorMsg.textContent = `Un séjour avec un titre similaire (slug "${slug}") existe déjà. Veuillez modifier le titre.`;
+        wizardErrorMsg.textContent = `Un séjour avec un titre ou slug similaire ("${slug}") existe déjà. Veuillez modifier le titre ou le slug.`;
         return;
+      }
+
+      const content_blocks = [];
+      if(wizGalList.length > 0){
+        content_blocks.push({
+          id: `block_gal_${Date.now()}`,
+          type: "gallery_2",
+          enabled: true,
+          title: "Aperçu en images",
+          images: wizGalList,
+          text: "", layout: "image_left", image: "", image_alt: "", quote: "", caption: ""
+        });
+      }
+      const intName = document.getElementById("wizIntervenantName").value.trim();
+      const intPhoto = document.getElementById("wizIntervenantPhoto").value.trim();
+      const intBio = document.getElementById("wizIntervenantBio").value.trim();
+      if(intName || intPhoto || intBio){
+        content_blocks.push({
+          id: `block_int_${Date.now()}`,
+          type: "image_text",
+          enabled: true,
+          layout: "image_left",
+          title: intName || "Votre Intervenante",
+          text: intBio,
+          image: intPhoto,
+          image_alt: intName,
+          images: [], quote: "", caption: ""
+        });
+      }
+      const accomDesc = document.getElementById("wizAccomDesc").value.trim();
+      const accomPhoto = document.getElementById("wizAccomPhoto").value.trim();
+      if(accomDesc || accomPhoto){
+        content_blocks.push({
+          id: `block_accom_${Date.now()}`,
+          type: "image_text",
+          enabled: true,
+          layout: "image_right",
+          title: "L'Hébergement",
+          text: accomDesc,
+          image: accomPhoto,
+          image_alt: "Hébergement du séjour",
+          images: [], quote: "", caption: ""
+        });
       }
 
       const payload = {
         title, slug, location, short_description, description, hero_image,
         booking_url, reservation_url: booking_url, min_bookings, published,
-        program_note, included_items, not_included_items
+        program_note, included_items, not_included_items,
+        program: wizProgList,
+        extra_options: wizOptList,
+        content_blocks
       };
 
       const { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
@@ -2084,20 +2416,20 @@
         return;
       }
 
+      const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
       await supabase.from("stay_dates").insert([{
         stay_id: newStay.id,
         start_date: document.getElementById("wizStartDate").value,
         end_date: document.getElementById("wizEndDate").value,
         seats_total: Number(document.getElementById("wizSeats").value || 12),
         seats_remaining: Number(document.getElementById("wizSeats").value || 12),
-        price_label: document.getElementById("wizPriceLabel").value.trim() || null,
-        amount: Number(document.getElementById("wizPrice").value || 0)
+        price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
+        amount: firstPrice
       }]);
 
       stayWizardModal.classList.remove("active");
       setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant ! Vous pouvez le peaufiner ici.");
       await loadStays();
-      // Ouvrir l'éditeur pour qu'il puisse vérifier/modifier
       await editStay(newStay.id);
     });
 
@@ -2248,7 +2580,7 @@
         program_note: stayProgramNote.value.trim(),
         included_items: linesToArray(stayIncludedItems.value),
         not_included_items: linesToArray(stayNotIncludedItems.value),
-        extra_options: linesToArray(stayExtraOptions.value),
+        extra_options: linesToOptionsArray(stayExtraOptions.value),
         gift_title: giftTitle.value.trim(),
         gift_intro: giftIntro.value.trim(),
         gift_items: linesToArray(giftItems.value),
@@ -2388,7 +2720,7 @@
         program_note: stayProgramNote.value.trim(),
         included_items: linesToArray(stayIncludedItems.value),
         not_included_items: linesToArray(stayNotIncludedItems.value),
-        extra_options: linesToArray(stayExtraOptions.value),
+        extra_options: linesToOptionsArray(stayExtraOptions.value),
         gift_title: giftTitle.value.trim(),
         gift_intro: giftIntro.value.trim(),
         gift_items: linesToArray(giftItems.value),
