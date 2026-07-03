@@ -219,43 +219,45 @@
   </section>
 
   <!-- BANDEAU GALERIE - RETOUR EN IMAGE -->
-  <section class="band white" id="galerie-retour-image" style="display:none; overflow:hidden;">
+  <section class="band white" id="galerie-retour-image" style="display:none; overflow:hidden; position:relative;">
     <div class="container" style="padding: calc(var(--navH) + 20px) 0 var(--space-lg);">
-      <div class="gallery-band-layout">
-        <div class="gallery-title-col reveal" data-delay="0">
-          <div class="kicker">Souvenirs & Émotions</div>
-          <h2 class="gallery-main-title">Retour en<br>images</h2>
-          <p class="muted" style="margin-top:16px;">
-            Quelques éclats de rire, de douceur et d'énergie partagés lors de nos moments Âmes Nomades.
-          </p>
-          <div class="gallery-controls" style="margin-top:24px; display:flex; gap:12px;">
-            <button class="btn tiny on-light" id="galPrevBtn" type="button" aria-label="Photo précédente" style="padding:8px 14px; font-size:16px;">←</button>
-            <button class="btn tiny on-light" id="galNextBtn" type="button" aria-label="Photo suivante" style="padding:8px 14px; font-size:16px;">→</button>
+      <div class="gallery-header-row reveal" data-delay="0" style="text-align:center; margin-bottom: 36px;">
+        <div class="kicker">Souvenirs & Émotions</div>
+        <h2 class="gallery-main-title" style="margin-top:8px;">Retour en images</h2>
+        <p class="muted" style="margin-top:12px; max-width:650px; margin-left:auto; margin-right:auto;">
+          Quelques éclats de rire, de douceur et d'énergie partagés lors de nos moments Âmes Nomades.
+        </p>
+      </div>
+
+      <div class="gallery-slider-container reveal" data-delay="2">
+        <button class="gallery-arrow gallery-arrow-left" id="galPrevBtn" type="button" aria-label="Photo précédente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+
+        <div class="gallery-carousel" id="galleryCarousel">
+          <div class="gallery-item">
+            <img src="assets/img/hero-1.jpg" alt="Souvenir Âmes Nomades 1" loading="lazy">
+          </div>
+          <div class="gallery-item">
+            <img src="assets/img/pool-brunch-yoga.jpg" alt="Souvenir Âmes Nomades 2" loading="lazy">
+          </div>
+          <div class="gallery-item">
+            <img src="assets/img/bottom-wide.jpg" alt="Souvenir Âmes Nomades 3" loading="lazy">
+          </div>
+          <div class="gallery-item">
+            <img src="assets/img/pool-brunch-yoga-2.jpg" alt="Souvenir Âmes Nomades 4" loading="lazy">
+          </div>
+          <div class="gallery-item">
+            <img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Souvenir Âmes Nomades 5" loading="lazy">
+          </div>
+          <div class="gallery-item">
+            <img src="assets/img/hero-2.jpg" alt="Souvenir Âmes Nomades 6" loading="lazy">
           </div>
         </div>
 
-        <div class="gallery-track-col reveal" data-delay="2">
-          <div class="gallery-carousel" id="galleryCarousel">
-            <div class="gallery-item">
-              <img src="assets/img/hero-1.jpg" alt="Souvenir Âmes Nomades 1" loading="lazy">
-            </div>
-            <div class="gallery-item">
-              <img src="assets/img/pool-brunch-yoga.jpg" alt="Souvenir Âmes Nomades 2" loading="lazy">
-            </div>
-            <div class="gallery-item">
-              <img src="assets/img/bottom-wide.jpg" alt="Souvenir Âmes Nomades 3" loading="lazy">
-            </div>
-            <div class="gallery-item">
-              <img src="assets/img/pool-brunch-yoga-2.jpg" alt="Souvenir Âmes Nomades 4" loading="lazy">
-            </div>
-            <div class="gallery-item">
-              <img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Souvenir Âmes Nomades 5" loading="lazy">
-            </div>
-            <div class="gallery-item">
-              <img src="assets/img/hero-2.jpg" alt="Souvenir Âmes Nomades 6" loading="lazy">
-            </div>
-          </div>
-        </div>
+        <button class="gallery-arrow gallery-arrow-right" id="galNextBtn" type="button" aria-label="Photo suivante">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -686,14 +688,15 @@
     const galPrev = document.getElementById("galPrevBtn");
     const galNext = document.getElementById("galNextBtn");
     if (galCarousel && galPrev && galNext) {
+      const getStep = () => (galCarousel.querySelector(".gallery-item")?.clientWidth || 300) + 20;
       galPrev.addEventListener("click", () => {
-        galCarousel.scrollBy({ left: -340, behavior: "smooth" });
+        galCarousel.scrollBy({ left: -getStep(), behavior: "smooth" });
       });
       galNext.addEventListener("click", () => {
         if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
           galCarousel.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-          galCarousel.scrollBy({ left: 340, behavior: "smooth" });
+          galCarousel.scrollBy({ left: getStep(), behavior: "smooth" });
         }
       });
       // Défilement automatique doux toutes les 4 secondes
@@ -702,7 +705,7 @@
           if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
             galCarousel.scrollTo({ left: 0, behavior: "smooth" });
           } else {
-            galCarousel.scrollBy({ left: 340, behavior: "smooth" });
+            galCarousel.scrollBy({ left: getStep(), behavior: "smooth" });
           }
         }
       }, 4000);
