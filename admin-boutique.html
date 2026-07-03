@@ -218,7 +218,12 @@
         return null;
       }
       const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-      if(error || data?.role !== "admin"){
+      const userEmail = (user.email || "").toLowerCase();
+      const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
+      if (isEmailAdmin && data?.role !== "admin") {
+        await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+      }
+      if(!isEmailAdmin && (error || data?.role !== "admin")){
         adminStatus.textContent = "Accès refusé. Vous devez être administrateur.";
         throw new Error("Not admin");
       }

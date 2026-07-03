@@ -645,7 +645,13 @@
           .eq("id", user.id)
           .single();
 
-        if (profile?.role !== "admin") {
+        const userEmail = (user.email || "").toLowerCase();
+        const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
+        if (isEmailAdmin && profile?.role !== "admin") {
+          await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+        }
+
+        if (!isEmailAdmin && profile?.role !== "admin") {
           stayTitle.textContent = "Accès refusé";
           stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
           return;

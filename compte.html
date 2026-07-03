@@ -795,14 +795,22 @@
     }
 
     async function checkAdminAndGetProfile(userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userEmail = session?.user?.email || "";
+      const isEmailAdmin = userEmail.toLowerCase() === "contact@amesnomades.com" || userEmail.toLowerCase() === "sarnelli.ap@gmail.com" || userEmail.toLowerCase() === "revesnomades@gmail.com";
+
       const { data, error } = await supabase
         .from("profiles")
         .select("role, firstname")
         .eq("id", userId)
         .single();
 
-      if (error) return { isAdmin: false, firstname: "" };
-      return { isAdmin: data?.role === "admin", firstname: data?.firstname || "" };
+      if (isEmailAdmin && data?.role !== "admin") {
+        await supabase.from("profiles").update({ role: "admin" }).eq("id", userId);
+      }
+
+      if (error && !isEmailAdmin) return { isAdmin: false, firstname: "" };
+      return { isAdmin: (data?.role === "admin" || isEmailAdmin), firstname: data?.firstname || "Admin" };
     }
 
     async function loadAdminStats() {

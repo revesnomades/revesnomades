@@ -184,10 +184,35 @@ select, option{ color: var(--text) !important; }
   font-size: 12px;
   letter-spacing:.08em;
   text-transform: uppercase;
-}
 .nav-links a:hover{
   border-color: rgba(255,255,255,.40);
   background: rgba(255,255,255,.08);
+}
+
+/* FAQ à gauche et titre au centre sur toutes les pages */
+.nav-inner {
+  position: relative !important;
+}
+.nav-inner a[href*="faq.html"],
+.nav-links a[href*="faq.html"],
+.nav-links-desktop a[href*="faq.html"] {
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin-left: 0 !important;
+  z-index: 20 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+@media (max-width: 768px) {
+  .nav-inner a[href*="faq.html"],
+  .nav-links a[href*="faq.html"],
+  .nav-links-desktop a[href*="faq.html"] {
+    left: 10px !important;
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
 }
 
 .icon-btn{
@@ -1625,14 +1650,15 @@ input, textarea {
   align-items: center;
 }
 .gallery-carousel {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
+  display: flex !important;
+  gap: 20px !important;
+  overflow-x: auto !important;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   padding: 10px 0 16px;
-  width: 100%;
-  flex-wrap: nowrap;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -1640,38 +1666,54 @@ input, textarea {
   display: none;
 }
 .gallery-item {
-  flex: 0 0 calc((100% - 60px) / 4);
-  height: 380px;
+  flex: 0 0 calc((100% - 60px) / 4) !important;
+  width: calc((100% - 60px) / 4) !important;
+  max-width: calc((100% - 60px) / 4) !important;
+  height: 280px !important;
+  max-height: 280px !important;
   scroll-snap-align: start;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: hidden !important;
   position: relative;
   background: #f0ebde;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  display: block !important;
 }
 @media (max-width: 1024px) {
   .gallery-item {
-    flex: 0 0 calc((100% - 40px) / 3);
-    height: 360px;
+    flex: 0 0 calc((100% - 40px) / 3) !important;
+    width: calc((100% - 40px) / 3) !important;
+    max-width: calc((100% - 40px) / 3) !important;
+    height: 260px !important;
+    max-height: 260px !important;
   }
 }
 @media (max-width: 768px) {
   .gallery-item {
-    flex: 0 0 calc((100% - 20px) / 2);
-    height: 340px;
+    flex: 0 0 calc((100% - 20px) / 2) !important;
+    width: calc((100% - 20px) / 2) !important;
+    max-width: calc((100% - 20px) / 2) !important;
+    height: 240px !important;
+    max-height: 240px !important;
   }
 }
 @media (max-width: 500px) {
   .gallery-item {
-    flex: 0 0 85%;
-    height: 340px;
+    flex: 0 0 85% !important;
+    width: 85% !important;
+    max-width: 85% !important;
+    height: 240px !important;
+    max-height: 240px !important;
   }
 }
 .gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .gallery-item:hover img {
