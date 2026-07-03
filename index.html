@@ -659,6 +659,26 @@
       if (staysBand) staysBand.style.display = showStays ? "" : "none";
       if (boutiqueBand) boutiqueBand.style.display = showBoutique ? "" : "none";
       if (galleryBand) galleryBand.style.display = showGallery ? "" : "none";
+
+      try {
+        const { data: galData } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "homepage_gallery")
+          .maybeSingle();
+        if (galData && Array.isArray(galData.value) && galData.value.length > 0) {
+          const galCarousel = document.getElementById("galleryCarousel");
+          if (galCarousel) {
+            galCarousel.innerHTML = galData.value.map(photo => `
+              <div class="gallery-item">
+                <img src="${photo.url || ''}" alt="${photo.alt || 'Souvenir Âmes Nomades'}" loading="lazy">
+              </div>
+            `).join("");
+          }
+        }
+      } catch (e) {
+        console.warn("Utilisation de la galerie par défaut:", e);
+      }
     }
 
     // Gestion du défilement du bandeau galerie

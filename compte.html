@@ -225,6 +225,34 @@
               </div>
               <div id="homepageBandsMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
             </div>
+
+            <!-- GESTION DES PHOTOS DE LA GALERIE -->
+            <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:20px; margin-top:20px;">
+              <h3 style="margin:0; font-size:16px;">Photos du bandeau "Retour en images"</h3>
+              <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
+                Ajoutez ou supprimez les photos qui défilent dans la galerie de la page d'accueil.
+              </p>
+
+              <div id="adminGalleryPhotosList" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                <div style="color:var(--muted); font-size:13px;">Chargement des photos…</div>
+              </div>
+
+              <div style="border-top:1px dashed var(--line); padding-top:16px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                <div style="flex:1; min-width:200px;">
+                  <label class="label" style="font-size:12px;">Fichier image ou URL</label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="file" id="galNewPhotoFile" accept="image/*" class="input" style="padding:6px; font-size:12px; flex:1;">
+                    <input type="text" id="galNewPhotoUrl" placeholder="Ou URL (ex: assets/img/...)" class="input" style="font-size:13px; flex:1;">
+                  </div>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                  <label class="label" style="font-size:12px;">Description (Alt)</label>
+                  <input type="text" id="galNewPhotoAlt" placeholder="Ex : Retraite Yoga Camargue" class="input" style="font-size:13px;">
+                </div>
+                <button class="btn tiny on-light" id="btnAdminAddGalPhoto" type="button" style="padding:8px 16px;">Ajouter la photo</button>
+              </div>
+              <div id="adminGalPhotoMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
+            </div>
           </div>
         </div>
 
@@ -786,6 +814,7 @@
       if (newsletterCount) newsletterCount.textContent = newsletterTotal ?? "0";
       if (priorityCount) priorityCount.textContent = priorityTotal ?? "0";
       await loadHomepageBandsConfig();
+      await loadAdminGalleryPhotos();
     }
 
     async function loadHomepageBandsConfig() {
@@ -815,10 +844,105 @@
       };
       const { error } = await supabase.from("site_settings").upsert({ key: "homepage_bands", value });
       if (error) {
-        setMsg(homepageBandsMsg, "❌ Erreur : " + error.message + " (Vérifiez que la table site_settings existe)");
+        setMsg(homepageBandsMsg, "❌ Erreur : " + error.message);
       } else {
         setMsg(homepageBandsMsg, "✅ Affichage de l'accueil enregistré !");
       }
+    });
+
+    let currentGalleryPhotos = [];
+    const adminGalleryPhotosList = document.getElementById("adminGalleryPhotosList");
+    const galNewPhotoFile = document.getElementById("galNewPhotoFile");
+    const galNewPhotoUrl = document.getElementById("galNewPhotoUrl");
+    const galNewPhotoAlt = document.getElementById("galNewPhotoAlt");
+    const btnAdminAddGalPhoto = document.getElementById("btnAdminAddGalPhoto");
+    const adminGalPhotoMsg = document.getElementById("adminGalPhotoMsg");
+
+    async function loadAdminGalleryPhotos() {
+      if (!adminGalleryPhotosList) return;
+      try {
+        const { data } = await supabase.from("site_settings").select("value").eq("key", "homepage_gallery").maybeSingle();
+        currentGalleryPhotos = (data && Array.isArray(data.value)) ? data.value : [
+          { url: "assets/img/hero-1.jpg", alt: "Souvenir Âmes Nomades 1" },
+          { url: "assets/img/pool-brunch-yoga.jpg", alt: "Souvenir Âmes Nomades 2" },
+          { url: "assets/img/bottom-wide.jpg", alt: "Souvenir Âmes Nomades 3" },
+          { url: "assets/img/pool-brunch-yoga-2.jpg", alt: "Souvenir Âmes Nomades 4" },
+          { url: "assets/img/sac-cadeau-reves-nomades.jpg", alt: "Souvenir Âmes Nomades 5" },
+          { url: "assets/img/hero-2.jpg", alt: "Souvenir Âmes Nomades 6" }
+        ];
+        renderAdminGalleryPhotos();
+      } catch (e) {
+        console.warn("Erreur chargement galerie admin:", e);
+      }
+    }
+
+    function renderAdminGalleryPhotos() {
+      if (!adminGalleryPhotosList) return;
+      if (currentGalleryPhotos.length === 0) {
+        adminGalleryPhotosList.innerHTML = `<div style="color:var(--muted); font-size:13px;">Aucune photo dans la galerie.</div>`;
+        return;
+      }
+      adminGalleryPhotosList.innerHTML = currentGalleryPhotos.map((p, idx) => `
+        <div style="border:1px solid var(--line); border-radius:4px; padding:6px; background:#f9f9f9; width:130px; text-align:center; position:relative;">
+          <img src="${p.url}" alt="${p.alt || ''}" style="width:100%; height:80px; object-fit:cover; border-radius:2px; background:#eee;">
+          <div style="font-size:11px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;" title="${p.alt || ''}">${p.alt || 'Sans description'}</div>
+          <button type="button" class="btn-del-gal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:11px; padding:3px 6px; margin-top:6px; cursor:pointer; width:100%;">Supprimer</button>
+        </div>
+      `).join("");
+
+      adminGalleryPhotosList.querySelectorAll(".btn-del-gal").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          currentGalleryPhotos.splice(idx, 1);
+          await saveGalleryPhotos();
+        });
+      });
+    }
+
+    async function saveGalleryPhotos() {
+      if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "Enregistrement de la galerie en cours…");
+      const { error } = await supabase.from("site_settings").upsert({ key: "homepage_gallery", value: currentGalleryPhotos });
+      if (error) {
+        if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "❌ Erreur : " + error.message);
+      } else {
+        if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "✅ Galerie mise à jour !");
+        renderAdminGalleryPhotos();
+      }
+    }
+
+    btnAdminAddGalPhoto?.addEventListener("click", async () => {
+      if (!galNewPhotoFile && !galNewPhotoUrl) return;
+      let url = galNewPhotoUrl?.value?.trim() || "";
+      const file = galNewPhotoFile?.files?.[0];
+      const alt = galNewPhotoAlt?.value?.trim() || "Souvenir Âmes Nomades";
+
+      if (!file && !url) {
+        if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "Veuillez sélectionner un fichier ou entrer une URL.");
+        return;
+      }
+
+      if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "Ajout de la photo en cours…");
+
+      if (file) {
+        try {
+          const safeName = file.name.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
+          const filePath = `gallery/${Date.now()}-${safeName}`;
+          const { error: upErr } = await supabase.storage.from("stays").upload(filePath, file, { cacheControl: "3600", upsert: false });
+          if (upErr) throw upErr;
+          const { data: pubData } = supabase.storage.from("stays").getPublicUrl(filePath);
+          url = pubData.publicUrl;
+        } catch (err) {
+          console.error("Erreur upload photo:", err);
+          if (adminGalPhotoMsg) setMsg(adminGalPhotoMsg, "❌ Erreur upload : " + err.message);
+          return;
+        }
+      }
+
+      currentGalleryPhotos.push({ url, alt });
+      if (galNewPhotoUrl) galNewPhotoUrl.value = "";
+      if (galNewPhotoAlt) galNewPhotoAlt.value = "";
+      if (galNewPhotoFile) galNewPhotoFile.value = "";
+      await saveGalleryPhotos();
     });
 
     function applyWelcomeName(firstname){
