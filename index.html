@@ -121,7 +121,7 @@
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
-      <h1 class="reveal" data-delay="0" style="font-size: clamp(26px, 4.2vw, 50px); font-weight: 300; line-height: 1.18; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 580px;">Partir pour mieux se retrouver.</h1>
+      <h1 class="reveal" data-delay="0" style="font-size: clamp(22px, 3.5vw, 42px); font-weight: 300; line-height: 1.2; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 520px;">Partir pour mieux se retrouver.</h1>
 
       <div class="actions reveal" data-delay="1">
         <a href="#sejours" class="btn tiny" data-scroll>Voir les séjours</a>
@@ -220,8 +220,8 @@
   </section>
 
   <!-- BANDEAU GALERIE - RETOUR EN IMAGE -->
-  <section class="band white" id="galerie-retour-image" style="display:none; overflow:hidden; position:relative;">
-    <div class="container" style="padding: calc(var(--navH) + 20px) 0 var(--space-lg);">
+  <section class="white" id="galerie-retour-image" style="display:none; overflow:hidden; position:relative; border-bottom: 1px solid var(--line); padding: 30px 0; margin: 0;">
+    <div class="container" style="padding: 0;">
       <div class="gallery-header-row reveal" data-delay="0" style="text-align:center; margin-bottom: 36px;">
         <div class="kicker">Souvenirs & Émotions</div>
         <h2 class="gallery-main-title" style="margin-top:8px;">Retour en images</h2>
@@ -684,30 +684,47 @@
       }
     }
 
-    // Gestion du défilement du bandeau galerie
+    // Gestion du défilement infini sans à-coups du bandeau galerie
     const galCarousel = document.getElementById("galleryCarousel");
     const galPrev = document.getElementById("galPrevBtn");
     const galNext = document.getElementById("galNextBtn");
     if (galCarousel && galPrev && galNext) {
       const getStep = () => (galCarousel.querySelector(".gallery-item")?.clientWidth || 300) + 20;
-      galPrev.addEventListener("click", () => {
-        galCarousel.scrollBy({ left: -getStep(), behavior: "smooth" });
-      });
-      galNext.addEventListener("click", () => {
-        if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
-          galCarousel.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          galCarousel.scrollBy({ left: getStep(), behavior: "smooth" });
-        }
-      });
-      // Défilement automatique doux toutes les 4 secondes
+      
+      const slideNext = () => {
+        const first = galCarousel.firstElementChild;
+        if (!first) return;
+        const step = getStep();
+        galCarousel.style.scrollBehavior = "smooth";
+        galCarousel.scrollBy({ left: step, behavior: "smooth" });
+        setTimeout(() => {
+          galCarousel.style.scrollBehavior = "auto";
+          galCarousel.appendChild(first);
+          galCarousel.scrollLeft -= step;
+          galCarousel.style.scrollBehavior = "smooth";
+        }, 500);
+      };
+
+      const slidePrev = () => {
+        const last = galCarousel.lastElementChild;
+        if (!last) return;
+        const step = getStep();
+        galCarousel.style.scrollBehavior = "auto";
+        galCarousel.insertBefore(last, galCarousel.firstElementChild);
+        galCarousel.scrollLeft += step;
+        requestAnimationFrame(() => {
+          galCarousel.style.scrollBehavior = "smooth";
+          galCarousel.scrollBy({ left: -step, behavior: "smooth" });
+        });
+      };
+
+      galPrev.addEventListener("click", slidePrev);
+      galNext.addEventListener("click", slideNext);
+
+      // Défilement automatique doux toutes les 4 secondes sans retour en arrière visible
       setInterval(() => {
         if (!document.hidden && galCarousel.offsetParent !== null) {
-          if (galCarousel.scrollLeft + galCarousel.clientWidth >= galCarousel.scrollWidth - 20) {
-            galCarousel.scrollTo({ left: 0, behavior: "smooth" });
-          } else {
-            galCarousel.scrollBy({ left: getStep(), behavior: "smooth" });
-          }
+          slideNext();
         }
       }, 4000);
     }

@@ -536,7 +536,7 @@
           </div>
         </div>
 
-        <div class="admin-panel editor-hidden" id="editorPanel">
+        <div class="admin-panel editor-hidden" id="editorPanel" style="display:none !important;">
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
             <div>
               <h2 id="editorTitle">Créer un séjour</h2>
@@ -1063,8 +1063,8 @@
     const btnCancelWizard = document.getElementById("btnCancelWizard");
     const btnWizPrev = document.getElementById("btnWizPrev");
     const btnWizNext = document.getElementById("btnWizNext");
-    const btnWizSubmit = document.getElementById("btnWizSubmit");
     let currentWizStep = 1;
+    let currentWizardEditId = null;
     const btnPreviewStayTop = document.getElementById("btnPreviewStayTop");
     const btnSaveStay = document.getElementById("btnSaveStay");
     const btnCancelEdit = document.getElementById("btnCancelEdit");
@@ -1968,9 +1968,6 @@
     }
 
     async function editStay(id){
-      resetEditor();
-      openEditor();
-
       const { data: stay, error } = await supabase
         .from("stays")
         .select("*")
@@ -1979,7 +1976,7 @@
 
       if(error || !stay){
         console.error(error);
-        setMsg(editorMsg, "Impossible de charger ce séjour.");
+        alert("Impossible de charger ce séjour.");
         return;
       }
 
@@ -1990,65 +1987,72 @@
         .order("start_date", { ascending: true })
         .limit(1);
 
-      currentStayId = stay.id;
-      editorTitle.textContent = "Modifier le séjour";
+      currentWizardEditId = id;
+      const wizH2 = document.querySelector("#stayWizardModal h2");
+      if(wizH2) wizH2.textContent = "Modifier le séjour";
+      const btnSub = stayWizardForm.querySelector("button[type='submit']");
+      if(btnSub) btnSub.textContent = "Enregistrer les modifications";
 
       const firstDate = dates?.[0] || null;
-      mainStartDate.value = firstDate?.start_date || "";
-      mainEndDate.value = firstDate?.end_date || "";
-      mainSeatsTotal.value = firstDate?.seats_total ?? 10;
-      mainSeatsRemaining.value = firstDate?.seats_remaining ?? 10;
-      updateDurationInfo();
-
-      stayTitle.value = stay.title || "";
-      staySlug.value = stay.slug || "";
-      stayLocation.value = stay.location || "";
-      stayShortDescription.value = stay.short_description || "";
-      stayDescription.value = stay.description || "";
-      stayHeroImage.value = stay.hero_image || "";
-      stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
-      stayMinBookings.value = stay.min_bookings ?? 10;
-      stayPublished.checked = !!stay.published;
-      updatePublishToggleUI();
-
-      if(stay.is_featured){
-        setHomepagePositionValue("featured");
-      } else if(stay.is_highlight && stay.highlight_order >= 1 && stay.highlight_order <= 5){
-        setHomepagePositionValue(String(stay.highlight_order));
-      } else {
-        setHomepagePositionValue("none");
+      document.getElementById("wizTitle").value = stay.title || "";
+      document.getElementById("wizSlug").value = stay.slug || "";
+      document.getElementById("wizLocation").value = stay.location || "";
+      document.getElementById("wizStartDate").value = firstDate?.start_date || "";
+      document.getElementById("wizEndDate").value = firstDate?.end_date || "";
+      document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
+      document.getElementById("wizShortDesc").value = stay.short_description || "";
+      document.getElementById("wizDesc").value = stay.description || "";
+      document.getElementById("wizHeroImage").value = stay.hero_image || "";
+      
+      // Visuel
+      wizGalList = [];
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        const galBlock = stay.content_blocks.find(b => b.type === "gallery_2" || (b.images && b.images.length > 0));
+        if (galBlock && galBlock.images) {
+          wizGalList = [...galBlock.images];
+        }
       }
+      renderWizGal();
 
-      showGiftSection = stay.show_gift_section ?? true;
-      showFaqSection = stay.show_faq_section ?? true;
-      showProgramSection = stay.show_program_section ?? true;
-      showIncludedSection = stay.show_included_section ?? true;
-      showOptionsSection = stay.show_options_section ?? true;
-      showHighlightsSection = stay.show_highlights_section ?? true;
-      refreshAllEyeButtons();
+      // Intervenante
+      let intName = "", intPhoto = "", intBio = "";
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        const intBlock = stay.content_blocks.find(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("intervenant"));
+        if (intBlock) {
+          intName = intBlock.title || "";
+          intBio = intBlock.text || "";
+          intPhoto = intBlock.image || "";
+        }
+      }
+      document.getElementById("wizIntervenantName").value = intName;
+      document.getElementById("wizIntervenantPhoto").value = intPhoto;
+      document.getElementById("wizIntervenantBio").value = intBio;
 
-      setPreview(heroPreview, stay.hero_image || "");
+      // Inclus / Non inclus
+      document.getElementById("wizIncluded").value = arrayToLines(stay.included_items);
+      document.getElementById("wizNotIncluded").value = arrayToLines(stay.not_included_items);
 
-      stayHighlights.value = arrayToLines(stay.highlights);
-      stayProgramNote.value = stay.program_note || "";
-      buildProgramEditors(getDurationData().days, stay.program || []);
+      // Programme
+      document.getElementById("wizProgramNote").value = stay.program_note || "";
+      wizProgList = Array.isArray(stay.program) ? [...stay.program] : [];
+      renderWizProg();
 
-      stayIncludedItems.value = arrayToLines(stay.included_items);
-      stayNotIncludedItems.value = arrayToLines(stay.not_included_items);
-      stayExtraOptions.value = arrayToLines(stay.extra_options);
+      // Hébergement & Tarifs
+      let accomDesc = "", accomPhoto = "";
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        const accomBlock = stay.content_blocks.find(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"));
+        if (accomBlock) {
+          accomDesc = accomBlock.text || "";
+          accomPhoto = accomBlock.image || "";
+        }
+      }
+      document.getElementById("wizAccomDesc").value = accomDesc;
+      document.getElementById("wizAccomPhoto").value = accomPhoto;
+      wizOptList = Array.isArray(stay.extra_options) ? [...stay.extra_options] : [];
+      renderWizOpt();
 
-      giftTitle.value = stay.gift_title || "";
-      giftIntro.value = stay.gift_intro || "";
-      giftItems.value = arrayToLines(stay.gift_items);
-      giftOutro.value = stay.gift_outro || "";
-      giftImage.value = stay.gift_image || "";
-
-      setPreview(giftPreview, stay.gift_image || "");
-      stayFaq.value = stay.faq ? JSON.stringify(stay.faq, null, 2) : "";
-      stayContentBlocks = normalizeContentBlocks(stay.content_blocks);
-      renderContentBlocksEditor();
-
-      openEditor();
+      updateWizardStep(1);
+      stayWizardModal.classList.add("active");
     }
 
     async function deleteStay(id){
@@ -2310,6 +2314,11 @@
     }
 
     btnNewStay?.addEventListener("click", () => {
+      currentWizardEditId = null;
+      const wizH2 = document.querySelector("#stayWizardModal h2");
+      if(wizH2) wizH2.textContent = "Nouveau séjour";
+      const btnSub = stayWizardForm.querySelector("button[type='submit']");
+      if(btnSub) btnSub.textContent = "Créer le séjour";
       stayWizardForm.reset();
       wizGalList = [];
       wizProgList = [];
@@ -2364,7 +2373,7 @@
       const not_included_items = linesToArray(document.getElementById("wizNotIncluded").value);
 
       const { data: existing } = await supabase.from("stays").select("id").eq("slug", slug).maybeSingle();
-      if(existing){
+      if(existing && (!currentWizardEditId || existing.id !== currentWizardEditId)){
         wizardErrorMsg.textContent = `Un séjour avec un titre ou slug similaire ("${slug}") existe déjà. Veuillez modifier le titre ou le slug.`;
         return;
       }
@@ -2414,12 +2423,48 @@
 
       const payload = {
         title, slug, location, short_description, description, hero_image,
-        booking_url, reservation_url: booking_url, min_bookings, published,
+        booking_url, reservation_url: booking_url, min_bookings,
         program_note, included_items, not_included_items,
         program: wizProgList,
         extra_options: wizOptList,
         content_blocks
       };
+      if (!currentWizardEditId) {
+        payload.published = false;
+      }
+
+      if (currentWizardEditId) {
+        const { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
+        if(updErr){
+          wizardErrorMsg.textContent = "Erreur modification : " + updErr.message;
+          return;
+        }
+        const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
+        const { data: exDate } = await supabase.from("stay_dates").select("id").eq("stay_id", currentWizardEditId).limit(1);
+        if (exDate && exDate.length > 0) {
+          await supabase.from("stay_dates").update({
+            start_date: document.getElementById("wizStartDate").value,
+            end_date: document.getElementById("wizEndDate").value,
+            seats_total: Number(document.getElementById("wizSeats").value || 12),
+            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
+            amount: firstPrice
+          }).eq("id", exDate[0].id);
+        } else {
+          await supabase.from("stay_dates").insert([{
+            stay_id: currentWizardEditId,
+            start_date: document.getElementById("wizStartDate").value,
+            end_date: document.getElementById("wizEndDate").value,
+            seats_total: Number(document.getElementById("wizSeats").value || 12),
+            seats_remaining: Number(document.getElementById("wizSeats").value || 12),
+            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
+            amount: firstPrice
+          }]);
+        }
+        stayWizardModal.classList.remove("active");
+        setMsg(adminStatus, "✨ Séjour modifié avec succès via l'assistant !");
+        await loadStays();
+        return;
+      }
 
       const { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
       if(error){
@@ -2439,9 +2484,8 @@
       }]);
 
       stayWizardModal.classList.remove("active");
-      setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant ! Vous pouvez le peaufiner ici.");
+      setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant !");
       await loadStays();
-      await editStay(newStay.id);
     });
 
     btnCancelEdit?.addEventListener("click", () => {

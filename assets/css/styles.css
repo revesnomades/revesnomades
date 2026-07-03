@@ -184,34 +184,51 @@ select, option{ color: var(--text) !important; }
   font-size: 12px;
   letter-spacing:.08em;
   text-transform: uppercase;
+}
 .nav-links a:hover{
   border-color: rgba(255,255,255,.40);
   background: rgba(255,255,255,.08);
 }
 
-/* FAQ à gauche et titre au centre sur toutes les pages */
+/* Navigation gauche (Shop, Séjour) et marque centrée sur tous les headers */
 .nav-inner {
   position: relative !important;
-}
-.nav-inner a[href*="faq.html"],
-.nav-links a[href*="faq.html"],
-.nav-links-desktop a[href*="faq.html"] {
-  position: absolute !important;
-  left: 0 !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  margin-left: 0 !important;
-  z-index: 20 !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
+  justify-content: space-between !important;
 }
-@media (max-width: 768px) {
-  .nav-inner a[href*="faq.html"],
-  .nav-links a[href*="faq.html"],
-  .nav-links-desktop a[href*="faq.html"] {
-    left: 10px !important;
-    padding: 6px 8px !important;
-    font-size: 11px !important;
+.brand {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  z-index: 15 !important;
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+.nav-left a {
+  color: rgba(255,255,255,.92);
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0);
+  transition: border-color .16s ease, background .16s ease;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.nav-left a:hover {
+  border-color: rgba(255,255,255,.40);
+  background: rgba(255,255,255,.08);
+}
+@media (max-width: 780px) {
+  .nav-left.nav-links-desktop,
+  .nav-links.nav-links-desktop {
+    display: none !important;
   }
 }
 
@@ -1148,8 +1165,8 @@ footer.band.cream{
   :root { --navH: 84px; }
   .brand img{ display: none !important; }
   .brand span{ font-size: 20px; }
-  .nav-links-desktop{ display: none; }
-  .hamburger{ display: inline-block; }
+  .nav-links-desktop, .nav-left{ display: none !important; }
+  .hamburger{ display: inline-block !important; position: relative; z-index: 25; margin-left: auto; }
 }
 
 /* =========================================================
