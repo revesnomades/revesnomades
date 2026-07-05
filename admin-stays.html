@@ -953,31 +953,39 @@
           </div>
         </div>
 
-        <!-- ÉTAPE 5 : Programme -->
+        <!-- ÉTAPE 5 : Programme (Journée type) -->
         <div class="wizard-step" id="wizardStep5" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 5 : Programme</h3>
-          <p class="muted-small" style="margin:0 0 12px 0;">Présentation générale et déroulé par étapes ou par journées.</p>
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 5 : Programme (Journée type)</h3>
+          <p class="muted-small" style="margin:0 0 12px 0;">Définissez le déroulé horaire d'une journée type (toutes les journées suivront ce rythme).</p>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Texte général de présentation du programme</label>
-            <textarea id="wizProgramNote" class="input" rows="3" placeholder="Un déroulé pensé pour ralentir, alternant pratiques dynamiques et temps de repos..."></textarea>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Texte général d'introduction au programme</label>
+            <textarea id="wizProgramNote" class="input" rows="2" placeholder="Une journée pensée pour ralentir, alternant pratiques douces et temps de repos..."></textarea>
           </div>
           <hr style="margin:16px 0; border:none; border-top:1px dashed var(--line);">
-          <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Programmes quotidiens / uniques (matin / après-midi / soirée)</label>
-          <div id="wizProgContainer" style="display:grid; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
-            <div style="color:var(--muted); font-size:12px;">Aucun créneau ou programme ajouté pour l'instant.</div>
+          <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Horaires de la journée type :</label>
+          <div id="wizProgContainer" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
+            <div style="color:var(--muted); font-size:12px;">Aucun créneau ajouté pour l'instant.</div>
           </div>
           <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px;">
-            <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+            <div style="display:grid; grid-template-columns:140px 100px 1fr; gap:8px; align-items:end;">
               <div>
-                <label class="label" style="font-size:11px;">Période / Titre (ex : Jour 1 — Matin, ou Soirée)</label>
-                <input type="text" id="wizProgTitle" class="input" placeholder="Ex : Jour 1 — Matinée & Accueil" style="font-size:13px;">
+                <label class="label" style="font-size:11px;">Période</label>
+                <select id="wizProgPeriod" class="input" style="font-size:13px; padding:7px;">
+                  <option value="Matin">Matin</option>
+                  <option value="Après-midi">Après-midi</option>
+                  <option value="Soirée">Soirée</option>
+                </select>
               </div>
               <div>
-                <label class="label" style="font-size:11px;">Description de l'activité</label>
-                <textarea id="wizProgDesc" class="input" rows="2" placeholder="Ex : Cercle d'ouverture, installation et pratique de Yin Yoga douce." style="font-size:13px;"></textarea>
+                <label class="label" style="font-size:11px;">Heure</label>
+                <input type="text" id="wizProgTime" class="input" placeholder="8.00 H" style="font-size:13px;">
+              </div>
+              <div>
+                <label class="label" style="font-size:11px;">Activité</label>
+                <input type="text" id="wizProgActivity" class="input" placeholder="Petit-déjeuner léger" style="font-size:13px;">
               </div>
             </div>
-            <button type="button" class="btn tiny on-light" id="btnWizAddProg" style="margin-top:8px; padding:6px 14px; font-size:12px;">+ Ajouter ce programme</button>
+            <button type="button" class="btn tiny on-light" id="btnWizAddProg" style="margin-top:10px; padding:6px 14px; font-size:12px;">+ Ajouter cet horaire</button>
           </div>
         </div>
 
@@ -2045,15 +2053,30 @@
 
       // Programme
       document.getElementById("wizProgramNote").value = stay.program_note || "";
-      wizProgList = (Array.isArray(stay.program) ? stay.program : []).map(p => {
-        let txt = p.text || p.description || "";
-        if (!txt && Array.isArray(p.slots) && p.slots.length > 0) {
-          txt = p.slots.map(s => (s.time ? s.time + " - " : "") + (s.text || "")).join("\n");
+      wizProgList = [];
+      (Array.isArray(stay.program) ? stay.program : []).forEach(p => {
+        if (p.slots && Array.isArray(p.slots) && p.slots.length > 0) {
+          p.slots.forEach(s => {
+            const per = p.period || p.title || "Matin";
+            wizProgList.push({
+              period: per,
+              time: s.time || "",
+              activity: s.text || s.activity || "",
+              title: per,
+              text: s.text || s.activity || ""
+            });
+          });
+        } else {
+          const per = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
+          const act = p.activity || p.text || p.description || "";
+          wizProgList.push({
+            period: per,
+            time: p.time || "",
+            activity: act,
+            title: p.title || per,
+            text: act
+          });
         }
-        return {
-          title: p.title || `Jour ${p.day_number || ""}`,
-          text: txt
-        };
       });
       renderWizProg();
 
@@ -2164,15 +2187,20 @@
         container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun créneau ou programme ajouté pour l'instant.</div>`;
         return;
       }
-      container.innerHTML = wizProgList.map((p, idx) => `
-        <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-          <div>
-            <div style="font-weight:600; font-size:13px; color:var(--text);">${escapeHtml(p.title || "")}</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px; white-space:pre-line;">${escapeHtml(p.text || "")}</div>
+      container.innerHTML = wizProgList.map((p, idx) => {
+        const period = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
+        const time = p.time || "";
+        const act = p.activity || p.text || "";
+        return `
+        <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span style="background:var(--cream); padding:2px 8px; border-radius:3px; font-weight:600; font-size:11px; text-transform:uppercase;">${escapeHtml(period)}</span>
+            <span style="font-weight:600; font-size:12.5px; color:var(--text); min-width:55px;">${escapeHtml(time)}</span>
+            <span style="font-size:13px; color:var(--text);">${escapeHtml(act)}</span>
           </div>
           <button type="button" class="btn-del-wizprog" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 6px; cursor:pointer;">Supprimer</button>
         </div>
-      `).join("");
+      `;}).join("");
       container.querySelectorAll(".btn-del-wizprog").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
@@ -2290,14 +2318,16 @@
     });
 
     document.getElementById("btnWizAddProg")?.addEventListener("click", () => {
-      const titleEl = document.getElementById("wizProgTitle");
-      const descEl = document.getElementById("wizProgDesc");
-      const title = titleEl?.value?.trim();
-      const text = descEl?.value?.trim();
-      if (!title && !text) return;
-      wizProgList.push({ title: title || "Créneau", text });
-      if (titleEl) titleEl.value = "";
-      if (descEl) descEl.value = "";
+      const periodEl = document.getElementById("wizProgPeriod");
+      const timeEl = document.getElementById("wizProgTime");
+      const actEl = document.getElementById("wizProgActivity");
+      const period = periodEl?.value || "Matin";
+      const time = timeEl?.value?.trim() || "";
+      const activity = actEl?.value?.trim() || "";
+      if (!time && !activity) return;
+      wizProgList.push({ period, time, activity, title: period, text: activity });
+      if (timeEl) timeEl.value = "";
+      if (actEl) actEl.value = "";
       renderWizProg();
     });
 
@@ -2445,7 +2475,7 @@
         title, slug, location, short_description, description, hero_image,
         booking_url, reservation_url: booking_url, min_bookings,
         program_note, included_items, not_included_items,
-        program: wizProgList.map(p => ({ title: p.title, text: p.text })),
+        program: wizProgList.map(p => ({ period: p.period || p.title || "Matin", time: p.time || "", activity: p.activity || p.text || "", title: p.title || p.period || "Matin", text: p.activity || p.text || "" })),
         extra_options: wizOptList,
         content_blocks
       };

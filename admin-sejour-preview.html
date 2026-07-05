@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title id="pageTitle">Aperçu — Âmes Nomades</title>
+  <title id="pageTitle">Aper&ccedil;u — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
@@ -207,15 +207,6 @@
         </div>
       </section>
 
-      <section class="reveal sejour-section">
-        <div class="trust-grid">
-          <div class="trust-item">Réservation simple</div>
-          <div class="trust-item">Petit groupe</div>
-          <div class="trust-item">Accompagnement personnalisé</div>
-          <div class="trust-item">Confirmation par email</div>
-        </div>
-      </section>
-
       <section class="reveal" style="margin-top:34px;">
         <p class="sub">
           Une question avant de réserver ? Écris-nous via la rubrique Contact, on te répond rapidement.
@@ -346,14 +337,6 @@
       {
         q: "Que comprend le séjour ?",
         a: "Chaque séjour inclut l’hébergement, certaines activités encadrées, et des moments de partage en groupe. Le détail exact est précisé sur la page du séjour."
-      },
-      {
-        q: "Que faut-il prévoir en plus ?",
-        a: "Les transports jusqu’au lieu du séjour, certaines activités optionnelles et les dépenses personnelles ne sont généralement pas inclus. Tout est détaillé sur la page du séjour."
-      },
-      {
-        q: "Comment se passe la réservation ?",
-        a: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois votre demande prise en compte, vous recevez toutes les informations nécessaires par email."
       }
     ];
 
@@ -385,7 +368,7 @@
         `;
         return;
       }
-      container.innerHTML = items.map(item => `
+      container.innerHTML = (items || []).slice(0, 3).map(item => `
         <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
           <div class="kicker">${escapeHtml(item.q || "Question")}</div>
           <p class="sub" style="margin-top:8px;">${escapeHtml(item.a || "")}</p>
@@ -405,22 +388,72 @@
         return;
       }
 
-      container.innerHTML = items.map(day => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
-          <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
+      const groups = {};
+      const order = ["Matin", "Après-midi", "Soirée"];
+      
+      items.forEach(item => {
+        if (item.slots && item.slots.length > 0) {
+          const pName = item.period || item.title || "Matin";
+          if (!groups[pName]) groups[pName] = [];
+          item.slots.forEach(s => {
+            groups[pName].push({ time: s.time || "", activity: s.text || s.activity || "" });
+          });
+        } else {
+          const pName = item.period || (["Matin", "Après-midi", "Soirée"].includes(item.title) ? item.title : "Matin");
+          if (!groups[pName]) groups[pName] = [];
+          groups[pName].push({
+            time: item.time || "",
+            activity: item.activity || item.text || item.description || ""
+          });
+        }
+      });
 
-          <div style="display:grid; gap:8px; margin-top:12px;">
-            ${(day.text || day.description) ? `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>` : ((day.slots && day.slots.length) ? day.slots.map(slot => `
-              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
-                <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
-                  ${escapeHtml(slot.time || "")}
-                </div>
-                <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        const idxA = order.indexOf(a);
+        const idxB = order.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+      });
+
+      const colsHtml = sortedKeys.map(periodName => {
+        const slots = groups[periodName];
+        const slotsHtml = slots.map(slot => {
+          let actText = slot.activity || "";
+          if (actText && !actText.startsWith("/") && !actText.startsWith("-")) {
+            actText = "/ " + actText;
+          }
+          return `
+            <div style="display:grid; grid-template-columns:80px 1fr; gap:14px; align-items:baseline; border-bottom:1px solid rgba(30,31,34,0.18); padding:14px 0;">
+              <div style="font-size:12.5px; font-weight:500; color:var(--text); letter-spacing:0.04em; font-family:var(--font-sans, sans-serif); text-transform:uppercase;">
+                ${escapeHtml(slot.time || "")}
               </div>
-            `).join("") : "")}
+              <div style="font-size:15px; color:var(--text); font-family:'SegoCustom', serif; line-height:1.4;">
+                ${escapeHtml(actText)}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="program-period-box" style="display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+              <span style="font-size:14px; color:var(--text);">&#9675;</span>
+              <span style="font-size:13px; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; color:var(--text);">${escapeHtml(periodName)}</span>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+              ${slotsHtml}
+            </div>
           </div>
+        `;
+      }).join("");
+
+      container.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:40px; align-items:start; background:var(--cream); padding:36px 30px; border-radius:4px; border:1px solid rgba(0,0,0,0.08);">
+          ${colsHtml}
         </div>
-      `).join("");
+      `;
     }
 
     function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl){
@@ -580,7 +613,7 @@
         }
 
         if(block.type === "gallery_2"){
-          const galleryImages = block.images.slice(0, 2).map(url => `
+          const galleryImages = (block.images || []).map(url => `
             <div style="border:1px solid var(--line); background:rgba(255,255,255,.55);">
               <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="width:100%; height:auto; display:block;">
             </div>
@@ -606,7 +639,7 @@
         .eq("is_active", true)
         .eq("use_for_stay_default", true)
         .order("sort_order", { ascending: true })
-        .limit(5);
+        .limit(3);
 
       const fromSiteFaq = (data || []).map(item => ({ q: item.question, a: item.answer }));
       return fromSiteFaq.length ? fromSiteFaq : fallbackStayFaqItems;

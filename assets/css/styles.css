@@ -345,10 +345,11 @@ html.js .text-reveal.reveal {
 /* ---------------- BANDEAU PRINCIPE ---------------- */
 .principle-band{
   position: relative;
-  min-height: 46vh;
+  min-height: 26vh;
   display: flex;
   align-items: center;
-  padding: calc(var(--navH) + 20px) 0 42px;
+  justify-content: center;
+  padding: 48px 0;
 
   background: var(--cream) !important;
   color: #000000 !important;
@@ -1545,11 +1546,15 @@ input, textarea {
    PRINCIPLE BAND MOBILE FIX (fond cream)
 ========================================== */
 @media (max-width: 900px){
-
   .principle-band{
     background-image: none !important;
     background: var(--cream) !important;
     color: var(--text) !important;
+    min-height: 22vh !important;
+    padding: 36px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .principle-band p{
@@ -1559,16 +1564,12 @@ input, textarea {
   .principle-band::before{
     display: none !important;
   }
-@media (max-width: 900px){
 
   .principle-band .container{
     margin: 0 auto;
     max-width: 88vw;
     text-align: left;
   }
-
-}
-}
 }
 
 /* ══════════════════════════════════════════════
