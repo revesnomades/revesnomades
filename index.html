@@ -151,7 +151,7 @@
         <div class="kicker reveal" data-delay="0">Prochain séjour…</div>
         <div class="sep reveal" data-delay="1"></div>
 
-        <h2 class="title reveal" data-delay="2" id="featuredStayTitle">Chargement…</h2>
+        <h2 class="title reveal" data-delay="2" id="featuredStayTitle" style="font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important;">Chargement…</h2>
 
         <p class="sub reveal" data-delay="3" id="featuredStayDuration">
           Durée à annoncer
@@ -168,9 +168,6 @@
         </div>
 
         <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
-        <div class="missing reveal" data-delay="8" style="font-size:12px;">
-          Un email vous sera envoyé dès la confirmation du séjour.
-        </div>
       </div>
     </div>
   </section>
@@ -180,7 +177,7 @@
   <section class="band cream" id="prochains-sejours">
     <div class="container" style="padding: 30px 0 var(--space-lg);">
       <div class="reveal">
-        <h2 style="margin:0;">Prochains séjours</h2>
+        <h2 style="margin:0; font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important;">Prochains séjours</h2>
         <p style="margin-top:12px; color:var(--muted);">
           Survolez un séjour pour découvrir les prochaines dates.
         </p>
@@ -581,7 +578,7 @@
           <div class="stay-card-overlay"></div>
 
           <div class="stay-card-hover">
-            <div class="stay-card-line">${stay.title || "Séjour"}</div>
+            <div class="stay-card-line" style="font-family:'SegoCustom', serif; font-weight:300; text-transform:none;">${stay.title || "Séjour"}</div>
             <div class="stay-card-line">${duration}</div>
             <div class="stay-card-line stay-card-dates">${dates}</div>
             <div class="card-place">${stay.location || stay.title}</div>
@@ -677,23 +674,37 @@
         if (galData && Array.isArray(galData.value) && galData.value.length > 0) {
           const galCarousel = document.getElementById("galleryCarousel");
           if (galCarousel) {
-            galCarousel.innerHTML = galData.value.map(photo => `
-              <div class="gallery-item">
-                <img src="${photo.url || ''}" alt="${photo.alt || 'Souvenir Âmes Nomades'}" loading="lazy">
-              </div>
-            `).join("");
+            const validPhotos = galData.value.map(photo => {
+              const url = typeof photo === 'string' ? photo : (photo?.url || photo?.image || photo?.src || '');
+              const alt = typeof photo === 'string' ? 'Souvenir Âmes Nomades' : (photo?.alt || photo?.title || 'Souvenir Âmes Nomades');
+              return { url, alt };
+            }).filter(p => p.url);
+
+            if (validPhotos.length > 0) {
+              galCarousel.innerHTML = validPhotos.map(photo => `
+                <div class="gallery-item" style="display:block !important; overflow:hidden !important; border-radius:4px;">
+                  <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.alt)}" loading="lazy" style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important;">
+                </div>
+              `).join("");
+            }
           }
         }
       } catch (e) {
         console.warn("Utilisation de la galerie par défaut:", e);
+      } finally {
+        initGalleryScroll();
       }
     }
 
-    // Gestion du défilement infini sans à-coups du bandeau galerie
-    const galCarousel = document.getElementById("galleryCarousel");
-    const galPrev = document.getElementById("galPrevBtn");
-    const galNext = document.getElementById("galNextBtn");
-    if (galCarousel && galPrev && galNext) {
+    let galScrollInterval = null;
+    function initGalleryScroll() {
+      const galCarousel = document.getElementById("galleryCarousel");
+      const galPrev = document.getElementById("galPrevBtn");
+      const galNext = document.getElementById("galNextBtn");
+      if (!galCarousel || !galPrev || !galNext) return;
+
+      if (galScrollInterval) clearInterval(galScrollInterval);
+      
       const getStep = () => (galCarousel.querySelector(".gallery-item")?.clientWidth || 300) + 20;
       
       const slideNext = () => {
@@ -723,11 +734,15 @@
         });
       };
 
-      galPrev.addEventListener("click", slidePrev);
-      galNext.addEventListener("click", slideNext);
+      const newPrev = galPrev.cloneNode(true);
+      const newNext = galNext.cloneNode(true);
+      galPrev.parentNode.replaceChild(newPrev, galPrev);
+      galNext.parentNode.replaceChild(newNext, galNext);
 
-      // Défilement automatique doux toutes les 4 secondes sans retour en arrière visible
-      setInterval(() => {
+      newPrev.addEventListener("click", slidePrev);
+      newNext.addEventListener("click", slideNext);
+
+      galScrollInterval = setInterval(() => {
         if (!document.hidden && galCarousel.offsetParent !== null) {
           slideNext();
         }
