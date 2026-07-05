@@ -309,6 +309,39 @@ html.js .reveal.is-visible{
   transform: translateY(0);
 }
 
+/* ---------------- SCROLL TEXT REVEAL (GSAP + SplitType) ---------------- */
+.text-reveal {
+  opacity: 1;
+}
+
+/* Sécurité : si un élément combine .reveal et .text-reveal, on désactive la transition CSS
+   pour laisser la maîtrise totale à GSAP ScrollTrigger. */
+html.js .reveal.text-reveal,
+html.js .text-reveal.reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.text-reveal .word {
+  display: inline-block;
+  white-space: nowrap; /* Évite qu'un mot se coupe sur deux lignes */
+}
+
+.text-reveal .char {
+  display: inline-block;
+  will-change: opacity; /* Optimisation 60 FPS GPU compositor */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-reveal,
+  .text-reveal .word,
+  .text-reveal .char {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}
+
 /* ---------------- BANDEAU PRINCIPE ---------------- */
 .principle-band{
   position: relative;
