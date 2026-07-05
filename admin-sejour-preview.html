@@ -85,8 +85,8 @@
         Dates : <span id="stayDates">Dates à annoncer</span>
       </p>
 
-      <div class="sejour-text reveal" id="stayText">
-        <p>Chargement du séjour…</p>
+      <div class="sejour-text" id="stayText">
+        <p class="text-reveal">Chargement du séjour…</p>
       </div>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="contentBlocksSection">
@@ -276,6 +276,11 @@
     </div>
   </footer>
 
+  <!-- GSAP, ScrollTrigger & SplitType (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+  <script src="/assets/js/scroll-text-reveal.js"></script>
   <script src="/assets/js/main.js"></script>
 
   <script type="module">
@@ -423,12 +428,15 @@
     function renderRichText(container, content){
       if(!container) return;
       if(!content){
-        container.innerHTML = `<p>Contenu bientôt disponible.</p>`;
+        container.innerHTML = `<p class="text-reveal">Contenu bientôt disponible.</p>`;
+        if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
         return;
       }
 
       if (typeof content === "string" && content.includes("<")) {
         container.innerHTML = content;
+        container.querySelectorAll("p, h1, h2, h3, h4, li").forEach(el => el.classList.add("text-reveal"));
+        if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
         return;
       }
 
@@ -437,7 +445,8 @@
         .map(p => p.trim())
         .filter(Boolean);
 
-      container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join("");
+      container.innerHTML = paragraphs.map(p => `<p class="text-reveal">${p}</p>`).join("");
+      if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
     }
 
     function normalizeContentBlocks(value){
@@ -512,6 +521,9 @@
 
         return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
       }).join("");
+
+      container.querySelectorAll("p.sub, h3, blockquote p, article p").forEach(el => el.classList.add("text-reveal"));
+      if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
     }
 
     async function getSiteStayDefaultFaq(){
