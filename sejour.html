@@ -410,14 +410,14 @@
           <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
 
           <div style="display:grid; gap:8px; margin-top:12px;">
-            ${(day.slots && day.slots.length) ? day.slots.map(slot => `
+            ${(day.text || day.description) ? `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>` : ((day.slots && day.slots.length) ? day.slots.map(slot => `
               <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
                 <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
                   ${escapeHtml(slot.time || "")}
                 </div>
                 <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
               </div>
-            `).join("") : `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>`}
+            `).join("") : "")}
           </div>
         </div>
       `).join("");

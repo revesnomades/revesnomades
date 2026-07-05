@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title id="pageTitle">Séjour (Aperçu Admin) — Âmes Nomades</title>
+  <title id="pageTitle">Aperçu — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
@@ -10,24 +10,18 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
-  <meta id="stayMetaDescription" name="description" content="Aperçu administrateur de séjour Âmes Nomades.">
+  <meta id="stayMetaDescription" name="description" content="D&eacute;couvrez un s&eacute;jour bien-&ecirc;tre avec &Acirc;mes Nomades. Une exp&eacute;rience pour ralentir, se reconnecter &agrave; soi et vivre une parenth&egrave;se de douceur.">
   <meta name="theme-color" content="#0e0f11">
 
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
-  <style>
-    /* Léger arrondi sur tous les boutons admin */
-    button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
-      border-radius: 6px !important;
-    }
-  </style>
 </head>
 
 <body class="on-light">
 
-  <div id="previewBanner" style="background:#111; color:#fff; text-align:center; padding:10px 14px; font-size:12px; letter-spacing:.08em; text-transform:uppercase;">
+  <div id="previewBanner" style="display:none; background:#111; color:#fff; text-align:center; padding:10px 14px; font-size:12px; letter-spacing:.08em; text-transform:uppercase;">
     Mode aperçu admin
   </div>
 
@@ -68,14 +62,18 @@
   </header>
 
   <main>
-  <section class="sejour-hero">
-    <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
-  </section>
+  <div style="border-top: 1px solid var(--line); padding: 30px 0 10px; margin-top: var(--navH); background: #faf8f5;">
+    <div class="container">
+      <section class="sejour-hero" style="height: clamp(340px, 55vh, 560px); min-height: 320px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
+        <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+      </section>
+    </div>
+  </div>
 
-  <section class="band cream">
+  <section class="band cream" style="padding-top: 10px;">
     <div class="container sejour-content">
 
-      <h1 class="reveal" id="stayTitle">Séjour</h1>
+      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 15px 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">/ Séjour</h1>
 
       <p class="sejour-meta reveal" id="stayMeta">
         5 jours · 4 nuits
@@ -372,6 +370,7 @@
         container.innerHTML = `<div>—</div>`;
         return;
       }
+
       container.innerHTML = items.map(item => `<div>• ${escapeHtml(item)}</div>`).join("");
     }
 
@@ -386,7 +385,6 @@
         `;
         return;
       }
-
       container.innerHTML = items.map(item => `
         <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
           <div class="kicker">${escapeHtml(item.q || "Question")}</div>
@@ -406,18 +404,20 @@
         `;
         return;
       }
-      container.innerHTML = items.map((day, idx) => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px; border-radius:4px;">
-          <div class="kicker" style="font-weight:600; color:var(--text); font-size:15px;">${escapeHtml(day.title || `Jour ${day.day_number || idx + 1}`)}</div>
-          <div style="margin-top:10px;">
-            ${Array.isArray(day.slots) && day.slots.length > 0 ? day.slots.map(slot => `
-              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start; margin-bottom:8px;">
+
+      container.innerHTML = items.map(day => `
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
+          <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
+
+          <div style="display:grid; gap:8px; margin-top:12px;">
+            ${(day.text || day.description) ? `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>` : ((day.slots && day.slots.length) ? day.slots.map(slot => `
+              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
                 <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
                   ${escapeHtml(slot.time || "")}
                 </div>
-                <div class="sub" style="margin:0; color:var(--text);">${escapeHtml(slot.text || "")}</div>
+                <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
               </div>
-            `).join("") : `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>`}
+            `).join("") : "")}
           </div>
         </div>
       `).join("");
@@ -811,7 +811,7 @@
 
       const firstDate = dates?.[0] || null;
 
-      stayTitle.textContent = stay.title || "Séjour";
+      stayTitle.textContent = "/ " + (stay.title || "Séjour");
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
       const metaDesc = buildStayMetaDescription(stay);
       if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
@@ -878,20 +878,17 @@
         if(highlightsSection) highlightsSection.style.display = "none";
       }
 
+      // Toujours afficher le programme, les inclusions et les options s'ils ont du contenu
       const progData = stay.program || [];
       renderProgram(programList, progData);
       if(programSection) {
         programSection.style.display = (progData.length || stay.program_note) ? "" : "none";
       }
 
-      const optData = stay.extra_options || [];
-      renderOptionsList(optionsList, optData, stay.booking_url || stay.reservation_url || "", bookingBtn, bookingMsg);
-      if(optionsSection) {
-        optionsSection.style.display = (stay.show_options_section === false || !optData.length) ? "none" : "";
-      }
-
       if(stay.program_note){
         programNote.textContent = stay.program_note;
+      } else if(programNote) {
+        programNote.textContent = "";
       }
 
       giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
@@ -911,18 +908,31 @@
       if(stay.gift_image){
         giftImage.src = stay.gift_image;
       }
+      if(giftSection) giftSection.style.display = giftItemsData.length ? "" : "none";
 
-      renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
-      renderSimpleList(notIncludedList, stay.not_included_items || []);
+      const incData = stay.included_items || arrayFromField(stay.included);
+      const notIncData = stay.not_included_items || [];
+      renderSimpleList(includedList, incData);
+      renderSimpleList(notIncludedList, notIncData);
+      if(includedSection) {
+        includedSection.style.display = (incData.length || notIncData.length) ? "" : "none";
+      }
+
+      const optData = stay.extra_options || [];
+      const bookingUrl = stay.booking_url || stay.reservation_url || "";
+      renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg);
+      if(optionsSection) {
+        optionsSection.style.display = optData.length ? "" : "none";
+      }
+
       const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
       const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
       renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
 
-      const bookingUrl = stay.booking_url || stay.reservation_url || "";
-      if(bookingUrl){
+      if(bookingUrl && (!optData || !optData.length)){
         bookingBtn.href = bookingUrl;
         bookingMsg.textContent = "Tu peux réserver directement via ce lien.";
-      } else {
+      } else if (!bookingUrl && (!optData || !optData.length)) {
         bookingBtn.removeAttribute("href");
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
@@ -989,64 +999,6 @@
     }, 3000);
 
     // Le header reste toujours visible sans masquage au scroll
-
-    window.addEventListener("message", (e) => {
-      if (e.data && e.data.type === "LIVE_UPDATE") {
-        const stay = e.data.payload;
-        if(stayTitle) stayTitle.textContent = stay.title || "Séjour (Aperçu en direct)";
-        if(stay.hero_image && stayHeroBg) stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
-        
-        const blocks = normalizeContentBlocks(stay.content_blocks);
-        if(blocks.length > 0){
-          renderContentBlocks(contentBlocksContainer, blocks);
-          if(contentBlocksSection) contentBlocksSection.style.display = "";
-          if(stayText) stayText.style.display = "none";
-        } else {
-          if(contentBlocksSection) contentBlocksSection.style.display = "none";
-          if(stayText) stayText.style.display = "";
-          renderRichText(stayText, stay.description || stay.short_description || "");
-        }
-        
-        if (stay.show_highlights_section !== false) {
-          if(highlightsSection) highlightsSection.style.display = "";
-          renderSimpleList(highlightsList, stay.highlights || []);
-        } else if(highlightsSection) highlightsSection.style.display = "none";
-        
-        if (stay.show_program_section !== false) {
-          if(programSection) programSection.style.display = "";
-          renderProgram(programList, stay.program || []);
-          if(stay.program_note && programNote) programNote.textContent = stay.program_note;
-        } else if(programSection) programSection.style.display = "none";
-
-        if (stay.show_gift_section !== false) {
-          if(giftSection) giftSection.style.display = "";
-          if(giftTitle) giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
-          if(giftIntro) giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
-          if(giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
-          const giftItemsData = stay.gift_items && stay.gift_items.length ? stay.gift_items : [ "Tee-shirt Âmes Nomades", "Sac en tissu", "Gourde réutilisable", "Carnet & stylo pour l’écriture et l’introspection", "Un soin bien-être (surprise)" ];
-          if(giftList) giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
-          if(stay.gift_image && giftImage) giftImage.src = stay.gift_image;
-        } else if(giftSection) giftSection.style.display = "none";
-
-        if (stay.show_included_section !== false) {
-          if(includedSection) includedSection.style.display = "";
-          renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
-          renderSimpleList(notIncludedList, stay.not_included_items || []);
-        } else if(includedSection) includedSection.style.display = "none";
-
-        if (stay.show_options_section !== false) {
-          if(optionsSection) optionsSection.style.display = "";
-          renderSimpleList(optionsList, stay.extra_options || []);
-        } else if(optionsSection) optionsSection.style.display = "none";
-
-        if (stay.show_faq_section !== false) {
-          if(faqSection) faqSection.style.display = "";
-          const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
-          renderFaq(faqList, stayFaqItems.length ? stayFaqItems : fallbackStayFaqItems);
-        } else if(faqSection) faqSection.style.display = "none";
-      }
-    });
-
     loadStay();
   </script>
 

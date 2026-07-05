@@ -52,9 +52,9 @@
     selector: ".text-reveal",
     initialOpacity: 0.15,     // Opacité initiale discrète (15%), standard du luxe
     start: "top 80%",         // Déclenchement lorsque l'élément arrive à 80% du viewport (~70-80% visibilité)
-    charDuration: 0.65,       // Durée d'apparition douce d'un caractère ou mot individuel
-    stagger: 0.025,           // Délai de cascade de base entre chaque élément
-    maxWaveDuration: 1.3,     // Durée maximale garantie pour la vague d'apparition complète (textes longs)
+    charDuration: 1.2,        // Durée d'apparition douce et lente d'un caractère ou mot individuel
+    stagger: 0.045,           // Délai de cascade de base plus reposant entre chaque élément
+    maxWaveDuration: 2.8,     // Durée maximale plus longue pour une vague d'apparition majestueuse
     defaultType: "chars",     // Type d'animation par défaut ('chars' pour caractères, 'words' pour mots)
   };
 
