@@ -1,58 +1,64 @@
 /**
  * scroll-text-reveal.js
  * ============================================================================
- * Module d'animation de révélation de texte au scroll (Scrubbed Text Reveal),
- * reproduisant l'effet visuel haute performance du Commandant Charcot de PONANT.
- * 
+ * Module d'animation de révélation de texte haut de gamme (Luxury Storytelling),
+ * reproduisant l'effet d'apparition fluide et élégant des sites de luxe (Apple, Cartier, etc.).
+ *
  * CHOIX TECHNIQUES & ARCHITECTURE :
  * ----------------------------------------------------------------------------
- * 1. Moteur d'animation : GSAP + ScrollTrigger
- *    - Offre une précision absolue de synchronisation avec le scroll (scrub).
- *    - Le paramètre `scrub: 0.5` lisse les acoups de molette/trackpad sur 0.5s,
- *      garantissant une sensation de fluidité veloutée à 60 FPS sans décalage.
- * 
- * 2. Découpage du DOM : SplitType (types: 'words,chars')
- *    - Découper d'abord en mots ('words') puis en caractères ('chars') permet
- *      de conserver les mots dans des conteneurs inline-block. Cela empêche les
- *      mots de se briser en milieu de ligne lors du wrapping naturel.
- * 
- * 3. Élimination totale du CLS (Cumulative Layout Shift) :
- *    - L'initialisation attend la résolution de `document.fonts.ready` afin que
- *      les largeurs de polices soient calculées définitivement avant le découpage.
- *    - Un gestionnaire de redimensionnement (debounce) exécute `split.revert()`,
- *      laissant le navigateur recalculer le layout responsive avant de redécouper.
- * 
+ * 1. Moteur d'animation : GSAP + ScrollTrigger (ou IntersectionObserver en fallback)
+ *    - Déclenchement autonome : l'animation ne dépend PAS du scroll pour sa lecture.
+ *      Le scroll (ou l'entrée dans le viewport à ~70-80% de visibilité) sert uniquement
+ *      de déclencheur (`once: true`).
+ *    - Une fois lancée, l'animation s'exécute à un rythme fluide et constant (60 FPS),
+ *      indépendamment de la vitesse de défilement de l'utilisateur.
+ *
+ * 2. Découpage du DOM : SplitType ('words,chars')
+ *    - Découpage par mots puis par caractères. Le fait de maintenir les mots dans
+ *      des conteneurs `inline-block` avec `white-space: nowrap` empêche toute cassure
+ *      de mot en milieu de ligne lors du wrapping naturel.
+ *
+ * 3. Pacing dynamique & Opacité discrète :
+ *    - Le texte est initialement à très faible opacité (15% par défaut).
+ *    - Pour éviter qu'un paragraphe long ne mette 10 secondes à s'afficher, le délai
+ *      de cascade (`stagger`) est calculé dynamiquement selon la longueur du texte :
+ *      la vague complète d'apparition dure au maximum ~1.2s à 1.5s.
+ *
  * 4. Accessibilité 100% préservée (Lecteurs d'écran & Sélection de texte) :
- *    - Si aucun `aria-label` n'est présent, on affecte le texte brut au conteneur.
- *    - Les spans générés par SplitType reçoivent `aria-hidden="true"`, forçant
- *      les lecteurs d'écran à lire la phrase fluide au lieu de l'épeler lettre à lettre.
- *    - Les nœuds de texte DOM étant intacts dans les spans, le copier-coller
- *      et la sélection de texte standard restent 100% fonctionnels.
- * 
+ *    - Positionnement automatique d'un `aria-label` sur le conteneur contenant le texte brut.
+ *    - Ajout de `aria-hidden="true"` sur les spans générés par SplitType afin que
+ *      les synthèses vocales lisent la phrase fluide au lieu d'épeler lettre par lettre.
+ *    - Les nœuds de texte DOM restant intacts, le copier-coller et la sélection
+ *      de texte standard restent 100% fonctionnels.
+ *
  * 5. Respect des préférences d'accessibilité (prefers-reduced-motion) :
- *    - Détection via `matchMedia`. Si l'utilisateur demande une réduction des
- *      mouvements, l'animation JS ne s'exécute pas et le texte reste à 100% d'opacité.
- * 
- * 6. Support du contenu dynamique (Supabase / Ajax) :
- *    - Un `MutationObserver` surveille le DOM pour détecter et animer automatiquement
- *      les descriptions de séjour injectées de manière asynchrone.
+ *    - Détection via `window.matchMedia`. Si la réduction des mouvements est activée,
+ *      aucune animation n'est jouée et le texte reste immédiatement à 100% d'opacité.
+ *
+ * 6. Élimination du CLS (Cumulative Layout Shift) & Responsive :
+ *    - L'initialisation attend la résolution de `document.fonts.ready` pour s'assurer
+ *      que les polices sont chargées avant le calcul des géométries.
+ *    - Au redimensionnement (debounce 250ms), les éléments déjà révélés à 100% sont
+ *      simplement restaurés dans un état propre (opacité 100%, sans réanimation),
+ *      tandis que les éléments en attente sont redécoupés proprement pour le nouveau viewport.
  * ============================================================================
  */
 
 (function () {
   "use strict";
 
-  // Configuration globale de l'effet
+  // Configuration globale de l'effet de révélation premium
   const CONFIG = {
     selector: ".text-reveal",
-    initialOpacity: 0.15, // Opacité de base discrète (15%), identique aux standards du luxe
-    start: "top 85%",     // Début de l'animation lorsque le haut de l'élément arrive à 85% du viewport
-    end: "bottom 35%",    // Révélation complète lorsque le bas de l'élément atteint 35% du viewport
-    scrub: 0.5,           // Lissage de 0.5s pour une fluidité 60 FPS irréprochable
-    stagger: 0.05,        // Délai de cascade pour un effet de vague naturelle (gauche à droite)
+    initialOpacity: 0.15,     // Opacité initiale discrète (15%), standard du luxe
+    start: "top 80%",         // Déclenchement lorsque l'élément arrive à 80% du viewport (~70-80% visibilité)
+    charDuration: 0.65,       // Durée d'apparition douce d'un caractère ou mot individuel
+    stagger: 0.025,           // Délai de cascade de base entre chaque élément
+    maxWaveDuration: 1.3,     // Durée maximale garantie pour la vague d'apparition complète (textes longs)
+    defaultType: "chars",     // Type d'animation par défaut ('chars' pour caractères, 'words' pour mots)
   };
 
-  // Registre des instances animées pour gestion propre du cycle de vie (resize)
+  // Registre des instances animées pour gestion propre du cycle de vie
   const instances = new Set();
 
   /**
@@ -68,26 +74,70 @@
   }
 
   /**
-   * Initialise la révélation au scroll sur une sélection d'éléments.
-   * @param {string|Element|NodeList|Array} targets - Cibles à animer.
+   * Calcule un stagger dynamique pour s'assurer que les longs paragraphes ne prennent
+   * pas trop de temps à se révéler entièrement.
+   * @param {number} totalItems - Nombre total de caractères ou de mots.
+   * @returns {number}
    */
-  function initScrollTextReveal(targets = CONFIG.selector) {
-    // Vérification de sécurité des dépendances
-    if (
-      typeof gsap === "undefined" ||
-      typeof ScrollTrigger === "undefined" ||
-      typeof SplitType === "undefined"
-    ) {
-      console.warn(
-        "[ScrollTextReveal] GSAP, ScrollTrigger ou SplitType manquant. Le texte restera visible par défaut."
-      );
+  function getDynamicStagger(totalItems) {
+    if (!totalItems || totalItems <= 1) return CONFIG.stagger;
+    // Si la multiplication du stagger par le nombre d'éléments dépasse maxWaveDuration,
+    // on compresse le stagger proportionnellement.
+    const calculated = CONFIG.maxWaveDuration / totalItems;
+    return Math.min(CONFIG.stagger, calculated);
+  }
+
+  /**
+   * Lance l'animation de révélation sur une instance découpée.
+   * @param {Object} instance - Objet contenant { el, split, targets, isCompleted }
+   */
+  function playRevealAnimation(instance) {
+    if (instance.isCompleted || !instance.targets || !instance.targets.length) return;
+
+    if (typeof gsap === "undefined") {
+      // Fallback sans GSAP
+      instance.targets.forEach((node) => (node.style.opacity = "1"));
+      instance.isCompleted = true;
+      instance.el.dataset.textRevealCompleted = "true";
       return;
     }
 
-    // Enregistrement de ScrollTrigger dans GSAP
-    gsap.registerPlugin(ScrollTrigger);
+    const staggerDelay = getDynamicStagger(instance.targets.length);
 
-    // Arrêt immédiat si l'utilisateur demande moins de mouvement
+    // Animation fluide de l'opacité (et colorisation naturelle si le texte était grisé)
+    gsap.to(instance.targets, {
+      opacity: 1,
+      duration: CONFIG.charDuration,
+      stagger: staggerDelay,
+      ease: "power2.out", // Easing velouté et naturel
+      onComplete: () => {
+        instance.isCompleted = true;
+        instance.el.dataset.textRevealCompleted = "true";
+        // Nettoyage de la propriété will-change pour libérer la mémoire GPU compositor
+        gsap.set(instance.targets, { clearProps: "will-change" });
+      },
+    });
+  }
+
+  /**
+   * Initialise la révélation sur un ensemble de cibles DOM.
+   * @param {string|Element|NodeList|Array} targets - Éléments à initialiser.
+   */
+  function initScrollTextReveal(targets = CONFIG.selector) {
+    // Vérification de sécurité des dépendances
+    if (typeof SplitType === "undefined") {
+      console.warn("[ScrollTextReveal] SplitType est manquant. Le texte restera à 100% d'opacité.");
+      return;
+    }
+
+    const hasGsap = typeof gsap !== "undefined";
+    const hasScrollTrigger = hasGsap && typeof ScrollTrigger !== "undefined";
+
+    if (hasScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
+    // Arrêt immédiat si l'utilisateur demande moins de mouvement ou en cas d'absence de JS
     if (isReducedMotion()) {
       return;
     }
@@ -111,22 +161,32 @@
       // 1. Déclenchement individuel et protection contre la double initialisation
       if (!el || el.dataset.textRevealInitialized === "true") return;
 
-      // Ignorer si l'élément ne contient pas de texte lisible
       const rawText = el.textContent.trim();
       if (!rawText) return;
 
       el.dataset.textRevealInitialized = "true";
+
+      // Si l'élément avait déjà été complètement révélé lors d'un cycle précédent (ex: resize),
+      // on s'assure qu'il reste à 100% visible sans rejouer l'animation.
+      if (el.dataset.textRevealCompleted === "true") {
+        el.style.opacity = "1";
+        return;
+      }
 
       // 2. Accessibilité : garantir une lecture fluide pour les lecteurs d'écran
       if (!el.getAttribute("aria-label") && !el.closest("[aria-label]")) {
         el.setAttribute("aria-label", rawText);
       }
 
-      // 3. Découpage du texte sans induire de Layout Shift
-      // L'option 'words,chars' préserve l'intégrité des mots lors des retours à la ligne
+      // 3. Découpage du texte sans induire de Layout Shift (CLS)
+      // On découpe en 'words,chars' pour préserver l'intégrité des mots et autoriser le wrapping
       const split = new SplitType(el, { types: "words,chars" });
 
-      if (!split.chars || split.chars.length === 0) {
+      // Lecture du type d'animation souhaité depuis les attributs data (ex: data-reveal-type="words")
+      const revealType = el.dataset.revealType || CONFIG.defaultType;
+      const targetsToAnimate = revealType === "words" ? (split.words || split.chars) : (split.chars || split.words);
+
+      if (!targetsToAnimate || targetsToAnimate.length === 0) {
         return;
       }
 
@@ -135,41 +195,65 @@
         split.words.forEach((word) => word.setAttribute("aria-hidden", "true"));
       }
       if (split.chars && split.chars.length) {
-        split.chars.forEach((char) => char.setAttribute("aria-hidden", "true"));
+        split.chars.forEach((char) => {
+          char.setAttribute("aria-hidden", "true");
+          char.style.willChange = "opacity"; // Optimisation GPU compositor pour 60 FPS
+        });
       }
 
-      // 4. Construction de l'animation GSAP
-      // On affecte l'opacité initiale et une couleur gris clair aux caractères individuels
-      gsap.set(split.chars, { opacity: CONFIG.initialOpacity, color: "#888888" });
+      // 4. Initialisation visuelle : très faible opacité (15%) sur les éléments découpés
+      if (hasGsap) {
+        gsap.set(targetsToAnimate, { opacity: CONFIG.initialOpacity });
+      } else {
+        targetsToAnimate.forEach((node) => (node.style.opacity = String(CONFIG.initialOpacity)));
+      }
 
-      // Création d'une timeline scrubbée (strictement pilotée par le défilement)
-      const tl = gsap.timeline({
-        scrollTrigger: {
+      const instance = {
+        el,
+        split,
+        targets: targetsToAnimate,
+        isCompleted: false,
+        trigger: null,
+      };
+
+      // 5. Déclenchement à l'entrée dans le viewport (~70-80% de visibilité, once: true)
+      if (hasScrollTrigger) {
+        instance.trigger = ScrollTrigger.create({
           trigger: el,
           start: CONFIG.start,
-          end: CONFIG.end,
-          scrub: CONFIG.scrub,
-          invalidateOnRefresh: true, // Recalcule les coordonnées en cas de rafraîchissement
-        },
-      });
+          once: true, // L'animation ne se déclenche qu'une seule fois !
+          onEnter: () => {
+            playRevealAnimation(instance);
+          },
+        });
+      } else if (typeof IntersectionObserver !== "undefined") {
+        // Fallback natif si ScrollTrigger n'est pas disponible
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+                playRevealAnimation(instance);
+                observer.unobserve(el);
+              }
+            });
+          },
+          { threshold: [0.2, 0.5] }
+        );
+        observer.observe(el);
+        instance.trigger = observer;
+      } else {
+        // Si aucun observer n'est disponible, on joue directement
+        playRevealAnimation(instance);
+      }
 
-      // Révélation progressive (de gauche à droite en suivant l'ordre du DOM) : devient noir et 100% opaque
-      tl.to(split.chars, {
-        opacity: 1,
-        color: "#000000",
-        stagger: CONFIG.stagger,
-        ease: "none", // Indispensable avec scrub pour une relation 1:1 et fluide
-      });
-
-      // Enregistrement de l'instance pour gestion au redimensionnement
-      instances.add({ el, split, tl });
+      instances.add(instance);
     });
   }
 
   /**
    * Gestionnaire de redimensionnement responsive (avec Debounce 250ms).
-   * Restaure le DOM initial pour recalculer le wrapping des lignes (desktop/tablette/mobile),
-   * puis réinitialise l'animation sans aucun décalage visuel (0 CLS).
+   * Revert le DOM initial pour recalibrer le wrapping des lignes (desktop/tablette/mobile),
+   * puis réinitialise uniquement les éléments non encore complétés sans aucun CLS.
    */
   let resizeTimeout = null;
   function handleResize() {
@@ -178,18 +262,32 @@
       if (isReducedMotion() || instances.size === 0) return;
 
       instances.forEach((instance) => {
-        if (instance.tl && instance.tl.scrollTrigger) {
-          instance.tl.scrollTrigger.kill();
+        // Si l'animation est déjà terminée, on revert le découpage pour un DOM propre
+        // et on conserve l'élément visible à 100% (pas de réanimation).
+        if (instance.isCompleted || instance.el.dataset.textRevealCompleted === "true") {
+          if (instance.trigger) {
+            if (instance.trigger.kill) instance.trigger.kill();
+            else if (instance.trigger.disconnect) instance.trigger.disconnect();
+          }
+          if (instance.split && instance.split.revert) instance.split.revert();
+          instance.el.style.opacity = "1";
+          delete instance.el.dataset.textRevealInitialized;
+          return;
         }
-        if (instance.tl) instance.tl.kill();
-        if (instance.split) instance.split.revert();
+
+        // Si l'animation était en attente, on nettoie pour recalculer le layout
+        if (instance.trigger) {
+          if (instance.trigger.kill) instance.trigger.kill();
+          else if (instance.trigger.disconnect) instance.trigger.disconnect();
+        }
+        if (instance.split && instance.split.revert) instance.split.revert();
         delete instance.el.dataset.textRevealInitialized;
       });
       instances.clear();
 
       // Réinitialisation après recalcul du layout par le navigateur
       initScrollTextReveal();
-      if (typeof ScrollTrigger !== "undefined") {
+      if (typeof ScrollTrigger !== "undefined" && ScrollTrigger.refresh) {
         ScrollTrigger.refresh();
       }
     }, 250);
@@ -197,8 +295,8 @@
 
   /**
    * Surveillance des mutations DOM (MutationObserver).
-   * Détecte l'insertion de descriptions dynamiques (ex : requêtes Supabase)
-   * et déclenche leur révélation au scroll de manière autonome.
+   * Détecte l'insertion de contenus dynamiques (ex : requêtes Supabase AJAX)
+   * et déclenche leur révélation de manière autonome.
    */
   function setupDOMObserver() {
     if (typeof MutationObserver === "undefined") return;
@@ -223,10 +321,9 @@
       }
 
       if (shouldRefresh) {
-        // Exécution dans le prochain cycle d'animation pour garantir le rendu DOM
         window.requestAnimationFrame(() => {
           initScrollTextReveal();
-          if (typeof ScrollTrigger !== "undefined") {
+          if (typeof ScrollTrigger !== "undefined" && ScrollTrigger.refresh) {
             ScrollTrigger.refresh();
           }
         });
@@ -261,12 +358,14 @@
   // Initialisation automatique du module
   boot();
 
-  // Exposition globale pour usage avancé ou appel manuel
+  // Exposition globale pour usage avancé, configuration dynamique ou appel manuel
   window.ScrollTextReveal = {
     init: initScrollTextReveal,
     config: CONFIG,
     refresh: () => {
-      if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
+      if (typeof ScrollTrigger !== "undefined" && ScrollTrigger.refresh) {
+        ScrollTrigger.refresh();
+      }
     },
   };
 })();
