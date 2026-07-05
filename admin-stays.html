@@ -1063,6 +1063,7 @@
     const btnCancelWizard = document.getElementById("btnCancelWizard");
     const btnWizPrev = document.getElementById("btnWizPrev");
     const btnWizNext = document.getElementById("btnWizNext");
+    const btnWizSubmit = document.getElementById("btnWizSubmit");
     let currentWizStep = 1;
     let currentWizardEditId = null;
     const btnPreviewStayTop = document.getElementById("btnPreviewStayTop");
@@ -2034,7 +2035,17 @@
 
       // Programme
       document.getElementById("wizProgramNote").value = stay.program_note || "";
-      wizProgList = Array.isArray(stay.program) ? [...stay.program] : [];
+      wizProgList = (Array.isArray(stay.program) ? stay.program : []).map(p => {
+        let txt = p.text || p.description || "";
+        if (!txt && Array.isArray(p.slots) && p.slots.length > 0) {
+          txt = p.slots.map(s => (s.time ? s.time + " - " : "") + (s.text || "")).join("\n");
+        }
+        return {
+          title: p.title || `Jour ${p.day_number || ""}`,
+          text: txt,
+          slots: p.slots || []
+        };
+      });
       renderWizProg();
 
       // Hébergement & Tarifs
@@ -2172,7 +2183,7 @@
       container.innerHTML = wizOptList.map((o, idx) => `
         <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <div>
-            <div style="font-weight:600; font-size:13.5px; color:var(--text);">${escapeHtml(o.label || "")} <span style="color:#4f8c5b; font-weight:700;">(${o.price} €)</span></div>
+            <div style="font-weight:600; font-size:13.5px; color:var(--text);">${escapeHtml(o.label || "")} <span style="color:var(--text); font-weight:700;">(${o.price} €)</span></div>
             <div style="font-size:11.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; max-width:280px;" title="${o.stripe_url || ''}">🔗 ${escapeHtml(o.stripe_url || "Pas de lien Stripe")}</div>
           </div>
           <button type="button" class="btn-del-wizopt" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 8px; cursor:pointer;">Supprimer</button>

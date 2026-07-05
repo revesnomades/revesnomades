@@ -139,8 +139,8 @@
       }
 
       // 4. Construction de l'animation GSAP
-      // On affecte l'opacité initiale aux caractères individuels
-      gsap.set(split.chars, { opacity: CONFIG.initialOpacity });
+      // On affecte l'opacité initiale et une couleur gris clair aux caractères individuels
+      gsap.set(split.chars, { opacity: CONFIG.initialOpacity, color: "#888888" });
 
       // Création d'une timeline scrubbée (strictement pilotée par le défilement)
       const tl = gsap.timeline({
@@ -153,9 +153,10 @@
         },
       });
 
-      // Révélation progressive (de gauche à droite en suivant l'ordre du DOM)
+      // Révélation progressive (de gauche à droite en suivant l'ordre du DOM) : devient noir et 100% opaque
       tl.to(split.chars, {
         opacity: 1,
+        color: "#000000",
         stagger: CONFIG.stagger,
         ease: "none", // Indispensable avec scrub pour une relation 1:1 et fluide
       });

@@ -31,7 +31,7 @@
     Mode aperçu admin
   </div>
 
-  <header class="nav hide-on-top" id="top">
+  <header class="nav" id="top">
     <div class="container nav-inner">
       <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
         <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
@@ -406,23 +406,96 @@
         `;
         return;
       }
-
-      container.innerHTML = items.map(day => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px;">
-          <div class="kicker">${escapeHtml(day.title || `Jour ${day.day_number || ""}`)}</div>
-
-          <div style="display:grid; gap:8px; margin-top:12px;">
-            ${(day.slots || []).map(slot => `
-              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start;">
+      container.innerHTML = items.map((day, idx) => `
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:16px; border-radius:4px;">
+          <div class="kicker" style="font-weight:600; color:var(--text); font-size:15px;">${escapeHtml(day.title || `Jour ${day.day_number || idx + 1}`)}</div>
+          <div style="margin-top:10px;">
+            ${Array.isArray(day.slots) && day.slots.length > 0 ? day.slots.map(slot => `
+              <div style="display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:start; margin-bottom:8px;">
                 <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;">
                   ${escapeHtml(slot.time || "")}
                 </div>
-                <div class="sub" style="margin:0;">${escapeHtml(slot.text || "")}</div>
+                <div class="sub" style="margin:0; color:var(--text);">${escapeHtml(slot.text || "")}</div>
               </div>
-            `).join("")}
+            `).join("") : `<div class="sub" style="margin:0; white-space:pre-line; line-height:1.6; color:var(--text); font-size:14px;">${escapeHtml(day.text || day.description || "")}</div>`}
           </div>
         </div>
       `).join("");
+    }
+
+    function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl){
+      if(!container) return;
+      if(!options || !options.length){
+        container.innerHTML = `<div style="color:var(--muted);">Aucune option tarifaire en supplément.</div>`;
+        return;
+      }
+      container.innerHTML = options.map((opt, idx) => {
+        const label = typeof opt === "string" ? opt : (opt.label || "");
+        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
+        const url = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        return `
+          <label class="option-card-label" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.75); cursor:pointer; transition:all 0.2s; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(price)}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
+              <div>
+                <div style="font-weight:600; color:var(--text); font-size:15px;">${escapeHtml(label)}</div>
+                ${price ? `<div style="font-weight:700; color:var(--text); font-size:16px; margin-top:2px;">${escapeHtml(price)}</div>` : ""}
+              </div>
+            </div>
+            <div>
+              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:4px; cursor:pointer; white-space:nowrap;">Réserver cette option →</button>` : ""}
+            </div>
+          </label>
+        `;
+      }).join("");
+
+      const radioInputs = container.querySelectorAll("input[type='radio']");
+      const stripeBtns = container.querySelectorAll(".btn-opt-stripe");
+
+      stripeBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const targetUrl = btn.getAttribute("data-url");
+          if(targetUrl) window.location.href = targetUrl;
+        });
+      });
+
+      function updateMainBookingBtn(){
+        const selected = container.querySelector("input[type='radio']:checked");
+        if(selected && bookingBtnEl){
+          const url = selected.getAttribute("data-url") || defaultUrl;
+          const label = selected.getAttribute("data-label");
+          const price = selected.getAttribute("data-price");
+          if(url){
+            bookingBtnEl.href = url;
+            bookingBtnEl.textContent = `Réserver — ${label} ${price ? '(' + price + ')' : ''}`;
+            if(bookingMsgEl) bookingMsgEl.textContent = `Redirection directe vers Stripe pour : ${label}`;
+          }
+        }
+      }
+
+      radioInputs.forEach(radio => {
+        radio.addEventListener("change", () => {
+          container.querySelectorAll(".option-card-label").forEach(el => {
+            el.style.borderColor = "var(--line)";
+            el.style.background = "rgba(255,255,255,.75)";
+          });
+          const parent = radio.closest(".option-card-label");
+          if(parent){
+            parent.style.borderColor = "var(--text)";
+            parent.style.background = "#ffffff";
+          }
+          updateMainBookingBtn();
+        });
+      });
+
+      const firstParent = container.querySelector("input[type='radio']:checked")?.closest(".option-card-label");
+      if(firstParent){
+        firstParent.style.borderColor = "var(--text)";
+        firstParent.style.background = "#ffffff";
+      }
+      updateMainBookingBtn();
     }
 
     function renderRichText(container, content){
@@ -520,7 +593,7 @@
         }
 
         return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
-      }).join("");
+      }).join('<hr class="sejour-block-sep" style="border:none; border-top:1px solid rgba(30,31,34,.15); margin:36px 0;">');
 
       container.querySelectorAll("p.sub, h3, blockquote p, article p").forEach(el => el.classList.add("text-reveal"));
       if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
@@ -786,21 +859,35 @@
       const blocks = normalizeContentBlocks(stay.content_blocks);
       const hasBlocks = blocks.length > 0;
 
+      if(stayText) {
+        stayText.style.display = "";
+        renderRichText(stayText, stay.description || stay.short_description || "");
+      }
+
       if(hasBlocks){
         renderContentBlocks(contentBlocksContainer, blocks);
         if(contentBlocksSection) contentBlocksSection.style.display = "";
-        if(stayText) stayText.style.display = "none";
-        if(highlightsSection) highlightsSection.style.display = "none";
-        if(programSection) programSection.style.display = "none";
-        if(giftSection) giftSection.style.display = "none";
-        if(includedSection) includedSection.style.display = "none";
-        if(optionsSection) optionsSection.style.display = "none";
       } else {
         if(contentBlocksSection) contentBlocksSection.style.display = "none";
-        if(stayText) stayText.style.display = "";
-        renderRichText(stayText, stay.description || stay.short_description || "");
-        renderSimpleList(highlightsList, stay.highlights || []);
-        renderProgram(programList, stay.program || []);
+      }
+
+      if(stay.highlights && stay.highlights.length > 0){
+        if(highlightsSection) highlightsSection.style.display = "";
+        renderSimpleList(highlightsList, stay.highlights);
+      } else {
+        if(highlightsSection) highlightsSection.style.display = "none";
+      }
+
+      const progData = stay.program || [];
+      renderProgram(programList, progData);
+      if(programSection) {
+        programSection.style.display = (progData.length || stay.program_note) ? "" : "none";
+      }
+
+      const optData = stay.extra_options || [];
+      renderOptionsList(optionsList, optData, stay.booking_url || stay.reservation_url || "", bookingBtn, bookingMsg);
+      if(optionsSection) {
+        optionsSection.style.display = (stay.show_options_section === false || !optData.length) ? "none" : "";
       }
 
       if(stay.program_note){
@@ -827,7 +914,6 @@
 
       renderSimpleList(includedList, stay.included_items || arrayFromField(stay.included));
       renderSimpleList(notIncludedList, stay.not_included_items || []);
-      renderSimpleList(optionsList, stay.extra_options || []);
       const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
       const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
       renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
@@ -902,14 +988,7 @@
       }
     }, 3000);
 
-    // Faire apparaitre le header au scroll
-    window.addEventListener("scroll", () => {
-      if(window.scrollY > 50) {
-        navHeader?.classList.remove("hide-on-top");
-      } else {
-        navHeader?.classList.add("hide-on-top");
-      }
-    });
+    // Le header reste toujours visible sans masquage au scroll
 
     window.addEventListener("message", (e) => {
       if (e.data && e.data.type === "LIVE_UPDATE") {

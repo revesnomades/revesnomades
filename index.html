@@ -521,7 +521,7 @@
       if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
-      if (featuredStayMissing) featuredStayMissing.textContent = "Places limitées";
+      if (featuredStayMissing) featuredStayMissing.textContent = "";
     }
 
     async function loadHighlightStays() {
