@@ -34,6 +34,9 @@
   font-display: swap;
 }
 
+/* Police de fallback web-safe : si Glacial Indifference n'est pas installée (iOS, Mac sans la police)
+   Outfit (Google Fonts, chargé via CDN) prend le relais — même style épuré, pas de gras parasite */
+
 :root{
   --cream:#faf5dc;
   --white:#fffdf3;
@@ -62,7 +65,7 @@
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; height:100%; }
 body{
-  font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
+  font-family:"Glacial Indifference", "Outfit", "Segoe UI", Arial, sans-serif;
   font-weight:300;
   color:var(--text);
   background:var(--white);
@@ -70,7 +73,7 @@ body{
   letter-spacing: .01em;
 }
 h1,h2,h3,h4{
-  font-family:"Glacial Indifference", "Segoe UI", Arial, sans-serif;
+  font-family:"Glacial Indifference", "Outfit", "Segoe UI", Arial, sans-serif;
   letter-spacing: .02em;
   text-transform: uppercase;
   font-weight:250;

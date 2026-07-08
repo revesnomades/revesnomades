@@ -36,6 +36,12 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="preload" as="image" href="assets/img/hero-1.jpg">
+
+  <!-- Google Fonts : Roca One (titres), IBM Plex Mono (kicker), Outfit (fallback Glacial) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="assets/css/styles.css" />
 
   <script type="application/ld+json">
@@ -125,7 +131,7 @@
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
-      <h1 class="reveal" data-delay="0" style="font-size: clamp(18px, 2.4vw, 30px); font-weight: 300; line-height: 1.25; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 520px;">Partir pour mieux se retrouver.</h1>
+      <h1 class="reveal" data-delay="0" style="font-family:'SegoCustom', serif; font-size: clamp(18px, 2.4vw, 30px); font-weight: 300; line-height: 1.25; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 520px; text-transform: none;">partir pour mieux se retrouver.</h1>
 
       <div class="actions reveal" data-delay="1">
         <a href="#sejours" class="btn tiny" data-scroll>Voir les séjours</a>
@@ -135,7 +141,7 @@
 
   <section class="band principle-band fixed-bg">
     <div class="container">
-      <h2 class="reveal text-reveal" data-delay="0">L'équilibre entre mouvement et détente.</h2>
+      <h2 class="reveal text-reveal" data-delay="0" style="font-family:'Roca One', 'Outfit', serif; font-weight:400; text-transform:none; letter-spacing:0.01em;">L'équilibre entre mouvement et détente.</h2>
 
       <p class="reveal text-reveal" data-delay="1">
         Nos retraites et séjours bien-être sont pensés comme une véritable coupure avec le quotidien, une parenthèse pour ralentir et se ressourcer.
@@ -152,10 +158,10 @@
       <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
 
       <div class="stay-copy">
-        <div class="kicker reveal" data-delay="0">Prochain séjour…</div>
+        <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px;">— &nbsp; —</div>
         <div class="sep reveal" data-delay="1"></div>
 
-        <h2 class="title reveal" data-delay="2" id="featuredStayTitle" style="font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important;">Chargement…</h2>
+        <h2 class="title reveal" data-delay="2" id="featuredStayTitle" style="font-family:'Roca One', 'Outfit', serif !important; font-weight:400 !important; text-transform:none !important; letter-spacing:0.01em;">Chargement…</h2>
 
         <p class="sub reveal" data-delay="3" id="featuredStayDuration">
           Durée à annoncer
@@ -165,13 +171,11 @@
           Chargement…
         </p>
 
-        <p class="sub reveal" data-delay="5" id="featuredStayLocation"></p>
-
-        <div class="actions reveal" data-delay="6">
+        <div class="actions reveal" data-delay="5">
           <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Réserver</a>
         </div>
 
-        <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
+        <div class="missing reveal" data-delay="6" id="featuredStayMissing"></div>
       </div>
     </div>
   </section>
@@ -224,11 +228,7 @@
   <section class="white" id="galerie-retour-image" style="display:none; overflow:hidden; position:relative; border-bottom: 1px solid var(--line); padding: 30px 0; margin: 0;">
     <div class="container" style="padding: 0;">
       <div class="gallery-header-row reveal" data-delay="0" style="text-align:center; margin-bottom: 36px;">
-        <div class="kicker">Souvenirs & Émotions</div>
-        <h2 class="gallery-main-title" style="margin-top:8px;">Retour en images</h2>
-        <p class="muted" style="margin-top:12px; max-width:650px; margin-left:auto; margin-right:auto;">
-          Quelques éclats de rire, de douceur et d'énergie partagés lors de nos moments Âmes Nomades.
-        </p>
+        <h2 class="gallery-main-title" style="margin-top:0; font-family:'Roca One', serif; font-weight:400; text-transform:none; letter-spacing:0.01em; font-size: clamp(24px, 2.6vw, 40px);">Nos précédents séjours</h2>
       </div>
 
       <div class="gallery-slider-container reveal" data-delay="2">
@@ -268,7 +268,7 @@
     <div class="container about-band">
       <div class="about-inner">
 
-        <h2 class="reveal" data-delay="0">À propos de Âmes Nomades</h2>
+        <h2 class="reveal" data-delay="0" style="font-family:'Roca One', serif; font-weight:400; text-transform:none; letter-spacing:0.01em;">À propos</h2>
 
         <div class="about-text is-collapsed" id="aboutText">
           <p class="reveal" data-delay="1">"Il y a quelques années, j’ai réalisé que beaucoup de femmes autour de moi étaient épuisées.</p>
@@ -330,7 +330,7 @@
     <div class="bg" style="background-image:url('assets/img/newsletter-bg.jpg');"></div>
 
     <div class="newsletter-inner container">
-      <h2 class="reveal" data-delay="0" style="font-family:'SegoCustom', serif; font-weight:400; text-transform:uppercase; letter-spacing:0.05em;">Recevez votre guide en cadeau !</h2>
+      <h2 class="reveal" data-delay="0" style="font-family:'Roca One', serif; font-weight:400; text-transform:none; letter-spacing:0.02em;">Recevez votre guide en cadeau !</h2>
 
       <form id="newsletterForm" class="form-stack reveal" data-delay="1" novalidate>
         <input class="input" name="lastname" placeholder="Nom" required autocomplete="family-name" />
@@ -349,27 +349,14 @@
     </div>
   </section>
 
-  <section class="gift-band band white">
-    <div class="bg" style="background-image:url('assets/img/hero-2.jpg');"></div>
-
-    <div class="inner container">
-      <h2 class="reveal" data-delay="0">Et si vous offriez un moment Âmes Nomades ?</h2>
-      <p class="reveal" data-delay="1">Un bon cadeau pour une parenthèse de mouvement, de douceur et de présence.</p>
-
-      <div class="actions reveal" data-delay="2">
-        <a class="btn tiny" href="bon-cadeau.html">Commander votre bon cadeau</a>
-      </div>
-    </div>
-  </section>
-
   <section class="band band-full cream" id="contact" style="padding: 110px 20px; text-align: center;">
     <div class="container" style="max-width: 680px; margin: 0 auto;">
-      <h2 class="reveal" data-delay="0" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4.5vw, 46px); font-weight: 300; letter-spacing: 0.05em; margin: 0 0 24px 0;">CONTACT</h2>
-      <p class="reveal" data-delay="1" style="font-size: 16.5px; line-height: 1.7; color: var(--muted); margin: 0 0 38px 0;">
-        Pour vos questions, la création d’un moment sur mesure, commander votre carte cadeau… N’hésitez pas à nous écrire !
+      <h2 class="reveal" data-delay="0" style="font-family:'Roca One', serif; font-size: clamp(32px, 4.5vw, 46px); font-weight: 400; letter-spacing: 0.02em; text-transform: none; margin: 0 0 24px 0;">Contact</h2>
+      <p class="reveal" data-delay="1" style="font-family:'Outfit', 'Glacial Indifference', sans-serif; font-size: 16.5px; line-height: 1.7; color: var(--muted); margin: 0 0 38px 0;">
+        Pour vos questions, la création d'un moment sur mesure, commander votre carte cadeau… N'hésitez pas à nous écrire !
       </p>
       <div class="reveal" data-delay="2">
-        <a class="btn on-light" href="contact.html" style="padding: 14px 36px; letter-spacing: 0.12em; font-weight: 500;">CONTACTER-NOUS</a>
+        <a class="btn on-light" href="contact.html" style="padding: 14px 36px; letter-spacing: 0.12em; font-weight: 500;">Nous écrire</a>
       </div>
     </div>
   </section>
@@ -377,7 +364,7 @@
   <section class="bottom-wide on-photo">
     <div class="bg" style="background-image:url('assets/img/bottom-wide.jpg');"></div>
     <div class="content container reveal">
-      <h2 style="font-size: clamp(18px, 2.4vw, 30px); font-weight: 300;">Partir pour mieux se retrouver.</h2>
+      <h2 style="font-family:'Outfit', 'Glacial Indifference', sans-serif; font-size: clamp(18px, 2.4vw, 30px); font-weight: 300; text-transform: none; letter-spacing: 0.02em;">partir pour mieux se retrouver.</h2>
     </div>
   </section>
 
@@ -438,9 +425,9 @@
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
 
     const featuredStayTitle = document.getElementById("featuredStayTitle");
+    const featuredStayKicker = document.getElementById("featuredStayKicker");
     const featuredStayDuration = document.getElementById("featuredStayDuration");
     const featuredStayDates = document.getElementById("featuredStayDates");
-    const featuredStayLocation = document.getElementById("featuredStayLocation");
     const featuredStayLink = document.getElementById("featuredStayLink");
     const featuredStayMedia = document.getElementById("featuredStayMedia");
     const featuredStayMissing = document.getElementById("featuredStayMissing");
@@ -498,7 +485,7 @@
         if (featuredStayTitle) featuredStayTitle.textContent = "Séjour à annoncer";
         if (featuredStayDuration) featuredStayDuration.textContent = "Durée à annoncer";
         if (featuredStayDates) featuredStayDates.textContent = "Dates à annoncer";
-        if (featuredStayLocation) featuredStayLocation.textContent = "";
+        if (featuredStayKicker) featuredStayKicker.textContent = "";
         if (featuredStayMissing) featuredStayMissing.textContent = "";
         return;
       }
@@ -518,7 +505,15 @@
       if (featuredStayTitle) featuredStayTitle.textContent = stay.title || "Séjour";
       if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
-      if (featuredStayLocation) featuredStayLocation.textContent = stay.location || "";
+
+      // Kicker : VILLE — PAYS en majuscules (IBM Plex Mono)
+      if (featuredStayKicker && stay.location) {
+        const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
+        featuredStayKicker.textContent = parts.join(' — ');
+      } else if (featuredStayKicker) {
+        featuredStayKicker.textContent = '';
+      }
+
       if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
       if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
 
