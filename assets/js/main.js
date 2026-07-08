@@ -1,5 +1,31 @@
 // main.js — version clean (nav + smooth scroll + reveal + hamburger + about toggle)
 (() => {
+  function initUniformHeader() {
+    const navInner = document.querySelector(".nav-inner");
+    if (!navInner || navInner.querySelector(".nav-left")) return;
+    
+    const navLeft = document.createElement("nav");
+    navLeft.className = "nav-left nav-links-desktop";
+    navLeft.setAttribute("aria-label", "Navigation gauche");
+    navLeft.innerHTML = `<a href="/boutique.html">Shop</a><a href="/index.html#sejours">Séjours</a>`;
+    navInner.insertBefore(navLeft, navInner.firstElementChild);
+
+    navInner.querySelectorAll(".nav-links a").forEach(a => {
+      const href = (a.getAttribute("href") || "").toLowerCase();
+      if (href.includes("boutique.html") && a.textContent.trim().toLowerCase() === "shop") {
+        a.remove();
+      }
+    });
+
+    const mobileMenu = document.querySelector(".mobile-menu");
+    if (mobileMenu && !mobileMenu.querySelector("a[href*='sejours']")) {
+      const sejourLink = document.createElement("a");
+      sejourLink.href = "/index.html#sejours";
+      sejourLink.textContent = "Séjours";
+      mobileMenu.insertBefore(sejourLink, mobileMenu.firstElementChild);
+    }
+  }
+  initUniformHeader();
 
   // ✅ Indique que JS est actif (sert au CSS pour animer sans cacher si JS plante)
   document.documentElement.classList.add("js");

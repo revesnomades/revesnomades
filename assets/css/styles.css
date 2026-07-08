@@ -405,7 +405,8 @@ html.js .text-reveal.reveal {
   height: 1px;
   background: var(--line);
   margin: 14px 0 22px;
-.title{ font-size: clamp(22px, 2.2vw, 34px); font-family: 'SegoCustom', serif !important; font-weight: 300 !important; text-transform: none !important; }
+}
+.title{ font-size: clamp(22px, 2.2vw, 34px); }
 .sub{ margin-top: 10px; color: var(--muted); max-width: 62ch; }
 .actions{ margin-top: 18px; }
 .missing{ margin-top: 12px; font-size: 12.5px; color: var(--muted); }
@@ -657,8 +658,8 @@ html.js .text-reveal.reveal {
 }
 .account-grid{
   display:grid;
-  grid-template-columns: minmax(320px, 400px) 1fr;
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
   align-items:start;
 }
 .account-card{
@@ -1706,8 +1707,6 @@ input, textarea {
   width: 100%;
   display: flex;
   align-items: center;
-  max-height: 320px;
-  overflow: hidden;
 }
 .gallery-carousel {
   display: flex !important;

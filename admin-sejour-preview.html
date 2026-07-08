@@ -73,7 +73,7 @@
   <section class="band cream" style="padding-top: 10px;">
     <div class="container sejour-content">
 
-      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(16px, 2.3vw, 30px); font-weight: 300; margin: 15px 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px; line-height: 1.2;">/ Séjour</h1>
+      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 15px 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">/ Séjour</h1>
 
       <p class="sejour-meta reveal" id="stayMeta">
         5 jours · 4 nuits
@@ -180,7 +180,6 @@
         </div>
 
         <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
-        <p class="sub" style="margin-top:8px; font-size:13px;">Un email vous sera envoyé dès la confirmation du séjour.</p>
       </div>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="faqSection">
@@ -212,12 +211,12 @@
         <p class="sub">
           Une question avant de réserver ? Écris-nous via la rubrique Contact, on te répond rapidement.
         </p>
-        <p class="sub" style="margin-top:8px; font-size:13px;">
-          Un email vous sera envoyé dès la confirmation du séjour.
-        </p>
         <div class="actions" style="margin-top:12px;">
           <a class="btn tiny on-light" href="/contact.html">Nous contacter</a>
         </div>
+        <p class="sub" style="margin-top:14px; font-size:13px; color:var(--muted);">
+          Un email vous sera envoyé dès la confirmation du séjour.
+        </p>
       </section>
 
     </div>
@@ -598,7 +597,7 @@
         const safeCaption = escapeHtml(block.caption);
         const safeQuote = escapeHtml(block.quote);
         const imageMarkup = block.image
-          ? `<div style="display:flex; align-items:center; justify-content:center; background:transparent; overflow:hidden;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || "Image du séjour")}" style="max-width:100%; max-height:550px; width:auto; height:auto; object-fit:contain; display:block; border-radius:4px;"></div>`
+          ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || "Image du séjour")}" style="width:100%; height:auto; display:block;">`
           : "";
 
         if(block.type === "image_full"){
@@ -618,11 +617,11 @@
 
         if(block.type === "gallery_2"){
           const galleryImages = (block.images || []).map(url => `
-            <div style="display:flex; align-items:center; justify-content:center; background:transparent; overflow:hidden; min-height:200px;">
-              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="max-width:100%; max-height:450px; width:auto; height:auto; object-fit:contain; display:block; border-radius:4px;">
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55);">
+              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="width:100%; height:auto; display:block;">
             </div>
           `).join("");
-          return `<article style="display:grid; gap:10px;">${safeTitle ? `<h3 style="margin:0;">${safeTitle}</h3>` : ""}<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; align-items:center;">${galleryImages}</div></article>`;
+          return `<article style="display:grid; gap:10px;">${safeTitle ? `<h3 style="margin:0;">${safeTitle}</h3>` : ""}<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
         }
 
         if(block.type === "quote"){

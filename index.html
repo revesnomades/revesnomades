@@ -80,18 +80,14 @@
 
   <header class="nav" id="top">
     <div class="container nav-inner">
-      <nav class="nav-left nav-links-desktop" aria-label="Navigation gauche">
-        <a href="#sejours" data-scroll>Séjours</a>
-        <a href="#apropos" data-scroll>À propos</a>
-        <a href="faq.html">FAQ</a>
-      </nav>
-
       <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
         <img src="assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
         <span>ÂmesNomades</span>
       </a>
 
-      <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation principale">
+        <a href="faq.html">FAQ</a>
+        <a href="index.html#apropos" data-scroll>À propos</a>
         <a href="boutique.html">Shop</a>
         <a href="contact.html" data-scroll>Contact</a>
 
@@ -582,7 +578,7 @@
           <div class="stay-card-overlay"></div>
 
           <div class="stay-card-hover">
-            <div class="stay-card-line" style="font-family:'SegoCustom', serif; font-weight:300; text-transform:none;">${stay.title || "Séjour"}</div>
+            <div class="stay-card-line">${stay.title || "Séjour"}</div>
             <div class="stay-card-line">${duration}</div>
             <div class="stay-card-line stay-card-dates">${dates}</div>
             <div class="card-place">${stay.location || stay.title}</div>
@@ -678,37 +674,23 @@
         if (galData && Array.isArray(galData.value) && galData.value.length > 0) {
           const galCarousel = document.getElementById("galleryCarousel");
           if (galCarousel) {
-            const validPhotos = galData.value.map(photo => {
-              const url = typeof photo === 'string' ? photo : (photo?.url || photo?.image || photo?.src || '');
-              const alt = typeof photo === 'string' ? 'Souvenir Âmes Nomades' : (photo?.alt || photo?.title || 'Souvenir Âmes Nomades');
-              return { url, alt };
-            }).filter(p => p.url);
-
-            if (validPhotos.length > 0) {
-              galCarousel.innerHTML = validPhotos.map(photo => `
-                <div class="gallery-item" style="display:block !important; overflow:hidden !important; border-radius:4px;">
-                  <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.alt)}" loading="lazy" style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important;">
-                </div>
-              `).join("");
-            }
+            galCarousel.innerHTML = galData.value.map(photo => `
+              <div class="gallery-item">
+                <img src="${photo.url || ''}" alt="${photo.alt || 'Souvenir Âmes Nomades'}" loading="lazy">
+              </div>
+            `).join("");
           }
         }
       } catch (e) {
         console.warn("Utilisation de la galerie par défaut:", e);
-      } finally {
-        initGalleryScroll();
       }
     }
 
-    let galScrollInterval = null;
-    function initGalleryScroll() {
-      const galCarousel = document.getElementById("galleryCarousel");
-      const galPrev = document.getElementById("galPrevBtn");
-      const galNext = document.getElementById("galNextBtn");
-      if (!galCarousel || !galPrev || !galNext) return;
-
-      if (galScrollInterval) clearInterval(galScrollInterval);
-      
+    // Gestion du défilement infini sans à-coups du bandeau galerie
+    const galCarousel = document.getElementById("galleryCarousel");
+    const galPrev = document.getElementById("galPrevBtn");
+    const galNext = document.getElementById("galNextBtn");
+    if (galCarousel && galPrev && galNext) {
       const getStep = () => (galCarousel.querySelector(".gallery-item")?.clientWidth || 300) + 20;
       
       const slideNext = () => {
@@ -738,15 +720,11 @@
         });
       };
 
-      const newPrev = galPrev.cloneNode(true);
-      const newNext = galNext.cloneNode(true);
-      galPrev.parentNode.replaceChild(newPrev, galPrev);
-      galNext.parentNode.replaceChild(newNext, galNext);
+      galPrev.addEventListener("click", slidePrev);
+      galNext.addEventListener("click", slideNext);
 
-      newPrev.addEventListener("click", slidePrev);
-      newNext.addEventListener("click", slideNext);
-
-      galScrollInterval = setInterval(() => {
+      // Défilement automatique doux toutes les 4 secondes sans retour en arrière visible
+      setInterval(() => {
         if (!document.hidden && galCarousel.offsetParent !== null) {
           slideNext();
         }

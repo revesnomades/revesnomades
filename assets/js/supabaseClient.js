@@ -12,4 +12,34 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   }
 });
 
+function initUniformHeader() {
+  const navInner = document.querySelector(".nav-inner");
+  if (!navInner || navInner.querySelector(".nav-left")) return;
+  
+  const navLeft = document.createElement("nav");
+  navLeft.className = "nav-left nav-links-desktop";
+  navLeft.setAttribute("aria-label", "Navigation gauche");
+  navLeft.innerHTML = `<a href="/boutique.html">Shop</a><a href="/index.html#sejours">Séjours</a>`;
+  navInner.insertBefore(navLeft, navInner.firstElementChild);
 
+  navInner.querySelectorAll(".nav-links a").forEach(a => {
+    const href = (a.getAttribute("href") || "").toLowerCase();
+    if (href.includes("boutique.html") && a.textContent.trim().toLowerCase() === "shop") {
+      a.remove();
+    }
+  });
+
+  const mobileMenu = document.querySelector(".mobile-menu");
+  if (mobileMenu && !mobileMenu.querySelector("a[href*='sejours']")) {
+    const sejourLink = document.createElement("a");
+    sejourLink.href = "/index.html#sejours";
+    sejourLink.textContent = "Séjours";
+    mobileMenu.insertBefore(sejourLink, mobileMenu.firstElementChild);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initUniformHeader);
+} else {
+  initUniformHeader();
+}
