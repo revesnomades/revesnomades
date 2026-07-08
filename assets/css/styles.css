@@ -1324,23 +1324,23 @@ footer.band.cream{
     display:grid;
     grid-template-columns: 1fr 1fr;
     align-items: stretch;
-    min-height: 100vh;
+    min-height: 480px;
   }
-  .stay-band .stay-media{ min-height: 100vh; }
+  .stay-band .stay-media{ min-height: 480px; }
   .stay-band .stay-copy{
-    min-height: 100vh;
+    min-height: 480px;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    padding: calc(var(--navH) + 60px) 60px 60px;
+    padding: calc(var(--navH) + 36px) 50px 40px;
     background: var(--white);
   }
 
-  /* Réduction uniquement du bandeau "séjour seul" de la home */
+  /* Réduction du bandeau "séjour seul" de la home */
   #sejours .stay-band-compact,
   #sejours .stay-band-compact .stay-media,
   #sejours .stay-band-compact .stay-copy{
-    min-height: 82vh;
+    min-height: 440px;
   }
 
   /* contact split */
@@ -1728,8 +1728,8 @@ input, textarea {
   flex: 0 0 calc((100% - 60px) / 4) !important;
   width: calc((100% - 60px) / 4) !important;
   max-width: calc((100% - 60px) / 4) !important;
-  height: 280px !important;
-  max-height: 280px !important;
+  height: 220px !important;
+  max-height: 220px !important;
   scroll-snap-align: start;
   border-radius: 4px;
   overflow: hidden !important;
@@ -1743,8 +1743,8 @@ input, textarea {
     flex: 0 0 calc((100% - 40px) / 3) !important;
     width: calc((100% - 40px) / 3) !important;
     max-width: calc((100% - 40px) / 3) !important;
-    height: 260px !important;
-    max-height: 260px !important;
+    height: 200px !important;
+    max-height: 200px !important;
   }
 }
 @media (max-width: 768px) {
@@ -1752,8 +1752,8 @@ input, textarea {
     flex: 0 0 calc((100% - 20px) / 2) !important;
     width: calc((100% - 20px) / 2) !important;
     max-width: calc((100% - 20px) / 2) !important;
-    height: 240px !important;
-    max-height: 240px !important;
+    height: 180px !important;
+    max-height: 180px !important;
   }
 }
 @media (max-width: 500px) {
@@ -1761,8 +1761,8 @@ input, textarea {
     flex: 0 0 85% !important;
     width: 85% !important;
     max-width: 85% !important;
-    height: 240px !important;
-    max-height: 240px !important;
+    height: 180px !important;
+    max-height: 180px !important;
   }
 }
 .gallery-item img {
