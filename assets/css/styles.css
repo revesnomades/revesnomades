@@ -138,28 +138,33 @@ select, option{ color: var(--text) !important; }
 .nav:hover{ background: var(--navBgHover); }
 .nav.is-scrolled{ background: var(--navBgScrolled); }
 
+/* -------- nav-inner (déclaration unique fusionnée) -------- */
 .nav-inner{
   height: var(--navH);
   display:flex;
   align-items:center;
-  justify-content:flex-end;
+  justify-content:space-between;
   gap:12px;
   position: relative;
 }
+
+/* -------- brand (déclaration unique fusionnée) -------- */
 .brand{
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  color: #fff !important;
-  text-decoration: none !important;
-  z-index: 20 !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  z-index: 20;
+  margin: 0;
 }
-.brand img{ display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; opacity: 0 !important; pointer-events: none !important; }
+/* Le logo img est masqué : le texte SegoCustom fait office de logotype */
+.brand img{ display: none; }
 .brand span{
   font-family:"SegoCustom", serif;
   font-weight:400;
@@ -190,21 +195,7 @@ select, option{ color: var(--text) !important; }
   background: rgba(255,255,255,.08);
 }
 
-/* Navigation gauche (Shop, Séjour) et marque centrée sur tous les headers */
-.nav-inner {
-  position: relative !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-}
-.brand {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  z-index: 15 !important;
-}
+/* Navigation gauche (Shop, Séjour) */
 .nav-left {
   display: flex;
   align-items: center;
@@ -1529,19 +1520,19 @@ footer.band.cream{
     background-attachment: scroll;
   }
   body {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-/* Autoriser dans les inputs */
-input, textarea {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  /* Autoriser dans les inputs */
+  input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+} /* ← fermeture @supports iOS — NE PAS SUPPRIMER */
   /* ==========================================
    PRINCIPLE BAND MOBILE FIX (fond cream)
 ========================================== */
@@ -1717,7 +1708,6 @@ input, textarea {
   padding: 10px 0 16px;
   width: 100% !important;
   flex-wrap: nowrap !important;
-  white-space: nowrap !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
