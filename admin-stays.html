@@ -650,7 +650,12 @@
 
                 <div class="field-group">
                   <input id="stayLocation" class="input field-input" placeholder=" ">
-                  <label class="field-label" for="stayLocation">Lieu du séjour</label>
+                  <label class="field-label" for="stayLocation">Ville / Lieu du séjour</label>
+                </div>
+
+                <div class="field-group">
+                  <input id="stayCountry" class="input field-input" placeholder=" ">
+                  <label class="field-label" for="stayCountry">Pays</label>
                 </div>
 
                 <div class="field-group">
@@ -858,8 +863,12 @@
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
           </div>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Destination / Lieu *</label>
-            <input id="wizLocation" class="input" placeholder="Ex : Mas des Songes, Camargue" required>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Destination / Ville *</label>
+            <input id="wizLocation" class="input" placeholder="Ex : Camargue" required>
+          </div>
+          <div>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Pays</label>
+            <input id="wizCountry" class="input" placeholder="Ex : France">
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
@@ -2411,6 +2420,8 @@
       const customSlug = document.getElementById("wizSlug").value.trim();
       const slug = customSlug || slugify(title);
       const location = document.getElementById("wizLocation").value.trim();
+      const country = document.getElementById("wizCountry")?.value.trim() || "";
+      const fullLocation = country ? `${location}, ${country}` : location;
       const short_description = document.getElementById("wizShortDesc").value.trim();
       const description = document.getElementById("wizDesc").value.trim();
       const hero_image = document.getElementById("wizHeroImage").value.trim();
@@ -2472,7 +2483,7 @@
       }
 
       const payload = {
-        title, slug, location, short_description, description, hero_image,
+        title, slug, location: fullLocation, short_description, description, hero_image,
         booking_url, reservation_url: booking_url, min_bookings,
         program_note, included_items, not_included_items,
         program: wizProgList.map(p => ({ period: p.period || p.title || "Matin", time: p.time || "", activity: p.activity || p.text || "", title: p.title || p.period || "Matin", text: p.activity || p.text || "" })),

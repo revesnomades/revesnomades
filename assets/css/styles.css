@@ -109,11 +109,16 @@ select, option{ color: var(--text) !important; }
   -webkit-backdrop-filter: blur(var(--glassBlur));
   color: currentColor;
   padding: 10px 16px;
-  font-size: 12px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
   cursor:pointer;
   transition: background .18s ease, color .18s ease, transform .18s ease, border-color .18s ease;
+}
+/* Exclure les boutons du header/nav et du footer */
+.nav .btn, .footer .btn, .nav-links .btn, .icon-btn {
+  font-family: inherit;
 }
 .btn:hover{
   transform: translateY(-1px);
@@ -363,7 +368,7 @@ html.js .text-reveal.reveal {
 }
 .principle-band p{ color: #000000 !important; }
 .principle-band h2{
-  font-size: clamp(24px, 2.4vw, 38px);
+  font-size: clamp(18px, 1.8vw, 26px);
   color: #000000 !important;
 }
 
@@ -461,9 +466,10 @@ html.js .text-reveal.reveal {
   text-align:center;
   align-items:center;
 }
+/* Harmonisation : tous les titres de section de la home à la même taille que newsletter h2 */
 .newsletter h2{
   color: var(--text);
-  font-size: clamp(28px, 3vw, 48px);
+  font-size: clamp(24px, 2.6vw, 36px);
   margin-bottom: 14px;
 }
 .form-stack{
@@ -572,7 +578,7 @@ html.js .text-reveal.reveal {
   justify-content:center;
 }
 .gift-band h2{
-  font-size: clamp(24px, 2.4vw, 36px);
+  font-size: clamp(24px, 2.6vw, 36px);
   margin-bottom: 18px;
 }
 .gift-band p{
@@ -723,6 +729,8 @@ html.js .text-reveal.reveal {
 
 /* ---------------- Footer ---------------- */
 .footer{ padding: 26px 0; }
+/* Masquer le logo dans tous les footers — le logotype texte suffit */
+.footer-brand img{ display: none !important; }
 footer.band.cream{
   background: #ede5de;
 }
@@ -886,7 +894,7 @@ footer.band.cream{
   text-align: center;
 }
 .about-inner h2{
-  font-size: clamp(24px, 2.6vw, 40px);
+  font-size: clamp(24px, 2.6vw, 36px);
   margin: 0 auto;
 }
 .about-text{
