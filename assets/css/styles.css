@@ -657,8 +657,8 @@ html.js .text-reveal.reveal {
 }
 .account-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:18px;
+  grid-template-columns: minmax(320px, 400px) 1fr;
+  gap: 24px;
   align-items:start;
 }
 .account-card{

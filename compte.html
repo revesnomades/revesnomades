@@ -139,27 +139,8 @@
 
             <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
           </div>
-
-          <!-- ADMIN FAQ PANEL (déplacé dans la colonne de gauche sous le bloc compte) -->
-          <div id="adminFaqPanel" class="account-card" style="display:none; margin-top:16px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <div>
-                <h4 style="margin:0;">FAQ du site</h4>
-                <p style="margin:6px 0 0; color:var(--muted); font-size:12.5px;">
-                  FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
-                </p>
-              </div>
-              <div class="account-actions">
-                <button class="btn on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button><button class="btn on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
-                <button class="btn on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
-              </div>
-            </div>
-            <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-            <div id="siteFaqWrapper" style="display:none;">
-              <div id="siteFaqList" class="admin-faq-list"></div>
-            </div>
-          </div>
         </div>
+
 
         <!-- COLONNE DROITE -->
         <div>
@@ -260,6 +241,28 @@
               </div>
               <div id="adminGalPhotoMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
             </div>
+
+            <!-- ADMIN FAQ PANEL -->
+            <div id="adminFaqPanel" class="account-card" style="display:none; margin-top:20px; background:#fff;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                  <h4 style="margin:0; font-size:16px;">❓ FAQ du site</h4>
+                  <p style="margin:6px 0 0; color:var(--muted); font-size:13px;">
+                    FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
+                  </p>
+                </div>
+                <div class="account-actions">
+                  <button class="btn tiny on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
+                  <button class="btn tiny on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
+                  <button class="btn tiny on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
+                </div>
+              </div>
+              <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+              <div id="siteFaqWrapper" style="display:none; margin-top:14px;">
+                <div id="siteFaqList" class="admin-faq-list"></div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1142,6 +1145,7 @@
       applyWelcomeName(metaFirstname || profileFirstname);
 
       if (isAdmin && adminPanel) {
+        if (perksBox) perksBox.style.display = "none";
         if (bookingsBox) bookingsBox.style.display = "none";
         if (purchasesBox) purchasesBox.style.display = "none";
         adminPanel.style.display = "block";
