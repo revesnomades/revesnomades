@@ -1813,15 +1813,12 @@ footer.band.cream{
 .gallery-arrow-right {
   right: -23px;
 }
-@media (max-width: 780px) {
-  .gallery-arrow {
-    width: 38px;
-    height: 38px;
-  }
-  .gallery-arrow svg {
-    width: 18px;
-    height: 18px;
-  }
+  .gallery-arrow-left { left: 4px; }
+  .gallery-arrow-right { right: 4px; }
+}
+
+/* Masquer les anciennes flèches */
+.gallery-arrow { display: none !important; }
 
 /* =========================================================
    MARQUEE INFINI — Galerie "Nos précédents séjours"
@@ -1849,12 +1846,35 @@ footer.band.cream{
     max-height: 160px !important;
   }
 }
-@keyframes marqueeScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+
+/* =========================================================
+   GAL-ITEM — items du marquee RAF (taille fixe uniforme)
+   ========================================================= */
+.gal-item {
+  flex: 0 0 280px;
+  width: 280px;
+  height: 200px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f0ebde;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+  flex-shrink: 0;
 }
-.gallery-marquee-wrapper:hover .gallery-marquee-track {
-  animation-play-state: paused;
+.gal-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
 }
-/* Masquer les anciennes flèches */
-.gallery-arrow { display: none !important; }
+.gal-item:hover img {
+  transform: scale(1.04);
+}
+@media (max-width: 768px) {
+  .gal-item {
+    flex: 0 0 200px;
+    width: 200px;
+    height: 150px;
+  }
+}
