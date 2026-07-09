@@ -1835,3 +1835,13 @@ footer.band.cream{
     scroll-snap-align: center !important;
   }
 }
+/* Marquee infini pour la galerie des précédents séjours */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.gallery-marquee-wrapper:hover .gallery-marquee-track {
+  animation-play-state: paused;
+}
+/* Masquer les anciennes flèches si elles réapparaissent */
+.gallery-arrow { display: none !important; }

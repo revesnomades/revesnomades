@@ -158,10 +158,11 @@
       <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
 
       <div class="stay-copy">
-        <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px;">— &nbsp; —</div>
-        <div class="sep reveal" data-delay="1"></div>
+        <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px; margin-bottom:10px;">— &nbsp; —</div>
 
-        <h2 class="title reveal" data-delay="2" id="featuredStayTitle" style="font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important; letter-spacing:0.04em;">Chargement…</h2>
+        <h2 class="title reveal" data-delay="1" id="featuredStayTitle" style="font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important; letter-spacing:0.04em; font-size: clamp(32px, 4vw, 56px) !important;">Chargement…</h2>
+
+        <div class="sep reveal" data-delay="2"></div>
 
         <p class="sub reveal" data-delay="3" id="featuredStayDuration" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.04em;">
           Durée à annoncer
@@ -224,42 +225,31 @@
     </div>
   </section>
 
-  <!-- BANDEAU GALERIE - RETOUR EN IMAGE -->
+  <!-- BANDEAU GALERIE - RETOUR EN IMAGE : défilement automatique continu -->
   <section class="white" id="galerie-retour-image" style="display:none; overflow:hidden; position:relative; border-bottom: 1px solid var(--line); padding: 30px 0; margin: 0; background: var(--cream);">
     <div class="container" style="padding: 0;">
       <div class="gallery-header-row reveal" data-delay="0" style="text-align:center; margin-bottom: 36px;">
         <h2 class="gallery-main-title" style="margin-top:0; font-family:'Roca One', serif; font-weight:300; text-transform:none; letter-spacing:0.01em; font-size: clamp(18px, 1.8vw, 26px);">Nos précédents séjours</h2>
       </div>
 
-      <div class="gallery-slider-container reveal" data-delay="2">
-        <button class="gallery-arrow gallery-arrow-left" id="galPrevBtn" type="button" aria-label="Photo précédente">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-
-        <div class="gallery-carousel" id="galleryCarousel">
-          <div class="gallery-item">
-            <img src="assets/img/hero-1.jpg" alt="Souvenir Âmes Nomades 1" loading="lazy">
-          </div>
-          <div class="gallery-item">
-            <img src="assets/img/pool-brunch-yoga.jpg" alt="Souvenir Âmes Nomades 2" loading="lazy">
-          </div>
-          <div class="gallery-item">
-            <img src="assets/img/bottom-wide.jpg" alt="Souvenir Âmes Nomades 3" loading="lazy">
-          </div>
-          <div class="gallery-item">
-            <img src="assets/img/pool-brunch-yoga-2.jpg" alt="Souvenir Âmes Nomades 4" loading="lazy">
-          </div>
-          <div class="gallery-item">
-            <img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Souvenir Âmes Nomades 5" loading="lazy">
-          </div>
-          <div class="gallery-item">
-            <img src="assets/img/hero-2.jpg" alt="Souvenir Âmes Nomades 6" loading="lazy">
-          </div>
+      <!-- Piste de défilement infini : les items sont dupliqués pour le loop -->
+      <div class="gallery-marquee-wrapper" style="overflow:hidden; width:100%; position:relative;">
+        <div class="gallery-marquee-track" id="galleryMarqueeTrack" style="display:flex; gap:20px; width:max-content; animation: marqueeScroll 40s linear infinite;">
+          <!-- Items originaux -->
+          <div class="gallery-item"><img src="assets/img/hero-1.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/pool-brunch-yoga.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/bottom-wide.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/pool-brunch-yoga-2.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/hero-2.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <!-- Dupliqués pour le loop sans coupure -->
+          <div class="gallery-item"><img src="assets/img/hero-1.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/pool-brunch-yoga.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/bottom-wide.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/pool-brunch-yoga-2.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
+          <div class="gallery-item"><img src="assets/img/hero-2.jpg" alt="Séjour Âmes Nomades" loading="lazy"></div>
         </div>
-
-        <button class="gallery-arrow gallery-arrow-right" id="galNextBtn" type="button" aria-label="Photo suivante">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
       </div>
     </div>
   </section>

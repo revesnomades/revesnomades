@@ -17,6 +17,9 @@
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 
 <body class="on-light">
@@ -69,7 +72,7 @@
   <main>
   <div style="border-top: 1px solid var(--line); padding: 30px 0 10px; margin-top: var(--navH); background: #faf8f5;">
     <div class="container">
-      <section class="sejour-hero" style="height: clamp(340px, 55vh, 560px); min-height: 320px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
+      <section class="sejour-hero" style="height: clamp(420px, 65vh, 660px); min-height: 380px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
         <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
       </section>
     </div>
@@ -77,14 +80,15 @@
 
   <section class="band cream" style="padding-top: 10px;">
     <div class="container sejour-content">
+      <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 15px 0 6px;"></p>
 
-      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 15px 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">/ Séjour</h1>
+      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 0 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">Séjour</h1>
 
-      <p class="sejour-meta reveal" id="stayMeta">
+      <p class="sejour-meta reveal" id="stayMeta" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:15px;">
         5 jours · 4 nuits
       </p>
 
-      <p class="sejour-dates reveal">
+      <p class="sejour-dates reveal" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:15px;">
         Dates : <span id="stayDates">Dates à annoncer</span>
       </p>
 
@@ -428,8 +432,8 @@
         const slots = groups[periodName];
         const slotsHtml = slots.map(slot => {
           let actText = slot.activity || "";
-          if (actText && !actText.startsWith("/") && !actText.startsWith("-")) {
-            actText = "/ " + actText;
+          if (actText && !actText.startsWith("-")) {
+            actText = "- " + actText;
           }
           return `
             <div style="display:grid; grid-template-columns:80px 1fr; gap:14px; align-items:baseline; border-bottom:1px solid rgba(30,31,34,0.18); padding:14px 0;">
@@ -645,11 +649,17 @@
         }
 
         if(block.type === "image_text" || block.type === "text_image"){
-          const imageFirst = block.type === "image_text" || block.layout === "image_left";
-          const textPanel = `<div>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></div>`;
-          const imagePanel = `<div>${imageMarkup}${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`;
+          // Image à droite par défaut (image_text = intervenant = image gauche, héberg = image droite)
+          const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
+          const imageFirst = !isAccom && block.type === "image_text" && block.layout !== "image_right";
+          const imgStyle = `width:100%; height:260px; object-fit:cover; display:block; border-radius:4px;`;
+          const imageMarkupSized = block.image
+            ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image du séjour')}" style="${imgStyle}">`
+            : "";
+          const textPanel = `<div style="display:flex; flex-direction:column; justify-content:center;">${safeTitle ? `<h3 style="margin:0 0 10px; font-family:'Glacial Indifference','Outfit',sans-serif; font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
+          const imagePanel = `<div>${imageMarkupSized}${safeCaption ? `<p class="small muted" style="margin-top:8px; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeCaption}</p>` : ""}</div>`;
           return `
-            <article style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;">
+            <article style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; align-items:center;">
               ${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}
             </article>
           `;
@@ -657,18 +667,18 @@
 
         if(block.type === "gallery_2"){
           const galleryImages = (block.images || []).map(url => `
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55);">
-              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="width:100%; height:auto; display:block;">
+            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); aspect-ratio:3/2; overflow:hidden; border-radius:4px;">
+              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || 'Image galerie')}" style="width:100%; height:100%; object-fit:cover; display:block;">
             </div>
           `).join("");
-          return `<article style="display:grid; gap:10px;">${safeTitle ? `<h3 style="margin:0;">${safeTitle}</h3>` : ""}<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
+          return `<article style="display:grid; gap:10px;"><div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
         }
 
         if(block.type === "quote"){
-          return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
+          return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
         }
 
-        return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
+        return `<article><p class="sub" style="margin:0; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></article>`;
       }).join('<hr class="sejour-block-sep" style="border:none; border-top:1px solid rgba(30,31,34,.15); margin:36px 0;">');
 
       container.querySelectorAll("p.sub, h3, blockquote p, article p").forEach(el => el.classList.add("text-reveal"));
@@ -887,7 +897,14 @@
 
       const firstDate = dates?.[0] || null;
 
-      stayTitle.textContent = "/ " + (stay.title || "Séjour");
+      stayTitle.textContent = stay.title || "Séjour";
+
+      // Lieu au-dessus du titre
+      const stayLocationEl = document.getElementById("stayLocation");
+      if (stayLocationEl) {
+        stayLocationEl.textContent = stay.location ? stay.location.toUpperCase() : "";
+        stayLocationEl.style.display = stay.location ? "" : "none";
+      }
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
       const metaDesc = buildStayMetaDescription(stay);
       if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);

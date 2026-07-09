@@ -78,8 +78,10 @@
 
     .upload-preview{
       display:none;
-      width:100%;
+      width:auto;
       max-width:320px;
+      max-height:120px;
+      object-fit:cover;
       margin-top:12px;
       border:1px solid var(--line);
     }
@@ -2184,8 +2186,10 @@
         return;
       }
       container.innerHTML = wizGalList.map((url, idx) => `
-        <div style="border:1px solid var(--line); border-radius:4px; padding:4px; background:#fff; width:80px; text-align:center;">
-          <img src="${url}" style="width:100%; height:50px; object-fit:cover; border-radius:2px; background:#eee;">
+        <div style="border:1px solid var(--line); border-radius:4px; padding:4px; background:#fff; width:90px; text-align:center;">
+          <div style="width:100%; aspect-ratio:3/2; overflow:hidden; border-radius:2px; background:#eee;">
+            <img src="${url}" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </div>
           <button type="button" class="btn-del-wizgal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:10px; padding:2px 4px; margin-top:4px; cursor:pointer; width:100%;">X</button>
         </div>
       `).join("");
@@ -2198,26 +2202,31 @@
       });
     }
 
+    let editingProgIdx = null; // track which item is being edited
+
     function renderWizProg() {
       const container = document.getElementById("wizProgContainer");
       if (!container) return;
       if (wizProgList.length === 0) {
-        container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun créneau ou programme ajouté pour l'instant.</div>`;
+        container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun cr\u00e9neau ou programme ajout\u00e9 pour l'instant.</div>`;
         return;
       }
       container.innerHTML = wizProgList.map((p, idx) => {
-        const period = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
+        const period = p.period || (["Matin", "Apr\u00e8s-midi", "Soir\u00e9e"].includes(p.title) ? p.title : "Matin");
         const time = (p.time || "").replace(/\//g, "-");
         const act = p.activity || p.text || "";
         return `
         <div class="wiz-prog-item" draggable="true" data-idx="${idx}" style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:grab; user-select:none;">
-          <span style="color:#bbb; font-size:16px; margin-right:4px;">⠿</span>
+          <span style="color:#bbb; font-size:16px; margin-right:4px;">\u283f</span>
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:1;">
             <span style="background:var(--cream); padding:2px 8px; border-radius:3px; font-weight:600; font-size:11px; text-transform:uppercase;">${escapeHtml(period)}</span>
             <span style="font-weight:600; font-size:12.5px; color:var(--text); min-width:55px;">${escapeHtml(time)}</span>
             <span style="font-size:13px; color:var(--text);">${escapeHtml(act)}</span>
           </div>
-          <button type="button" class="btn-del-wizprog" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 6px; cursor:pointer;">Supprimer</button>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-edit-wizprog" data-idx="${idx}" style="background:#4f8c5b; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 8px; cursor:pointer;">\u00c9diter</button>
+            <button type="button" class="btn-del-wizprog" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 6px; cursor:pointer;">Supprimer</button>
+          </div>
         </div>
       `;
       }).join("");
@@ -2227,11 +2236,32 @@
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
           wizProgList.splice(idx, 1);
+          if (editingProgIdx === idx) {
+            editingProgIdx = null;
+            resetProgForm();
+          }
           renderWizProg();
         });
       });
 
-      // Drag & drop pour réordonner
+      // Editer
+      container.querySelectorAll(".btn-edit-wizprog").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          const item = wizProgList[idx];
+          editingProgIdx = idx;
+          const periodEl = document.getElementById("wizProgPeriod");
+          const timeEl = document.getElementById("wizProgTime");
+          const actEl = document.getElementById("wizProgActivity");
+          const addBtn = document.getElementById("btnWizAddProg");
+          if (periodEl) periodEl.value = item.period || "Matin";
+          if (timeEl) timeEl.value = item.time || "";
+          if (actEl) actEl.value = item.activity || item.text || "";
+          if (addBtn) addBtn.textContent = "\u2713 Modifier cet horaire";
+        });
+      });
+
+      // Drag & drop pour r\u00e9ordonner
       let dragSrcIdx = null;
       container.querySelectorAll(".wiz-prog-item").forEach(item => {
         item.addEventListener("dragstart", e => {
@@ -2259,6 +2289,18 @@
           }
         });
       });
+    }
+
+    function resetProgForm() {
+      const periodEl = document.getElementById("wizProgPeriod");
+      const timeEl = document.getElementById("wizProgTime");
+      const actEl = document.getElementById("wizProgActivity");
+      const addBtn = document.getElementById("btnWizAddProg");
+      if (periodEl) periodEl.value = "Matin";
+      if (timeEl) timeEl.value = "";
+      if (actEl) actEl.value = "";
+      if (addBtn) addBtn.textContent = "+ Ajouter cet horaire";
+      editingProgIdx = null;
     }
 
     function renderWizOpt() {
@@ -2373,12 +2415,16 @@
       const timeEl = document.getElementById("wizProgTime");
       const actEl = document.getElementById("wizProgActivity");
       const period = periodEl?.value || "Matin";
-      const time = timeEl?.value?.trim() || "";
-      const activity = actEl?.value?.trim() || "";
-      if (!time && !activity) return;
-      wizProgList.push({ period, time, activity, title: period, text: activity });
-      if (timeEl) timeEl.value = "";
-      if (actEl) actEl.value = "";
+      const time = timeEl?.value.trim() || "";
+      const activity = actEl?.value.trim() || "";
+      if (!activity) return;
+      const item = { period, time, activity, title: period, text: activity };
+      if (editingProgIdx !== null && editingProgIdx >= 0 && editingProgIdx < wizProgList.length) {
+        wizProgList[editingProgIdx] = item;
+      } else {
+        wizProgList.push(item);
+      }
+      resetProgForm();
       renderWizProg();
     });
 
