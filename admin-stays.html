@@ -987,7 +987,7 @@
               </div>
               <div>
                 <label class="label" style="font-size:11px;">Heure</label>
-                <input type="text" id="wizProgTime" class="input" placeholder="8.00 H" style="font-size:13px;">
+                <input type="text" id="wizProgTime" class="input" placeholder="8h00 - 9h00" style="font-size:13px;">
               </div>
               <div>
                 <label class="label" style="font-size:11px;">Activité</label>
@@ -2042,10 +2042,19 @@
       }
       renderWizGal();
 
-      // Intervenante
-      let intName = "", intPhoto = "", intBio = "";
-      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const intBlock = stay.content_blocks.find(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("intervenant"));
+      // Intervenante — cherche dans plusieurs sources
+      let intName = stay.speaker_name || "";
+      let intPhoto = stay.speaker_photo || "";
+      let intBio = stay.speaker_bio || "";
+      if (!intName && stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        // Cherche le bloc de type image_text qui ressemble à une intervenante
+        const intBlock = stay.content_blocks.find(b =>
+          b.type === "image_text" && (
+            (b.title || "").toLowerCase().includes("intervenant") ||
+            (b.title || "").toLowerCase().includes("avec ") ||
+            (b.image && !((b.title||"").toLowerCase().includes("héberg")))
+          )
+        );
         if (intBlock) {
           intName = intBlock.title || "";
           intBio = intBlock.text || "";
@@ -2198,23 +2207,56 @@
       }
       container.innerHTML = wizProgList.map((p, idx) => {
         const period = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
-        const time = p.time || "";
+        const time = (p.time || "").replace(/\//g, "-");
         const act = p.activity || p.text || "";
         return `
-        <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="wiz-prog-item" draggable="true" data-idx="${idx}" style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:grab; user-select:none;">
+          <span style="color:#bbb; font-size:16px; margin-right:4px;">⠿</span>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:1;">
             <span style="background:var(--cream); padding:2px 8px; border-radius:3px; font-weight:600; font-size:11px; text-transform:uppercase;">${escapeHtml(period)}</span>
             <span style="font-weight:600; font-size:12.5px; color:var(--text); min-width:55px;">${escapeHtml(time)}</span>
             <span style="font-size:13px; color:var(--text);">${escapeHtml(act)}</span>
           </div>
           <button type="button" class="btn-del-wizprog" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 6px; cursor:pointer;">Supprimer</button>
         </div>
-      `;}).join("");
+      `;
+      }).join("");
+
+      // Supprimer
       container.querySelectorAll(".btn-del-wizprog").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
           wizProgList.splice(idx, 1);
           renderWizProg();
+        });
+      });
+
+      // Drag & drop pour réordonner
+      let dragSrcIdx = null;
+      container.querySelectorAll(".wiz-prog-item").forEach(item => {
+        item.addEventListener("dragstart", e => {
+          dragSrcIdx = parseInt(item.getAttribute("data-idx"), 10);
+          item.style.opacity = "0.5";
+          e.dataTransfer.effectAllowed = "move";
+        });
+        item.addEventListener("dragend", e => {
+          item.style.opacity = "1";
+          container.querySelectorAll(".wiz-prog-item").forEach(el => el.style.borderTop = "");
+        });
+        item.addEventListener("dragover", e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          container.querySelectorAll(".wiz-prog-item").forEach(el => el.style.borderTop = "");
+          item.style.borderTop = "2px solid var(--text)";
+        });
+        item.addEventListener("drop", e => {
+          e.preventDefault();
+          const dropIdx = parseInt(item.getAttribute("data-idx"), 10);
+          if (dragSrcIdx !== null && dragSrcIdx !== dropIdx) {
+            const moved = wizProgList.splice(dragSrcIdx, 1)[0];
+            wizProgList.splice(dropIdx, 0, moved);
+            renderWizProg();
+          }
         });
       });
     }

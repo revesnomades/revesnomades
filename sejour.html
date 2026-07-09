@@ -162,7 +162,7 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="optionsSection">
-        <h2 class="sejour-section-title">Options (en supplément)</h2>
+        <h2 class="sejour-section-title" id="optionsTitle">Options</h2>
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
@@ -465,10 +465,46 @@
 
     function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl){
       if(!container) return;
+      const optionsTitleEl = document.getElementById("optionsTitle");
+
       if(!options || !options.length){
-        container.innerHTML = `<div style="color:var(--muted);">Aucune option tarifaire en supplément.</div>`;
+        container.innerHTML = `<div style="color:var(--muted);">Aucune option tarifaire disponible.</div>`;
         return;
       }
+
+      // --- CAS : UNE SEULE OPTION --- beau bouton seul, pas de titre OPTIONS
+      if(options.length === 1){
+        if(optionsTitleEl) optionsTitleEl.style.display = "none";
+        const opt = options[0];
+        const label = typeof opt === "string" ? opt : (opt.label || "");
+        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
+        const url   = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        const btnText = price ? `${label} — ${price}` : label;
+        container.innerHTML = url ? `
+          <div style="margin-top:8px;">
+            <a
+              href="${escapeHtml(url)}"
+              class="btn on-light"
+              style="
+                display:inline-flex;
+                font-family:'IBM Plex Mono', monospace;
+                font-size:12px;
+                letter-spacing:0.10em;
+                text-transform:uppercase;
+                padding:14px 36px;
+                background:var(--text);
+                color:#fff;
+                border:none;
+                text-decoration:none;
+              "
+            >${escapeHtml(btnText)} →</a>
+          </div>
+        ` : `<div style="color:var(--muted);">${escapeHtml(label)}</div>`;
+        return;
+      }
+
+      // --- CAS : PLUSIEURS OPTIONS --- affichage classique avec radios
+      if(optionsTitleEl) optionsTitleEl.style.display = "";
       container.innerHTML = options.map((opt, idx) => {
         const label = typeof opt === "string" ? opt : (opt.label || "");
         const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
@@ -478,12 +514,12 @@
             <div style="display:flex; align-items:center; gap:12px;">
               <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(price)}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
               <div>
-                <div style="font-weight:600; color:var(--text); font-size:15px;">${escapeHtml(label)}</div>
-                ${price ? `<div style="font-weight:700; color:var(--text); font-size:16px; margin-top:2px;">${escapeHtml(price)}</div>` : ""}
+                <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.04em; color:var(--text);">${escapeHtml(label)}</div>
+                ${price ? `<div style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
               </div>
             </div>
             <div>
-              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:4px; cursor:pointer; white-space:nowrap;">Réserver cette option →</button>` : ""}
+              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>` : ""}
             </div>
           </label>
         `;
@@ -509,8 +545,8 @@
           const price = selected.getAttribute("data-price");
           if(url){
             bookingBtnEl.href = url;
-            bookingBtnEl.textContent = `Réserver — ${label} ${price ? '(' + price + ')' : ''}`;
-            if(bookingMsgEl) bookingMsgEl.textContent = `Redirection directe vers Stripe pour : ${label}`;
+            bookingBtnEl.textContent = `Réserver — ${label}${price ? ' ' + price : ''}`;
+            if(bookingMsgEl) bookingMsgEl.textContent = "";
           }
         }
       }
