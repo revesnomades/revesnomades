@@ -659,64 +659,26 @@
           .select("value")
           .eq("key", "homepage_gallery")
           .maybeSingle();
-        if (galData && Array.isArray(galData.value) && galData.value.length > 0) {
-          const galCarousel = document.getElementById("galleryCarousel");
-          if (galCarousel) {
-            galCarousel.innerHTML = galData.value.map(photo => `
-              <div class="gallery-item">
-                <img src="${photo.url || ''}" alt="${photo.alt || 'Souvenir Âmes Nomades'}" loading="lazy">
-              </div>
-            `).join("");
-          }
+
+        const marqueTrack = document.getElementById("galleryMarqueeTrack");
+        if (marqueTrack && galData && Array.isArray(galData.value) && galData.value.length > 0) {
+          // Construit les items et les duplique pour le loop sans coupure
+          const itemsHtml = galData.value.map(photo => `
+            <div class="gallery-item"><img src="${photo.url || ''}" alt="${photo.alt || 'Séjour Âmes Nomades'}" loading="lazy"></div>
+          `).join("");
+          marqueTrack.innerHTML = itemsHtml + itemsHtml; // duplication pour loop
         }
       } catch (e) {
         console.warn("Utilisation de la galerie par défaut:", e);
       }
-    }
 
-    // Gestion du défilement infini sans à-coups du bandeau galerie
-    const galCarousel = document.getElementById("galleryCarousel");
-    const galPrev = document.getElementById("galPrevBtn");
-    const galNext = document.getElementById("galNextBtn");
-    if (galCarousel && galPrev && galNext) {
-      const getStep = () => (galCarousel.querySelector(".gallery-item")?.clientWidth || 300) + 20;
-      
-      const slideNext = () => {
-        const first = galCarousel.firstElementChild;
-        if (!first) return;
-        const step = getStep();
-        galCarousel.style.scrollBehavior = "smooth";
-        galCarousel.scrollBy({ left: step, behavior: "smooth" });
-        setTimeout(() => {
-          galCarousel.style.scrollBehavior = "auto";
-          galCarousel.appendChild(first);
-          galCarousel.scrollLeft -= step;
-          galCarousel.style.scrollBehavior = "smooth";
-        }, 500);
-      };
-
-      const slidePrev = () => {
-        const last = galCarousel.lastElementChild;
-        if (!last) return;
-        const step = getStep();
-        galCarousel.style.scrollBehavior = "auto";
-        galCarousel.insertBefore(last, galCarousel.firstElementChild);
-        galCarousel.scrollLeft += step;
-        requestAnimationFrame(() => {
-          galCarousel.style.scrollBehavior = "smooth";
-          galCarousel.scrollBy({ left: -step, behavior: "smooth" });
-        });
-      };
-
-      galPrev.addEventListener("click", slidePrev);
-      galNext.addEventListener("click", slideNext);
-
-      // Défilement automatique doux toutes les 4 secondes sans retour en arrière visible
-      setInterval(() => {
-        if (!document.hidden && galCarousel.offsetParent !== null) {
-          slideNext();
-        }
-      }, 4000);
+      // S'assure que l’animation repart après injection dynamique des images
+      const marqueTrack = document.getElementById("galleryMarqueeTrack");
+      if (marqueTrack) {
+        marqueTrack.style.animation = "none";
+        void marqueTrack.offsetWidth; // force reflow
+        marqueTrack.style.animation = "marqueeScroll 40s linear infinite";
+      }
     }
 
     let newsletterLastSubmit = 0;

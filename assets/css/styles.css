@@ -1822,20 +1822,33 @@ footer.band.cream{
     width: 18px;
     height: 18px;
   }
-  .gallery-arrow-left { left: 4px; }
-  .gallery-arrow-right { right: 4px; }
-  .gallery-carousel {
-    padding: 10px 44px 16px !important;
-    gap: 16px !important;
-  }
-  .gallery-item {
-    flex: 0 0 calc(100% - 88px) !important;
-    width: calc(100% - 88px) !important;
-    max-width: calc(100% - 88px) !important;
-    scroll-snap-align: center !important;
+
+/* =========================================================
+   MARQUEE INFINI — Galerie "Nos précédents séjours"
+   Items à largeur fixe pour fonctionner dans un flex max-content
+   ========================================================= */
+.gallery-marquee-track .gallery-item {
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  max-width: 280px !important;
+  height: 200px !important;
+  max-height: 200px !important;
+  border-radius: 4px;
+  overflow: hidden !important;
+  position: relative;
+  background: #f0ebde;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  display: block !important;
+}
+@media (max-width: 768px) {
+  .gallery-marquee-track .gallery-item {
+    flex: 0 0 200px !important;
+    width: 200px !important;
+    max-width: 200px !important;
+    height: 160px !important;
+    max-height: 160px !important;
   }
 }
-/* Marquee infini pour la galerie des précédents séjours */
 @keyframes marqueeScroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -1843,5 +1856,5 @@ footer.band.cream{
 .gallery-marquee-wrapper:hover .gallery-marquee-track {
   animation-play-state: paused;
 }
-/* Masquer les anciennes flèches si elles réapparaissent */
+/* Masquer les anciennes flèches */
 .gallery-arrow { display: none !important; }
