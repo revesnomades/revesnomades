@@ -1879,3 +1879,30 @@ footer.band.cream{
   }
 }
 
+/* =========================================================
+   SPEAKER & CHEF — Page séjour
+   ========================================================= */
+.speaker-row, .chef-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+  align-items: start;
+  padding: 32px 0;
+  border-top: 1px solid rgba(30, 31, 34, 0.12);
+}
+.speaker-row img, .chef-row img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 4px;
+  display: block;
+}
+@media (max-width: 768px) {
+  .speaker-row, .chef-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px 0;
+  }
+}
+

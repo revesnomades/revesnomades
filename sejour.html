@@ -43,7 +43,7 @@
       <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html">FAQ</a>
-        <a href="/contact.html" data-scroll>Contact</a>
+        <a href="/index.html#contact" data-scroll>Contact</a>
 
         <a class="icon-btn" href="/compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
@@ -62,7 +62,7 @@
           <a href="/faq.html">FAQ</a>
           <a href="/index.html#apropos" data-scroll>À propos</a>
           <a href="/boutique.html">Shop</a>
-          <a href="/contact.html" data-scroll>Contact</a>
+          <a href="/index.html#contact" data-scroll>Contact</a>
           <a href="/compte.html">Compte</a>
         </nav>
       </div>
@@ -185,7 +185,7 @@
           <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener noreferrer">
             Réserver
           </a>
-          <a class="btn tiny on-light" href="/contact.html">Nous contacter</a>
+          <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
         </div>
 
         <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
@@ -221,7 +221,7 @@
           Une question avant de réserver ? Écris-nous via la rubrique Contact, on te répond rapidement.
         </p>
         <div class="actions" style="margin-top:12px;">
-          <a class="btn tiny on-light" href="/contact.html">Nous contacter</a>
+          <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
         </div>
         <p class="sub" style="margin-top:14px; font-size:13px; color:var(--muted);">
           Un email vous sera envoyé dès la confirmation du séjour.
@@ -659,11 +659,10 @@
         const name  = escapeHtml(sp.title || sp.name || "");
         const bio   = escapeHtml(sp.text  || sp.bio  || "").replace(/\n/g, "<br>");
         return `
-          <div class="speaker-row" style="display:grid; grid-template-columns:180px 1fr; gap:32px; align-items:start; padding:32px 0; border-top:1px solid rgba(30,31,34,.12);">
+          <div class="speaker-row">
             <!-- Photo -->
             <div>
-              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}"
-                style="width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:4px; display:block;">` : ""}
+              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
             </div>
             <!-- Texte -->
             <div style="display:flex; flex-direction:column; justify-content:flex-start; padding-top:8px;">
@@ -683,10 +682,9 @@
       const name  = escapeHtml(block.title || "Notre Cuisinière");
       const bio   = escapeHtml(block.text  || "").replace(/\n/g, "<br>");
       return `
-        <div style="display:grid; grid-template-columns:180px 1fr; gap:32px; align-items:start; padding:32px 0; border-top:1px solid rgba(30,31,34,.12);">
+        <div class="chef-row">
           <div>
-            ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}"
-              style="width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:4px; display:block;">` : ""}
+            ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
           </div>
           <div style="padding-top:8px;">
             <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px;">Cuisine & repas</p>
@@ -735,7 +733,7 @@
         } else if(block.type === "image_text" || block.type === "text_image"){
           const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
           const imageFirst = !isAccom && block.type === "image_text" && block.layout !== "image_right";
-          const imgStyle = `width:100%; height:260px; object-fit:cover; display:block; border-radius:4px;`;
+          const imgStyle = `width:100%; height:380px; object-fit:cover; display:block; border-radius:4px;`;
           const imagePanel = block.image
             ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
             : "";
@@ -1160,40 +1158,6 @@
         renderOtherStays(otherPublishedStays || []);
       }
     }
-
-    // ── NOUVELLES ANIMATIONS (HEADER + SCROLL 5S) ──
-    const navHeader = document.getElementById("top");
-
-    function slowScrollTo(targetY, duration) {
-      const startY = window.scrollY;
-      const difference = targetY - startY;
-      const startTime = performance.now();
-
-      function step(currentTime) {
-        const elapsed = currentTime - startTime;
-        let progress = elapsed / duration;
-        if (progress > 1) progress = 1;
-
-        // Easing easeInOutQuad
-        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-
-        window.scrollTo(0, startY + difference * ease);
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
-      }
-
-      requestAnimationFrame(step);
-    }
-    
-    // Au bout de 3 secondes, scroller doucement sous l'image
-    setTimeout(() => {
-      // Ne scroller que si l'utilisateur n'a pas déjà scrollé manuellement
-      if(window.scrollY < 100) {
-        slowScrollTo(window.innerHeight, 1500);
-      }
-    }, 3000);
 
     // Le header reste toujours visible sans masquage au scroll
     loadStay();

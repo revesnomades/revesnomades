@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -2066,28 +2066,7 @@
       }
       renderWizGal();
 
-      // Intervenante — cherche dans plusieurs sources
-      let intName = stay.speaker_name || "";
-      let intPhoto = stay.speaker_photo || "";
-      let intBio = stay.speaker_bio || "";
-      if (!intName && stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        // Cherche le bloc de type image_text qui ressemble à une intervenante
-        const intBlock = stay.content_blocks.find(b =>
-          b.type === "image_text" && (
-            (b.title || "").toLowerCase().includes("intervenant") ||
-            (b.title || "").toLowerCase().includes("avec ") ||
-            (b.image && !((b.title||"").toLowerCase().includes("héberg")))
-          )
-        );
-        if (intBlock) {
-          intName = intBlock.title || "";
-          intBio = intBlock.text || "";
-          intPhoto = intBlock.image || "";
-        }
-      }
-      document.getElementById("wizIntervenantName").value = intName;
-      document.getElementById("wizIntervenantPhoto").value = intPhoto;
-      document.getElementById("wizIntervenantBio").value = intBio;
+
 
       // Inclus / Non inclus
       document.getElementById("wizIncluded").value = arrayToLines(stay.included_items);
