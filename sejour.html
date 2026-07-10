@@ -628,6 +628,74 @@
         .replace(/"/g, "&quot;");
     }
 
+    // ── VISIONNEUSE GALERIE (gallery_2) ──
+    function renderGalleryViewer(images, containerId) {
+      if (!images || !images.length) return "";
+      const id = containerId || ("gv_" + Date.now());
+      const thumbs = images.map((url, i) => `
+        <div class="gv-thumb${i === 0 ? " active" : ""}" data-src="${escapeHtml(url)}" data-viewer="${id}"
+          style="cursor:pointer; aspect-ratio:3/2; overflow:hidden; border-radius:3px; border:2px solid ${i === 0 ? "var(--text)" : "transparent"}; transition:border-color 0.2s;">
+          <img src="${escapeHtml(url)}" alt="Aperçu ${i+1}" loading="lazy"
+            style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
+        </div>`).join("");
+      return `
+        <div id="${id}" style="display:grid; grid-template-columns:1fr 2fr; gap:14px; align-items:start;">
+          <div class="gv-thumbs" style="display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto; padding-right:4px;">
+            ${thumbs}
+          </div>
+          <div class="gv-main" style="position:sticky; top:80px; border-radius:4px; overflow:hidden; aspect-ratio:4/3; background:#f0ebde;">
+            <img id="${id}_main" src="${escapeHtml(images[0])}" alt="Photo séjour"
+              style="width:100%; height:100%; object-fit:cover; display:block; transition:opacity 0.3s ease;">
+          </div>
+        </div>`;
+    }
+
+    // ── INTERVENANTS (liste numérotée) ──
+    function renderSpeakers(speakers) {
+      if (!speakers || !speakers.length) return "";
+      return speakers.map((sp, i) => {
+        const num = String(i + 1).padStart(2, "0");
+        const photo = sp.image || sp.photo || "";
+        const name  = escapeHtml(sp.title || sp.name || "");
+        const bio   = escapeHtml(sp.text  || sp.bio  || "").replace(/\n/g, "<br>");
+        return `
+          <div class="speaker-row" style="display:grid; grid-template-columns:180px 1fr; gap:32px; align-items:start; padding:32px 0; border-top:1px solid rgba(30,31,34,.12);">
+            <!-- Photo -->
+            <div>
+              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}"
+                style="width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:4px; display:block;">` : ""}
+            </div>
+            <!-- Texte -->
+            <div style="display:flex; flex-direction:column; justify-content:flex-start; padding-top:8px;">
+              <div style="display:flex; align-items:baseline; gap:24px; margin-bottom:16px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
+                <h3 style="font-family:'Roca One',serif; font-weight:300; font-size:clamp(18px,2vw,24px); margin:0; text-transform:none;">${name}</h3>
+              </div>
+              <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:15px; line-height:1.75; color:var(--muted); margin:0;">${bio}</p>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    // ── CUISINIER/CHEF ──
+    function renderChef(block) {
+      const photo = block.image || "";
+      const name  = escapeHtml(block.title || "Notre Cuisinière");
+      const bio   = escapeHtml(block.text  || "").replace(/\n/g, "<br>");
+      return `
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:32px; align-items:start; padding:32px 0; border-top:1px solid rgba(30,31,34,.12);">
+          <div>
+            ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}"
+              style="width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:4px; display:block;">` : ""}
+          </div>
+          <div style="padding-top:8px;">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px;">Cuisine & repas</p>
+            <h3 style="font-family:'Roca One',serif; font-weight:300; font-size:clamp(18px,2vw,24px); margin:0 0 16px; text-transform:none;">${name}</h3>
+            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:15px; line-height:1.75; color:var(--muted); margin:0;">${bio}</p>
+          </div>
+        </div>`;
+    }
+
     function renderContentBlocks(container, blocks){
       if(!container) return;
       if(!blocks.length){
@@ -635,55 +703,91 @@
         return;
       }
 
-      container.innerHTML = blocks.map((block) => {
-        const safeTitle = escapeHtml(block.title);
-        const safeText = escapeHtml(block.text).replace(/\n/g, "<br>");
+      // Sépare les speakers, chef, galerie et autres blocs
+      const speakers   = blocks.filter(b => b.type === "speaker");
+      const chefBlocks = blocks.filter(b => b.type === "chef");
+      const galleries  = blocks.filter(b => b.type === "gallery_2");
+      const others     = blocks.filter(b => !["speaker","chef","gallery_2"].includes(b.type));
+
+      let html = "";
+
+      // 1. Galerie visionneuse
+      galleries.forEach((block, gi) => {
+        const imgs = (block.images || []);
+        if (imgs.length) {
+          const vid = "galleryViewer_" + gi;
+          html += `<article style="margin-bottom:0;">${renderGalleryViewer(imgs, vid)}</article>`;
+        }
+      });
+
+      // 2. Autres blocs (image_text hébergement, etc.)
+      others.forEach(block => {
+        const safeTitle   = escapeHtml(block.title);
+        const safeText    = escapeHtml(block.text).replace(/\n/g, "<br>");
         const safeCaption = escapeHtml(block.caption);
-        const safeQuote = escapeHtml(block.quote);
-        const imageMarkup = block.image
-          ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || "Image du séjour")}" style="width:100%; height:auto; display:block;">`
-          : "";
+        const safeQuote   = escapeHtml(block.quote);
 
         if(block.type === "image_full"){
-          return `<article style="display:grid; gap:8px;">${imageMarkup}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
-        }
-
-        if(block.type === "image_text" || block.type === "text_image"){
-          // Image à droite par défaut (image_text = intervenant = image gauche, héberg = image droite)
+          const imgFull = block.image
+            ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || "Image du séjour")}" style="width:100%; height:auto; display:block;">`
+            : "";
+          html += `<article style="display:grid; gap:8px;">${imgFull}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
+        } else if(block.type === "image_text" || block.type === "text_image"){
           const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
           const imageFirst = !isAccom && block.type === "image_text" && block.layout !== "image_right";
           const imgStyle = `width:100%; height:260px; object-fit:cover; display:block; border-radius:4px;`;
-          const imageMarkupSized = block.image
-            ? `<img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image du séjour')}" style="${imgStyle}">`
+          const imagePanel = block.image
+            ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
             : "";
-          const textPanel = `<div style="display:flex; flex-direction:column; justify-content:center;">${safeTitle ? `<h3 style="margin:0 0 10px; font-family:'Glacial Indifference','Outfit',sans-serif; font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
-          const imagePanel = `<div>${imageMarkupSized}${safeCaption ? `<p class="small muted" style="margin-top:8px; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeCaption}</p>` : ""}</div>`;
-          return `
-            <article style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; align-items:center;">
-              ${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}
-            </article>
-          `;
+          const textPanel = `<div style="display:flex;flex-direction:column;justify-content:center;">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
+          html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;
+        } else if(block.type === "quote"){
+          html += `<blockquote style="margin:0;border-left:2px solid var(--line);padding-left:14px;"><p style="margin:0;font-style:italic;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
+        } else {
+          html += `<article><p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></article>`;
         }
+      });
 
-        if(block.type === "gallery_2"){
-          const galleryImages = (block.images || []).map(url => `
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); aspect-ratio:3/2; overflow:hidden; border-radius:4px;">
-              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || 'Image galerie')}" style="width:100%; height:100%; object-fit:cover; display:block;">
-            </div>
-          `).join("");
-          return `<article style="display:grid; gap:10px;"><div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
-        }
+      // 3. Intervenants
+      if(speakers.length){
+        html += `<article>
+          <h2 style="font-family:'Roca One',serif;font-weight:300;font-size:clamp(18px,2vw,26px);margin:0 0 4px;text-transform:none;letter-spacing:0.01em;">Les intervenants</h2>
+          ${renderSpeakers(speakers)}
+        </article>`;
+      }
 
-        if(block.type === "quote"){
-          return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
-        }
+      // 4. Cuisinier
+      if(chefBlocks.length){
+        html += `<article>${renderChef(chefBlocks[0])}</article>`;
+      }
 
-        return `<article><p class="sub" style="margin:0; font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></article>`;
-      }).join('<hr class="sejour-block-sep" style="border:none; border-top:1px solid rgba(30,31,34,.15); margin:36px 0;">');
+      container.innerHTML = html;
+
+      // Activer la visionneuse galerie
+      container.querySelectorAll(".gv-thumb").forEach(thumb => {
+        thumb.addEventListener("click", () => {
+          const src = thumb.getAttribute("data-src");
+          const vid = thumb.getAttribute("data-viewer");
+          const mainImg = document.getElementById(vid + "_main");
+          if(mainImg && src){
+            mainImg.style.opacity = "0";
+            setTimeout(() => { mainImg.src = src; mainImg.style.opacity = "1"; }, 200);
+          }
+          // Mise à jour bordures
+          container.querySelectorAll(`.gv-thumb[data-viewer="${vid}"]`).forEach(t => {
+            t.style.borderColor = "transparent";
+            t.classList.remove("active");
+          });
+          thumb.style.borderColor = "var(--text)";
+          thumb.classList.add("active");
+        });
+      });
 
       container.querySelectorAll("p.sub, h3, blockquote p, article p").forEach(el => el.classList.add("text-reveal"));
       if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
     }
+
+
 
     async function getSiteStayDefaultFaq(){
       const { data } = await supabase

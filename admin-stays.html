@@ -925,26 +925,48 @@
           </div>
         </div>
 
-        <!-- ÉTAPE 3 : Intervenante -->
+        <!-- ÉTAPE 3 : Intervenants & Cuisinier -->
         <div class="wizard-step" id="wizardStep3" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
-          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 3 : Intervenante</h3>
-          <p class="muted-small" style="margin:0 0 12px 0;">Présentez la ou les personnes qui animent le séjour.</p>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Nom / Titre *</label>
-            <input id="wizIntervenantName" class="input" placeholder="Ex : Avec Appoline & Sarah — Professeures de Yoga">
-          </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo de l'intervenante</label>
-            <div style="display:flex; gap:8px;">
-              <input id="wizIntervenantPhoto" class="input" placeholder="URL photo ou importer ->" style="flex:1;">
-              <input type="file" id="wizIntervenantFile" accept="image/*" style="display:none;">
-              <button type="button" class="btn tiny on-light" id="btnUploadWizIntervenant" style="padding:6px 12px; white-space:nowrap;">Importer</button>
+          <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 3 : Intervenants &amp; Cuisinier</h3>
+          <p class="muted-small" style="margin:0 0 16px 0;">Ajoutez un ou plusieurs intervenants, puis renseignez optionnellement le/la cuisinier(ère).</p>
+
+          <!-- Liste des intervenants -->
+          <div style="margin-bottom:12px;">
+            <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Intervenants</label>
+            <div id="wizSpeakerContainer" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+              <div style="color:var(--muted); font-size:12px;">Aucun intervenant ajouté.</div>
             </div>
-            <div id="wizIntervenantMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
           </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Description / Biographie</label>
-            <textarea id="wizIntervenantBio" class="input" rows="5" placeholder="Présentation détaillée de l'expérience et de l'approche de l'intervenante..."></textarea>
+
+          <!-- Formulaire ajout -->
+          <div style="background:var(--cream); border-radius:6px; padding:14px; border:1px solid var(--line); margin-bottom:20px;">
+            <p class="muted-small" style="margin:0 0 10px; font-weight:600;">+ Ajouter un intervenant</p>
+            <div style="display:grid; gap:8px;">
+              <input id="wizSpkName" class="input" placeholder="Nom / Titre">
+              <div style="display:flex; gap:8px;">
+                <input id="wizSpkPhoto" class="input" placeholder="URL photo" style="flex:1;">
+                <input type="file" id="wizSpkFile" accept="image/*" style="display:none;">
+                <button type="button" class="btn tiny on-light" id="btnUploadWizSpk" style="padding:6px 12px; white-space:nowrap;">Importer</button>
+              </div>
+              <div id="wizSpkPhotoMsg" style="font-size:12px; color:var(--muted);"></div>
+              <textarea id="wizSpkBio" class="input" rows="4" placeholder="Biographie..."></textarea>
+            </div>
+            <button type="button" class="btn tiny on-light" id="btnAddWizSpk" style="margin-top:10px; padding:7px 18px;">Ajouter cet intervenant</button>
+          </div>
+
+          <!-- Cuisinier -->
+          <div style="border-top:1px solid var(--line); padding-top:16px;">
+            <label class="muted-small" style="display:block; font-weight:600; margin-bottom:8px;">Cuisinier / Chef (optionnel)</label>
+            <div style="display:grid; gap:8px;">
+              <input id="wizChefName" class="input" placeholder="Nom du cuisinier(ère)">
+              <div style="display:flex; gap:8px;">
+                <input id="wizChefPhoto" class="input" placeholder="URL photo" style="flex:1;">
+                <input type="file" id="wizChefFile" accept="image/*" style="display:none;">
+                <button type="button" class="btn tiny on-light" id="btnUploadWizChef" style="padding:6px 12px; white-space:nowrap;">Importer</button>
+              </div>
+              <div id="wizChefPhotoMsg" style="font-size:12px; color:var(--muted);"></div>
+              <textarea id="wizChefBio" class="input" rows="4" placeholder="Présentation, spécialités..."></textarea>
+            </div>
           </div>
         </div>
 
@@ -2111,8 +2133,27 @@
       }
       document.getElementById("wizAccomDesc").value = accomDesc;
       document.getElementById("wizAccomPhoto").value = accomPhoto;
+
+      // Intervenants — charge wizSpeakerList depuis content_blocks
+      wizSpeakerList = [];
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        stay.content_blocks
+          .filter(b => b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg")))
+          .forEach(b => {
+            wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "" });
+          });
+      }
+      renderWizSpeakers();
+
+      // Chef — charge depuis content_blocks type "chef"
+      const chefBlock = (stay.content_blocks || []).find(b => b.type === "chef");
+      if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = chefBlock?.title || "";
+      if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = chefBlock?.image || "";
+      if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = chefBlock?.text || "";
+
       wizOptList = Array.isArray(stay.extra_options) ? [...stay.extra_options] : [];
       renderWizOpt();
+
 
       updateWizardStep(1);
       stayWizardModal.classList.add("active");
@@ -2177,6 +2218,33 @@
     let wizGalList = [];
     let wizProgList = [];
     let wizOptList = [];
+    let wizSpeakerList = [];
+
+    // ── GESTION SPEAKERS (intervenants multiples) ──
+    function renderWizSpeakers() {
+      const container = document.getElementById("wizSpeakerContainer");
+      if (!container) return;
+      if (wizSpeakerList.length === 0) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun intervenant ajouté.</div>`;
+        return;
+      }
+      container.innerHTML = wizSpeakerList.map((sp, idx) => `
+        <div style="display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px;">
+          ${sp.image ? `<img src="${sp.image}" style="width:48px; height:48px; object-fit:cover; border-radius:3px;">` : `<div style="width:48px; height:48px; background:var(--cream); border-radius:3px;"></div>`}
+          <div>
+            <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")}</div>
+            <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
+          </div>
+          <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 8px; cursor:pointer; white-space:nowrap;">Supprimer</button>
+        </div>`).join("");
+      container.querySelectorAll(".btn-del-wizspk").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          wizSpeakerList.splice(idx, 1);
+          renderWizSpeakers();
+        });
+      });
+    }
 
     function renderWizGal() {
       const container = document.getElementById("wizGalContainer");
@@ -2388,13 +2456,40 @@
       }
     });
 
-    document.getElementById("btnUploadWizIntervenant")?.addEventListener("click", async () => {
-      const fileInput = document.getElementById("wizIntervenantFile");
+    // ── SPEAKER : upload photo ──
+    document.getElementById("btnUploadWizSpk")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizSpkFile");
       if (fileInput) {
         fileInput.click();
         fileInput.onchange = async () => {
-          const url = await uploadWizFile(fileInput, document.getElementById("wizIntervenantMsg"));
-          if (url) document.getElementById("wizIntervenantPhoto").value = url;
+          const url = await uploadWizFile(fileInput, document.getElementById("wizSpkPhotoMsg"));
+          if (url) document.getElementById("wizSpkPhoto").value = url;
+        };
+      }
+    });
+
+    // ── SPEAKER : ajouter à la liste ──
+    document.getElementById("btnAddWizSpk")?.addEventListener("click", () => {
+      const name  = (document.getElementById("wizSpkName")?.value || "").trim();
+      const photo = (document.getElementById("wizSpkPhoto")?.value || "").trim();
+      const bio   = (document.getElementById("wizSpkBio")?.value || "").trim();
+      if (!name) { alert("Veuillez renseigner le nom de l'intervenant."); return; }
+      wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
+      renderWizSpeakers();
+      // Réinitialise le formulaire
+      if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = "";
+      if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = "";
+      if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = "";
+    });
+
+    // ── CHEF : upload photo ──
+    document.getElementById("btnUploadWizChef")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizChefFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizChefPhotoMsg"));
+          if (url) document.getElementById("wizChefPhoto").value = url;
         };
       }
     });
@@ -2470,9 +2565,15 @@
       wizGalList = [];
       wizProgList = [];
       wizOptList = [];
+      wizSpeakerList = [];
+      if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = "";
+      if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = "";
+      if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = "";
       renderWizGal();
       renderWizProg();
       renderWizOpt();
+      renderWizSpeakers();
+
       updateWizardStep(1);
       stayWizardModal.classList.add("active");
     });
@@ -2538,19 +2639,34 @@
           text: "", layout: "image_left", image: "", image_alt: "", quote: "", caption: ""
         });
       }
-      const intName = document.getElementById("wizIntervenantName").value.trim();
-      const intPhoto = document.getElementById("wizIntervenantPhoto").value.trim();
-      const intBio = document.getElementById("wizIntervenantBio").value.trim();
-      if(intName || intPhoto || intBio){
+      // Speakers (intervenants multiples)
+      wizSpeakerList.forEach((sp, i) => {
         content_blocks.push({
-          id: `block_int_${Date.now()}`,
-          type: "image_text",
+          id: `block_spk_${Date.now()}_${i}`,
+          type: "speaker",
           enabled: true,
           layout: "image_left",
-          title: intName || "Votre Intervenante",
-          text: intBio,
-          image: intPhoto,
-          image_alt: intName,
+          title: sp.title || "",
+          text: sp.text || "",
+          image: sp.image || "",
+          image_alt: sp.title || "",
+          images: [], quote: "", caption: ""
+        });
+      });
+      // Chef / Cuisinier
+      const chefName  = (document.getElementById("wizChefName")?.value || "").trim();
+      const chefPhoto = (document.getElementById("wizChefPhoto")?.value || "").trim();
+      const chefBio   = (document.getElementById("wizChefBio")?.value || "").trim();
+      if(chefName || chefPhoto || chefBio){
+        content_blocks.push({
+          id: `block_chef_${Date.now()}`,
+          type: "chef",
+          enabled: true,
+          layout: "image_left",
+          title: chefName || "Notre Chef",
+          text: chefBio,
+          image: chefPhoto,
+          image_alt: chefName,
           images: [], quote: "", caption: ""
         });
       }
@@ -2569,6 +2685,7 @@
           images: [], quote: "", caption: ""
         });
       }
+
 
       const payload = {
         title, slug, location: fullLocation, short_description, description, hero_image,

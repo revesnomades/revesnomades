@@ -326,42 +326,66 @@
     </div>
   </section>
 
-  <!-- BANDEAU CONTACT - split layout -->
+  <!-- BANDEAU CONTACT - split layout avec formulaire intégré -->
   <section id="contact" style="background: var(--white); padding: 0; overflow:hidden; border-top: 1px solid var(--line);">
-    <div style="display:grid; grid-template-columns: 1fr 1fr; min-height: 480px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; min-height: 560px;" id="contactGrid">
 
-      <!-- GAUCHE : texte descriptif -->
+      <!-- GAUCHE : texte descriptif uniquement -->
       <div class="reveal" data-delay="0" style="display:flex; flex-direction:column; justify-content:center; padding: clamp(40px, 6vw, 100px) clamp(30px, 5vw, 80px);">
         <p style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin:0 0 20px 0;">Envie d'en savoir plus ?</p>
-        <h2 style="font-family:'Roca One', serif; font-weight:300; font-size: clamp(28px, 3.5vw, 48px); text-transform:none; letter-spacing:0.01em; margin:0 0 24px 0; line-height:1.15;">Parlons de votre prochaine aventure</h2>
-        <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:16px; line-height:1.75; color:var(--muted); margin:0 0 36px 0; max-width:42ch;">Pour vos questions, un séjour sur mesure, ou simplement envie de partager — n’hésitez pas à nous écrire. On vous répond avec plaisir.</p>
-        <div>
-          <a class="btn on-light" href="contact.html" style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:14px 36px; display:inline-block;">Nous écrire →</a>
-        </div>
+        <h2 style="font-family:'Roca One', serif; font-weight:300; font-size: clamp(28px, 3.5vw, 48px); text-transform:none; letter-spacing:0.01em; margin:0 0 24px 0; line-height:1.15;">Parlons de votre prochaine&nbsp;aventure</h2>
+        <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:16px; line-height:1.75; color:var(--muted); margin:0; max-width:42ch;">Pour vos questions, un séjour sur mesure, ou simplement envie de partager — n'hésitez pas à nous écrire. On vous répond avec plaisir.</p>
       </div>
 
-      <!-- DROITE : image + carte sombre superposée -->
-      <div class="reveal" data-delay="1" style="position:relative; overflow:hidden; min-height:400px;">
-        <!-- Image de fond -->
-        <img src="assets/img/newsletter-bg.jpg" alt="Contact Âmes Nomades"
-          style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;">
-        <!-- Overlay léger -->
-        <div style="position:absolute; inset:0; background:rgba(14,15,17,0.35);"></div>
-        <!-- Carte contact sombre -->
-        <div style="position:absolute; bottom:40px; right:40px; left:40px; background:rgba(14,15,17,0.82); backdrop-filter:blur(8px); padding:32px 36px; border-radius:4px; border:1px solid rgba(255,255,255,0.08);">
-          <p style="font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.55); margin:0 0 8px 0;">Nous contacter</p>
-          <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:15px; color:rgba(255,255,255,0.9); margin:0 0 20px 0; line-height:1.6;">Une question avant de réserver ? Écrivez-nous, on vous répond en moins de 48h.</p>
-          <a href="contact.html" style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#fff; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.4); padding-bottom:2px; display:inline-block;">Envoyer un message →</a>
+      <!-- DROITE : image hero + formulaire superposé -->
+      <div class="reveal" data-delay="1" style="position:relative; overflow:hidden; min-height:500px;">
+        <!-- Image de fond (même que contact.html) -->
+        <img src="assets/img/hero-1.jpg" alt="Contact Âmes Nomades"
+          style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; transition:transform 1.2s ease;">
+        <!-- Overlay sombre -->
+        <div style="position:absolute; inset:0; background:rgba(10,11,13,0.62);"></div>
+        <!-- Formulaire flottant -->
+        <div style="position:relative; z-index:2; padding: clamp(30px,5vw,60px) clamp(24px,4vw,50px); height:100%; display:flex; flex-direction:column; justify-content:center;">
+          <p style="font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin:0 0 18px 0;">Nous contacter</p>
+          <form id="indexContactForm" novalidate style="display:flex; flex-direction:column; gap:14px;">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <input name="lastname" placeholder="NOM *" required autocomplete="family-name"
+                style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
+                onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
+              <input name="email" type="email" placeholder="EMAIL *" required autocomplete="email"
+                style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
+                onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
+            </div>
+            <input name="subject" placeholder="OBJET *" required
+              style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
+              onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
+            <textarea name="message" placeholder="VOTRE MESSAGE *" required rows="4"
+              style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box; resize:vertical;"
+              onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'"></textarea>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" name="privacyConsent" id="indexContactConsent" required style="width:15px; height:15px; accent-color:#fff; cursor:pointer; flex-shrink:0;">
+              <label for="indexContactConsent" style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:11px; color:rgba(255,255,255,0.6); cursor:pointer; line-height:1.4;">J'accepte la <a href="/politique-confidentialite.html" style="color:rgba(255,255,255,0.8); text-decoration:underline;">Politique de confidentialité</a></label>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <button type="submit" id="indexContactSubmit"
+                style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; background:#fff; color:#111; border:none; padding:13px 32px; border-radius:3px; cursor:pointer; transition:opacity 0.2s; white-space:nowrap;">
+                Envoyer →
+              </button>
+              <div id="indexContactMsg" style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:rgba(255,255,255,0.8);"></div>
+            </div>
+          </form>
         </div>
       </div>
 
     </div>
-    <!-- Responsive mobile : empilement -->
     <style>
       @media (max-width: 768px) {
-        #contact > div { grid-template-columns: 1fr !important; }
-        #contact > div > div:last-child { min-height: 320px !important; }
+        #contactGrid { grid-template-columns: 1fr !important; }
+        #contactGrid > div:last-child { min-height: 560px !important; }
       }
+      #indexContactForm input::placeholder,
+      #indexContactForm textarea::placeholder { color: rgba(255,255,255,0.35); }
     </style>
   </section>
 
@@ -851,6 +875,57 @@
 
       setContactMsg("Message envoyé ✅ Nous vous répondons vite.");
       contactForm.reset();
+    });
+
+    // ── FORMULAIRE CONTACT BANDEAU (indexContactForm) ──
+    const indexContactForm = document.getElementById("indexContactForm");
+    const indexContactMsg  = document.getElementById("indexContactMsg");
+    let indexContactLastSubmit = 0;
+    indexContactForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if(indexContactMsg) indexContactMsg.textContent = "";
+
+      const fd = new FormData(indexContactForm);
+      if (String(fd.get("website") || "").trim()) { indexContactForm.reset(); return; }
+      const now = Date.now();
+      if (now - indexContactLastSubmit < 30000) {
+        indexContactMsg.textContent = "Merci de patienter avant de soumettre à nouveau.";
+        return;
+      }
+      indexContactLastSubmit = now;
+
+      const subject  = String(fd.get("subject")  || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
+      const email    = String(fd.get("email")    || "").trim().toLowerCase();
+      const message  = String(fd.get("message")  || "").trim();
+      const privacyConsent = fd.get("privacyConsent") === "on";
+
+      if(!subject || !lastname || !email || !message){
+        if(indexContactMsg) indexContactMsg.textContent = "Merci de compléter tous les champs obligatoires.";
+        return;
+      }
+      if(!privacyConsent){
+        if(indexContactMsg) indexContactMsg.textContent = "Merci d'accepter la politique de confidentialité.";
+        return;
+      }
+
+      const btn = document.getElementById("indexContactSubmit");
+      if(btn) btn.disabled = true;
+
+      const { error } = await supabase
+        .from("messages")
+        .insert({ subject, name: lastname, email, message });
+
+      if(btn) btn.disabled = false;
+
+      if(error){
+        console.error("CONTACT FORM ERROR:", error);
+        if(indexContactMsg) indexContactMsg.textContent = "Oups… impossible d'envoyer. Réessayez.";
+        return;
+      }
+
+      if(indexContactMsg) indexContactMsg.textContent = "Message envoyé ✅ On vous répond vite !";
+      indexContactForm.reset();
     });
 
     await loadFeaturedStay();

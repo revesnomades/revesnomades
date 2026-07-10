@@ -1853,7 +1853,7 @@ footer.band.cream{
 .gal-item {
   flex: 0 0 280px;
   width: 280px;
-  height: 200px;
+  height: 380px;
   border-radius: 4px;
   overflow: hidden;
   background: #f0ebde;
@@ -1875,6 +1875,7 @@ footer.band.cream{
   .gal-item {
     flex: 0 0 200px;
     width: 200px;
-    height: 150px;
+    height: 270px;
   }
 }
+
