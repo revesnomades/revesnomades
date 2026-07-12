@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -903,7 +903,7 @@
       try {
         const { data } = await supabase.from("site_settings").select("value").eq("key", "homepage_gallery").maybeSingle();
         currentGalleryPhotos = (data && Array.isArray(data.value)) ? data.value : [
-          { url: "assets/img/hero-1.jpg", alt: "Souvenir Âmes Nomades 1" },
+          { url: "assets/img/hero-1.webp", alt: "Souvenir Âmes Nomades 1" },
           { url: "assets/img/pool-brunch-yoga.jpg", alt: "Souvenir Âmes Nomades 2" },
           { url: "assets/img/bottom-wide.jpg", alt: "Souvenir Âmes Nomades 3" },
           { url: "assets/img/pool-brunch-yoga-2.jpg", alt: "Souvenir Âmes Nomades 4" },
