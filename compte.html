@@ -807,9 +807,12 @@
       }
     }
 
-    async function checkAdminAndGetProfile(userId) {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userEmail = session?.user?.email || "";
+    async function checkAdminAndGetProfile(userId, emailParam) {
+      let userEmail = emailParam || "";
+      if (!userEmail) {
+        const { data: { session } } = await supabase.auth.getSession();
+        userEmail = session?.user?.email || "";
+      }
       const isEmailAdmin = userEmail.toLowerCase() === "contact@amesnomades.com" || userEmail.toLowerCase() === "sarnelli.ap@gmail.com" || userEmail.toLowerCase() === "revesnomades@gmail.com";
 
       const { data, error } = await supabase
@@ -1138,7 +1141,7 @@
       const metaFirstname = user.user_metadata?.firstname ? String(user.user_metadata.firstname).trim() : "";
 
       // 1. Détermine le rôle admin en premier
-      const { isAdmin, firstname: profileFirstname } = await checkAdminAndGetProfile(user.id);
+      const { isAdmin, firstname: profileFirstname } = await checkAdminAndGetProfile(user.id, user.email);
 
       // En mode maintenance, seul l'admin peut accéder au compte
       if (MAINTENANCE_MODE && !isAdmin) {
@@ -1220,7 +1223,7 @@
 
       // Vérification maintenance avant d'afficher le compte
       if(MAINTENANCE_MODE){
-        const { isAdmin } = await checkAdminAndGetProfile(data.user.id);
+        const { isAdmin } = await checkAdminAndGetProfile(data.user.id, data.user.email);
         if(!isAdmin){
           await supabase.auth.signOut();
           setMsg(authMsg, "Le site est en cours de maintenance. Seuls les administrateurs peuvent se connecter.");
@@ -1347,7 +1350,7 @@
     supabase.auth.onAuthStateChange(async (_evt, newSession) => {
       if(newSession?.user){
         if(MAINTENANCE_MODE){
-          const { isAdmin } = await checkAdminAndGetProfile(newSession.user.id);
+          const { isAdmin } = await checkAdminAndGetProfile(newSession.user.id, newSession.user.email);
           if(!isAdmin){
             await supabase.auth.signOut();
             window.location.href = "/maintenance.html";

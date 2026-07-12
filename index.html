@@ -742,18 +742,15 @@
           }
           rafId = requestAnimationFrame(animate);
         }
+        // Lance l'animation immédiatement et mesure dès que possible
+        measure();
+        animate();
 
-        // Attend que les images soient chargées pour mesurer correctement
-        Promise.all(
-          Array.from(track.querySelectorAll("img")).map(img =>
-            img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; })
-          )
-        ).then(() => {
-          // Un petit délai supplémentaire garantit que le reflow de display:block a eu lieu
-          setTimeout(() => {
-            measure();
-            animate();
-          }, 100);
+        // Ré-estime la taille au fur et à mesure que les images se chargent
+        track.querySelectorAll("img").forEach(img => {
+          if (img.complete) return;
+          img.addEventListener("load", () => { measure(); });
+          img.addEventListener("error", () => { measure(); });
         });
 
         // Pause au survol
