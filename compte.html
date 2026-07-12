@@ -1133,20 +1133,15 @@
       if (resetBox) resetBox.style.display = "none";
       if (perksBox) perksBox.style.display = "none";
       if (loggedBox) loggedBox.style.display = "block";
-      if (bookingsBox) bookingsBox.style.display = "block";
       if (userEmail) userEmail.textContent = user?.email || "";
 
       const metaFirstname = user.user_metadata?.firstname ? String(user.user_metadata.firstname).trim() : "";
 
-      const [{ isAdmin, firstname: profileFirstname }] = await Promise.all([
-        checkAdminAndGetProfile(user.id),
-        loadMyBookings(user),
-        loadMyPurchases(user),
-        loadNewsletterStatus(user)
-      ]);
+      // 1. Détermine le rôle admin en premier
+      const { isAdmin, firstname: profileFirstname } = await checkAdminAndGetProfile(user.id);
 
       // En mode maintenance, seul l'admin peut accéder au compte
-      if(MAINTENANCE_MODE && !isAdmin){
+      if (MAINTENANCE_MODE && !isAdmin) {
         await supabase.auth.signOut();
         window.location.href = "/maintenance.html";
         return;
@@ -1154,17 +1149,29 @@
 
       applyWelcomeName(metaFirstname || profileFirstname);
 
-      if (isAdmin && adminPanel) {
+      if (isAdmin) {
+        // Mode Admin : seulement mon compte et FAQ à gauche, et uniquement l'espace admin à droite
         if (perksBox) perksBox.style.display = "none";
         if (bookingsBox) bookingsBox.style.display = "none";
         if (purchasesBox) purchasesBox.style.display = "none";
-        adminPanel.style.display = "block";
+        if (adminPanel) adminPanel.style.display = "block";
         if (adminFaqPanel) adminFaqPanel.style.display = "block";
-        await loadAdminStats();
-        await loadSiteFaqItems();
-      } else if (adminPanel) {
-        adminPanel.style.display = "none";
+
+        await Promise.all([
+          loadAdminStats(),
+          loadSiteFaqItems()
+        ]);
+      } else {
+        // Mode Utilisateur standard
+        if (adminPanel) adminPanel.style.display = "none";
         if (adminFaqPanel) adminFaqPanel.style.display = "none";
+        if (bookingsBox) bookingsBox.style.display = "block";
+
+        await Promise.all([
+          loadMyBookings(user),
+          loadMyPurchases(user),
+          loadNewsletterStatus(user)
+        ]);
       }
     }
 

@@ -709,7 +709,7 @@
         console.warn("Galerie : utilisation des images par d\u00e9faut", e);
       }
 
-      // --- Marquee RAF : d\u00e9filement fluide garanti ---
+      // --- Marquee RAF : défilement fluide garanti ---
       (function initMarquee() {
         const track = document.getElementById("galleryMarqueeTrack");
         if (!track) return;
@@ -725,27 +725,35 @@
         let paused = false;
 
         function measure() {
-          // La moiti\u00e9 de la track = largeur d'un set complet
+          // La moitié de la track = largeur d'un set complet
           halfWidth = track.scrollWidth / 2;
         }
 
         function animate() {
           if (!paused) {
+            if (halfWidth <= 0) {
+              measure();
+            }
             offset += SPEED;
-            if (offset >= halfWidth) offset = 0; // reset instantan\u00e9 = loop seamless
+            if (halfWidth > 0 && offset >= halfWidth) {
+              offset = 0; // reset instantané = loop seamless
+            }
             track.style.transform = `translateX(-${offset}px)`;
           }
           rafId = requestAnimationFrame(animate);
         }
 
-        // Attend que les images soient charg\u00e9es pour mesurer correctement
+        // Attend que les images soient chargées pour mesurer correctement
         Promise.all(
           Array.from(track.querySelectorAll("img")).map(img =>
             img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; })
           )
         ).then(() => {
-          measure();
-          animate();
+          // Un petit délai supplémentaire garantit que le reflow de display:block a eu lieu
+          setTimeout(() => {
+            measure();
+            animate();
+          }, 100);
         });
 
         // Pause au survol
@@ -756,7 +764,9 @@
         }
 
         // Recalcule si redimensionnement
-        window.addEventListener("resize", measure);
+        window.addEventListener("resize", () => {
+          measure();
+        });
       })();
     }
 
