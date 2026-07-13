@@ -1935,6 +1935,15 @@ footer.band.cream{
   flex-direction: column;
   justify-content: center;
 }
+.index-section-title {
+  font-family: 'Roca One', 'Outfit', serif !important;
+  font-weight: 300 !important;
+  text-transform: uppercase !important;
+  font-size: clamp(23px, 2.6vw, 36px) !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.25 !important;
+  color: var(--text) !important;
+}
 .speaker-bio p, .chef-bio p, .accom-bio p {
   font-family: 'Glacial Indifference', 'Outfit', sans-serif !important;
   font-size: 14.5px !important;

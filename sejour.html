@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.3">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -109,7 +109,10 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="programSection">
-        <h2 class="sejour-section-title">Programme</h2>
+        <div style="margin-bottom:16px;">
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">03. Programme</p>
+          <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">Le programme</h3>
+        </div>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
             <div class="kicker">Chargement…</div>
@@ -780,8 +783,7 @@
         
         const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
-        const isDefaultTitle = safeTitle.toLowerCase().trim() === "hébergement" || safeTitle.toLowerCase().trim() === "l'hébergement";
-        const kickerHtml = isDefaultTitle ? "" : `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Hébergement</p>`;
+        const kickerHtml = `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">01. Hébergement</p>`;
         const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
 
         html += `
@@ -795,11 +797,19 @@
         `;
       });
 
-      // 3. Intervenants (après hébergement, sans titre H2)
+      // 3. Intervenants (après hébergement)
       if(speakers.length){
-        html += `<article style="margin-top: 100px;">
-          ${renderSpeakers(speakers)}
-        </article>`;
+        const kickerHtml = `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">02. Intervenant</p>`;
+        const titleHtml = `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">Les intervenants</h3>`;
+        html += `
+          <article class="speaker-section-wrapper" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0 0 0; margin-top:40px;">
+            <div style="margin-bottom:16px;">
+              ${kickerHtml}
+              ${titleHtml}
+            </div>
+            ${renderSpeakers(speakers)}
+          </article>
+        `;
       }
 
       // 4. Cuisinier / Chef
