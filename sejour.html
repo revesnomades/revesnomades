@@ -72,7 +72,7 @@
   <main>
   <div style="border-top: 1px solid var(--line); padding: 30px 0 10px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
-      <section class="sejour-hero" style="height: clamp(420px, 65vh, 660px); min-height: 380px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
+      <section class="sejour-hero" style="height: clamp(480px, 70vh, 720px); min-height: 420px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
         <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
       </section>
     </div>
@@ -640,8 +640,8 @@
             style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
         </div>`).join("");
       return `
-        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:1fr 2fr; gap:14px; align-items:start;">
-          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden;">
+        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:110px 1fr; gap:16px; align-items:start;">
+          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:110px; flex-shrink:0;">
             ${showArrows ? `
               <button type="button" class="gv-arrow gv-prev" data-viewer="${id}" aria-label="Précédent"
                 style="position:absolute; top:0; left:0; width:100%; height:32px; background:linear-gradient(to bottom, rgba(250,245,220,0.95), rgba(250,245,220,0)); border:none; color:var(--text); font-size:14px; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; opacity:0.5;">
@@ -660,7 +660,7 @@
               </button>
             ` : ""}
           </div>
-          <div class="gv-main" style="border-radius:4px; overflow:hidden; background:#f0ebde;">
+          <div class="gv-main" style="border-radius:4px; overflow:hidden; background:#f0ebde; position:relative;">
             <img id="${id}_main" src="${escapeHtml(images[0])}" alt="Photo séjour"
               style="width:100%; height:100%; object-fit:cover; display:block; transition:opacity 0.3s ease;">
           </div>
@@ -674,20 +674,28 @@
         const num = String(i + 1).padStart(2, "0");
         const photo = sp.image || sp.photo || "";
         const name  = escapeHtml(sp.title || sp.name || "");
-        const bio   = escapeHtml(sp.text  || sp.bio  || "").replace(/\n/g, "<br>");
+        const bio   = escapeHtml(sp.text  || sp.bio  || "");
+        const bioParagraphs = bio.split(/\n|<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+          <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+        `).join("");
+
         return `
           <div class="speaker-row">
             <!-- Photo -->
-            <div>
+            <div class="speaker-photo-wrapper">
               ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
             </div>
-            <!-- Texte -->
-            <div class="speaker-text-container" style="padding-top:8px;">
-              <div style="display:flex; align-items:baseline; gap:24px; margin-bottom:16px;">
-                <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
-                <h3 style="font-family:'Roca One',serif; font-weight:300; font-size:clamp(18px,2vw,24px); margin:0; text-transform:none;">${name}</h3>
-              </div>
-              <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:15px; line-height:1.75; color:var(--muted); margin:0;">${bio}</p>
+            <!-- Numéro -->
+            <div class="speaker-num" style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.12em; color:var(--muted); padding-top:4px;">
+              ${num}
+            </div>
+            <!-- Nom -->
+            <div class="speaker-name" style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text); padding-top:3px; line-height:1.4;">
+              ${name}
+            </div>
+            <!-- Biographie -->
+            <div class="speaker-bio speaker-text-container">
+              ${bioParagraphs}
             </div>
           </div>`;
       }).join("");
@@ -697,16 +705,22 @@
     function renderChef(block) {
       const photo = block.image || "";
       const name  = escapeHtml(block.title || "Notre Cuisinière");
-      const bio   = escapeHtml(block.text  || "").replace(/\n/g, "<br>");
+      const bio   = escapeHtml(block.text  || "");
+      const bioParagraphs = bio.split(/\n|<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+        <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+      `).join("");
+
       return `
         <div class="chef-row">
-          <div>
+          <div class="chef-photo-wrapper">
             ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
           </div>
-          <div class="speaker-text-container" style="padding-top:8px;">
-            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px;">Cuisine & repas</p>
-            <h3 style="font-family:'Roca One',serif; font-weight:300; font-size:clamp(18px,2vw,24px); margin:0 0 16px; text-transform:none;">${name}</h3>
-            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:15px; line-height:1.75; color:var(--muted); margin:0;">${bio}</p>
+          <div class="chef-title-col" style="padding-top:2px;">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px; text-transform:uppercase;">Cuisine & repas</p>
+            <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text); line-height:1.4;">${name}</h3>
+          </div>
+          <div class="chef-bio speaker-text-container">
+            ${bioParagraphs}
           </div>
         </div>`;
     }
@@ -749,13 +763,23 @@
           html += `<article style="display:grid; gap:8px;">${imgFull}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
         } else if(block.type === "image_text" || block.type === "text_image"){
           const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
-          const imageFirst = !isAccom && block.type === "image_text" && block.layout !== "image_right";
-          const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
-          const imagePanel = block.image
-            ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
-            : "";
-          const textPanel = `<div class="accom-text-container">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
-          html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;
+          if (isAccom) {
+            const imgStyle = `width:200px; height:280px; object-fit:cover; display:block; border-radius:4px;`;
+            const imagePanel = block.image
+              ? `<div class="accom-photo-wrapper" style="width:200px; flex-shrink:0;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Hébergement')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
+              : "";
+            const titlePanel = `<div class="accom-title-col" style="width:210px; flex-shrink:0; padding-top:2px;"><p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px; text-transform:uppercase;">Hébergement</p>${safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text); line-height:1.4;">${safeTitle}</h3>` : ""}</div>`;
+            const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
+            html += `<article class="accom-row" style="display:grid; grid-template-columns:200px 210px 1fr; gap:24px; align-items:start; padding:32px 0; border-top:1px solid rgba(30, 31, 34, 0.12); margin:0;">${imagePanel}${titlePanel}${textPanel}</article>`;
+          } else {
+            const imageFirst = block.type === "image_text" && block.layout !== "image_right";
+            const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
+            const imagePanel = block.image
+              ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
+              : "";
+            const textPanel = `<div class="accom-text-container">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
+            html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;
+          }
         } else if(block.type === "quote"){
           html += `<blockquote style="margin:0;border-left:2px solid var(--line);padding-left:14px;"><p style="margin:0;font-style:italic;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
         } else {
@@ -765,7 +789,7 @@
 
       // 3. Intervenants
       if(speakers.length){
-        html += `<article>
+        html += `<article style="margin-top: 60px;">
           <h2 style="font-family:'Roca One',serif;font-weight:300;font-size:clamp(18px,2vw,26px);margin:0 0 4px;text-transform:none;letter-spacing:0.01em;">Les intervenants</h2>
           ${renderSpeakers(speakers)}
         </article>`;

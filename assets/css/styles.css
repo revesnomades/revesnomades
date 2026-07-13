@@ -1879,15 +1879,31 @@ footer.band.cream{
 /* =========================================================
    SPEAKER & CHEF — Page séjour
    ========================================================= */
-.speaker-row, .chef-row {
+.speaker-row {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 32px;
+  grid-template-columns: 180px 40px 160px 1fr;
+  gap: 24px;
   align-items: start;
   padding: 32px 0;
   border-top: 1px solid rgba(30, 31, 34, 0.12);
 }
-.speaker-row img, .chef-row img {
+.chef-row {
+  display: grid;
+  grid-template-columns: 180px 200px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 32px 0;
+  border-top: 1px solid rgba(30, 31, 34, 0.12);
+}
+.accom-row {
+  display: grid;
+  grid-template-columns: 200px 210px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 32px 0;
+  border-top: 1px solid rgba(30, 31, 34, 0.12);
+}
+.speaker-row img, .chef-row img, .accom-row img {
   width: 100%;
   aspect-ratio: 2/3;
   object-fit: cover;
@@ -1922,11 +1938,44 @@ footer.band.cream{
   background: rgba(30, 31, 34, 0.15);
   border-radius: 2px;
 }
-@media (max-width: 768px) {
-  .speaker-row, .chef-row {
-    grid-template-columns: 1fr;
+@media (max-width: 900px) {
+  .speaker-row {
+    grid-template-columns: 180px 1fr;
     gap: 16px;
+  }
+  .speaker-photo-wrapper { grid-column: 1; grid-row: 1 / span 3; }
+  .speaker-num { grid-column: 2; grid-row: 1; }
+  .speaker-name { grid-column: 2; grid-row: 2; }
+  .speaker-bio { grid-column: 2; grid-row: 3; }
+
+  .chef-row {
+    grid-template-columns: 180px 1fr;
+    gap: 16px;
+  }
+  .chef-photo-wrapper { grid-column: 1; grid-row: 1 / span 2; }
+  .chef-title-col { grid-column: 2; grid-row: 1; }
+  .chef-bio { grid-column: 2; grid-row: 2; }
+
+  .accom-row {
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+  }
+  .accom-photo-wrapper { grid-column: 1; grid-row: 1 / span 2; }
+  .accom-title-col { grid-column: 2; grid-row: 1; }
+  .accom-bio { grid-column: 2; grid-row: 2; }
+}
+@media (max-width: 600px) {
+  .speaker-row, .chef-row, .accom-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
     padding: 20px 0;
+  }
+  .speaker-photo-wrapper, .speaker-num, .speaker-name, .speaker-bio,
+  .chef-photo-wrapper, .chef-title-col, .chef-bio,
+  .accom-photo-wrapper, .accom-title-col, .accom-bio {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100% !important;
   }
   .speaker-text-container, .accom-text-container {
     max-height: none !important;
