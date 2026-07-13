@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.2">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -748,16 +748,18 @@
       );
       
       const speakers = blocks.filter(b => 
-        b.type === "speaker" || 
-        ((b.type === "image_text" || b.type === "text_image") && 
-         ((b.title || "").toLowerCase().includes("intervenant") || (b.title || "").toLowerCase().includes("avec ")))
+        (b.type === "speaker" || 
+         ((b.type === "image_text" || b.type === "text_image") && 
+          ((b.title || "").toLowerCase().includes("intervenant") || (b.title || "").toLowerCase().includes("avec ")))) &&
+        (b.title || "").toLowerCase().trim() !== "les intervenants"
       );
 
       // Le reste (excluant galleries, accom, speakers, chef, et le bloc technique index_image)
       const others = blocks.filter(b => 
         !["gallery_2", "chef", "speaker", "index_image"].includes(b.type) && 
         !accomBlocks.includes(b) && 
-        !speakers.includes(b)
+        !speakers.includes(b) &&
+        (b.title || "").toLowerCase().trim() !== "les intervenants"
       );
 
       let html = "";
@@ -831,19 +833,6 @@
           html += `<article><p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></article>`;
         }
       });
-
-      // 3. Intervenants
-      if(speakers.length){
-        html += `<article style="margin-top: 100px;">
-          <h2 style="font-family:'Roca One',serif;font-weight:300;font-size:clamp(18px,2vw,26px);margin:0 0 4px;text-transform:none;letter-spacing:0.01em;">Les intervenants</h2>
-          ${renderSpeakers(speakers)}
-        </article>`;
-      }
-
-      // 4. Cuisinier
-      if(chefBlocks.length){
-        html += `<article>${renderChef(chefBlocks[0])}</article>`;
-      }
 
       container.innerHTML = html;
 
