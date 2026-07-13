@@ -681,13 +681,13 @@
 
         return `
           <div class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
-            <!-- Titre au-dessus -->
-            <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:16px;">
-              <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
-              <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
-            </div>
-            <!-- Contenu en 2 colonnes (biographie + portrait) -->
+            <!-- Grille à 2 colonnes (titre, biographie + portrait) -->
             <div class="speaker-row">
+              <!-- Titre -->
+              <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
+                <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
+              </div>
               <!-- Biographie -->
               <div class="speaker-bio speaker-text-container">
                 ${bioParagraphs}
@@ -712,16 +712,17 @@
 
       return `
         <div class="chef-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
-          <!-- Titre au-dessus -->
-          <div style="margin-bottom:16px;">
-            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
-            <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
-          </div>
-          <!-- Contenu en 2 colonnes (biographie + photo) -->
           <div class="chef-row">
+            <!-- Titre -->
+            <div class="chef-title-block">
+              <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
+              <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
+            </div>
+            <!-- Biographie -->
             <div class="chef-bio speaker-text-container">
               ${bioParagraphs}
             </div>
+            <!-- Photo -->
             <div class="chef-photo-wrapper" style="width:200px; flex-shrink:0;">
               ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
             </div>
@@ -782,14 +783,15 @@
 
             html += `
               <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
-                <!-- Titre au-dessus -->
-                <div style="margin-bottom:16px;">
-                  ${kickerHtml}
-                  ${titleHtml}
-                </div>
-                <!-- 2 colonnes (photo + description) -->
                 <div class="accom-row">
+                  <!-- Photo -->
                   ${imagePanel}
+                  <!-- Titre -->
+                  <div class="accom-title-block">
+                    ${kickerHtml}
+                    ${titleHtml}
+                  </div>
+                  <!-- Description -->
                   ${textPanel}
                 </div>
               </article>
@@ -807,14 +809,15 @@
 
             html += `
               <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
-                <!-- Titre au-dessus -->
-                <div style="margin-bottom:16px;">
-                  ${kickerHtml}
-                  ${titleHtml}
-                </div>
-                <!-- 2 colonnes (biographie + photo) -->
                 <div class="speaker-row">
+                  <!-- Titre -->
+                  <div class="speaker-title-block">
+                    ${kickerHtml}
+                    ${titleHtml}
+                  </div>
+                  <!-- Biographie -->
                   ${textPanel}
+                  <!-- Photo -->
                   ${imagePanel}
                 </div>
               </article>

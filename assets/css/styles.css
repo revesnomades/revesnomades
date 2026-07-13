@@ -1885,11 +1885,37 @@ footer.band.cream{
   gap: 24px;
   align-items: start;
 }
+.speaker-title-block, .chef-title-block {
+  grid-row: 1;
+  grid-column: 1 / span 2;
+  margin-bottom: 16px;
+}
+.speaker-bio, .chef-bio {
+  grid-row: 2;
+  grid-column: 1;
+}
+.speaker-photo-wrapper, .chef-photo-wrapper {
+  grid-row: 2;
+  grid-column: 2;
+}
 .accom-row {
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 24px;
   align-items: start;
+}
+.accom-title-block {
+  grid-row: 1;
+  grid-column: 1 / span 2;
+  margin-bottom: 16px;
+}
+.accom-photo-wrapper {
+  grid-row: 2;
+  grid-column: 1;
+}
+.accom-bio {
+  grid-row: 2;
+  grid-column: 2;
 }
 .speaker-row img, .chef-row img, .accom-row img {
   width: 100%;
@@ -1909,24 +1935,94 @@ footer.band.cream{
   flex-direction: column;
   justify-content: center;
 }
-@media (max-width: 600px) {
-  .speaker-row, .chef-row, .accom-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .speaker-photo-wrapper, .chef-photo-wrapper, .accom-photo-wrapper {
-    grid-row: 1;
-    width: 100% !important;
-  }
-  .speaker-bio, .chef-bio, .accom-bio {
-    grid-row: 2;
-  }
-}
 .speaker-bio p, .chef-bio p, .accom-bio p {
   font-family: 'Glacial Indifference', 'Outfit', sans-serif !important;
   font-size: 14.5px !important;
   line-height: 1.65 !important;
   color: var(--muted) !important;
   margin: 0 0 14px 0 !important;
+}
+
+/* RESPONSIVE OVERRIDES */
+@media (max-width: 768px) {
+  /* Index slogan principal */
+  .main-banner-title {
+    font-size: 26px !important;
+  }
+  
+  /* Index titres majuscules Roca One */
+  .balance-title, .about-title {
+    font-family: 'Roca One', serif !important;
+    text-transform: uppercase !important;
+    font-size: 14.5px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
+  }
+  
+  /* Index dernier bandeau position plus bas */
+  .bottom-wide {
+    align-items: end !important;
+  }
+  .bottom-wide .content {
+    padding-bottom: 80px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Grilles intervenants / hébergements sur mobile : Photo, Titre, Bio */
+  .speaker-row, .chef-row, .accom-row {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .speaker-photo-wrapper, .chef-photo-wrapper, .accom-photo-wrapper {
+    grid-row: 1 !important;
+    grid-column: 1 !important;
+    width: 100% !important;
+  }
+  .speaker-title-block, .chef-title-block, .accom-title-block {
+    grid-row: 2 !important;
+    grid-column: 1 !important;
+    margin-bottom: 12px !important;
+  }
+  .speaker-bio, .chef-bio, .accom-bio {
+    grid-row: 3 !important;
+    grid-column: 1 !important;
+  }
+
+  /* Galerie horizontale sur mobile */
+  .gv-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .gv-left-col {
+    grid-row: 2 !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .gv-main {
+    grid-row: 1 !important;
+    height: 250px !important;
+  }
+  .gv-thumbs-viewport {
+    height: auto !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gv-thumbs-track {
+    flex-direction: row !important;
+    transform: none !important;
+    gap: 8px !important;
+    width: max-content !important;
+  }
+  .gv-thumb {
+    width: 90px !important;
+    height: 60px !important;
+    flex-shrink: 0 !important;
+  }
+  .gv-arrow {
+    display: none !important;
+  }
 }
 
