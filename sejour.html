@@ -640,8 +640,8 @@
             style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
         </div>`).join("");
       return `
-        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:110px 1fr; gap:16px; align-items:start;">
-          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:110px; flex-shrink:0;">
+        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:128px 1fr; gap:16px; align-items:start;">
+          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:128px; flex-shrink:0;">
             ${showArrows ? `
               <button type="button" class="gv-arrow gv-prev" data-viewer="${id}" aria-label="Précédent"
                 style="position:absolute; top:0; left:0; width:100%; height:32px; background:linear-gradient(to bottom, rgba(250,245,220,0.95), rgba(250,245,220,0)); border:none; color:var(--text); font-size:14px; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; opacity:0.5;">
@@ -680,22 +680,22 @@
         `).join("");
 
         return `
-          <div class="speaker-row">
-            <!-- Photo -->
-            <div class="speaker-photo-wrapper">
-              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+          <div class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+            <!-- Titre au-dessus -->
+            <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:16px;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
+              <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
             </div>
-            <!-- Numéro -->
-            <div class="speaker-num" style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.12em; color:var(--muted); padding-top:4px;">
-              ${num}
-            </div>
-            <!-- Nom -->
-            <div class="speaker-name" style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text); padding-top:3px; line-height:1.4;">
-              ${name}
-            </div>
-            <!-- Biographie -->
-            <div class="speaker-bio speaker-text-container">
-              ${bioParagraphs}
+            <!-- Contenu en 2 colonnes (portrait + biographie) -->
+            <div class="speaker-row">
+              <!-- Photo -->
+              <div class="speaker-photo-wrapper" style="width:180px; flex-shrink:0;">
+                ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+              </div>
+              <!-- Biographie -->
+              <div class="speaker-bio speaker-text-container">
+                ${bioParagraphs}
+              </div>
             </div>
           </div>`;
       }).join("");
@@ -711,16 +711,20 @@
       `).join("");
 
       return `
-        <div class="chef-row">
-          <div class="chef-photo-wrapper">
-            ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+        <div class="chef-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+          <!-- Titre au-dessus -->
+          <div style="margin-bottom:16px;">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
+            <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
           </div>
-          <div class="chef-title-col" style="padding-top:2px;">
-            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px; text-transform:uppercase;">Cuisine & repas</p>
-            <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text); line-height:1.4;">${name}</h3>
-          </div>
-          <div class="chef-bio speaker-text-container">
-            ${bioParagraphs}
+          <!-- Contenu en 2 colonnes (photo + biographie) -->
+          <div class="chef-row">
+            <div class="chef-photo-wrapper" style="width:180px; flex-shrink:0;">
+              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+            </div>
+            <div class="chef-bio speaker-text-container">
+              ${bioParagraphs}
+            </div>
           </div>
         </div>`;
     }
@@ -768,9 +772,22 @@
             const imagePanel = block.image
               ? `<div class="accom-photo-wrapper" style="width:200px; flex-shrink:0;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Hébergement')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
               : "";
-            const titlePanel = `<div class="accom-title-col" style="width:210px; flex-shrink:0; padding-top:2px;"><p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 8px; text-transform:uppercase;">Hébergement</p>${safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text); line-height:1.4;">${safeTitle}</h3>` : ""}</div>`;
             const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
-            html += `<article class="accom-row" style="display:grid; grid-template-columns:200px 210px 1fr; gap:24px; align-items:start; padding:32px 0; border-top:1px solid rgba(30, 31, 34, 0.12); margin:0;">${imagePanel}${titlePanel}${textPanel}</article>`;
+            
+            html += `
+              <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
+                <!-- Titre au-dessus -->
+                <div style="margin-bottom:16px;">
+                  <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Hébergement</p>
+                  ${safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : ""}
+                </div>
+                <!-- 2 colonnes (photo + description) -->
+                <div class="accom-row">
+                  ${imagePanel}
+                  ${textPanel}
+                </div>
+              </article>
+            `;
           } else {
             const imageFirst = block.type === "image_text" && block.layout !== "image_right";
             const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
