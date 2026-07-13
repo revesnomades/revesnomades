@@ -1881,7 +1881,7 @@ footer.band.cream{
    ========================================================= */
 .speaker-row, .chef-row {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 180px 1fr;
   gap: 32px;
   align-items: start;
   padding: 32px 0;
@@ -1895,11 +1895,43 @@ footer.band.cream{
   border-radius: 4px;
   display: block;
 }
+.speaker-text-container {
+  max-height: 270px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-right: 8px;
+}
+.accom-text-container {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 8px;
+}
+.speaker-text-container, .accom-text-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(30, 31, 34, 0.15) transparent;
+}
+.speaker-text-container::-webkit-scrollbar, .accom-text-container::-webkit-scrollbar {
+  width: 4px;
+}
+.speaker-text-container::-webkit-scrollbar-thumb, .accom-text-container::-webkit-scrollbar-thumb {
+  background: rgba(30, 31, 34, 0.15);
+  border-radius: 2px;
+}
 @media (max-width: 768px) {
   .speaker-row, .chef-row {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 20px 0;
+  }
+  .speaker-text-container, .accom-text-container {
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding-right: 0;
   }
 }
 
