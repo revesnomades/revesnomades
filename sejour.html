@@ -70,17 +70,17 @@
   </header>
 
   <main>
-  <div style="border-top: 1px solid var(--line); padding: 30px 0 10px; margin-top: var(--navH); background: var(--cream);">
+  <div style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
-      <section class="sejour-hero" style="height: clamp(480px, 70vh, 720px); min-height: 420px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
+      <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
         <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
       </section>
     </div>
   </div>
 
-  <section class="band cream" style="padding-top: 10px;">
+  <section class="band cream" style="padding-top: 0px;">
     <div class="container sejour-content">
-      <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 15px 0 6px;"></p>
+      <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 8px 0 6px;"></p>
 
       <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 0 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">Séjour</h1>
 
@@ -693,7 +693,7 @@
                 ${bioParagraphs}
               </div>
               <!-- Photo -->
-              <div class="speaker-photo-wrapper" style="width:180px; flex-shrink:0;">
+              <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
                 ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
               </div>
             </div>
@@ -722,7 +722,7 @@
             <div class="chef-bio speaker-text-container">
               ${bioParagraphs}
             </div>
-            <div class="chef-photo-wrapper" style="width:180px; flex-shrink:0;">
+            <div class="chef-photo-wrapper" style="width:200px; flex-shrink:0;">
               ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
             </div>
           </div>
@@ -810,7 +810,7 @@
 
       // 3. Intervenants
       if(speakers.length){
-        html += `<article style="margin-top: 60px;">
+        html += `<article style="margin-top: 100px;">
           <h2 style="font-family:'Roca One',serif;font-weight:300;font-size:clamp(18px,2vw,26px);margin:0 0 4px;text-transform:none;letter-spacing:0.01em;">Les intervenants</h2>
           ${renderSpeakers(speakers)}
         </article>`;

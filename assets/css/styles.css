@@ -1881,7 +1881,7 @@ footer.band.cream{
    ========================================================= */
 .speaker-row, .chef-row {
   display: grid;
-  grid-template-columns: 1fr 180px;
+  grid-template-columns: 1fr 200px;
   gap: 24px;
   align-items: start;
 }
@@ -1900,31 +1900,14 @@ footer.band.cream{
   display: block;
 }
 .speaker-text-container {
-  max-height: 270px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-right: 8px;
 }
 .accom-text-container {
-  max-height: 300px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-right: 8px;
-}
-.speaker-text-container, .accom-text-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(30, 31, 34, 0.15) transparent;
-}
-.speaker-text-container::-webkit-scrollbar, .accom-text-container::-webkit-scrollbar {
-  width: 4px;
-}
-.speaker-text-container::-webkit-scrollbar-thumb, .accom-text-container::-webkit-scrollbar-thumb {
-  background: rgba(30, 31, 34, 0.15);
-  border-radius: 2px;
 }
 @media (max-width: 600px) {
   .speaker-row, .chef-row, .accom-row {
@@ -1937,11 +1920,6 @@ footer.band.cream{
   }
   .speaker-bio, .chef-bio, .accom-bio {
     grid-row: 2;
-  }
-  .speaker-text-container, .accom-text-container {
-    max-height: none !important;
-    overflow-y: visible !important;
-    padding-right: 0;
   }
 }
 
