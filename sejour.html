@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.0">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -767,6 +767,8 @@
           html += `<article style="display:grid; gap:8px;">${imgFull}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
         } else if(block.type === "image_text" || block.type === "text_image"){
           const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
+          const isSpeakerBlock = (block.title || "").toLowerCase().includes("intervenant") || (block.title || "").toLowerCase().includes("avec ");
+
           if (isAccom) {
             const imgStyle = `width:200px; height:300px; object-fit:cover; display:block; border-radius:4px;`;
             const imagePanel = block.image
@@ -789,6 +791,31 @@
                 <div class="accom-row">
                   ${imagePanel}
                   ${textPanel}
+                </div>
+              </article>
+            `;
+          } else if (isSpeakerBlock) {
+            const imgStyle = `width:200px; height:300px; object-fit:cover; display:block; border-radius:4px;`;
+            const imagePanel = block.image
+              ? `<div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Intervenante')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
+              : "";
+            const textPanel = `<div class="speaker-bio speaker-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
+            
+            const isDefaultTitle = safeTitle.toLowerCase().trim().includes("intervenant");
+            const kickerHtml = isDefaultTitle ? "" : `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Intervenante</p>`;
+            const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
+
+            html += `
+              <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
+                <!-- Titre au-dessus -->
+                <div style="margin-bottom:16px;">
+                  ${kickerHtml}
+                  ${titleHtml}
+                </div>
+                <!-- 2 colonnes (biographie + photo) -->
+                <div class="speaker-row">
+                  ${textPanel}
+                  ${imagePanel}
                 </div>
               </article>
             `;
