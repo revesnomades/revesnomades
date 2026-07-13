@@ -1881,7 +1881,7 @@ footer.band.cream{
    ========================================================= */
 .speaker-row, .chef-row {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: 1fr 180px;
   gap: 24px;
   align-items: start;
 }
@@ -1908,7 +1908,7 @@ footer.band.cream{
   padding-right: 8px;
 }
 .accom-text-container {
-  max-height: 280px;
+  max-height: 300px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1932,7 +1932,11 @@ footer.band.cream{
     gap: 12px;
   }
   .speaker-photo-wrapper, .chef-photo-wrapper, .accom-photo-wrapper {
+    grid-row: 1;
     width: 100% !important;
+  }
+  .speaker-bio, .chef-bio, .accom-bio {
+    grid-row: 2;
   }
   .speaker-text-container, .accom-text-container {
     max-height: none !important;
