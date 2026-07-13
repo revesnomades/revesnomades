@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <script>document.documentElement.classList.add("js");</script>
   <meta charset="utf-8" />
   <title>Âmes Nomades — Séjours bien-être en France</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -42,7 +43,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=2.1" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=2.2" />
 
   <script type="application/ld+json">
   {
@@ -542,7 +543,14 @@
       }
 
       if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
-      if (featuredStayMedia && stay.hero_image) featuredStayMedia.style.backgroundImage = `url('${stay.hero_image}')`;
+      let featIndexImage = stay.hero_image;
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
+        if (idxImgBlock && idxImgBlock.image) {
+          featIndexImage = idxImgBlock.image;
+        }
+      }
+      if (featuredStayMedia && featIndexImage) featuredStayMedia.style.backgroundImage = `url('${featIndexImage}')`;
 
       if (featuredStayMissing) featuredStayMissing.textContent = "";
     }
@@ -594,7 +602,14 @@
 
     const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
     const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
-    const image = stay.hero_image || "assets/img/sejour-camargue.jpg";
+    let indexImage = stay.hero_image;
+    if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+      const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
+      if (idxImgBlock && idxImgBlock.image) {
+        indexImage = idxImgBlock.image;
+      }
+    }
+    const image = indexImage || "assets/img/sejour-camargue.jpg";
 
     return `
       <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">

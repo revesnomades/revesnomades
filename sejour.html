@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <script>document.documentElement.classList.add("js");</script>
   <meta charset="utf-8">
   <title id="pageTitle">S&eacute;jour — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +17,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.1">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -82,7 +83,7 @@
     <div class="container sejour-content">
       <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 8px 0 6px;"></p>
 
-      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; margin: 0 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">Séjour</h1>
+      <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(38px, 6vw, 52px); font-weight: 300; margin: 0 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">Séjour</h1>
 
       <p class="sejour-meta reveal" id="stayMeta" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:15px;">
         5 jours · 4 nuits
@@ -737,11 +738,27 @@
         return;
       }
 
-      // Sépare les speakers, chef, galerie et autres blocs
-      const speakers   = blocks.filter(b => b.type === "speaker");
-      const chefBlocks = blocks.filter(b => b.type === "chef");
+      // Sépare les blocs
       const galleries  = blocks.filter(b => b.type === "gallery_2");
-      const others     = blocks.filter(b => !["speaker","chef","gallery_2"].includes(b.type));
+      const chefBlocks = blocks.filter(b => b.type === "chef");
+      
+      const accomBlocks = blocks.filter(b => 
+        (b.type === "image_text" || b.type === "text_image") && 
+        ((b.title || "").toLowerCase().includes("héberg") || b.layout === "image_right")
+      );
+      
+      const speakers = blocks.filter(b => 
+        b.type === "speaker" || 
+        ((b.type === "image_text" || b.type === "text_image") && 
+         ((b.title || "").toLowerCase().includes("intervenant") || (b.title || "").toLowerCase().includes("avec ")))
+      );
+
+      // Le reste (excluant galleries, accom, speakers, chef, et le bloc technique index_image)
+      const others = blocks.filter(b => 
+        !["gallery_2", "chef", "speaker", "index_image"].includes(b.type) && 
+        !accomBlocks.includes(b) && 
+        !speakers.includes(b)
+      );
 
       let html = "";
 
@@ -754,7 +771,41 @@
         }
       });
 
-      // 2. Autres blocs (image_text hébergement, etc.)
+      // 2. Hébergements (sous la galerie, SANS image)
+      accomBlocks.forEach(block => {
+        const safeTitle   = escapeHtml(block.title);
+        const safeText    = escapeHtml(block.text).replace(/\n/g, "<br>");
+        
+        const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
+        
+        const isDefaultTitle = safeTitle.toLowerCase().trim() === "hébergement" || safeTitle.toLowerCase().trim() === "l'hébergement";
+        const kickerHtml = isDefaultTitle ? "" : `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Hébergement</p>`;
+        const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
+
+        html += `
+          <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
+            <div style="margin-bottom:16px;">
+              ${kickerHtml}
+              ${titleHtml}
+            </div>
+            ${textPanel}
+          </article>
+        `;
+      });
+
+      // 3. Intervenants (après hébergement, sans titre H2)
+      if(speakers.length){
+        html += `<article style="margin-top: 100px;">
+          ${renderSpeakers(speakers)}
+        </article>`;
+      }
+
+      // 4. Cuisinier / Chef
+      if(chefBlocks.length){
+        html += `<article>${renderChef(chefBlocks[0])}</article>`;
+      }
+
+      // 5. Autres blocs
       others.forEach(block => {
         const safeTitle   = escapeHtml(block.title);
         const safeText    = escapeHtml(block.text).replace(/\n/g, "<br>");
@@ -767,70 +818,13 @@
             : "";
           html += `<article style="display:grid; gap:8px;">${imgFull}${safeCaption ? `<p class="small muted">${safeCaption}</p>` : ""}</article>`;
         } else if(block.type === "image_text" || block.type === "text_image"){
-          const isAccom = (block.title || "").toLowerCase().includes("héberg") || block.layout === "image_right";
-          const isSpeakerBlock = (block.title || "").toLowerCase().includes("intervenant") || (block.title || "").toLowerCase().includes("avec ");
-
-          if (isAccom) {
-            const imgStyle = `width:200px; height:300px; object-fit:cover; display:block; border-radius:4px;`;
-            const imagePanel = block.image
-              ? `<div class="accom-photo-wrapper" style="width:200px; flex-shrink:0;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Hébergement')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
-              : "";
-            const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
-            
-            const isDefaultTitle = safeTitle.toLowerCase().trim() === "hébergement" || safeTitle.toLowerCase().trim() === "l'hébergement";
-            const kickerHtml = isDefaultTitle ? "" : `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Hébergement</p>`;
-            const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
-
-            html += `
-              <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
-                <div class="accom-row">
-                  <!-- Photo -->
-                  ${imagePanel}
-                  <!-- Titre -->
-                  <div class="accom-title-block">
-                    ${kickerHtml}
-                    ${titleHtml}
-                  </div>
-                  <!-- Description -->
-                  ${textPanel}
-                </div>
-              </article>
-            `;
-          } else if (isSpeakerBlock) {
-            const imgStyle = `width:200px; height:300px; object-fit:cover; display:block; border-radius:4px;`;
-            const imagePanel = block.image
-              ? `<div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;"><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Intervenante')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
-              : "";
-            const textPanel = `<div class="speaker-bio speaker-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
-            
-            const isDefaultTitle = safeTitle.toLowerCase().trim().includes("intervenant");
-            const kickerHtml = isDefaultTitle ? "" : `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Intervenante</p>`;
-            const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
-
-            html += `
-              <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
-                <div class="speaker-row">
-                  <!-- Titre -->
-                  <div class="speaker-title-block">
-                    ${kickerHtml}
-                    ${titleHtml}
-                  </div>
-                  <!-- Biographie -->
-                  ${textPanel}
-                  <!-- Photo -->
-                  ${imagePanel}
-                </div>
-              </article>
-            `;
-          } else {
-            const imageFirst = block.type === "image_text" && block.layout !== "image_right";
-            const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
-            const imagePanel = block.image
-              ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
-              : "";
-            const textPanel = `<div class="accom-text-container">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
-            html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;
-          }
+          const imageFirst = block.type === "image_text" && block.layout !== "image_right";
+          const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
+          const imagePanel = block.image
+            ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
+            : "";
+          const textPanel = `<div class="accom-text-container">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
+          html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;
         } else if(block.type === "quote"){
           html += `<blockquote style="margin:0;border-left:2px solid var(--line);padding-left:14px;"><p style="margin:0;font-style:italic;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
         } else {

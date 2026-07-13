@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
@@ -901,13 +901,22 @@
           <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 2 : Visuels</h3>
           <p class="muted-small" style="margin:0 0 12px 0;">Ajoutez la photo principale et les images de la galerie.</p>
           <div>
-            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo principale (couverture) *</label>
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo principale de la page séjour (couverture) *</label>
             <div style="display:flex; gap:8px;">
               <input id="wizHeroImage" class="input" placeholder="URL ou importer ->" style="flex:1;" required>
               <input type="file" id="wizHeroFile" accept="image/*" style="display:none;">
               <button type="button" class="btn tiny on-light" id="btnUploadWizHero" style="padding:6px 12px; white-space:nowrap;">Importer un fichier</button>
             </div>
             <div id="wizHeroMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
+          <div style="margin-top:12px;">
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo pour le bandeau de l'index (carte page d'accueil) *</label>
+            <div style="display:flex; gap:8px;">
+              <input id="wizIndexImage" class="input" placeholder="URL ou importer ->" style="flex:1;" required>
+              <input type="file" id="wizIndexFile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny on-light" id="btnUploadWizIndex" style="padding:6px 12px; white-space:nowrap;">Importer un fichier</button>
+            </div>
+            <div id="wizIndexMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
           </div>
           <div style="margin-top:16px; border-top:1px dashed var(--line); padding-top:16px;">
             <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Images de la galerie</label>
@@ -2056,6 +2065,15 @@
       document.getElementById("wizDesc").value = stay.description || "";
       document.getElementById("wizHeroImage").value = stay.hero_image || "";
       
+      // Image de l'index
+      let indexImage = "";
+      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+        const idxBlock = stay.content_blocks.find(b => b.type === "index_image");
+        if (idxBlock) {
+          indexImage = idxBlock.image || "";
+        }
+      }
+      document.getElementById("wizIndexImage").value = indexImage || stay.hero_image || "";
       // Visuel
       wizGalList = [];
       if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
@@ -2405,6 +2423,17 @@
       }
     });
 
+    document.getElementById("btnUploadWizIndex")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizIndexFile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizIndexMsg"));
+          if (url) document.getElementById("wizIndexImage").value = url;
+        };
+      }
+    });
+
     document.getElementById("btnUploadWizGalFile")?.addEventListener("click", () => {
       const fileInput = document.getElementById("wizGalFile");
       if (fileInput) {
@@ -2572,8 +2601,8 @@
           return;
         }
       } else if(currentWizStep === 2){
-        if(!document.getElementById("wizHeroImage").value.trim()){
-          wizardErrorMsg.textContent = "Merci d'ajouter la photo principale (couverture).";
+        if(!document.getElementById("wizHeroImage").value.trim() || !document.getElementById("wizIndexImage").value.trim()){
+          wizardErrorMsg.textContent = "Merci d'ajouter la photo principale (couverture) et la photo pour l'index.";
           return;
         }
       }
@@ -2608,6 +2637,19 @@
       }
 
       const content_blocks = [];
+      const index_image = document.getElementById("wizIndexImage").value.trim();
+      if(index_image){
+        content_blocks.push({
+          id: `block_index_img_${Date.now()}`,
+          type: "index_image",
+          enabled: true,
+          title: "Image index",
+          text: "",
+          image: index_image,
+          image_alt: "Image index",
+          images: [], quote: "", caption: ""
+        });
+      }
       if(wizGalList.length > 0){
         content_blocks.push({
           id: `block_gal_${Date.now()}`,
