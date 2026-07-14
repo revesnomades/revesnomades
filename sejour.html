@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.4">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -110,8 +110,7 @@
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="programSection">
         <div style="margin-bottom:16px;">
-          <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">03. Programme</p>
-          <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">Le programme</h3>
+          <h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">03. Programme</h3>
         </div>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
@@ -644,8 +643,8 @@
             style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
         </div>`).join("");
       return `
-        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:150px 1fr; gap:16px; align-items:start;">
-          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:150px; flex-shrink:0;">
+        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:180px 1fr; gap:20px; align-items:start;">
+          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:180px; flex-shrink:0;">
             ${showArrows ? `
               <button type="button" class="gv-arrow gv-prev" data-viewer="${id}" aria-label="Précédent"
                 style="position:absolute; top:0; left:0; width:100%; height:32px; background:linear-gradient(to bottom, rgba(250,245,220,0.95), rgba(250,245,220,0)); border:none; color:var(--text); font-size:14px; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; opacity:0.5;">
@@ -783,13 +782,11 @@
         
         const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
-        const kickerHtml = `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">01. Hébergement</p>`;
-        const titleHtml = safeTitle ? `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle}</h3>` : "";
+        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. Hébergement</h3>`;
 
         html += `
           <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
             <div style="margin-bottom:16px;">
-              ${kickerHtml}
               ${titleHtml}
             </div>
             ${textPanel}
@@ -799,12 +796,10 @@
 
       // 3. Intervenants (après hébergement)
       if(speakers.length){
-        const kickerHtml = `<p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">02. Intervenant</p>`;
-        const titleHtml = `<h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">Les intervenants</h3>`;
+        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">02. Intervenant</h3>`;
         html += `
           <article class="speaker-section-wrapper" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0 0 0; margin-top:40px;">
             <div style="margin-bottom:16px;">
-              ${kickerHtml}
               ${titleHtml}
             </div>
             ${renderSpeakers(speakers)}
@@ -872,7 +867,7 @@
               setTimeout(updateLayout, 100);
               return;
             }
-            const count = Math.min(total, 5);
+            const count = Math.max(5, Math.min(total, 5));
             const gap = 8;
             const viewportH = count * thumbH + (count - 1) * gap;
             if (viewport) viewport.style.height = `${viewportH}px`;

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -15,7 +15,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.5">
 </head>
 <body class="on-light">
   <header class="nav" id="top">
@@ -67,10 +67,9 @@
         Les réponses aux questions les plus fréquentes avant de réserver un séjour Âmes Nomades.
       </p>
 
-      <div id="faqList" class="reveal" style="display:grid; gap:12px; margin-top:26px;">
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-          <div class="kicker">Chargement…</div>
-          <p class="sub" style="margin-top:8px;">Les questions fréquentes s’affichent ici.</p>
+      <div id="faqList" class="reveal faq-container" style="margin-top: 30px;">
+        <div class="faq-item" style="padding: 24px 0; text-align: center; border-top: 1px solid rgba(30, 31, 34, 0.1);">
+          <p class="sub" style="color: var(--muted); margin: 0;">Chargement des questions fréquentes…</p>
         </div>
       </div>
     </div>
@@ -180,20 +179,60 @@
     function renderFaq(items){
       if(!items.length){
         faqList.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-            <div class="kicker">FAQ</div>
-            <p class="sub" style="margin-top:8px;">Aucune question n’est disponible pour le moment.</p>
+          <div class="faq-item" style="padding: 24px 0; text-align: center;">
+            <p class="sub" style="color: var(--muted); margin: 0;">Aucune question n’est disponible pour le moment.</p>
           </div>
         `;
         return;
       }
 
-      faqList.innerHTML = items.map(item => `
-        <article style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
-          <h3 style="margin:0; font-size:18px;">${escapeHtml(item.question || "Question")}</h3>
-          <p class="sub" style="margin-top:8px;">${escapeHtml(item.answer || "")}</p>
-        </article>
+      faqList.classList.add("faq-container");
+      faqList.innerHTML = items.map((item, idx) => `
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false" data-target="faq_ans_${idx}">
+            <span>${escapeHtml(item.question || "Question")}</span>
+            <span class="faq-icon-wrapper">
+              <span class="faq-icon-line horizontal"></span>
+              <span class="faq-icon-line vertical"></span>
+            </span>
+          </button>
+          <div id="faq_ans_${idx}" class="faq-content">
+            <div class="faq-answer">
+              ${escapeHtml(item.answer || "").replace(/\n/g, "<br>")}
+            </div>
+          </div>
+        </div>
       `).join("");
+
+      // Add click event listeners for toggling
+      const triggers = faqList.querySelectorAll(".faq-trigger");
+      triggers.forEach(trigger => {
+        trigger.addEventListener("click", () => {
+          const item = trigger.closest(".faq-item");
+          const content = item.querySelector(".faq-content");
+          const isActive = item.classList.contains("active");
+
+          // Close all other items (accordion behavior)
+          faqList.querySelectorAll(".faq-item").forEach(otherItem => {
+            if (otherItem !== item) {
+              otherItem.classList.remove("active");
+              otherItem.querySelector(".faq-content").style.maxHeight = null;
+              otherItem.querySelector(".faq-trigger").setAttribute("aria-expanded", "false");
+            }
+          });
+
+          // Toggle current item
+          if (isActive) {
+            item.classList.remove("active");
+            content.style.maxHeight = null;
+            trigger.setAttribute("aria-expanded", "false");
+          } else {
+            item.classList.add("active");
+            content.style.maxHeight = content.scrollHeight + "px";
+            trigger.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
     }
 
     async function loadFaq(){
