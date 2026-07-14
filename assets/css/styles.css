@@ -1863,10 +1863,6 @@ footer.band.cream{
   object-fit: cover;
   object-position: center;
   display: block;
-  transition: transform 0.5s ease;
-}
-.gal-item:hover img {
-  transform: scale(1.04);
 }
 @media (max-width: 768px) {
   .gal-item {
