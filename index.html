@@ -294,7 +294,7 @@
         </div>
 
         <div class="about-founder reveal" data-delay="11">
-          <img src="assets/img/appoline.jpg" alt="Appoline" class="about-founder-img" loading="lazy" />
+          <img src="assets/img/appoline.webp" alt="Appoline" class="about-founder-img" loading="lazy" />
           <div class="about-founder-meta">
             <div class="about-founder-name">Appoline</div>
             <div class="about-founder-role">Fondatrice de Âmes Nomades</div>
@@ -770,12 +770,7 @@
           img.addEventListener("error", () => { measure(); });
         });
 
-        // Pause au survol
-        const wrapper = document.getElementById("galleryMarqueeWrapper");
-        if (wrapper) {
-          wrapper.addEventListener("mouseenter", () => { paused = true; });
-          wrapper.addEventListener("mouseleave", () => { paused = false; });
-        }
+        // Défilement continu sans arrêt au survol
 
         // Recalcule si redimensionnement
         window.addEventListener("resize", () => {
