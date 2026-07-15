@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.6">
 </head>
 
 <body class="on-light">
@@ -70,7 +70,7 @@
   <div style="border-top: 1px solid var(--line); padding: 30px 0 10px; margin-top: var(--navH); background: #faf8f5;">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(340px, 55vh, 560px); min-height: 320px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
-        <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+        <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="/assets/img/sejour-camargue.jpg" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
       </section>
     </div>
   </div>
@@ -276,8 +276,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
-  <script src="/assets/js/scroll-text-reveal.js"></script>
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/scroll-text-reveal.js?v=2.6"></script>
+  <script src="/assets/js/main.js?v=2.6"></script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
@@ -893,7 +893,9 @@
       stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
 
       if(stay.hero_image){
-        stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
+        stayHeroBg.src = stay.hero_image;
+      } else {
+        stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
       }
 
       const blocks = normalizeContentBlocks(stay.content_blocks);

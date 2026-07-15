@@ -289,6 +289,17 @@
         font-size: 42px;
       }
     }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
   </style>
 </head>
 
@@ -330,7 +341,8 @@
             <span>J’accepte de recevoir les informations Âmes Nomades et les prochaines ouvertures de séjours.</span>
           </label>
 
-          <input type="text" name="website" tabindex="-1" autocomplete="off"
+          <label for="maintenanceHoneypot" class="sr-only">Ne pas remplir ce champ si vous êtes un robot</label>
+          <input type="text" id="maintenanceHoneypot" name="website" tabindex="-1" autocomplete="off"
             style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
           <button class="btn block" type="submit">

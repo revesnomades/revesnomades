@@ -1,0 +1,16 @@
+# Âmes Nomades
+
+Site internet officiel de Âmes Nomades (https://amesnomades.com) — retraites et séjours bien-être en France, proposant la pratique sportive consciente (Pilates quotidien, yoga, randonnées), des soins (massages) et une alimentation saine.
+
+## Pages clés
+- [Page d'Accueil](/index.html) : Présentation générale, séjours à la une, témoignages, à propos et formulaire de contact.
+- [Page Séjour](/sejour.html) : Affichage d'un séjour spécifique avec son programme heure par heure, l'intervenant, l'hébergement, les inclusions/exclusions et l'inscription.
+- [Page FAQ](/faq.html) : FAQ moderne interactive expliquant le fonctionnement des inscriptions, logistique et politique de remboursement.
+- [Page Administration](/admin-stays.html) : Interface administrative sécurisée pour la gestion des séjours (Wizard étape par étape).
+- [Page Boutique / Shop](/boutique.html) : Boutique en ligne de produits éco-responsables et accessoires de sport.
+
+## Stack technique
+- Frontend statique déployé sur Netlify.
+- Supabase pour l'authentification des utilisateurs, le stockage des données des séjours et des médias (bucket stays).
+- DNS & Proxy Cloudflare.
+- Animations avancées avec GSAP & ScrollTrigger.

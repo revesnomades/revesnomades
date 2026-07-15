@@ -173,14 +173,16 @@
         return;
       }
 
-      // 2. Accessibilité : garantir une lecture fluide pour les lecteurs d'écran
-      if (!el.getAttribute("aria-label") && !el.closest("[aria-label]")) {
-        el.setAttribute("aria-label", rawText);
-      }
-
       // 3. Découpage du texte sans induire de Layout Shift (CLS)
       // On découpe en 'words,chars' pour préserver l'intégrité des mots et autoriser le wrapping
       const split = new SplitType(el, { types: "words,chars" });
+
+      // Accessibilité : insérer un élément sr-only contenant le texte original
+      // et masquer les éléments animés pour les lecteurs d'écran.
+      const srSpan = document.createElement("span");
+      srSpan.className = "sr-only";
+      srSpan.textContent = rawText;
+      el.appendChild(srSpan);
 
       // Lecture du type d'animation souhaité depuis les attributs data (ex: data-reveal-type="words")
       const revealType = el.dataset.revealType || CONFIG.defaultType;
@@ -190,7 +192,7 @@
         return;
       }
 
-      // Masquer les spans découpés aux lecteurs d'écran (qui liront l'aria-label du conteneur)
+      // Masquer les spans découpés aux lecteurs d'écran (qui liront le span sr-only)
       if (split.words && split.words.length) {
         split.words.forEach((word) => word.setAttribute("aria-hidden", "true"));
       }

@@ -1526,10 +1526,76 @@
       return allStays.find(s => s.id === id) || null;
     }
 
+    function resizeAndCompressImage(file, maxWidth, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  let newName = file.name;
+                  const lastDot = file.name.lastIndexOf('.');
+                  if (lastDot !== -1) {
+                    newName = file.name.substring(0, lastDot) + ".webp";
+                  } else {
+                    newName = file.name + ".webp";
+                  }
+                  const resizedFile = new File([blob], newName, {
+                    type: "image/webp",
+                    lastModified: Date.now()
+                  });
+                  resolve(resizedFile);
+                } else {
+                  reject(new Error("La compression de l'image a échoué."));
+                }
+              },
+              "image/webp",
+              quality
+            );
+          };
+          img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+      });
+    }
+
     async function uploadImageToStorage(file, folder = "general"){
       if(!file) throw new Error("Aucun fichier sélectionné.");
 
-      const safeName = file.name
+      let maxWidth = 1600;
+      if (folder === "gallery" || folder === "speaker" || folder === "chef" || folder === "accommodation" || folder === "general") {
+        maxWidth = 900;
+      }
+
+      let processedFile = file;
+      if (file.type.startsWith("image/")) {
+        try {
+          processedFile = await resizeAndCompressImage(file, maxWidth, 0.8);
+        } catch (e) {
+          console.warn("Échec du redimensionnement côté client, envoi du fichier original", e);
+        }
+      }
+
+      const safeName = processedFile.name
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -1539,8 +1605,8 @@
 
       const { error: uploadError } = await supabase.storage
         .from("stays")
-        .upload(filePath, file, {
-          cacheControl: "3600",
+        .upload(filePath, processedFile, {
+          cacheControl: "31536000",
           upsert: false
         });
 
@@ -2398,9 +2464,23 @@
       if (!file) return null;
       if (msgEl) msgEl.textContent = "Importation en cours…";
       try {
-        const safeName = file.name.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
+        let maxWidth = 1600;
+        if (fileInputEl.id === "wizGalFile" || fileInputEl.id === "wizSpkFile" || fileInputEl.id === "wizChefFile" || fileInputEl.id === "wizAccomFile") {
+          maxWidth = 900;
+        }
+
+        let processedFile = file;
+        if (file.type.startsWith("image/")) {
+          try {
+            processedFile = await resizeAndCompressImage(file, maxWidth, 0.8);
+          } catch (e) {
+            console.warn("Échec du redimensionnement côté client, envoi du fichier original", e);
+          }
+        }
+
+        const safeName = processedFile.name.toLowerCase().replace(/[^a-z0-9.\-_]/g, "-");
         const filePath = `wizard/${Date.now()}-${safeName}`;
-        const { error: upErr } = await supabase.storage.from("stays").upload(filePath, file, { cacheControl: "3600", upsert: false });
+        const { error: upErr } = await supabase.storage.from("stays").upload(filePath, processedFile, { cacheControl: "31536000", upsert: false });
         if (upErr) throw upErr;
         const { data: pubData } = supabase.storage.from("stays").getPublicUrl(filePath);
         if (msgEl) msgEl.textContent = "✅ Importé avec succès !";

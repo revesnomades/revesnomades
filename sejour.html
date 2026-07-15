@@ -17,10 +17,51 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2.5">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- Google Fonts & Stylesheets Asynchrones -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
+
+  <link rel="preload" href="/assets/css/styles.css?v=2.6" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/assets/css/styles.css?v=2.6"></noscript>
+
+  <style>
+    /* Styles critiques inlinés pour éviter le FOUC */
+    :root {
+      --cream: #faf5dc;
+      --white: #fffdf3;
+      --text: #1e1f22;
+      --muted: #6c7078;
+      --line: rgba(30,31,34,.16);
+      --navBg: rgba(14, 15, 17, .24);
+      --navH: 110px;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      color: var(--text);
+      background: var(--white);
+    }
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--navBg);
+      height: var(--navH);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
 </head>
 
 <body class="on-light">
@@ -37,7 +78,7 @@
       </nav>
 
       <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
-        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
+        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" width="40" height="40" />
         <span>ÂmesNomades</span>
       </a>
 
@@ -74,7 +115,7 @@
   <div style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
-        <div class="sejour-hero-bg subtle-zoom" id="stayHeroBg" style="background-image:url('/assets/img/sejour-camargue.jpg'); background-position:center 65%;"></div>
+        <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="/assets/img/sejour-camargue.jpg" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
       </section>
     </div>
   </div>
@@ -283,8 +324,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
-  <script src="/assets/js/scroll-text-reveal.js"></script>
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/scroll-text-reveal.js?v=2.6"></script>
+  <script src="/assets/js/main.js?v=2.6"></script>
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
@@ -639,7 +680,7 @@
       const thumbs = images.map((url, i) => `
         <div class="gv-thumb${i === 0 ? " active" : ""}" data-src="${escapeHtml(url)}" data-viewer="${id}" data-idx="${i}"
           style="cursor:pointer; aspect-ratio:3/2; overflow:hidden; border-radius:3px; border:2px solid ${i === 0 ? "var(--text)" : "transparent"}; transition:border-color 0.2s; flex-shrink:0;">
-          <img src="${escapeHtml(url)}" alt="Aperçu ${i+1}" loading="lazy"
+          <img src="${escapeHtml(url)}" alt="Aperçu ${i+1}" loading="lazy" width="180" height="120"
             style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
         </div>`).join("");
       return `
@@ -664,7 +705,7 @@
             ` : ""}
           </div>
           <div class="gv-main" style="border-radius:4px; overflow:hidden; background:#f0ebde; position:relative;">
-            <img id="${id}_main" src="${escapeHtml(images[0])}" alt="Photo séjour"
+            <img id="${id}_main" src="${escapeHtml(images[0])}" alt="Photo séjour" width="900" height="600"
               style="width:100%; height:100%; object-fit:cover; display:block; transition:opacity 0.3s ease;">
           </div>
         </div>`;
@@ -697,7 +738,7 @@
               </div>
               <!-- Photo -->
               <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
-                ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+                ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300">` : ""}
               </div>
             </div>
           </div>`;
@@ -727,7 +768,7 @@
             </div>
             <!-- Photo -->
             <div class="chef-photo-wrapper" style="width:200px; flex-shrink:0;">
-              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}">` : ""}
+              ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300">` : ""}
             </div>
           </div>
         </div>`;
@@ -1017,7 +1058,7 @@
       otherStaysTrack.innerHTML = publishedStays.map(stay => `
         <article class="other-stay-card">
           <a href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" class="other-stay-link">
-            <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/sejour-camargue.jpg")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy">
+            <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/sejour-camargue.jpg")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy" width="340" height="220">
             <div class="other-stay-body">
               <h3>${escapeHtml(stay.title || "Séjour Âmes Nomades")}</h3>
               ${stay.location ? `<p class="other-stay-location">${escapeHtml(stay.location)}</p>` : ""}
@@ -1204,7 +1245,17 @@
       stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
 
       if(stay.hero_image){
-        stayHeroBg.style.backgroundImage = `url('${stay.hero_image}')`;
+        stayHeroBg.src = stay.hero_image;
+        
+        // Préchargement dynamique à haute priorité pour l'image LCP
+        const link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = stay.hero_image;
+        link.fetchPriority = "high";
+        document.head.appendChild(link);
+      } else {
+        stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
       }
 
       const blocks = normalizeContentBlocks(stay.content_blocks);
