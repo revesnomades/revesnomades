@@ -2222,9 +2222,53 @@
       stayWizardModal.classList.add("active");
     }
 
+    function getStoragePathFromUrl(url) {
+      if (!url) return null;
+      const marker = "/public/stays/";
+      const idx = url.indexOf(marker);
+      if (idx !== -1) {
+        return decodeURIComponent(url.substring(idx + marker.length));
+      }
+      return null;
+    }
+
+    function findStaysBucketUrls(obj, urls = []) {
+      if (!obj) return urls;
+      if (typeof obj === "string") {
+        if (obj.startsWith("http") && obj.includes("/public/stays/")) {
+          urls.push(obj);
+        }
+      } else if (Array.isArray(obj)) {
+        obj.forEach(item => findStaysBucketUrls(item, urls));
+      } else if (typeof obj === "object") {
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            findStaysBucketUrls(obj[key], urls);
+          }
+        }
+      }
+      return urls;
+    }
+
     async function deleteStay(id){
       const ok = confirm("Supprimer ce séjour ?");
       if(!ok) return;
+
+      const stay = stayById(id);
+      if (stay) {
+        const urls = findStaysBucketUrls(stay);
+        const paths = urls.map(getStoragePathFromUrl).filter(Boolean);
+        if (paths.length > 0) {
+          try {
+            const { error: delStorageErr } = await supabase.storage.from("stays").remove(paths);
+            if (delStorageErr) {
+              console.warn("Erreur de suppression des images du séjour dans le storage:", delStorageErr);
+            }
+          } catch (storageErr) {
+            console.warn("Erreur lors de la suppression des images du séjour:", storageErr);
+          }
+        }
+      }
 
       const { error } = await supabase.from("stays").delete().eq("id", id);
 
