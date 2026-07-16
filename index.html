@@ -198,11 +198,11 @@
   </header>
 
   <main>
-  <section class="hero hero-left">
-    <div class="hero-bg parallax-bg" id="homeHeroBg" style="background-image:url('assets/img/hero-1.webp');"></div>
-    <div class="hero-overlay"></div>
+  <section class="hero hero-left" style="position: relative; height: 100vh; min-height: 100vh; overflow: hidden; background: #0e0f11;">
+    <div class="hero-bg parallax-bg" id="homeHeroBg" style="background-image:url('assets/img/hero-1.webp'); position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+    <div class="hero-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,.14); z-index: 1;"></div>
 
-    <div class="hero-content">
+    <div class="hero-content" style="position: absolute; left: clamp(18px, 5vw, 84px); bottom: clamp(50px, 14vh, 120px); max-width: 640px; text-align: left; z-index: 2; color: rgba(255,255,255,.92);">
       <h1 class="reveal" data-delay="0" style="font-family:'SegoCustom', serif; font-size: clamp(18px, 2.4vw, 30px); font-weight: 300; line-height: 1.25; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 520px; text-transform: none;">Partir pour mieux se retrouver.</h1>
 
       <div class="actions reveal" data-delay="1">
