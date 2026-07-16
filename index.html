@@ -37,6 +37,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="preload" as="image" href="assets/img/hero-1.webp" fetchpriority="high">
+  <link rel="preload" href="/assets/sego.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Google Fonts & Stylesheets Asynchrones -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -48,7 +49,7 @@
   <noscript><link rel="stylesheet" href="assets/css/styles.css?v=2.6"></noscript>
 
   <style>
-    /* Styles critiques inlinés pour éviter le FOUC */
+    /* Styles critiques inlinés pour éviter le FOUC et le CLS */
     :root {
       --cream: #faf5dc;
       --white: #fffdf3;
@@ -71,6 +72,31 @@
       z-index: 100;
       background: var(--navBg);
       height: var(--navH);
+    }
+    .nav-inner {
+      height: var(--navH);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+    }
+    .nav-left, .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand img {
+      display: none !important;
     }
     .hero {
       min-height: 100vh;
@@ -138,7 +164,7 @@
       </nav>
 
       <a class="brand" href="index.html" aria-label="Accueil Âmes Nomades">
-        <img src="assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" />
+        <img src="assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" width="594" height="420" style="display: none;" />
         <span>ÂmesNomades</span>
       </a>
 
@@ -495,7 +521,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
-  <script src="assets/js/scroll-text-reveal.js?v=2.6"></script>
+  <script src="assets/js/scroll-text-reveal.js?v=2.7"></script>
   <script src="assets/js/main.js?v=2.6"></script>
 
   <script type="module">

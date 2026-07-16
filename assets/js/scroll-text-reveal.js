@@ -345,11 +345,35 @@
       window.addEventListener("resize", handleResize, { passive: true });
     };
 
-    // Lance directement car le script est chargé après le DOM et pour éliminer toute latence
+    const loadAndStart = () => {
+      let started = false;
+      const done = () => {
+        if (started) return;
+        started = true;
+        startApp();
+      };
+
+      // Timeout de sécurité de 1.2s pour ne pas bloquer si les polices tardent
+      const timeoutId = setTimeout(done, 1200);
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          clearTimeout(timeoutId);
+          done();
+        }).catch(() => {
+          clearTimeout(timeoutId);
+          done();
+        });
+      } else {
+        clearTimeout(timeoutId);
+        done();
+      }
+    };
+
     if (document.readyState === "complete" || document.readyState === "interactive") {
-      startApp();
+      loadAndStart();
     } else {
-      window.addEventListener("DOMContentLoaded", startApp);
+      window.addEventListener("DOMContentLoaded", loadAndStart);
     }
   }
 
