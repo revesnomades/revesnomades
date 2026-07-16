@@ -1,6 +1,6 @@
 # Âmes Nomades
 
-Site internet officiel de Âmes Nomades (https://amesnomades.com) — retraites et séjours bien-être en France, proposant la pratique sportive consciente (Pilates quotidien, yoga, randonnées), des soins (massages) et une alimentation saine.
+Site internet officiel d'Âmes Nomades (https://amesnomades.com) — retraites et séjours bien-être en France, proposant la pratique sportive consciente (Pilates quotidien, yoga, randonnées), des soins (massages) et une alimentation saine.
 
 ## Pages clés
 - [Page d'Accueil](/index.html) : Présentation générale, séjours à la une, témoignages, à propos et formulaire de contact.
