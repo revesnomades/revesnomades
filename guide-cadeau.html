@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Recevez votre guide en cadeau — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Recevez votre guide bien-être en cadeau.">
+  <link rel="canonical" href="https://amesnomades.com/guide-cadeau.html">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2.6">
+  
+  <style>
+    body {
+      background-color: var(--cream, #faf5dc) !important;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text, #1e1f22);
+    }
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .guide-card {
+      background: var(--white, #fffdf3);
+      border: 1px solid var(--line, rgba(30, 31, 34, 0.08));
+      border-radius: 4px;
+      padding: clamp(30px, 6vw, 60px);
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .guide-card h2 {
+      font-size: clamp(20px, 3vw, 26px);
+      margin-bottom: 24px;
+      font-weight: 400;
+    }
+    .guide-card .sub-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .guide-card .input {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      padding: 12px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .guide-card .input:focus {
+      outline: none;
+      border-color: var(--text);
+    }
+    .guide-card .btn {
+      width: 100%;
+      background: var(--text);
+      color: var(--white);
+      border: 1px solid var(--text);
+      padding: 14px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: bold;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: background 0.2s, color 0.2s;
+    }
+    .guide-card .btn:hover {
+      background: transparent;
+      color: var(--text);
+    }
+    .form-msg {
+      margin-top: 20px;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+    .newsletter-legal {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 24px;
+      line-height: 1.5;
+    }
+    .newsletter-legal a {
+      color: var(--text);
+      text-decoration: underline;
+    }
+    .brand-header {
+      font-family: 'SegoCustom', 'Georgia', serif;
+      font-size: clamp(24px, 4.5vw, 38px);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="brand-header">
+    Âmes Nomades
+  </div>
+
+  <div class="main-container">
+    <div class="guide-card">
+      <div class="sub-title">Un premier pas vers l'évasion</div>
+      <h2>Recevez votre guide en cadeau&nbsp;!</h2>
+
+      <form id="newsletterForm" novalidate>
+        <input class="input" name="lastname" placeholder="Nom" required autocomplete="family-name" />
+        <input class="input" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
+        <input class="input" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
+        
+        <label for="newsletterHoneypot" class="sr-only">Ne pas remplir ce champ si vous êtes un robot</label>
+        <input type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        
+        <button class="btn" type="submit">Recevoir mon guide</button>
+      </form>
+
+      <div id="newsletterMsg" class="form-msg"></div>
+      
+      <p class="newsletter-legal">
+        En cliquant sur recevoir mon guide vous acceptez notre
+        <a href="/politique-confidentialite.html" target="_blank">Politique de confidentialité</a>
+        et êtes inscrits à notre newsletter.
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "/assets/js/supabaseClient.js";
+
+    const form = document.getElementById("newsletterForm");
+    const msgDiv = document.getElementById("newsletterMsg");
+
+    function show(html) {
+      if (msgDiv) {
+        msgDiv.innerHTML = html || "";
+      }
+    }
+
+    let newsletterLastSubmit = 0;
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      show("");
+
+      const fd = new FormData(form);
+      if (String(fd.get("website") || "").trim()) { form.reset(); show("Merci !"); return; }
+      
+      const now = Date.now();
+      if (now - newsletterLastSubmit < 30000) { show("Merci de patienter avant de soumettre à nouveau."); return; }
+      newsletterLastSubmit = now;
+
+      const firstname = String(fd.get("firstname") || "").trim();
+      const lastname = String(fd.get("lastname") || "").trim();
+      const email = String(fd.get("email") || "").trim().toLowerCase();
+
+      if(!firstname || !lastname || !email){
+        show("<span style='color:#d9534f;'>Merci de renseigner votre nom, votre prénom et votre email.</span>");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ firstname, lastname, email }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if(!res.ok){
+          console.warn("newsletter-signup error:", data);
+          show("<span style='color:#d9534f;'>Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.</span>");
+          return;
+        }
+
+        if(data.status === "already"){
+          show(`💌 Vous êtes déjà inscrit(e).<br>
+            <a href="assets/pdf/5%20fa%C3%A7ons%20de%20reprendre%20du%20temps%20pour%20toi.pdf" target="_blank" style="text-decoration:underline; font-weight:600; color:var(--text);">
+              Télécharger le guide
+            </a>`);
+          return;
+        }
+
+        show(`🌿 Merci ${firstname}, votre guide est prêt !<br>
+          <a href="assets/pdf/5%20fa%C3%A7ons%20de%20reprendre%20du%20temps%20pour%20toi.pdf" target="_blank" style="text-decoration:underline; font-weight:600; color:var(--text);">
+            Télécharger le guide
+          </a>`);
+
+        form.reset();
+
+      } catch (err) {
+        console.error(err);
+        show("<span style='color:#d9534f;'>Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.</span>");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -302,6 +302,16 @@ serve(async (req) => {
     if (dbError) {
       if (dbError.code === "23505") {
         status = "already";
+        return json(
+          {
+            ok: true,
+            status,
+            brevoContactOk: true,
+            brevoMailOk: true,
+          },
+          200,
+          origin
+        );
       } else {
         return json(
           { error: "DB error", details: dbError.message, code: dbError.code },
