@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
               <p>Et si un jour tu as envie d’aller plus loin, les retraites Âmes Nomades seront là pour t’offrir cette même sensation, mais pendant quelques jours.</p>
               
               <div class="cta-container">
-                <a href="https://amesnomades.com/assets/pdf/guide.pdf" target="_blank" class="btn">Télécharger mon guide</a>
+                <a href="https://amesnomades.com/assets/pdf/5%20fa%C3%A7ons%20de%20reprendre%20du%20temps%20pour%20toi.pdf" target="_blank" class="btn">Télécharger mon guide</a>
               </div>
               
               <p>Je te souhaite une belle lecture.</p>
