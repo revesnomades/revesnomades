@@ -11,7 +11,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
   <link rel="stylesheet" href="/assets/css/styles.css" />
@@ -1016,23 +1016,37 @@
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
 
+            const createResizedFile = (blob, format) => {
+              let ext = format === "image/webp" ? ".webp" : ".jpg";
+              let newName = file.name;
+              const lastDot = file.name.lastIndexOf('.');
+              if (lastDot !== -1) {
+                newName = file.name.substring(0, lastDot) + ext;
+              } else {
+                newName = file.name + ext;
+              }
+              return new File([blob], newName, {
+                type: format,
+                lastModified: Date.now()
+              });
+            };
+
             canvas.toBlob(
               (blob) => {
                 if (blob) {
-                  let newName = file.name;
-                  const lastDot = file.name.lastIndexOf('.');
-                  if (lastDot !== -1) {
-                    newName = file.name.substring(0, lastDot) + ".webp";
-                  } else {
-                    newName = file.name + ".webp";
-                  }
-                  const resizedFile = new File([blob], newName, {
-                    type: "image/webp",
-                    lastModified: Date.now()
-                  });
-                  resolve(resizedFile);
+                  resolve(createResizedFile(blob, "image/webp"));
                 } else {
-                  reject(new Error("La compression de l'image a échoué."));
+                  canvas.toBlob(
+                    (jpegBlob) => {
+                      if (jpegBlob) {
+                        resolve(createResizedFile(jpegBlob, "image/jpeg"));
+                      } else {
+                        reject(new Error("La compression de l'image a échoué."));
+                      }
+                    },
+                    "image/jpeg",
+                    quality
+                  );
                 }
               },
               "image/webp",
