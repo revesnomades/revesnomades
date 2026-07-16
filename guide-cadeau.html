@@ -219,6 +219,19 @@
         show("<span style='color:#d9534f;'>Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.</span>");
       }
     });
+
+    // ✅ Sécurité des images : empêcher clic droit et glisser-déposer sur les images
+    document.addEventListener("contextmenu", (e) => {
+      if (e.target.tagName === "IMG") {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    document.addEventListener("dragstart", (e) => {
+      if (e.target.tagName === "IMG") {
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>

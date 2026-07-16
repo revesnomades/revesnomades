@@ -228,4 +228,17 @@
       onScroll();
     }
   }
+
+  // ✅ Sécurité des images : empêcher clic droit et glisser-déposer sur les images
+  document.addEventListener("contextmenu", (e) => {
+    if (e.target.tagName === "IMG") {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener("dragstart", (e) => {
+    if (e.target.tagName === "IMG") {
+      e.preventDefault();
+    }
+  }, { passive: false });
 })();

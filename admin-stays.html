@@ -14,6 +14,10 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
+  <!-- Cropper.js CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
   <link rel="stylesheet" href="/assets/css/styles.css" />
 
   <style>
@@ -2588,14 +2592,113 @@
       }
     });
 
-    // ── SPEAKER : upload photo ──
+    let currentCropper = null;
+
+    function openCropperModal(file, onConfirm, onCancel) {
+      const modal = document.getElementById("cropModal");
+      const imgPreview = document.getElementById("cropImagePreview");
+      const confirmBtn = document.getElementById("btnConfirmCrop");
+      const cancelBtn = document.getElementById("btnCancelCrop");
+      const cancelBtn2 = document.getElementById("btnCancelCrop2");
+
+      if (!modal || !imgPreview || !confirmBtn) return;
+
+      if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imgPreview.src = e.target.result;
+        modal.style.display = "flex";
+
+        currentCropper = new Cropper(imgPreview, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 0.85,
+          responsive: true,
+          restore: false,
+          guides: true,
+          center: true,
+          highlight: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          toggleDragModeOnDblclick: false,
+        });
+      };
+      reader.readAsDataURL(file);
+
+      const cleanup = () => {
+        modal.style.display = "none";
+        if (currentCropper) {
+          currentCropper.destroy();
+          currentCropper = null;
+        }
+        const newConfirm = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+        
+        const newCancel = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+        const newCancel2 = cancelBtn2.cloneNode(true);
+        cancelBtn2.parentNode.replaceChild(newCancel2, cancelBtn2);
+      };
+
+      confirmBtn.addEventListener("click", () => {
+        if (!currentCropper) return;
+        
+        const canvas = currentCropper.getCroppedCanvas({
+          width: 500,
+          height: 500,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: "high",
+        });
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            let originalName = file.name || "intervenant.jpg";
+            const lastDot = originalName.lastIndexOf(".");
+            let baseName = lastDot !== -1 ? originalName.substring(0, lastDot) : originalName;
+            const croppedFile = new File([blob], `${baseName}-cropped.webp`, {
+              type: "image/webp",
+              lastModified: Date.now(),
+            });
+            onConfirm(croppedFile);
+          } else {
+            alert("Erreur lors de la génération de l'image recadrée.");
+          }
+          cleanup();
+        }, "image/webp", 0.85);
+      });
+
+      const handleCancel = () => {
+        if (onCancel) onCancel();
+        cleanup();
+      };
+
+      cancelBtn.addEventListener("click", handleCancel);
+      cancelBtn2.addEventListener("click", handleCancel);
+    }
+
+    // ── SPEAKER : upload photo avec recadrage ──
     document.getElementById("btnUploadWizSpk")?.addEventListener("click", async () => {
       const fileInput = document.getElementById("wizSpkFile");
       if (fileInput) {
+        fileInput.value = "";
         fileInput.click();
         fileInput.onchange = async () => {
-          const url = await uploadWizFile(fileInput, document.getElementById("wizSpkPhotoMsg"));
-          if (url) document.getElementById("wizSpkPhoto").value = url;
+          const file = fileInput.files?.[0];
+          if (!file) return;
+
+          openCropperModal(file, async (croppedFile) => {
+            const tempInput = {
+              files: [croppedFile],
+              id: "wizSpkFile"
+            };
+            const url = await uploadWizFile(tempInput, document.getElementById("wizSpkPhotoMsg"));
+            if (url) document.getElementById("wizSpkPhoto").value = url;
+          });
         };
       }
     });
@@ -2608,20 +2711,29 @@
       if (!name) { alert("Veuillez renseigner le nom de l'intervenant."); return; }
       wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
       renderWizSpeakers();
-      // Réinitialise le formulaire
       if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = "";
       if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = "";
       if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = "";
     });
 
-    // ── CHEF : upload photo ──
+    // ── CHEF : upload photo avec recadrage ──
     document.getElementById("btnUploadWizChef")?.addEventListener("click", async () => {
       const fileInput = document.getElementById("wizChefFile");
       if (fileInput) {
+        fileInput.value = "";
         fileInput.click();
         fileInput.onchange = async () => {
-          const url = await uploadWizFile(fileInput, document.getElementById("wizChefPhotoMsg"));
-          if (url) document.getElementById("wizChefPhoto").value = url;
+          const file = fileInput.files?.[0];
+          if (!file) return;
+
+          openCropperModal(file, async (croppedFile) => {
+            const tempInput = {
+              files: [croppedFile],
+              id: "wizChefFile"
+            };
+            const url = await uploadWizFile(tempInput, document.getElementById("wizChefPhotoMsg"));
+            if (url) document.getElementById("wizChefPhoto").value = url;
+          });
         };
       }
     });
@@ -3243,6 +3355,25 @@
       }
     });
   </script>
+
+  <!-- Modal de Recadrage d'Image -->
+  <div id="cropModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:var(--white, #fffdf3); border-radius:6px; border:1px solid var(--line); max-width:480px; width:100%; display:flex; flex-direction:column; box-shadow:var(--shadow); overflow:hidden;">
+      <div style="padding:16px; border-bottom:1px solid var(--line); font-family:'SegoCustom', serif; font-size:16px; font-weight:600; display:flex; justify-content:space-between; align-items:center; color:var(--text);">
+        <span>Cadrer la photo</span>
+        <button type="button" id="btnCancelCrop" style="background:transparent; border:none; font-size:20px; cursor:pointer; color:var(--text);">✕</button>
+      </div>
+      <div style="padding:16px; flex:1; display:flex; align-items:center; justify-content:center; background:#faf5dc; overflow:hidden; position:relative;">
+        <div style="width:100%; height:320px; overflow:hidden; width: 100%;">
+          <img id="cropImagePreview" style="max-width:100%; display:block;" alt="Aperçu">
+        </div>
+      </div>
+      <div style="padding:16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:10px; background:var(--white, #fffdf3);">
+        <button type="button" class="btn" id="btnCancelCrop2" style="background:transparent; border:1px solid var(--line); font-size:12px; padding:8px 16px;">Annuler</button>
+        <button type="button" class="btn on-light" id="btnConfirmCrop" style="font-size:12px; padding:8px 16px;">Valider</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
