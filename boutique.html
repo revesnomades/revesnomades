@@ -398,7 +398,7 @@
 
             <div class="shop-image-hover">
               <div style="font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">${p.name}</div>
-              <div style="font-size:15px; font-weight:600; margin-top:4px;">${p.price} €</div>
+              <div style="font-size:15px; font-weight:600; margin-top:4px;">${(Number(p.price) || 0).toFixed(2)} €</div>
               <div style="font-size:12.5px; margin-top:6px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; opacity:0.95;">${p.description || "Aucune description pour le moment."}</div>
               ${p.delivery_info ? `<div style="font-size:11.5px; margin-top:6px; opacity:0.9;">📦 ${p.delivery_info}</div>` : ''}
 
@@ -413,7 +413,10 @@
             </div>
           </div>
           <div class="shop-title">
-            ${p.name} — <span style="font-weight:500; color:var(--muted);">${p.price} €</span>
+            ${p.name}
+          </div>
+          <div class="shop-price" style="font-size:13.5px; font-weight:500; color:var(--muted); margin-top:4px;">
+            ${(Number(p.price) || 0).toFixed(2)} €
           </div>
           ${p.delivery_info ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
           ${isSoldOut ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>` : ''}
