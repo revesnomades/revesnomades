@@ -15,9 +15,15 @@
   <style>
     .shop-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
       margin-top: 36px;
+    }
+    @media (min-width: 768px) {
+      .shop-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
     }
     @media (min-width: 1024px) {
       .shop-grid {
@@ -37,7 +43,6 @@
       position: relative;
       width: 100%;
       aspect-ratio: 4 / 5;
-      min-height: 240px;
       background-size: cover;
       background-position: center;
       background-color: var(--line);
