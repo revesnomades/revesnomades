@@ -1070,6 +1070,10 @@ footer.band.cream{
   letter-spacing: .02em;
   text-transform: none;
   opacity: .95;
+  white-space: normal;
+  line-height: 1.4;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 /* mini bouton */

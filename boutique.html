@@ -89,11 +89,17 @@
       font-size: 12.5px;
       line-height: 1.45;
       margin-top: 4px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .shop-desc.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
     }
     .shop-price {
       font-size: 14.5px;
@@ -438,13 +444,28 @@
           <div class="shop-price" style="font-size:13.5px; font-weight:500; color:var(--muted); margin-top:4px;">
             ${(Number(p.price) || 0).toFixed(2)} €
           </div>
-          ${p.description ? `<div class="shop-desc">${p.description}</div>` : ''}
+          ${p.description ? `
+            <div class="shop-desc" id="desc-${p.id}">${p.description}</div>
+            ${p.description.length > 70 ? `<button type="button" class="btn-toggle-desc" style="background:none; border:none; padding:0; margin-top:2px; margin-bottom:6px; font-size:11.5px; font-weight:600; color:var(--text); text-decoration:underline; cursor:pointer;" onclick="window.toggleProductDesc('${p.id}', this)">Voir plus +</button>` : ''}
+          ` : ''}
           ${p.delivery_info ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
           ${isSoldOut ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>` : ''}
         </div>
         `;
       }).join('');
     }
+
+    window.toggleProductDesc = (id, btn) => {
+      const descEl = document.getElementById("desc-" + id);
+      if (!descEl) return;
+      if (descEl.classList.contains("expanded")) {
+        descEl.classList.remove("expanded");
+        btn.textContent = "Voir plus +";
+      } else {
+        descEl.classList.add("expanded");
+        btn.textContent = "Voir moins -";
+      }
+    };
 
     filterCategory?.addEventListener("change", renderProducts);
     sortProducts?.addEventListener("change", renderProducts);

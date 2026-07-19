@@ -562,12 +562,30 @@
 
     function formatDateRange(start, end) {
       if (!start && !end) return "Dates à annoncer";
+      if (start && !end) {
+        const s = new Date(start + "T00:00:00");
+        return s.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      }
+      if (!start && end) {
+        const e = new Date(end + "T00:00:00");
+        return e.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      }
+      const s = new Date(start + "T00:00:00");
+      const e = new Date(end + "T00:00:00");
+      const sDay = s.getDate();
+      const eDay = e.getDate();
+      const sMonth = s.toLocaleDateString("fr-FR", { month: "long" });
+      const eMonth = e.toLocaleDateString("fr-FR", { month: "long" });
+      const sYear = s.getFullYear();
+      const eYear = e.getFullYear();
 
-      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-
-      if (startText && endText) return `${startText} au ${endText}`;
-      return startText || endText || "Dates à annoncer";
+      if (sMonth === eMonth && sYear === eYear) {
+        return `Du ${sDay} au ${eDay} ${sMonth} ${sYear}`;
+      }
+      if (sYear === eYear) {
+        return `Du ${sDay} ${sMonth} au ${eDay} ${eMonth} ${sYear}`;
+      }
+      return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
     function getDurationLabel(start, end) {
