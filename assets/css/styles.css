@@ -387,6 +387,14 @@ html.js .text-reveal.reveal {
   min-height: 480px;
   background-size: cover;
   background-position: center;
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.stay-band .stay-media:hover{
+  opacity: 0.94;
+  filter: brightness(1.02);
 }
 .stay-band .stay-copy{
   min-height: 480px;
@@ -411,6 +419,25 @@ html.js .text-reveal.reveal {
 .title{ font-size: clamp(22px, 2.2vw, 34px); }
 .sub{ margin-top: 10px; color: var(--muted); max-width: 62ch; }
 .actions{ margin-top: 18px; }
+.btn-arrow-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 38px;
+  border-radius: 9999px;
+  border: 1.8px solid var(--text);
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.btn-arrow-pill:hover {
+  transform: translateX(4px);
+  background: var(--text);
+  color: var(--white);
+}
 .missing{ margin-top: 12px; font-size: 12.5px; color: var(--muted); }
 
 .trust-grid{
@@ -1258,6 +1285,15 @@ footer.band.cream{
   #sejours .stay-band .stay-copy .btn:hover{
     background:#fff !important;
     color:#000 !important;
+  }
+  #sejours .stay-band .stay-copy .btn-arrow-pill{
+    color: rgba(255,255,255,.95) !important;
+    border-color: rgba(255,255,255,.85) !important;
+    background: rgba(255,255,255,.08) !important;
+  }
+  #sejours .stay-band .stay-copy .btn-arrow-pill:hover{
+    background: rgba(255,255,255,.95) !important;
+    color: #1e1f22 !important;
   }
   #sejours .stay-band.reverse .stay-media{ order: 1 !important; }
   #sejours .stay-band.reverse .stay-copy{ order: 2 !important; }

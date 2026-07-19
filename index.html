@@ -228,7 +228,7 @@
   <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
     <div class="stay-band stay-band-compact" id="featuredStayBand">
-      <div class="stay-media" id="featuredStayMedia" style="background-image:url('/assets/img/sejour-camargue.jpg');"></div>
+      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg');"></a>
 
       <div class="stay-copy">
         <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px; margin-bottom:2px;">— &nbsp; —</div>
@@ -246,7 +246,12 @@
         </p>
 
         <div class="actions reveal" data-delay="5">
-          <a class="btn tiny on-light" id="featuredStayLink" href="/sejour.html">Réserver</a>
+          <a class="btn-arrow-pill" id="featuredStayLink" href="/sejour.html" aria-label="Découvrir le séjour">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <polyline points="13 5 20 12 13 19"></polyline>
+            </svg>
+          </a>
         </div>
 
         <div class="missing reveal" data-delay="6" id="featuredStayMissing"></div>
@@ -628,7 +633,10 @@
         featuredStayKicker.textContent = '';
       }
 
-      if (featuredStayLink) featuredStayLink.href = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+      const stayUrl = `/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+      if (featuredStayLink) featuredStayLink.href = stayUrl;
+      if (featuredStayMedia) featuredStayMedia.href = stayUrl;
+
       let featIndexImage = stay.hero_image;
       if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
         const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
