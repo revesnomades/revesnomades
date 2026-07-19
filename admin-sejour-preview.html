@@ -928,7 +928,7 @@
       }
 
       if(stay.program_note){
-        programNote.textContent = stay.program_note;
+        programNote.textContent = stay.program_note.replace(/votre séjours/gi, "votre séjour");
       } else if(programNote) {
         programNote.textContent = "";
       }

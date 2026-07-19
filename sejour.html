@@ -100,7 +100,7 @@
   <header class="nav" id="top">
     <div class="container nav-inner">
       <nav class="nav-left nav-links-desktop" aria-label="Navigation gauche">
-        <a href="/index.html#sejours">Séjours</a>
+        <a href="/index.html">Accueil</a>
         <a href="/boutique.html">Shop</a>
       </nav>
 
@@ -1310,7 +1310,7 @@
       }
 
       if(stay.program_note){
-        programNote.textContent = stay.program_note;
+        programNote.textContent = stay.program_note.replace(/votre séjours/gi, "votre séjour");
       } else if(programNote) {
         programNote.textContent = "";
       }

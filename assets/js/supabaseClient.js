@@ -14,27 +14,45 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 function initUniformHeader() {
   const navInner = document.querySelector(".nav-inner");
-  if (!navInner || navInner.querySelector(".nav-left")) return;
-  
-  const navLeft = document.createElement("nav");
-  navLeft.className = "nav-left nav-links-desktop";
-  navLeft.setAttribute("aria-label", "Navigation gauche");
-  navLeft.innerHTML = `<a href="/boutique.html">Shop</a><a href="/index.html#sejours">Séjours</a>`;
-  navInner.insertBefore(navLeft, navInner.firstElementChild);
+  if (!navInner) return;
 
-  navInner.querySelectorAll(".nav-links a").forEach(a => {
-    const href = (a.getAttribute("href") || "").toLowerCase();
-    if (href.includes("boutique.html") && a.textContent.trim().toLowerCase() === "shop") {
-      a.remove();
-    }
-  });
+  const currentPath = window.location.pathname.toLowerCase();
+  const isIndex = currentPath === "/" || currentPath.endsWith("/index.html") || currentPath === "" || currentPath.endsWith("/");
+  const isSejour = currentPath.includes("sejour");
+
+  let navLeft = navInner.querySelector(".nav-left");
+  if (!navLeft) {
+    navLeft = document.createElement("nav");
+    navLeft.className = "nav-left nav-links-desktop";
+    navLeft.setAttribute("aria-label", "Navigation gauche");
+    navInner.insertBefore(navLeft, navInner.firstElementChild);
+  }
+
+  let leftLinksHTML = "";
+  if (!isIndex) {
+    leftLinksHTML += `<a href="/index.html">Accueil</a>`;
+  }
+  if (!isSejour) {
+    leftLinksHTML += `<a href="/index.html#sejours">Séjours</a>`;
+  }
+  leftLinksHTML += `<a href="/boutique.html">Shop</a>`;
+  navLeft.innerHTML = leftLinksHTML;
 
   const mobileMenu = document.querySelector(".mobile-menu");
-  if (mobileMenu && !mobileMenu.querySelector("a[href*='sejours']")) {
-    const sejourLink = document.createElement("a");
-    sejourLink.href = "/index.html#sejours";
-    sejourLink.textContent = "Séjours";
-    mobileMenu.insertBefore(sejourLink, mobileMenu.firstElementChild);
+  if (mobileMenu) {
+    let mobileLinksHTML = "";
+    if (!isIndex) {
+      mobileLinksHTML += `<a href="/index.html">Accueil</a>`;
+    }
+    if (!isSejour) {
+      mobileLinksHTML += `<a href="/index.html#sejours">Séjours</a>`;
+    }
+    mobileLinksHTML += `<a href="/boutique.html">Shop</a>`;
+    mobileLinksHTML += `<a href="/index.html#apropos" data-scroll>À propos</a>`;
+    mobileLinksHTML += `<a href="/faq.html">FAQ</a>`;
+    mobileLinksHTML += `<a href="/index.html#contact" data-scroll>Contact</a>`;
+    mobileLinksHTML += `<a href="/compte.html">Compte</a>`;
+    mobileMenu.innerHTML = mobileLinksHTML;
   }
 }
 

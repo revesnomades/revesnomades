@@ -227,7 +227,7 @@
 
   <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
-    <div class="stay-band stay-band-compact" id="featuredStayBand">
+    <div class="stay-band stay-band-compact" id="featuredStayBand" style="cursor:pointer;" onclick="if(!event.target.closest('a')) window.location.href='/sejour.html';">
       <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg');"></a>
 
       <div class="stay-copy">
@@ -637,6 +637,15 @@
       if (featuredStayLink) featuredStayLink.href = stayUrl;
       if (featuredStayMedia) featuredStayMedia.href = stayUrl;
 
+      const featuredStayBand = document.getElementById("featuredStayBand");
+      if (featuredStayBand) {
+        featuredStayBand.onclick = (e) => {
+          if (!e.target.closest("a")) {
+            window.location.href = stayUrl;
+          }
+        };
+      }
+
       let featIndexImage = stay.hero_image;
       if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
         const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
@@ -965,17 +974,22 @@
         : message;
 
       const { error } = await supabase
-        .from("messages")
+        .from("contact_messages")
         .insert({
           subject,
-          name: fullName,
+          firstname,
+          lastname,
           email,
-          message: messageWithPhone
+          phone,
+          message
         });
 
       if(error){
         console.error("CONTACT FORM ERROR:", error);
-        setContactMsg("Oups… impossible d’envoyer votre message pour le moment.");
+        const mailtoUrl = `mailto:contact@amesnomades.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("De: " + firstname + " " + lastname + " (" + email + ")\n\n" + message)}`;
+        if(contactMsg) {
+          contactMsg.innerHTML = `Oups… Envoi direct indisponible. <a href="${mailtoUrl}" style="color:inherit; text-decoration:underline;">Cliquez ici pour envoyer par email</a>.`;
+        }
         return;
       }
 
@@ -1019,14 +1033,17 @@
       if(btn) btn.disabled = true;
 
       const { error } = await supabase
-        .from("messages")
-        .insert({ subject, name: lastname, email, message });
+        .from("contact_messages")
+        .insert({ subject, lastname, email, message });
 
       if(btn) btn.disabled = false;
 
       if(error){
         console.error("CONTACT FORM ERROR:", error);
-        if(indexContactMsg) indexContactMsg.textContent = "Oups… impossible d'envoyer. Réessayez.";
+        const mailtoUrl = `mailto:contact@amesnomades.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("De: " + lastname + " (" + email + ")\n\n" + message)}`;
+        if(indexContactMsg) {
+          indexContactMsg.innerHTML = `Oups… Envoi direct indisponible. <a href="${mailtoUrl}" style="color:#fff; text-decoration:underline;">Cliquez ici pour envoyer par email</a>.`;
+        }
         return;
       }
 
