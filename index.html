@@ -245,7 +245,9 @@
           Chargement…
         </p>
 
-        <div class="actions reveal" data-delay="5">
+        <p class="sub reveal" data-delay="5" id="featuredStayPrice" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.04em; margin-top: 10px; margin-bottom: 2px; display: none;"></p>
+
+        <div class="actions reveal" data-delay="6">
           <a class="btn-arrow-pill" id="featuredStayLink" href="/sejour.html" aria-label="Découvrir le séjour">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -254,7 +256,7 @@
           </a>
         </div>
 
-        <div class="missing reveal" data-delay="6" id="featuredStayMissing"></div>
+        <div class="missing reveal" data-delay="7" id="featuredStayMissing"></div>
       </div>
     </div>
   </section>
@@ -643,6 +645,26 @@
       if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
       if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
 
+      // Prix de départ
+      let minPrice = null;
+      if (stay.extra_options && Array.isArray(stay.extra_options)) {
+        const prices = stay.extra_options
+          .map(opt => Number(opt.price))
+          .filter(p => !isNaN(p) && p > 0);
+        if (prices.length > 0) {
+          minPrice = Math.min(...prices);
+        }
+      }
+      const featuredStayPrice = document.getElementById("featuredStayPrice");
+      if (featuredStayPrice) {
+        if (minPrice !== null) {
+          featuredStayPrice.textContent = `À partir de ${minPrice} €`;
+          featuredStayPrice.style.display = "block";
+        } else {
+          featuredStayPrice.style.display = "none";
+        }
+      }
+
       // Kicker : VILLE — PAYS en majuscules (IBM Plex Mono)
       if (featuredStayKicker && stay.location) {
         const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
@@ -717,6 +739,7 @@
 
   const dateMap = new Map(dateResults.map(item => [item.stayId, item.date]));
 
+  highlightStaysGrid.className = `stay-grid stay-grid-${stays.length}`;
   highlightStaysGrid.innerHTML = stays.map((stay, index) => {
 
     const stayDate = dateMap.get(stay.id);
