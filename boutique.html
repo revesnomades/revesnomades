@@ -200,6 +200,10 @@
       to { transform: scale(1); opacity: 1; }
     }
   </style>
+  <!-- Meta Pixel Code -->
+  <script src="/assets/js/metaPixel.js" defer></script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel Code -->
 </head>
 
 <body class="on-light">
@@ -432,7 +436,7 @@
                 ${isSoldOut
                   ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
                   : (p.stripe_url 
-                      ? `<a href="${p.stripe_url}" class="stay-mini-btn" style="text-decoration:none; text-align:center; display:block; width:100%; background:rgba(255,255,255,0.15);">Acheter</a>` 
+                      ? `<a href="${p.stripe_url}" class="stay-mini-btn" style="text-decoration:none; text-align:center; display:block; width:100%; background:rgba(255,255,255,0.15);" onclick="if(window.MetaPixel) window.MetaPixel.trackAddToCart('${p.name.replace(/'/g, "\\'")}', '${p.id}', ${p.price || 0});">Acheter</a>` 
                       : `<span class="stay-mini-btn" style="opacity:0.7; display:block; text-align:center;">Bientôt dispo</span>`)
                 }
               </div>

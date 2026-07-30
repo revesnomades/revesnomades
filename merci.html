@@ -142,6 +142,14 @@
     if(el && type === "gift"){
       el.textContent = "Votre carte cadeau sera envoyée par email après le paiement.";
     }
+
+    // Meta Pixel Purchase Event Tracking
+    if (window.MetaPixel) {
+      const session_id = p.get("session_id") || p.get("id") || "";
+      const price = Number(p.get("price") || p.get("amount") || localStorage.getItem("last_cart_total") || 0);
+      window.MetaPixel.trackPurchase(price, session_id);
+      localStorage.removeItem("last_cart_total");
+    }
   </script>
 
 </body>

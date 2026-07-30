@@ -1286,6 +1286,20 @@
 
       stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
 
+      // Meta Pixel ViewContent event tracking
+      if (window.MetaPixel) {
+        let basePrice = 0;
+        if (stay.extra_options && Array.isArray(stay.extra_options)) {
+          const prices = stay.extra_options
+            .map(opt => Number(opt.price))
+            .filter(p => !isNaN(p) && p > 0);
+          if (prices.length > 0) {
+            basePrice = Math.min(...prices);
+          }
+        }
+        window.MetaPixel.trackViewContent(stay.title || 'Séjour', 'Séjour', stay.id, basePrice);
+      }
+
       if(stay.hero_image){
         stayHeroBg.src = stay.hero_image;
         
@@ -1379,6 +1393,24 @@
       } else if (!bookingUrl && (!optData || !optData.length)) {
         bookingBtn.removeAttribute("href");
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
+      }
+
+      // Meta Pixel AddToCart event tracking
+      if (bookingBtn) {
+        bookingBtn.addEventListener("click", () => {
+          if (window.MetaPixel) {
+            let basePrice = 0;
+            if (stay.extra_options && Array.isArray(stay.extra_options)) {
+              const prices = stay.extra_options
+                .map(opt => Number(opt.price))
+                .filter(p => !isNaN(p) && p > 0);
+              if (prices.length > 0) {
+                basePrice = Math.min(...prices);
+              }
+            }
+            window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, basePrice);
+          }
+        });
       }
 
       if(firstDate){
