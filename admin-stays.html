@@ -436,7 +436,39 @@
       background: #eaf4ec;
       color: #3b7045;
     }
-  </style>
+  
+    .switch-toggle input:checked + .slider {
+      background-color: #4f8c5b !important;
+    }
+    .switch-toggle input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    .switch-toggle .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .badge-published {
+      background: rgba(79, 140, 91, 0.15);
+      color: #2e6238;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-draft {
+      background: rgba(120, 120, 120, 0.15);
+      color: #555;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+</style>
 </head>
 
 <body class="on-light">
@@ -2074,7 +2106,7 @@
             <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
             <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
             <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "Publié" : "Brouillon"}</div>
+            <div class="muted-small" style="margin-top:4px;">Statut : <span class="${stay.published ? 'badge-published' : 'badge-draft'}">${stay.published ? "Publié" : "Brouillon"}</span></div>
             <div class="muted-small" style="margin-top:4px;">
               Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
             </div>
@@ -2088,6 +2120,30 @@
           </div>
         </div>
       `).join("");
+
+      staysList.querySelectorAll("[data-toggle-publish]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-toggle-publish");
+          const isCurrentlyPublished = btn.getAttribute("data-published") === "true";
+          const nextState = !isCurrentlyPublished;
+          
+          btn.disabled = true;
+          btn.textContent = "Mise à jour...";
+
+          const { error } = await supabase
+            .from("stays")
+            .update({
+              published: nextState,
+              published_at: nextState ? new Date().toISOString() : null
+            })
+            .eq("id", id);
+
+          if (error) {
+            alert("Erreur lors de la modification du statut : " + error.message);
+          }
+          await loadStays();
+        });
+      });
 
       staysList.querySelectorAll("[data-edit]").forEach(btn => {
         btn.addEventListener("click", async () => {
@@ -2813,6 +2869,59 @@
       btnWizSubmit.style.display = step === 6 ? "inline-flex" : "none";
     }
 
+    const wizIsSingleDay = document.getElementById("wizIsSingleDay");
+    const wizEndDateGroup = document.getElementById("wizEndDateGroup");
+    const wizStartDateLabel = document.getElementById("wizStartDateLabel");
+    const wizPublished = document.getElementById("wizPublished");
+    const wizPublishedLabel = document.getElementById("wizPublishedLabel");
+    const mainIsSingleDay = document.getElementById("mainIsSingleDay");
+    const mainEndDateGroup = document.getElementById("mainEndDateGroup");
+    const mainStartDateLabel = document.getElementById("mainStartDateLabel");
+
+    function updateWizSingleDayUI() {
+      const isSingle = !!wizIsSingleDay?.checked;
+      if (wizEndDateGroup) wizEndDateGroup.style.display = isSingle ? "none" : "";
+      if (wizEndDate) wizEndDate.required = !isSingle;
+      if (wizStartDateLabel) wizStartDateLabel.textContent = isSingle ? "Date du séjour *" : "Date de début *";
+      if (isSingle && wizStartDate && wizEndDate) {
+        wizEndDate.value = wizStartDate.value;
+      }
+    }
+
+    function updateWizPublishedUI() {
+      const isPub = !!wizPublished?.checked;
+      if (wizPublishedLabel) {
+        wizPublishedLabel.textContent = isPub ? "Publié (visible sur le site)" : "Brouillon (non visible sur le site)";
+      }
+    }
+
+    function updateMainSingleDayUI() {
+      const isSingle = !!mainIsSingleDay?.checked;
+      if (mainEndDateGroup) mainEndDateGroup.style.display = isSingle ? "none" : "";
+      if (mainStartDateLabel) mainStartDateLabel.textContent = isSingle ? "Date du séjour" : "Date de début";
+      if (isSingle && mainStartDate && mainEndDate) {
+        mainEndDate.value = mainStartDate.value;
+      }
+      if (typeof updateDurationInfo === 'function') updateDurationInfo();
+    }
+
+    wizIsSingleDay?.addEventListener("change", updateWizSingleDayUI);
+    document.getElementById("wizStartDate")?.addEventListener("change", () => {
+      if (wizIsSingleDay?.checked && document.getElementById("wizEndDate")) {
+        document.getElementById("wizEndDate").value = document.getElementById("wizStartDate").value;
+      }
+    });
+
+    wizPublished?.addEventListener("change", updateWizPublishedUI);
+
+    mainIsSingleDay?.addEventListener("change", updateMainSingleDayUI);
+    document.getElementById("mainStartDate")?.addEventListener("change", () => {
+      if (mainIsSingleDay?.checked && document.getElementById("mainEndDate")) {
+        document.getElementById("mainEndDate").value = document.getElementById("mainStartDate").value;
+        if (typeof updateDurationInfo === 'function') updateDurationInfo();
+      }
+    });
+
     btnNewStay?.addEventListener("click", () => {
       currentWizardEditId = null;
       const wizH2 = document.querySelector("#stayWizardModal h2");
@@ -2820,6 +2929,10 @@
       const btnSub = stayWizardForm.querySelector("button[type='submit']");
       if(btnSub) btnSub.textContent = "Créer le séjour";
       stayWizardForm.reset();
+      if (wizIsSingleDay) wizIsSingleDay.checked = false;
+      if (wizPublished) wizPublished.checked = false;
+      updateWizSingleDayUI();
+      updateWizPublishedUI();
       wizGalList = [];
       wizProgList = [];
       wizOptList = [];

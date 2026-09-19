@@ -579,16 +579,28 @@
 
     function formatDateRange(start, end) {
       if (!start && !end) return "Dates à annoncer";
-      if (start && !end) {
+      if (start && (!end || start === end)) {
         const s = new Date(start + "T00:00:00");
-        return s.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
       }
       if (!start && end) {
         const e = new Date(end + "T00:00:00");
-        return e.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+        const day = e.getDate();
+        const month = e.toLocaleDateString("fr-FR", { month: "long" });
+        const year = e.getFullYear();
+        return `Le ${day} ${month} ${year}`;
       }
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
+      if (s.getTime() === e.getTime()) {
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
       const sDay = s.getDate();
       const eDay = e.getDate();
       const sMonth = s.toLocaleDateString("fr-FR", { month: "long" });
@@ -606,13 +618,15 @@
     }
 
     function getDurationLabel(start, end) {
-      if (!start || !end) return "Durée à annoncer";
+      if (!start) return "Durée à annoncer";
+      if (!end || start === end) return "1 jour";
 
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
       const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
 
       if (days <= 0) return "Durée à annoncer";
+      if (days === 1) return "1 jour";
 
       const nights = Math.max(0, days - 1);
       return `${days} jour${days > 1 ? "s" : ""} / ${nights} nuit${nights > 1 ? "s" : ""}`;

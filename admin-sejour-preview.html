@@ -632,6 +632,51 @@
           return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
         }
 
+        if(block.type === "speaker"){
+          const bioParagraphs = safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+          `).join("");
+
+          return `
+            <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+              <div class="speaker-row">
+                <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px;">
+                  <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Intervenante"}</h3>
+                </div>
+                <div class="speaker-bio speaker-text-container">
+                  ${bioParagraphs}
+                </div>
+                <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
+                  ${block.image ? `<img src="${escapeHtml(block.image)}" alt="${safeTitle}" style="width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:4px; display:block;">` : ""}
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
+        if(block.type === "chef"){
+          const bioParagraphs = safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+          `).join("");
+
+          return `
+            <article class="chef-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+              <div class="chef-row">
+                <div class="chef-title-block">
+                  <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
+                  <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Notre Cuisinière"}</h3>
+                </div>
+                <div class="chef-bio speaker-text-container">
+                  ${bioParagraphs}
+                </div>
+                <div class="chef-photo-wrapper" style="width:200px; flex-shrink:0;">
+                  ${block.image ? `<img src="${escapeHtml(block.image)}" alt="${safeTitle}" style="width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:4px; display:block;">` : ""}
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
         return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
       }).join('<hr class="sejour-block-sep" style="border:none; border-top:1px solid rgba(30,31,34,.15); margin:36px 0;">');
 
@@ -653,21 +698,55 @@
     }
 
     function formatDateRange(start, end){
-      if(!start && !end) return "Dates à annoncer";
-      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-      if(startText && endText) return `${startText} au ${endText}`;
-      return startText || endText || "Dates à annoncer";
+      if (!start && !end) return "Dates à annoncer";
+      if (start && (!end || start === end)) {
+        const s = new Date(start + "T00:00:00");
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      if (!start && end) {
+        const e = new Date(end + "T00:00:00");
+        const day = e.getDate();
+        const month = e.toLocaleDateString("fr-FR", { month: "long" });
+        const year = e.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      const s = new Date(start + "T00:00:00");
+      const e = new Date(end + "T00:00:00");
+      if (s.getTime() === e.getTime()) {
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      const sDay = s.getDate();
+      const eDay = e.getDate();
+      const sMonth = s.toLocaleDateString("fr-FR", { month: "long" });
+      const eMonth = e.toLocaleDateString("fr-FR", { month: "long" });
+      const sYear = s.getFullYear();
+      const eYear = e.getFullYear();
+
+      if (sMonth === eMonth && sYear === eYear) {
+        return `Du ${sDay} au ${eDay} ${sMonth} ${sYear}`;
+      }
+      if (sYear === eYear) {
+        return `Du ${sDay} ${sMonth} au ${eDay} ${eMonth} ${sYear}`;
+      }
+      return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
     function getDurationLabel(start, end){
-      if(!start || !end) return "Durée à annoncer";
+      if(!start) return "Durée à annoncer";
+      if(!end || start === end) return "1 jour";
 
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
       const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
 
       if(days <= 0) return "Durée à annoncer";
+      if(days === 1) return "1 jour";
 
       const nights = Math.max(0, days - 1);
       return `${days} jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
