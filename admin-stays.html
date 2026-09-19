@@ -2452,6 +2452,8 @@
     let wizOptList = [];
     let wizSpeakerList = [];
 
+    let editingSpkIdx = null;
+
     // ── GESTION SPEAKERS (intervenants multiples) ──
     function renderWizSpeakers() {
       const container = document.getElementById("wizSpeakerContainer");
@@ -2461,17 +2463,41 @@
         return;
       }
       container.innerHTML = wizSpeakerList.map((sp, idx) => `
-        <div style="display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px;">
+        <div style="display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; ${editingSpkIdx === idx ? 'border-color:var(--accent,#c5a880); background:#faf8f5;' : ''}">
           ${sp.image ? `<img src="${sp.image}" style="width:48px; height:48px; object-fit:cover; border-radius:3px;">` : `<div style="width:48px; height:48px; background:var(--cream); border-radius:3px;"></div>`}
           <div>
             <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")}</div>
-            <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
+            <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
           </div>
-          <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 8px; cursor:pointer; white-space:nowrap;">Supprimer</button>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-edit-wizspk" data-idx="${idx}" style="background:#4a90e2; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Modifier</button>
+            <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Supprimer</button>
+          </div>
         </div>`).join("");
+
+      container.querySelectorAll(".btn-edit-wizspk").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          const sp = wizSpeakerList[idx];
+          if (!sp) return;
+          editingSpkIdx = idx;
+          if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = sp.title || "";
+          if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = sp.image || "";
+          if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = sp.text || "";
+          const btnAdd = document.getElementById("btnAddWizSpk");
+          if (btnAdd) btnAdd.textContent = "✏️ Mettre à jour l'intervenant";
+          renderWizSpeakers();
+        });
+      });
+
       container.querySelectorAll(".btn-del-wizspk").forEach(btn => {
         btn.addEventListener("click", e => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          if (editingSpkIdx === idx) {
+            editingSpkIdx = null;
+            const btnAdd = document.getElementById("btnAddWizSpk");
+            if (btnAdd) btnAdd.textContent = "+ Ajouter cet intervenant";
+          }
           wizSpeakerList.splice(idx, 1);
           renderWizSpeakers();
         });
@@ -2824,17 +2850,26 @@
       }
     });
 
-    // ── SPEAKER : ajouter à la liste ──
+    // ── SPEAKER : ajouter ou modifier dans la liste ──
     document.getElementById("btnAddWizSpk")?.addEventListener("click", () => {
       const name  = (document.getElementById("wizSpkName")?.value || "").trim();
       const photo = (document.getElementById("wizSpkPhoto")?.value || "").trim();
       const bio   = (document.getElementById("wizSpkBio")?.value || "").trim();
       if (!name) { alert("Veuillez renseigner le nom de l'intervenant."); return; }
-      wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
+
+      if (editingSpkIdx !== null && editingSpkIdx >= 0 && editingSpkIdx < wizSpeakerList.length) {
+        wizSpeakerList[editingSpkIdx] = { type: "speaker", title: name, image: photo, text: bio };
+        editingSpkIdx = null;
+      } else {
+        wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
+      }
+
       renderWizSpeakers();
       if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = "";
       if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = "";
       if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = "";
+      const btnAdd = document.getElementById("btnAddWizSpk");
+      if (btnAdd) btnAdd.textContent = "+ Ajouter cet intervenant";
     });
 
     // ── CHEF : upload photo avec recadrage ──
@@ -3012,8 +3047,11 @@
 
     btnWizNext?.addEventListener("click", () => {
       if(currentWizStep === 1){
-        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizShortDesc").value.trim()){
-          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, les dates et l'accroche courte.";
+        const isSingle = !!document.getElementById("wizIsSingleDay")?.checked;
+        const startDateVal = document.getElementById("wizStartDate")?.value;
+        const endDateVal = isSingle ? startDateVal : document.getElementById("wizEndDate")?.value;
+        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !startDateVal || !endDateVal || !document.getElementById("wizShortDesc").value.trim()){
+          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, la date et l'accroche courte.";
           return;
         }
       } else if(currentWizStep === 2){
@@ -3142,9 +3180,15 @@
       }
 
       if (currentWizardEditId) {
-        const { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
+        let { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
+        if (updErr && updErr.message && updErr.message.includes("show_other_stays_section")) {
+          delete payload.show_other_stays_section;
+          const retry = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
+          updErr = retry.error;
+        }
         if(updErr){
-          wizardErrorMsg.textContent = "Erreur modification : " + updErr.message;
+          console.error(updErr);
+          wizardErrorMsg.textContent = "Erreur modification : " + (updErr.message || JSON.stringify(updErr));
           return;
         }
         const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
@@ -3180,9 +3224,16 @@
         return;
       }
 
-      const { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
-      if(error){
-        wizardErrorMsg.textContent = "Erreur création : " + error.message;
+      let { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
+      if (error && error.message && error.message.includes("show_other_stays_section")) {
+        delete payload.show_other_stays_section;
+        const retry = await supabase.from("stays").insert([payload]).select().single();
+        newStay = retry.data;
+        error = retry.error;
+      }
+      if(error || !newStay){
+        console.error(error);
+        wizardErrorMsg.textContent = "Erreur création : " + (error?.message || "Erreur lors de la création");
         return;
       }
 
