@@ -895,7 +895,29 @@
         <!-- ÉTAPE 1 : Général -->
         <div class="wizard-step active" id="wizardStep1" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
           <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 1 : Général</h3>
-          <p class="muted-small" style="margin:0 0 12px 0;">Définissez les informations de base et les dates de ce séjour.</p>
+          <p class="muted-small" style="margin:0 0 12px 0;">Définissez les informations de base, le statut et les dates de ce séjour.</p>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Séjour d'une journée (1 jour)</div>
+              <div class="muted-small">Activez cette option si le séjour se déroule sur une seule date</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizIsSingleDay" style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Statut du séjour</div>
+              <div class="muted-small" id="wizPublishedLabel">Brouillon (non visible sur le site)</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizPublished" style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
           <div>
             <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
@@ -908,12 +930,12 @@
             <label class="muted-small" style="display:block; margin-bottom:4px;">Pays</label>
             <input id="wizCountry" class="input" placeholder="Ex : France">
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" id="wizDateGrid">
             <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Date de début *</label>
+              <label class="muted-small" style="display:block; margin-bottom:4px;" id="wizStartDateLabel">Date de début *</label>
               <input id="wizStartDate" type="date" class="input" required>
             </div>
-            <div>
+            <div id="wizEndDateGroup">
               <label class="muted-small" style="display:block; margin-bottom:4px;">Date de fin *</label>
               <input id="wizEndDate" type="date" class="input" required>
             </div>
@@ -2113,6 +2135,9 @@
           </div>
 
           <div class="admin-inline">
+            <button class="btn on-light data-toggle-publish-btn" type="button" data-toggle-publish="${stay.id}" data-published="${!!stay.published}" style="${stay.published ? 'border-color:#4f8c5b; color:#4f8c5b; font-weight:600;' : 'background:#4f8c5b; color:#fff; font-weight:600;'}">
+              ${stay.published ? "Passer en brouillon" : "⚡ Publier"}
+            </button>
             <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
             <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
             <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
