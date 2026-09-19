@@ -1238,9 +1238,14 @@
 
       // Lieu au-dessus du titre
       const stayLocationEl = document.getElementById("stayLocation");
-      if (stayLocationEl) {
-        stayLocationEl.textContent = stay.location ? stay.location.toUpperCase() : "";
-        stayLocationEl.style.display = stay.location ? "" : "none";
+      if (stayLocationEl && stay.location) {
+        const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
+        const uniqueParts = [];
+        parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
+        stayLocationEl.textContent = uniqueParts.join(' — ');
+        stayLocationEl.style.display = "";
+      } else if (stayLocationEl) {
+        stayLocationEl.style.display = "none";
       }
       pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
       const metaDesc = buildStayMetaDescription(stay);

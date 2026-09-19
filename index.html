@@ -741,7 +741,9 @@
       // Kicker : VILLE — PAYS en majuscules (IBM Plex Mono)
       if (featuredStayKicker && stay.location) {
         const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
-        featuredStayKicker.textContent = parts.join(' — ');
+        const uniqueParts = [];
+        parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
+        featuredStayKicker.textContent = uniqueParts.join(' — ');
       } else if (featuredStayKicker) {
         featuredStayKicker.textContent = '';
       }
