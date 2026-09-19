@@ -1189,13 +1189,19 @@
       let stayQuery = supabase
         .from("stays")
         .select("*")
-        .eq("slug", currentSlug);
+        .ilike("slug", currentSlug.trim());
 
       if (!isPreview) {
         stayQuery = stayQuery.eq("published", true);
       }
 
-      const { data: stay, error } = await stayQuery.maybeSingle();
+      let { data: stay, error } = await stayQuery.maybeSingle();
+
+      if (!stay && isPreview) {
+        // Fallback pour prévisualisation par ID ou sans filtre strict sur slug
+        const fallbackRes = await supabase.from("stays").select("*").eq("id", currentSlug).maybeSingle();
+        if (fallbackRes.data) stay = fallbackRes.data;
+      }
 
       if(error || !stay){
         if(error) console.error(error);
