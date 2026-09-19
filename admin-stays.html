@@ -1256,6 +1256,38 @@
 
     const featuredSlotContent = document.getElementById("featuredSlotContent");
 
+        function updateWizSingleDayUI() {
+      const wizIsSingleDay = document.getElementById("wizIsSingleDay");
+      const wizEndDateGroup = document.getElementById("wizEndDateGroup");
+      const wizStartDateLabel = document.getElementById("wizStartDateLabel");
+      const wizStartDate = document.getElementById("wizStartDate");
+      const wizEndDate = document.getElementById("wizEndDate");
+      const isSingle = !!wizIsSingleDay?.checked;
+
+      if (wizEndDateGroup) wizEndDateGroup.style.display = isSingle ? "none" : "";
+      if (wizEndDate) wizEndDate.required = !isSingle;
+      if (wizStartDateLabel) wizStartDateLabel.textContent = isSingle ? "Date du séjour *" : "Date de début *";
+      if (isSingle && wizStartDate && wizEndDate && wizStartDate.value) {
+        wizEndDate.value = wizStartDate.value;
+      }
+    }
+
+    function updateMainSingleDayUI() {
+      const mainIsSingleDay = document.getElementById("mainIsSingleDay");
+      const mainEndDateGroup = document.getElementById("mainEndDateGroup");
+      const mainStartDateLabel = document.getElementById("mainStartDateLabel");
+      const mainStartDate = document.getElementById("mainStartDate");
+      const mainEndDate = document.getElementById("mainEndDate");
+      const isSingle = !!mainIsSingleDay?.checked;
+
+      if (mainEndDateGroup) mainEndDateGroup.style.display = isSingle ? "none" : "";
+      if (mainStartDateLabel) mainStartDateLabel.textContent = isSingle ? "Date du séjour" : "Date de début";
+      if (isSingle && mainStartDate && mainEndDate && mainStartDate.value) {
+        mainEndDate.value = mainStartDate.value;
+      }
+      if (typeof updateDurationInfo === 'function') updateDurationInfo();
+    }
+
     let currentStayId = null;
     let stayContentBlocks = [];
     let allStays = [];
