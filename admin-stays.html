@@ -918,6 +918,28 @@
               <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
             </label>
           </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Afficher la FAQ</div>
+              <div class="muted-small">Afficher la foire aux questions en bas de la page séjour</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizShowFaq" checked style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Afficher "Autres séjours"</div>
+              <div class="muted-small">Proposer les autres séjours en bas de page pour augmenter la visibilité</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizShowOtherStays" checked style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
           <div>
             <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
@@ -2316,6 +2338,10 @@
       wizOptList = Array.isArray(stay.extra_options) ? [...stay.extra_options] : [];
       renderWizOpt();
 
+      const wShowFaq = document.getElementById("wizShowFaq");
+      if (wShowFaq) wShowFaq.checked = stay.show_faq_section !== false;
+      const wShowOther = document.getElementById("wizShowOtherStays");
+      if (wShowOther) wShowOther.checked = stay.show_other_stays_section !== false;
 
       updateWizardStep(1);
       stayWizardModal.classList.add("active");
@@ -2956,6 +2982,8 @@
       stayWizardForm.reset();
       if (wizIsSingleDay) wizIsSingleDay.checked = false;
       if (wizPublished) wizPublished.checked = false;
+      if (document.getElementById("wizShowFaq")) document.getElementById("wizShowFaq").checked = true;
+      if (document.getElementById("wizShowOtherStays")) document.getElementById("wizShowOtherStays").checked = true;
       updateWizSingleDayUI();
       updateWizPublishedUI();
       wizGalList = [];
@@ -3096,13 +3124,18 @@
       }
 
 
+      const show_faq_section = document.getElementById("wizShowFaq") ? !!document.getElementById("wizShowFaq").checked : true;
+      const show_other_stays_section = document.getElementById("wizShowOtherStays") ? !!document.getElementById("wizShowOtherStays").checked : true;
+
       const payload = {
         title, slug, location: fullLocation, short_description, description, hero_image,
         booking_url, reservation_url: booking_url, min_bookings,
         program_note, included_items, not_included_items,
         program: wizProgList.map(p => ({ period: p.period || p.title || "Matin", time: p.time || "", activity: p.activity || p.text || "", title: p.title || p.period || "Matin", text: p.activity || p.text || "" })),
         extra_options: wizOptList,
-        content_blocks
+        content_blocks,
+        show_faq_section,
+        show_other_stays_section
       };
       if (!currentWizardEditId) {
         payload.published = false;

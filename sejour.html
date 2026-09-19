@@ -1208,6 +1208,8 @@
       if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
       if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
       if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
+      const otherStaysSection = document.getElementById("otherStaysSection");
+      if (otherStaysSection) otherStaysSection.style.display = stay.show_other_stays_section === false ? "none" : "";
 
       const [{ data: dates }, { data: bookingsPaid }, { data: otherPublishedStays, error: otherStaysError }] = await Promise.all([
         supabase
