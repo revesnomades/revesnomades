@@ -3116,10 +3116,16 @@
         }
         const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
         const { data: exDate } = await supabase.from("stay_dates").select("id").eq("stay_id", currentWizardEditId).limit(1);
+        const wStart = document.getElementById("wizStartDate").value || null;
+        let wEnd = document.getElementById("wizEndDate").value || null;
+        if (document.getElementById("wizIsSingleDay")?.checked || !wEnd) {
+          wEnd = wStart;
+        }
+
         if (exDate && exDate.length > 0) {
           await supabase.from("stay_dates").update({
-            start_date: document.getElementById("wizStartDate").value,
-            end_date: document.getElementById("wizEndDate").value,
+            start_date: wStart,
+            end_date: wEnd,
             seats_total: Number(document.getElementById("wizSeats").value || 12),
             price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
             amount: firstPrice
@@ -3127,8 +3133,8 @@
         } else {
           await supabase.from("stay_dates").insert([{
             stay_id: currentWizardEditId,
-            start_date: document.getElementById("wizStartDate").value,
-            end_date: document.getElementById("wizEndDate").value,
+            start_date: wStart,
+            end_date: wEnd,
             seats_total: Number(document.getElementById("wizSeats").value || 12),
             seats_remaining: Number(document.getElementById("wizSeats").value || 12),
             price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
@@ -3148,10 +3154,15 @@
       }
 
       const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
+      const wStartNew = document.getElementById("wizStartDate").value || null;
+      let wEndNew = document.getElementById("wizEndDate").value || null;
+      if (document.getElementById("wizIsSingleDay")?.checked || !wEndNew) {
+        wEndNew = wStartNew;
+      }
       await supabase.from("stay_dates").insert([{
         stay_id: newStay.id,
-        start_date: document.getElementById("wizStartDate").value,
-        end_date: document.getElementById("wizEndDate").value,
+        start_date: wStartNew,
+        end_date: wEndNew,
         seats_total: Number(document.getElementById("wizSeats").value || 12),
         seats_remaining: Number(document.getElementById("wizSeats").value || 12),
         price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
@@ -3383,10 +3394,15 @@
 
       await supabase.from("stay_dates").delete().eq("stay_id", stayId);
 
+      const mStart = mainStartDate.value || null;
+      let mEnd = mainEndDate.value || null;
+      if (document.getElementById("mainIsSingleDay")?.checked || !mEnd) {
+        mEnd = mStart;
+      }
       const { error: dateError } = await supabase.from("stay_dates").insert([{
         stay_id: stayId,
-        start_date: mainStartDate.value,
-        end_date: mainEndDate.value,
+        start_date: mStart,
+        end_date: mEnd,
         seats_total: Number(mainSeatsTotal.value || 0),
         seats_remaining: Number(mainSeatsRemaining.value || 0)
       }]);
