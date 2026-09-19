@@ -2242,13 +2242,15 @@
       if(btnSub) btnSub.textContent = "Enregistrer les modifications";
 
       const firstDate = dates?.[0] || null;
-      const isSingleStay = firstDate ? (!firstDate.end_date || firstDate.start_date === firstDate.end_date) : false;
+      const sStr = firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "";
+      const eStr = firstDate?.end_date ? String(firstDate.end_date).substring(0, 10) : "";
+      const isSingleStay = stay.is_single_day === true || (firstDate ? (!eStr || sStr === eStr) : false);
 
       document.getElementById("wizTitle").value = stay.title || "";
       document.getElementById("wizSlug").value = stay.slug || "";
       document.getElementById("wizLocation").value = stay.location || "";
-      document.getElementById("wizStartDate").value = firstDate?.start_date || "";
-      document.getElementById("wizEndDate").value = firstDate?.end_date || firstDate?.start_date || "";
+      document.getElementById("wizStartDate").value = sStr || "";
+      document.getElementById("wizEndDate").value = eStr || sStr || "";
       if (wizIsSingleDay) wizIsSingleDay.checked = isSingleStay;
       updateWizSingleDayUI();
       document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
@@ -3169,6 +3171,8 @@
       const show_faq_section = document.getElementById("wizShowFaq") ? !!document.getElementById("wizShowFaq").checked : true;
       const show_other_stays_section = document.getElementById("wizShowOtherStays") ? !!document.getElementById("wizShowOtherStays").checked : true;
 
+      const is_single_day = !!document.getElementById("wizIsSingleDay")?.checked;
+
       const payload = {
         title, slug, location: fullLocation, short_description, description, hero_image,
         booking_url, reservation_url: booking_url, min_bookings,
@@ -3177,7 +3181,8 @@
         extra_options: wizOptList,
         content_blocks,
         show_faq_section,
-        show_other_stays_section
+        show_other_stays_section,
+        is_single_day
       };
       if (!currentWizardEditId) {
         payload.published = false;
@@ -3185,8 +3190,9 @@
 
       if (currentWizardEditId) {
         let { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
-        if (updErr && updErr.message && updErr.message.includes("show_other_stays_section")) {
+        if (updErr && updErr.message && (updErr.message.includes("show_other_stays_section") || updErr.message.includes("is_single_day"))) {
           delete payload.show_other_stays_section;
+          delete payload.is_single_day;
           const retry = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
           updErr = retry.error;
         }
@@ -3229,8 +3235,9 @@
       }
 
       let { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
-      if (error && error.message && error.message.includes("show_other_stays_section")) {
+      if (error && error.message && (error.message.includes("show_other_stays_section") || error.message.includes("is_single_day"))) {
         delete payload.show_other_stays_section;
+        delete payload.is_single_day;
         const retry = await supabase.from("stays").insert([payload]).select().single();
         newStay = retry.data;
         error = retry.error;
