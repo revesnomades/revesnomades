@@ -1374,9 +1374,9 @@
         programNote.textContent = "";
       }
 
-      giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
-      giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
-      giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
+      if (giftTitle) giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
+      if (giftIntro) giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
+      if (giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
 
       const giftItemsData = stay.gift_items || [
         "Tee-shirt Âmes Nomades",
@@ -1386,10 +1386,10 @@
         "Un soin bien-être (surprise)"
       ];
 
-      giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      if (giftList) giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
       if(stay.gift_image){
-        giftImage.src = stay.gift_image;
+        if (giftImage) giftImage.src = stay.gift_image;
       }
       if(giftSection) giftSection.style.display = "none";
 
