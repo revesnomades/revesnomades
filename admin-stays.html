@@ -1254,40 +1254,6 @@
     const btnAddContentBlock = document.getElementById("btnAddContentBlock");
     const contentBlocksList = document.getElementById("contentBlocksList");
 
-    const featuredSlotContent = document.getElementById("featuredSlotContent");
-
-        function updateWizSingleDayUI() {
-      const wizIsSingleDay = document.getElementById("wizIsSingleDay");
-      const wizEndDateGroup = document.getElementById("wizEndDateGroup");
-      const wizStartDateLabel = document.getElementById("wizStartDateLabel");
-      const wizStartDate = document.getElementById("wizStartDate");
-      const wizEndDate = document.getElementById("wizEndDate");
-      const isSingle = !!wizIsSingleDay?.checked;
-
-      if (wizEndDateGroup) wizEndDateGroup.style.display = isSingle ? "none" : "";
-      if (wizEndDate) wizEndDate.required = !isSingle;
-      if (wizStartDateLabel) wizStartDateLabel.textContent = isSingle ? "Date du séjour *" : "Date de début *";
-      if (isSingle && wizStartDate && wizEndDate && wizStartDate.value) {
-        wizEndDate.value = wizStartDate.value;
-      }
-    }
-
-    function updateMainSingleDayUI() {
-      const mainIsSingleDay = document.getElementById("mainIsSingleDay");
-      const mainEndDateGroup = document.getElementById("mainEndDateGroup");
-      const mainStartDateLabel = document.getElementById("mainStartDateLabel");
-      const mainStartDate = document.getElementById("mainStartDate");
-      const mainEndDate = document.getElementById("mainEndDate");
-      const isSingle = !!mainIsSingleDay?.checked;
-
-      if (mainEndDateGroup) mainEndDateGroup.style.display = isSingle ? "none" : "";
-      if (mainStartDateLabel) mainStartDateLabel.textContent = isSingle ? "Date du séjour" : "Date de début";
-      if (isSingle && mainStartDate && mainEndDate && mainStartDate.value) {
-        mainEndDate.value = mainStartDate.value;
-      }
-      if (typeof updateDurationInfo === 'function') updateDurationInfo();
-    }
-
     let currentStayId = null;
     let stayContentBlocks = [];
     let allStays = [];
@@ -2157,94 +2123,106 @@
       return user;
     }
 
-    async function loadStays(){
+        async function loadStays(){
+      const staysList = document.getElementById("staysList");
+      if (!staysList) return;
       staysList.innerHTML = "Chargement…";
 
-      const { data, error } = await supabase
-        .from("stays")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("stays")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if(error){
-        console.error(error);
-        staysList.innerHTML = "Impossible de charger les séjours.";
-        return;
-      }
+        if(error){
+          console.error("Supabase stays error:", error);
+          staysList.innerHTML = "<div style='color:red; padding:12px;'>Impossible de charger les séjours : " + (error.message || JSON.stringify(error)) + "</div>";
+          return;
+        }
 
-      if(!data?.length){
-        staysList.innerHTML = "Aucun séjour pour le moment.";
-        return;
-      }
+        if(!data?.length){
+          staysList.innerHTML = "<div style='padding:12px;'>Aucun séjour pour le moment.</div>";
+          return;
+        }
 
-      staysList.innerHTML = data.map(stay => `
-        <div class="stay-admin-item">
-          <div>
-            <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
-            <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Statut : <span class="${stay.published ? 'badge-published' : 'badge-draft'}">${stay.published ? "Publié" : "Brouillon"}</span></div>
-            <div class="muted-small" style="margin-top:4px;">
-              Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
+        staysList.innerHTML = data.map(stay => {
+          const safeSlug = stay.slug ? encodeURIComponent(stay.slug) : "";
+          const isPub = !!stay.published;
+          return `
+            <div class="stay-admin-item">
+              <div>
+                <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
+                <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
+                <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
+                <div class="muted-small" style="margin-top:4px;">Statut : <span class="${isPub ? 'badge-published' : 'badge-draft'}">${isPub ? "Publié" : "Brouillon"}</span></div>
+                <div class="muted-small" style="margin-top:4px;">
+                  Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
+                </div>
+              </div>
+
+              <div class="admin-inline">
+                <button class="btn on-light data-toggle-publish-btn" type="button" data-toggle-publish="${stay.id}" data-published="${isPub}" style="${isPub ? 'border-color:#4f8c5b; color:#4f8c5b; font-weight:600;' : 'background:#4f8c5b; color:#fff; font-weight:600;'}">
+                  ${isPub ? "Passer en brouillon" : "⚡ Publier"}
+                </button>
+                <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
+                <button class="btn on-light" type="button" data-preview="${safeSlug}">Aperçu</button>
+                <a class="btn on-light" href="/sejour.html?slug=${safeSlug}" target="_blank" rel="noopener">Voir</a>
+                <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
+              </div>
             </div>
-          </div>
+          `;
+        }).join("");
 
-          <div class="admin-inline">
-            <button class="btn on-light data-toggle-publish-btn" type="button" data-toggle-publish="${stay.id}" data-published="${!!stay.published}" style="${stay.published ? 'border-color:#4f8c5b; color:#4f8c5b; font-weight:600;' : 'background:#4f8c5b; color:#fff; font-weight:600;'}">
-              ${stay.published ? "Passer en brouillon" : "⚡ Publier"}
-            </button>
-            <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
-            <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
-          </div>
-        </div>
-      `).join("");
+        staysList.querySelectorAll("[data-toggle-publish]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-toggle-publish");
+            const isCurrentlyPublished = btn.getAttribute("data-published") === "true";
+            const nextState = !isCurrentlyPublished;
+            
+            btn.disabled = true;
+            btn.textContent = "Mise à jour...";
 
-      staysList.querySelectorAll("[data-toggle-publish]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.getAttribute("data-toggle-publish");
-          const isCurrentlyPublished = btn.getAttribute("data-published") === "true";
-          const nextState = !isCurrentlyPublished;
-          
-          btn.disabled = true;
-          btn.textContent = "Mise à jour...";
+            const { error } = await supabase
+              .from("stays")
+              .update({
+                published: nextState,
+                published_at: nextState ? new Date().toISOString() : null
+              })
+              .eq("id", id);
 
-          const { error } = await supabase
-            .from("stays")
-            .update({
-              published: nextState,
-              published_at: nextState ? new Date().toISOString() : null
-            })
-            .eq("id", id);
-
-          if (error) {
-            alert("Erreur lors de la modification du statut : " + error.message);
-          }
-          await loadStays();
+            if (error) {
+              alert("Erreur lors de la modification du statut : " + error.message);
+            }
+            await loadStays();
+          });
         });
-      });
 
-      staysList.querySelectorAll("[data-edit]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await editStay(btn.getAttribute("data-edit"));
+        staysList.querySelectorAll("[data-edit]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await editStay(btn.getAttribute("data-edit"));
+          });
         });
-      });
 
-      staysList.querySelectorAll("[data-preview]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const slug = decodeURIComponent(btn.getAttribute("data-preview"));
-          window.open(
-            `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
-            "_blank"
-          );
+        staysList.querySelectorAll("[data-preview]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const slug = decodeURIComponent(btn.getAttribute("data-preview") || "");
+            window.open(
+              `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
+              "_blank"
+            );
+          });
         });
-      });
 
-      staysList.querySelectorAll("[data-delete]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await deleteStay(btn.getAttribute("data-delete"));
+        staysList.querySelectorAll("[data-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await deleteStay(btn.getAttribute("data-delete"));
+          });
         });
-      });
+
+      } catch (err) {
+        console.error("loadStays catch error:", err);
+        staysList.innerHTML = "<div style='color:red; padding:12px;'>Erreur lors du chargement des séjours : " + (err.message || err) + "</div>";
+      }
     }
 
     async function editStay(id){
@@ -3620,11 +3598,26 @@
 
     attachDropEvents();
 
-    try{
+    try {
       await checkAdmin();
       setMsg(adminStatus, "Vous êtes connecté(e) en tant qu’administrateur.");
+    } catch(err) {
+      console.warn("checkAdmin issue:", err);
+    }
+
+    try {
       await loadHomepageState();
+    } catch(err) {
+      console.warn("loadHomepageState issue:", err);
+    }
+
+    try {
       await loadStays();
+    } catch(err) {
+      console.warn("loadStays issue:", err);
+    }
+
+    try {
       refreshAllEyeButtons();
       renderContentBlocksEditor();
       updatePublishToggleUI();
