@@ -834,24 +834,34 @@
       return fromSiteFaq.length ? fromSiteFaq : fallbackStayFaqItems;
     }
 
-    function formatDateRange(start, end){
+    function parseIsoDateStr(str) {
+      if (!str) return null;
+      const clean = String(str).substring(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+      return clean;
+    }
+
+    function formatDateRange(startRaw, endRaw) {
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
       if (!start && !end) return "Dates à annoncer";
-      if (start && (!end || start === end)) {
-        const s = new Date(start + "T00:00:00");
+      
+      const s = start ? new Date(start + "T00:00:00") : null;
+      const e = end ? new Date(end + "T00:00:00") : null;
+
+      if (s && (!e || start === end)) {
         const day = s.getDate();
         const month = s.toLocaleDateString("fr-FR", { month: "long" });
         const year = s.getFullYear();
         return `Le ${day} ${month} ${year}`;
       }
-      if (!start && end) {
-        const e = new Date(end + "T00:00:00");
+      if (!s && e) {
         const day = e.getDate();
         const month = e.toLocaleDateString("fr-FR", { month: "long" });
         const year = e.getFullYear();
         return `Le ${day} ${month} ${year}`;
       }
-      const s = new Date(start + "T00:00:00");
-      const e = new Date(end + "T00:00:00");
       if (s.getTime() === e.getTime()) {
         const day = s.getDate();
         const month = s.toLocaleDateString("fr-FR", { month: "long" });
@@ -874,19 +884,23 @@
       return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
-    function getDurationLabel(start, end){
-      if(!start) return "Durée à annoncer";
-      if(!end || start === end) return "1 jour";
+    function getDurationLabel(startRaw, endRaw) {
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
+      if (!start) return "Durée à annoncer";
+      if (!end || start === end) return "1 jour";
 
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
       const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
 
-      if(days <= 0) return "Durée à annoncer";
-      if(days === 1) return "1 jour";
+      if (days <= 0) return "Durée à annoncer";
+      if (days === 1) return "1 jour";
 
       const nights = Math.max(0, days - 1);
-      return `${days} jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
+      return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
+    } jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function buildStayMetaDescription(stay){

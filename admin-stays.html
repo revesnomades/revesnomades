@@ -2262,12 +2262,14 @@
       document.getElementById("wizStartDate").value = sStr || "";
       document.getElementById("wizEndDate").value = eStr || sStr || "";
       if (wizIsSingleDay) wizIsSingleDay.checked = isSingleStay;
+      if (mainIsSingleDay) mainIsSingleDay.checked = isSingleStay;
       updateWizSingleDayUI();
+      updateMainSingleDayUI();
       document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
       document.getElementById("wizShortDesc").value = stay.short_description || "";
       document.getElementById("wizDesc").value = stay.description || "";
       document.getElementById("wizHeroImage").value = stay.hero_image || "";
-      
+
       // Image de l'index
       let indexImage = "";
       if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
@@ -3439,7 +3441,8 @@
         show_program_section: showProgramSection,
         show_included_section: showIncludedSection,
         show_options_section: showOptionsSection,
-        show_highlights_section: showHighlightsSection
+        show_highlights_section: showHighlightsSection,
+        is_single_day: !!document.getElementById("mainIsSingleDay")?.checked
       };
 
       // Vérification unicité du slug
