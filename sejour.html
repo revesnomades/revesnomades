@@ -202,7 +202,7 @@
         </p>
       </section>
 
-      <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
+      <!-- <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
         <div class="gift-pack-grid">
           <div class="gift-pack-text">
             <h2 class="sejour-section-title" id="giftTitle">Le sac cadeau Âmes Nomades</h2>
@@ -1235,7 +1235,7 @@
 
       if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
       if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
-      if (giftSection) giftSection.style.display = stay.show_gift_section === false ? "none" : "";
+      if (giftSection) giftSection.style.display = "none";
       if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
       if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
       if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
@@ -1391,7 +1391,7 @@
       if(stay.gift_image){
         giftImage.src = stay.gift_image;
       }
-      if(giftSection) giftSection.style.display = giftItemsData.length ? "" : "none";
+      if(giftSection) giftSection.style.display = "none";
 
       const incData = stay.included_items || arrayFromField(stay.included);
       const notIncData = stay.not_included_items || [];
