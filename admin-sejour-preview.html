@@ -769,21 +769,22 @@
         }
 
         if(block.type === "speaker"){
+          const layoutRight = block.layout === "image_right" || block.image_position === "image_right";
           const bioParagraphs = safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
             <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
           `).join("");
 
           return `
             <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
-              <div class="speaker-row">
-                <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px;">
-                  <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Intervenante"}</h3>
-                </div>
-                <div class="speaker-bio speaker-text-container">
-                  ${bioParagraphs}
-                </div>
+              <div class="speaker-row" style="display:flex; gap:32px; align-items:start; flex-wrap:wrap; ${layoutRight ? 'flex-direction:row-reverse;' : ''}">
                 <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
                   ${block.image ? `<img src="${escapeHtml(block.image)}" alt="${safeTitle}" style="width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:4px; display:block;">` : ""}
+                </div>
+                <div class="speaker-bio speaker-text-container" style="flex:1;">
+                  <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px; margin-bottom:12px;">
+                    <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Intervenante"}</h3>
+                  </div>
+                  ${bioParagraphs}
                 </div>
               </div>
             </article>
