@@ -1332,8 +1332,9 @@
 
         // Lieu au-dessus du titre
         const stayLocationEl = document.getElementById("stayLocation");
-        if (stayLocationEl && stay.location) {
-          const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
+        const fullLocationStr = [stay.location, stay.country].filter(Boolean).join(', ');
+        if (stayLocationEl && fullLocationStr) {
+          const parts = fullLocationStr.split(',').map(p => p.trim().toUpperCase());
           const uniqueParts = [];
           parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
           stayLocationEl.textContent = uniqueParts.join(' — ');

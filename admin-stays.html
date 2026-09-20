@@ -1344,15 +1344,25 @@
     }
 
     function arrayToLines(value){
-      if(!value || !Array.isArray(value)) return "";
-      return value.map(item => {
-        if(typeof item === "object" && item !== null){
-          if(item.label) return `${item.label} | ${item.price || ''} | ${item.stripe_url || ''}`;
-          if(item.title) return `${item.title} : ${item.text || ''}`;
+      if (!value) return "";
+      let arr = value;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+          try { arr = JSON.parse(trimmed); } catch(e) { arr = trimmed.split("\n"); }
+        } else {
+          arr = trimmed.split("\n");
+        }
+      }
+      if (!Array.isArray(arr)) return String(value || "");
+      return arr.map(item => {
+        if (typeof item === "object" && item !== null){
+          if (item.label) return `${item.label} | ${item.price || ''} | ${item.stripe_url || ''}`;
+          if (item.title) return `${item.title} : ${item.text || ''}`;
           return JSON.stringify(item);
         }
         return String(item);
-      }).join("\n");
+      }).filter(Boolean).join("\n");
     }
 
     function linesToOptionsArray(text){
