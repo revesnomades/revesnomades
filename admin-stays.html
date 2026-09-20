@@ -3229,6 +3229,7 @@ function renderWizGal() {
     });
 
     btnNewStay?.addEventListener("click", () => {
+      stayContentBlocks = [];
       currentWizardEditId = null;
       const wizH2 = document.querySelector("#stayWizardModal h2");
       if(wizH2) wizH2.textContent = "Nouveau séjour";
@@ -3340,7 +3341,7 @@ function renderWizGal() {
       }
       if (Array.isArray(stayContentBlocks)) {
         stayContentBlocks.forEach(b => {
-          if (!["index_image", "gallery_2", "chef"].includes(b.type) && !(b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
+          if (!["index_image", "gallery_2", "chef", "speaker"].includes(b.type) && !(b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
             contentBlocks.push(b);
           }
         });
