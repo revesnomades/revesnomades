@@ -2226,187 +2226,214 @@
     }
 
     async function editStay(id){
-      const { data: stay, error } = await supabase
-        .from("stays")
-        .select("*")
-        .eq("id", id)
-        .single();
+      currentWizardEditId = id;
+      currentStayId = id;
 
-      if(error || !stay){
-        console.error(error);
-        alert("Impossible de charger ce séjour.");
+      // Ouvrir le modal immédiatement
+      const wizH2 = document.querySelector("#stayWizardModal h2");
+      if(wizH2) wizH2.textContent = "Modifier le séjour";
+      const btnSub = stayWizardForm ? stayWizardForm.querySelector("button[type='submit']") : null;
+      if(btnSub) btnSub.textContent = "Enregistrer les modifications";
+      updateWizardStep(1);
+      if (stayWizardModal) stayWizardModal.classList.add("active");
+
+      let stay = null;
+      let dates = [];
+      try {
+        const { data: stayData, error: stayErr } = await supabase
+          .from("stays")
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (stayErr || !stayData) {
+          console.error("Erreur chargement séjour:", stayErr);
+          alert("Impossible de charger ce séjour.");
+          return;
+        }
+        stay = stayData;
+
+        const { data: datesData } = await supabase
+          .from("stay_dates")
+          .select("*")
+          .eq("stay_id", id)
+          .order("start_date", { ascending: true })
+          .limit(1);
+        dates = datesData || [];
+      } catch (err) {
+        console.error("Erreur d'accès réseau Supabase:", err);
+        alert("Erreur de communication avec Supabase.");
         return;
       }
 
-      const { data: dates } = await supabase
-        .from("stay_dates")
-        .select("*")
-        .eq("stay_id", id)
-        .order("start_date", { ascending: true })
-        .limit(1);
+      // Remplissage sécurisé des formulaires
+      try {
+        const firstDate = dates?.[0] || null;
+        const sStr = firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "";
+        const eStr = firstDate?.end_date ? String(firstDate.end_date).substring(0, 10) : "";
+        const isSingleStay = stay.is_single_day === true || (firstDate ? (!eStr || sStr === eStr) : false);
 
-      currentWizardEditId = id;
-      currentStayId = id;
-      const wizH2 = document.querySelector("#stayWizardModal h2");
-      if(wizH2) wizH2.textContent = "Modifier le séjour";
-      const btnSub = stayWizardForm.querySelector("button[type='submit']");
-      if(btnSub) btnSub.textContent = "Enregistrer les modifications";
+        // Étape 1 : Infos générales
+        if (document.getElementById("wizTitle")) document.getElementById("wizTitle").value = stay.title || "";
+        if (document.getElementById("wizSlug")) document.getElementById("wizSlug").value = stay.slug || "";
+        if (document.getElementById("wizLocation")) document.getElementById("wizLocation").value = stay.location || "";
+        if (document.getElementById("wizStartDate")) document.getElementById("wizStartDate").value = sStr || "";
+        if (document.getElementById("wizEndDate")) document.getElementById("wizEndDate").value = eStr || sStr || "";
+        if (wizIsSingleDay) wizIsSingleDay.checked = isSingleStay;
+        if (mainIsSingleDay) mainIsSingleDay.checked = isSingleStay;
+        updateWizSingleDayUI();
+        updateMainSingleDayUI();
+        if (document.getElementById("wizSeats")) document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
+        if (document.getElementById("wizShortDesc")) document.getElementById("wizShortDesc").value = stay.short_description || "";
+        if (document.getElementById("wizDesc")) document.getElementById("wizDesc").value = stay.description || "";
+        if (document.getElementById("wizHeroImage")) document.getElementById("wizHeroImage").value = stay.hero_image || "";
 
-      const firstDate = dates?.[0] || null;
-      const sStr = firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "";
-      const eStr = firstDate?.end_date ? String(firstDate.end_date).substring(0, 10) : "";
-      const isSingleStay = stay.is_single_day === true || (firstDate ? (!eStr || sStr === eStr) : false);
+        // Éditeur inline synchro
+        if (stayTitle) stayTitle.value = stay.title || "";
+        if (staySlug) staySlug.value = stay.slug || "";
+        if (stayLocation) stayLocation.value = stay.location || "";
+        if (mainStartDate) mainStartDate.value = sStr || "";
+        if (mainEndDate) mainEndDate.value = eStr || sStr || "";
+        if (mainSeatsTotal) mainSeatsTotal.value = firstDate?.seats_total ?? 10;
+        if (mainSeatsRemaining) mainSeatsRemaining.value = firstDate?.seats_remaining ?? 10;
+        if (typeof updateDurationInfo === 'function') updateDurationInfo();
+        if (stayShortDescription) stayShortDescription.value = stay.short_description || "";
+        if (stayDescription) stayDescription.value = stay.description || "";
+        if (stayHeroImage) stayHeroImage.value = stay.hero_image || "";
+        if (stayBookingUrl) stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
+        if (stayMinBookings) stayMinBookings.value = stay.min_bookings || "10";
+        if (stayPublished) stayPublished.checked = !!stay.published;
+        updatePublishToggleUI();
+        if (stayHighlights) stayHighlights.value = Array.isArray(stay.highlights) ? stay.highlights.join("\n") : (typeof stay.highlights === 'string' ? stay.highlights : "");
+        if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
+        if (stayIncludedItems) stayIncludedItems.value = Array.isArray(stay.included_items) ? stay.included_items.join("\n") : (typeof stay.included_items === 'string' ? stay.included_items : "");
+        if (stayNotIncludedItems) stayNotIncludedItems.value = Array.isArray(stay.not_included_items) ? stay.not_included_items.join("\n") : (typeof stay.not_included_items === 'string' ? stay.not_included_items : "");
+        if (stayFaq && stay.faq) stayFaq.value = typeof stay.faq === 'string' ? stay.faq : JSON.stringify(stay.faq, null, 2);
 
-      // Étape 1 : Infos générales
-      if (document.getElementById("wizTitle")) document.getElementById("wizTitle").value = stay.title || "";
-      if (document.getElementById("wizSlug")) document.getElementById("wizSlug").value = stay.slug || "";
-      if (document.getElementById("wizLocation")) document.getElementById("wizLocation").value = stay.location || "";
-      if (document.getElementById("wizStartDate")) document.getElementById("wizStartDate").value = sStr || "";
-      if (document.getElementById("wizEndDate")) document.getElementById("wizEndDate").value = eStr || sStr || "";
-      if (wizIsSingleDay) wizIsSingleDay.checked = isSingleStay;
-      if (mainIsSingleDay) mainIsSingleDay.checked = isSingleStay;
-      updateWizSingleDayUI();
-      updateMainSingleDayUI();
-      if (document.getElementById("wizSeats")) document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
-      if (document.getElementById("wizShortDesc")) document.getElementById("wizShortDesc").value = stay.short_description || "";
-      if (document.getElementById("wizDesc")) document.getElementById("wizDesc").value = stay.description || "";
-      if (document.getElementById("wizHeroImage")) document.getElementById("wizHeroImage").value = stay.hero_image || "";
+        showGiftSection = stay.show_gift_section !== false;
+        showFaqSection = stay.show_faq_section !== false;
+        showProgramSection = stay.show_program_section !== false;
+        showIncludedSection = stay.show_included_section !== false;
+        showOptionsSection = stay.show_options_section !== false;
+        showHighlightsSection = stay.show_highlights_section !== false;
+        refreshAllEyeButtons();
 
-      // Éditeur inline synchro
-      if (stayTitle) stayTitle.value = stay.title || "";
-      if (staySlug) staySlug.value = stay.slug || "";
-      if (stayLocation) stayLocation.value = stay.location || "";
-      if (mainStartDate) mainStartDate.value = sStr || "";
-      if (mainEndDate) mainEndDate.value = eStr || sStr || "";
-      if (mainSeatsTotal) mainSeatsTotal.value = firstDate?.seats_total ?? 10;
-      if (mainSeatsRemaining) mainSeatsRemaining.value = firstDate?.seats_remaining ?? 10;
-      if (typeof updateDurationInfo === 'function') updateDurationInfo();
-      if (stayShortDescription) stayShortDescription.value = stay.short_description || "";
-      if (stayDescription) stayDescription.value = stay.description || "";
-      if (stayHeroImage) stayHeroImage.value = stay.hero_image || "";
-      if (stayBookingUrl) stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
-      if (stayMinBookings) stayMinBookings.value = stay.min_bookings || "10";
-      if (stayPublished) stayPublished.checked = !!stay.published;
-      updatePublishToggleUI();
-      if (stayHighlights) stayHighlights.value = Array.isArray(stay.highlights) ? stay.highlights.join("\n") : "";
-      if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
-      if (stayIncludedItems) stayIncludedItems.value = Array.isArray(stay.included_items) ? stay.included_items.join("\n") : "";
-      if (stayNotIncludedItems) stayNotIncludedItems.value = Array.isArray(stay.not_included_items) ? stay.not_included_items.join("\n") : "";
-      if (stayFaq && stay.faq) stayFaq.value = JSON.stringify(stay.faq, null, 2);
+        let rawBlocks = stay.content_blocks;
+        if (typeof rawBlocks === 'string') { try { rawBlocks = JSON.parse(rawBlocks); } catch(e){} }
+        stayContentBlocks = Array.isArray(rawBlocks) ? [...rawBlocks] : [];
+        renderContentBlocksEditor();
 
-      showGiftSection = stay.show_gift_section !== false;
-      showFaqSection = stay.show_faq_section !== false;
-      showProgramSection = stay.show_program_section !== false;
-      showIncludedSection = stay.show_included_section !== false;
-      showOptionsSection = stay.show_options_section !== false;
-      showHighlightsSection = stay.show_highlights_section !== false;
-      refreshAllEyeButtons();
+        // Étape 2 : Visuels (Image index & Galerie)
+        let indexImage = stay.index_image || "";
+        if (!indexImage && Array.isArray(stayContentBlocks)) {
+          const idxBlock = stayContentBlocks.find(b => b && b.type === "index_image");
+          if (idxBlock) indexImage = idxBlock.image || "";
+        }
+        if (document.getElementById("wizIndexImage")) document.getElementById("wizIndexImage").value = indexImage || stay.hero_image || "";
 
-      stayContentBlocks = Array.isArray(stay.content_blocks) ? [...stay.content_blocks] : [];
-      renderContentBlocksEditor();
+        let rawGal = stay.gallery_images;
+        if (typeof rawGal === 'string') { try { rawGal = JSON.parse(rawGal); } catch(e){} }
+        wizGalList = Array.isArray(rawGal) && rawGal.length > 0 ? [...rawGal] : [];
+        if (wizGalList.length === 0 && Array.isArray(stayContentBlocks)) {
+          const galBlock = stayContentBlocks.find(b => b && (b.type === "gallery_2" || (b.images && b.images.length > 0)));
+          if (galBlock && galBlock.images) wizGalList = [...galBlock.images];
+        }
+        renderWizGal();
 
-      // Étape 2 : Visuels (Image index & Galerie)
-      let indexImage = stay.index_image || "";
-      if (!indexImage && stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const idxBlock = stay.content_blocks.find(b => b.type === "index_image");
-        if (idxBlock) indexImage = idxBlock.image || "";
-      }
-      if (document.getElementById("wizIndexImage")) document.getElementById("wizIndexImage").value = indexImage || stay.hero_image || "";
+        // Étape 3 : Intervenants & Chef
+        let rawSpk = stay.speakers;
+        if (typeof rawSpk === 'string') { try { rawSpk = JSON.parse(rawSpk); } catch(e){} }
+        wizSpeakerList = Array.isArray(rawSpk) && rawSpk.length > 0 ? [...rawSpk] : [];
+        if (wizSpeakerList.length === 0 && Array.isArray(stayContentBlocks)) {
+          stayContentBlocks
+            .filter(b => b && (b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg"))))
+            .forEach(b => {
+              wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "" });
+            });
+        }
+        renderWizSpeakers();
 
-      wizGalList = Array.isArray(stay.gallery_images) && stay.gallery_images.length > 0 ? [...stay.gallery_images] : [];
-      if (wizGalList.length === 0 && stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const galBlock = stay.content_blocks.find(b => b.type === "gallery_2" || (b.images && b.images.length > 0));
-        if (galBlock && galBlock.images) wizGalList = [...galBlock.images];
-      }
-      renderWizGal();
+        const cName = stay.chef_name || "";
+        const cPhoto = stay.chef_photo || "";
+        const cBio = stay.chef_bio || "";
+        if (cName || cPhoto || cBio) {
+          if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = cName;
+          if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = cPhoto;
+          if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = cBio;
+        } else {
+          const chefBlock = Array.isArray(stayContentBlocks) ? stayContentBlocks.find(b => b && b.type === "chef") : null;
+          if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = chefBlock?.title || "";
+          if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = chefBlock?.image || "";
+          if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = chefBlock?.text || "";
+        }
 
-      // Étape 3 : Intervenants & Chef
-      wizSpeakerList = Array.isArray(stay.speakers) && stay.speakers.length > 0 ? [...stay.speakers] : [];
-      if (wizSpeakerList.length === 0 && stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        stay.content_blocks
-          .filter(b => b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg")))
-          .forEach(b => {
-            wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "" });
-          });
-      }
-      renderWizSpeakers();
+        // Étape 4 : Inclus / Non inclus
+        if (document.getElementById("wizIncluded")) document.getElementById("wizIncluded").value = arrayToLines(stay.included_items);
+        if (document.getElementById("wizNotIncluded")) document.getElementById("wizNotIncluded").value = arrayToLines(stay.not_included_items);
 
-      const cName = stay.chef_name || "";
-      const cPhoto = stay.chef_photo || "";
-      const cBio = stay.chef_bio || "";
-      if (cName || cPhoto || cBio) {
-        if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = cName;
-        if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = cPhoto;
-        if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = cBio;
-      } else {
-        const chefBlock = (stay.content_blocks || []).find(b => b.type === "chef");
-        if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = chefBlock?.title || "";
-        if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = chefBlock?.image || "";
-        if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = chefBlock?.text || "";
-      }
-
-      // Étape 4 : Inclus / Non inclus
-      if (document.getElementById("wizIncluded")) document.getElementById("wizIncluded").value = arrayToLines(stay.included_items);
-      if (document.getElementById("wizNotIncluded")) document.getElementById("wizNotIncluded").value = arrayToLines(stay.not_included_items);
-
-      // Étape 5 : Programme
-      if (document.getElementById("wizProgramNote")) document.getElementById("wizProgramNote").value = stay.program_note || "";
-      wizProgList = [];
-      (Array.isArray(stay.program) ? stay.program : []).forEach(p => {
-        if (p.slots && Array.isArray(p.slots) && p.slots.length > 0) {
-          p.slots.forEach(s => {
-            const per = p.period || p.title || "Matin";
+        // Étape 5 : Programme
+        if (document.getElementById("wizProgramNote")) document.getElementById("wizProgramNote").value = stay.program_note || "";
+        wizProgList = [];
+        let rawProg = stay.program;
+        if (typeof rawProg === 'string') { try { rawProg = JSON.parse(rawProg); } catch(e){} }
+        (Array.isArray(rawProg) ? rawProg : []).forEach(p => {
+          if (!p) return;
+          if (p.slots && Array.isArray(p.slots) && p.slots.length > 0) {
+            p.slots.forEach(s => {
+              if (!s) return;
+              const per = p.period || p.title || "Matin";
+              wizProgList.push({
+                period: per,
+                time: s.time || "",
+                activity: s.text || s.activity || "",
+                title: per,
+                text: s.text || s.activity || ""
+              });
+            });
+          } else {
+            const per = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
+            const act = p.activity || p.text || p.description || "";
             wizProgList.push({
               period: per,
-              time: s.time || "",
-              activity: s.text || s.activity || "",
-              title: per,
-              text: s.text || s.activity || ""
+              time: p.time || "",
+              activity: act,
+              title: p.title || per,
+              text: act
             });
-          });
-        } else {
-          const per = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
-          const act = p.activity || p.text || p.description || "";
-          wizProgList.push({
-            period: per,
-            time: p.time || "",
-            activity: act,
-            title: p.title || per,
-            text: act
-          });
-        }
-      });
-      renderWizProg();
-
-      // Étape 6 : Hébergement & Tarifs
-      const aDesc = stay.accommodation_desc || "";
-      const aPhoto = stay.accommodation_photo || "";
-      if (aDesc || aPhoto) {
-        if (document.getElementById("wizAccomDesc")) document.getElementById("wizAccomDesc").value = aDesc;
-        if (document.getElementById("wizAccomPhoto")) document.getElementById("wizAccomPhoto").value = aPhoto;
-      } else {
-        let accomD = "", accomP = "";
-        if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-          const accomBlock = stay.content_blocks.find(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"));
-          if (accomBlock) {
-            accomD = accomBlock.text || "";
-            accomP = accomBlock.image || "";
           }
+        });
+        renderWizProg();
+
+        // Étape 6 : Hébergement & Tarifs
+        const aDesc = stay.accommodation_desc || "";
+        const aPhoto = stay.accommodation_photo || "";
+        if (aDesc || aPhoto) {
+          if (document.getElementById("wizAccomDesc")) document.getElementById("wizAccomDesc").value = aDesc;
+          if (document.getElementById("wizAccomPhoto")) document.getElementById("wizAccomPhoto").value = aPhoto;
+        } else {
+          let accomD = "", accomP = "";
+          if (Array.isArray(stayContentBlocks)) {
+            const accomBlock = stayContentBlocks.find(b => b && b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"));
+            if (accomBlock) {
+              accomD = accomBlock.text || "";
+              accomP = accomBlock.image || "";
+            }
+          }
+          if (document.getElementById("wizAccomDesc")) document.getElementById("wizAccomDesc").value = accomD;
+          if (document.getElementById("wizAccomPhoto")) document.getElementById("wizAccomPhoto").value = accomP;
         }
-        if (document.getElementById("wizAccomDesc")) document.getElementById("wizAccomDesc").value = accomD;
-        if (document.getElementById("wizAccomPhoto")) document.getElementById("wizAccomPhoto").value = accomP;
+
+        let rawOpt = stay.extra_options;
+        if (typeof rawOpt === 'string') { try { rawOpt = JSON.parse(rawOpt); } catch(e){} }
+        wizOptList = Array.isArray(rawOpt) ? [...rawOpt] : [];
+        renderWizOpt();
+
+        const wShowFaq = document.getElementById("wizShowFaq");
+        if (wShowFaq) wShowFaq.checked = stay.show_faq_section !== false;
+        const wShowOther = document.getElementById("wizShowOtherStays");
+        if (wShowOther) wShowOther.checked = stay.show_other_stays_section !== false;
+      } catch (err) {
+        console.error("Erreur remplissage formulaire editStay:", err);
       }
-
-      wizOptList = Array.isArray(stay.extra_options) ? [...stay.extra_options] : [];
-      renderWizOpt();
-
-      const wShowFaq = document.getElementById("wizShowFaq");
-      if (wShowFaq) wShowFaq.checked = stay.show_faq_section !== false;
-      const wShowOther = document.getElementById("wizShowOtherStays");
-      if (wShowOther) wShowOther.checked = stay.show_other_stays_section !== false;
-
-      updateWizardStep(1);
-      stayWizardModal.classList.add("active");
     }
     function getStoragePathFromUrl(url) {
       if (!url) return null;
