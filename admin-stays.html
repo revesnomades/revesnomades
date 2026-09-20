@@ -3154,26 +3154,19 @@
         short_description: shortDesc,
         description: document.getElementById("wizDescription")?.value?.trim() || "",
         hero_image: heroImage,
-        index_image: indexImage || heroImage,
         booking_url: bookingUrl,
         reservation_url: bookingUrl,
         is_single_day: isSingle,
         published: !!document.getElementById("wizPublished")?.checked,
         published_at: document.getElementById("wizPublished")?.checked ? new Date().toISOString() : null,
         min_bookings: seatsTotal,
-        price_from: priceFrom,
         highlights: linesToArray(document.getElementById("wizHighlights")?.value || ""),
         included_items: linesToArray(document.getElementById("wizIncludedItems")?.value || ""),
         not_included_items: linesToArray(document.getElementById("wizNotIncludedItems")?.value || ""),
         extra_options: typeof wizOptList !== "undefined" ? wizOptList : [],
         program: typeof wizProgList !== "undefined" ? wizProgList : [],
-        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
-        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
         show_faq_section: !!document.getElementById("wizShowFaq")?.checked,
-        show_other_stays_section: !!document.getElementById("wizShowOtherStays")?.checked,
-        chef_name: document.getElementById("wizChefName")?.value?.trim() || "",
-        chef_photo: document.getElementById("wizChefPhoto")?.value?.trim() || "",
-        chef_bio: document.getElementById("wizChefBio")?.value?.trim() || ""
+        show_other_stays_section: !!document.getElementById("wizShowOtherStays")?.checked
       };
 
       let stayId = typeof currentWizardEditId !== "undefined" ? currentWizardEditId : null;
