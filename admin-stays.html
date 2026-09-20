@@ -3117,216 +3117,98 @@
       updateWizardStep(currentWizStep + 1);
     });
 
-    stayWizardForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      wizardErrorMsg.textContent = "Création du séjour en cours...";
-      
-      const title = document.getElementById("wizTitle").value.trim();
-      const customSlug = document.getElementById("wizSlug").value.trim();
-      const slug = customSlug || slugify(title);
-      const location = document.getElementById("wizLocation").value.trim();
-      const country = document.getElementById("wizCountry")?.value.trim() || "";
-      const fullLocation = country ? `${location}, ${country}` : location;
-      const short_description = document.getElementById("wizShortDesc").value.trim();
-      const description = document.getElementById("wizDesc").value.trim();
-      const hero_image = document.getElementById("wizHeroImage").value.trim();
-      const booking_url = wizOptList.length > 0 && wizOptList[0].stripe_url ? wizOptList[0].stripe_url : "";
-      const min_bookings = 10;
-      const published = false;
-      
-      const program_note = document.getElementById("wizProgramNote").value.trim();
-      const included_items = linesToArray(document.getElementById("wizIncluded").value);
-      const not_included_items = linesToArray(document.getElementById("wizNotIncluded").value);
-
-      const { data: existing } = await supabase.from("stays").select("id").eq("slug", slug).maybeSingle();
-      if(existing && (!currentWizardEditId || existing.id !== currentWizardEditId)){
-        wizardErrorMsg.textContent = `Un séjour avec un titre ou slug similaire ("${slug}") existe déjà. Veuillez modifier le titre ou le slug.`;
-        return;
-      }
-
-      const content_blocks = [];
-      const index_image = document.getElementById("wizIndexImage").value.trim();
-      if(index_image){
-        content_blocks.push({
-          id: `block_index_img_${Date.now()}`,
-          type: "index_image",
-          enabled: true,
-          title: "Image index",
-          text: "",
-          image: index_image,
-          image_alt: "Image index",
-          images: [], quote: "", caption: ""
-        });
-      }
-      if(wizGalList.length > 0){
-        content_blocks.push({
-          id: `block_gal_${Date.now()}`,
-          type: "gallery_2",
-          enabled: true,
-          title: "Aperçu en images",
-          images: wizGalList,
-          text: "", layout: "image_left", image: "", image_alt: "", quote: "", caption: ""
-        });
-      }
-      // Speakers (intervenants multiples)
-      wizSpeakerList.forEach((sp, i) => {
-        content_blocks.push({
-          id: `block_spk_${Date.now()}_${i}`,
-          type: "speaker",
-          enabled: true,
-          layout: "image_left",
-          title: sp.title || "",
-          text: sp.text || "",
-          image: sp.image || "",
-          image_alt: sp.title || "",
-          images: [], quote: "", caption: ""
-        });
-      });
-      // Chef / Cuisinier
-      const chefName  = (document.getElementById("wizChefName")?.value || "").trim();
-      const chefPhoto = (document.getElementById("wizChefPhoto")?.value || "").trim();
-      const chefBio   = (document.getElementById("wizChefBio")?.value || "").trim();
-      if(chefName || chefPhoto || chefBio){
-        content_blocks.push({
-          id: `block_chef_${Date.now()}`,
-          type: "chef",
-          enabled: true,
-          layout: "image_left",
-          title: chefName || "Notre Chef",
-          text: chefBio,
-          image: chefPhoto,
-          image_alt: chefName,
-          images: [], quote: "", caption: ""
-        });
-      }
-      const accomDesc = document.getElementById("wizAccomDesc").value.trim();
-      const accomPhoto = document.getElementById("wizAccomPhoto").value.trim();
-      if(accomDesc || accomPhoto){
-        content_blocks.push({
-          id: `block_accom_${Date.now()}`,
-          type: "image_text",
-          enabled: true,
-          layout: "image_right",
-          title: "L'Hébergement",
-          text: accomDesc,
-          image: accomPhoto,
-          image_alt: "Hébergement du séjour",
-          images: [], quote: "", caption: ""
-        });
-      }
-
-
-      const show_faq_section = document.getElementById("wizShowFaq") ? !!document.getElementById("wizShowFaq").checked : true;
-      const show_other_stays_section = document.getElementById("wizShowOtherStays") ? !!document.getElementById("wizShowOtherStays").checked : true;
-
-      const is_single_day = !!document.getElementById("wizIsSingleDay")?.checked;
-
-      const payload = {
-        title, slug, location: fullLocation, short_description, description, hero_image,
-        booking_url, reservation_url: booking_url, min_bookings,
-        program_note, included_items, not_included_items,
-        program: wizProgList.map(p => ({ period: p.period || p.title || "Matin", time: p.time || "", activity: p.activity || p.text || "", title: p.title || p.period || "Matin", text: p.activity || p.text || "" })),
-        extra_options: wizOptList,
-        content_blocks,
-        show_faq_section,
-        show_other_stays_section,
-        is_single_day
-      };
-      if (!currentWizardEditId) {
-        payload.published = false;
-      }
-
-      if (currentWizardEditId) {
-        let { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
-        if (updErr && updErr.message && (updErr.message.includes("show_other_stays_section") || updErr.message.includes("is_single_day"))) {
-          delete payload.show_other_stays_section;
-          delete payload.is_single_day;
-          const retry = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
-          updErr = retry.error;
-        }
-        if(updErr){
-          console.error(updErr);
-          wizardErrorMsg.textContent = "Erreur modification : " + (updErr.message || JSON.stringify(updErr));
-          return;
-        }
-        const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
-        const { data: exDate } = await supabase.from("stay_dates").select("id").eq("stay_id", currentWizardEditId).limit(1);
-        const wStart = document.getElementById("wizStartDate").value || null;
-        let wEnd = document.getElementById("wizEndDate").value || null;
-        if (document.getElementById("wizIsSingleDay")?.checked || !wEnd) {
-          wEnd = wStart;
-        }
-
-        if (exDate && exDate.length > 0) {
-          await supabase.from("stay_dates").update({
-            start_date: wStart,
-            end_date: wEnd,
-            seats_total: Number(document.getElementById("wizSeats").value || 12),
-            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-            amount: firstPrice
-          }).eq("id", exDate[0].id);
-        } else {
-          await supabase.from("stay_dates").insert([{
-            stay_id: currentWizardEditId,
-            start_date: wStart,
-            end_date: wEnd,
-            seats_total: Number(document.getElementById("wizSeats").value || 12),
-            seats_remaining: Number(document.getElementById("wizSeats").value || 12),
-            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-            amount: firstPrice
-          }]);
-        }
-        stayWizardModal.classList.remove("active");
-        setMsg(adminStatus, "✨ Séjour modifié avec succès via l'assistant !");
-        await loadStays();
-        return;
-      }
-
-      let { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
-      if (error && error.message && (error.message.includes("show_other_stays_section") || error.message.includes("is_single_day"))) {
-        delete payload.show_other_stays_section;
-        delete payload.is_single_day;
-        const retry = await supabase.from("stays").insert([payload]).select().single();
-        newStay = retry.data;
-        error = retry.error;
-      }
-      if(error || !newStay){
-        console.error(error);
-        wizardErrorMsg.textContent = "Erreur création : " + (error?.message || "Erreur lors de la création");
-        return;
-      }
-
-      const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
-      const wStartNew = document.getElementById("wizStartDate").value || null;
-      let wEndNew = document.getElementById("wizEndDate").value || null;
-      if (document.getElementById("wizIsSingleDay")?.checked || !wEndNew) {
-        wEndNew = wStartNew;
-      }
-      await supabase.from("stay_dates").insert([{
-        stay_id: newStay.id,
-        start_date: wStartNew,
-        end_date: wEndNew,
-        seats_total: Number(document.getElementById("wizSeats").value || 12),
-        seats_remaining: Number(document.getElementById("wizSeats").value || 12),
-        price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-        amount: firstPrice
-      }]);
-
-      stayWizardModal.classList.remove("active");
-      setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant !");
-      await loadStays();
-    });
-
-    btnCancelEdit?.addEventListener("click", () => {
-      resetEditor();
-      closeEditor();
-    });
-
     btnAddContentBlock?.addEventListener("click", () => {
       const type = newBlockType?.value || "text";
       stayContentBlocks.push(createDefaultBlock(type));
       renderContentBlocksEditor();
       setMsg(editorMsg, "");
+    });
+
+    stayWizardForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (wizardErrorMsg) wizardErrorMsg.textContent = "";
+
+      const title = document.getElementById("wizTitle")?.value?.trim();
+      const location = document.getElementById("wizLocation")?.value?.trim();
+      const startDateVal = document.getElementById("wizStartDate")?.value;
+      const isSingle = !!document.getElementById("wizIsSingleDay")?.checked;
+      const endDateVal = isSingle ? startDateVal : (document.getElementById("wizEndDate")?.value || startDateVal);
+      const shortDesc = document.getElementById("wizShortDesc")?.value?.trim();
+
+      if (!title || !location || !startDateVal || !endDateVal || !shortDesc) {
+        if (wizardErrorMsg) wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, la date et l'accroche courte.";
+        return;
+      }
+
+      const slug = slugify(title);
+      const heroImage = document.getElementById("wizHeroImage")?.value?.trim() || "";
+      const indexImage = document.getElementById("wizIndexImage")?.value?.trim() || "";
+      const bookingUrl = document.getElementById("wizBookingUrl")?.value?.trim() || "";
+      const seatsTotal = Number(document.getElementById("wizSeatsTotal")?.value || 10);
+      const priceFrom = Number(document.getElementById("wizPriceFrom")?.value || 0);
+
+      const payload = {
+        title,
+        slug,
+        location,
+        short_description: shortDesc,
+        description: document.getElementById("wizDescription")?.value?.trim() || "",
+        hero_image: heroImage,
+        index_image: indexImage || heroImage,
+        booking_url: bookingUrl,
+        reservation_url: bookingUrl,
+        is_single_day: isSingle,
+        published: !!document.getElementById("wizPublished")?.checked,
+        published_at: document.getElementById("wizPublished")?.checked ? new Date().toISOString() : null,
+        min_bookings: seatsTotal,
+        price_from: priceFrom,
+        highlights: linesToArray(document.getElementById("wizHighlights")?.value || ""),
+        included_items: linesToArray(document.getElementById("wizIncludedItems")?.value || ""),
+        not_included_items: linesToArray(document.getElementById("wizNotIncludedItems")?.value || ""),
+        extra_options: typeof wizOptList !== "undefined" ? wizOptList : [],
+        program: typeof wizProgList !== "undefined" ? wizProgList : [],
+        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
+        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
+        show_faq_section: !!document.getElementById("wizShowFaq")?.checked,
+        show_other_stays_section: !!document.getElementById("wizShowOtherStays")?.checked,
+        chef_name: document.getElementById("wizChefName")?.value?.trim() || "",
+        chef_photo: document.getElementById("wizChefPhoto")?.value?.trim() || "",
+        chef_bio: document.getElementById("wizChefBio")?.value?.trim() || ""
+      };
+
+      let stayId = typeof currentWizardEditId !== "undefined" ? currentWizardEditId : null;
+      if (stayId) {
+        const { error } = await supabase.from("stays").update(payload).eq("id", stayId);
+        if (error) {
+          if (wizardErrorMsg) wizardErrorMsg.textContent = "Erreur de mise à jour : " + error.message;
+          return;
+        }
+      } else {
+        const { data, error } = await supabase.from("stays").insert([payload]).select().single();
+        if (error) {
+          if (wizardErrorMsg) wizardErrorMsg.textContent = "Erreur de création : " + error.message;
+          return;
+        }
+        stayId = data.id;
+      }
+
+      if (startDateVal && stayId) {
+        await supabase.from("stay_dates").delete().eq("stay_id", stayId);
+        const { error: dateErr } = await supabase.from("stay_dates").insert([{
+          stay_id: stayId,
+          start_date: startDateVal,
+          end_date: endDateVal,
+          seats_total: seatsTotal,
+          seats_remaining: seatsTotal
+        }]);
+        if (dateErr) {
+          console.error("Erreur d'enregistrement des dates :", dateErr);
+        }
+      }
+
+      if (stayWizardModal) stayWizardModal.classList.remove("active");
+      await loadHomepageState();
+      await loadStays();
     });
 
     btnPreviewStayTop?.addEventListener("click", () => {
@@ -3551,11 +3433,6 @@
           seats_total: Number(mainSeatsTotal.value || 10),
           seats_remaining: Number(mainSeatsRemaining.value || 10)
         }]);
-        if(dateError){
-          console.error(dateError);
-          setMsg(editorMsg, `Séjour enregistré, mais erreur sur les dates : ${dateError.message || "erreur inconnue"}`);
-          return;
-        }
       }
 
       if(dateError){
