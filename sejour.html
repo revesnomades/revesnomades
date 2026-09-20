@@ -1014,7 +1014,7 @@
       return clean;
     }
 
-    function formatDateRange(startRaw, endRaw) {
+    function formatDateRange(startRaw, endRaw, isSingleDay) {
       const start = parseIsoDateStr(startRaw);
       const end = parseIsoDateStr(endRaw);
 
@@ -1023,10 +1023,12 @@
       const s = start ? new Date(start + "T00:00:00") : null;
       const e = end ? new Date(end + "T00:00:00") : null;
 
-      if (s && (!e || start === end)) {
-        const day = s.getDate();
-        const month = s.toLocaleDateString("fr-FR", { month: "long" });
-        const year = s.getFullYear();
+      if (isSingleDay || (s && (!e || start === end))) {
+        const targetDate = s || e;
+        if (!targetDate) return "Dates à annoncer";
+        const day = targetDate.getDate();
+        const month = targetDate.toLocaleDateString("fr-FR", { month: "long" });
+        const year = targetDate.getFullYear();
         return `Le ${day} ${month} ${year}`;
       }
       if (!s && e) {
@@ -1057,7 +1059,8 @@
       return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
-    function getDurationLabel(startRaw, endRaw) {
+    function getDurationLabel(startRaw, endRaw, isSingleDay) {
+      if (isSingleDay) return "1 jour";
       const start = parseIsoDateStr(startRaw);
       const end = parseIsoDateStr(endRaw);
 
@@ -1073,7 +1076,6 @@
 
       const nights = Math.max(0, days - 1);
       return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
-    } jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function buildStayMetaDescription(stay){
@@ -1271,166 +1273,140 @@
           return;
         }
 
-      if(error || !stay){
-        if(error) console.error(error);
+        if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
+        if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
+        if (giftSection) giftSection.style.display = "none";
+        if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
+        if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
+        if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
+        const otherStaysSection = document.getElementById("otherStaysSection");
+        if (otherStaysSection) otherStaysSection.style.display = stay.show_other_stays_section === false ? "none" : "";
 
-        const heroSection = document.querySelector(".sejour-hero");
-        if(heroSection) heroSection.style.display = "none";
+        let dates = null;
+        try {
+          const res = await supabase.from("stay_dates").select("*").eq("stay_id", stay.id).order("start_date", { ascending: true }).limit(1);
+          dates = res.data;
+        } catch(e) { console.warn("stay_dates query issue:", e); }
 
-        stayTitle.textContent = "";
-        stayText.innerHTML = `
-          <div style="text-align:center; padding:60px 20px;">
-            <div style="font-size:48px; margin-bottom:16px;">🌿</div>
-            <h1 style="font-family:'SegoCustom'; font-weight:500; font-size:clamp(28px,4vw,48px); margin:0;">
-              Ce séjour n'est plus disponible
-            </h1>
-            <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
-              Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
-            </p>
-            <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-              <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
-              <a class="btn on-light" href="/index.html">Retour à l'accueil</a>
-            </div>
-          </div>
-        `;
-        if(stayMeta)  stayMeta.style.display  = "none";
-        if(stayDates) stayDates.parentElement.style.display = "none";
-        return;
-      }
+        let bookingsPaid = null;
+        try {
+          const res = await supabase.from("bookings").select("id").eq("stay_id", stay.id).in("status", ["paid", "confirmed"]);
+          bookingsPaid = res.data;
+        } catch(e) { console.warn("bookings query issue:", e); }
 
-      if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
-      if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
-      if (giftSection) giftSection.style.display = "none";
-      if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
-      if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
-      if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
-      const otherStaysSection = document.getElementById("otherStaysSection");
-      if (otherStaysSection) otherStaysSection.style.display = stay.show_other_stays_section === false ? "none" : "";
+        let otherPublishedStays = null;
+        let otherStaysError = null;
+        try {
+          const res = await supabase.from("stays").select("title, slug, hero_image, location, published").eq("published", true).neq("slug", stay.slug).order("created_at", { ascending: false }).limit(12);
+          otherPublishedStays = res.data;
+          otherStaysError = res.error;
+        } catch(e) { console.warn("otherPublishedStays query issue:", e); }
 
-      let dates = null;
-      try {
-        const res = await supabase.from("stay_dates").select("*").eq("stay_id", stay.id).order("start_date", { ascending: true }).limit(1);
-        dates = res.data;
-      } catch(e) { console.warn("stay_dates query issue:", e); }
+        const firstDate = dates?.[0] || null;
 
-      let bookingsPaid = null;
-      try {
-        const res = await supabase.from("bookings").select("id").eq("stay_id", stay.id).in("status", ["paid", "confirmed"]);
-        bookingsPaid = res.data;
-      } catch(e) { console.warn("bookings query issue:", e); }
+        stayTitle.textContent = stay.title || "Séjour";
 
-      let otherPublishedStays = null;
-      let otherStaysError = null;
-      try {
-        const res = await supabase.from("stays").select("title, slug, hero_image, location, published").eq("published", true).neq("slug", stay.slug).order("created_at", { ascending: false }).limit(12);
-        otherPublishedStays = res.data;
-        otherStaysError = res.error;
-      } catch(e) { console.warn("otherPublishedStays query issue:", e); }
-
-      const firstDate = dates?.[0] || null;
-
-      stayTitle.textContent = stay.title || "Séjour";
-
-      // Lieu au-dessus du titre
-      const stayLocationEl = document.getElementById("stayLocation");
-      if (stayLocationEl && stay.location) {
-        const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
-        const uniqueParts = [];
-        parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
-        stayLocationEl.textContent = uniqueParts.join(' — ');
-        stayLocationEl.style.display = "";
-      } else if (stayLocationEl) {
-        stayLocationEl.style.display = "none";
-      }
-      pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
-      const metaDesc = buildStayMetaDescription(stay);
-      if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
-      const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
-      const canonicalEl = document.getElementById("stayCanonical");
-      if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
-      const ogTitleEl = document.getElementById("ogTitle");
-      if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
-      const ogDescEl = document.getElementById("ogDescription");
-      if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
-      if (stay.hero_image) {
-        const ogImgEl = document.getElementById("ogImage");
-        if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
-      }
-
-      const existingSchema = document.getElementById("staySchema");
-      if (existingSchema) existingSchema.remove();
-      const schemaScript = document.createElement("script");
-      schemaScript.type = "application/ld+json";
-      schemaScript.id = "staySchema";
-      schemaScript.textContent = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "TouristTrip",
-        "name": stay.title || "Séjour Âmes Nomades",
-        "description": metaDesc,
-        "url": stayUrl,
-        "image": stay.hero_image || "",
-        "provider": {
-          "@type": "Organization",
-          "name": "Âmes Nomades",
-          "url": "https://amesnomades.com"
+        // Lieu au-dessus du titre
+        const stayLocationEl = document.getElementById("stayLocation");
+        if (stayLocationEl && stay.location) {
+          const parts = stay.location.split(',').map(p => p.trim().toUpperCase());
+          const uniqueParts = [];
+          parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
+          stayLocationEl.textContent = uniqueParts.join(' — ');
+          stayLocationEl.style.display = "";
+        } else if (stayLocationEl) {
+          stayLocationEl.style.display = "none";
         }
-      });
-      document.head.appendChild(schemaScript);
 
-      const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date);
-      stayMeta.textContent = durationText;
+        pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
+        const metaDesc = buildStayMetaDescription(stay);
+        if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
+        const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
+        const canonicalEl = document.getElementById("stayCanonical");
+        if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
+        const ogTitleEl = document.getElementById("ogTitle");
+        if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
+        const ogDescEl = document.getElementById("ogDescription");
+        if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
+        if (stay.hero_image) {
+          const ogImgEl = document.getElementById("ogImage");
+          if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
+        }
 
-      stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
-
-      // Meta Pixel ViewContent event tracking
-      if (window.MetaPixel) {
-        let basePrice = 0;
-        if (stay.extra_options && Array.isArray(stay.extra_options)) {
-          const prices = stay.extra_options
-            .map(opt => Number(opt.price))
-            .filter(p => !isNaN(p) && p > 0);
-          if (prices.length > 0) {
-            basePrice = Math.min(...prices);
+        const existingSchema = document.getElementById("staySchema");
+        if (existingSchema) existingSchema.remove();
+        const schemaScript = document.createElement("script");
+        schemaScript.type = "application/ld+json";
+        schemaScript.id = "staySchema";
+        schemaScript.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "TouristTrip",
+          "name": stay.title || "Séjour Âmes Nomades",
+          "description": metaDesc,
+          "url": stayUrl,
+          "image": stay.hero_image || "",
+          "provider": {
+            "@type": "Organization",
+            "name": "Âmes Nomades",
+            "url": "https://amesnomades.com"
           }
+        });
+        document.head.appendChild(schemaScript);
+
+        const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date, stay?.is_single_day);
+        stayMeta.textContent = durationText;
+
+        stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date, stay?.is_single_day);
+
+        // Meta Pixel ViewContent event tracking
+        if (window.MetaPixel) {
+          let basePrice = 0;
+          if (stay.extra_options && Array.isArray(stay.extra_options)) {
+            const prices = stay.extra_options
+              .map(opt => Number(opt.price))
+              .filter(p => !isNaN(p) && p > 0);
+            if (prices.length > 0) {
+              basePrice = Math.min(...prices);
+            }
+          }
+          window.MetaPixel.trackViewContent(stay.title || 'Séjour', 'Séjour', stay.id, basePrice);
         }
-        window.MetaPixel.trackViewContent(stay.title || 'Séjour', 'Séjour', stay.id, basePrice);
-      }
 
-      if(stay.hero_image){
-        stayHeroBg.src = stay.hero_image;
-        
-        // Préchargement dynamique à haute priorité pour l'image LCP
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = stay.hero_image;
-        link.fetchPriority = "high";
-        document.head.appendChild(link);
-      } else {
-        stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
-      }
+        if(stay.hero_image){
+          stayHeroBg.src = stay.hero_image;
+          
+          // Préchargement dynamique à haute priorité pour l'image LCP
+          const link = document.createElement("link");
+          link.rel = "preload";
+          link.as = "image";
+          link.href = stay.hero_image;
+          link.fetchPriority = "high";
+          document.head.appendChild(link);
+        } else {
+          stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
+        }
 
-      const blocks = normalizeContentBlocks(stay.content_blocks);
-      const hasBlocks = blocks.length > 0;
+        const blocks = normalizeContentBlocks(stay.content_blocks);
+        const hasBlocks = blocks.length > 0;
 
-      if(stayText) {
-        stayText.style.display = "";
-        renderRichText(stayText, stay.description || stay.short_description || "");
-      }
+        if(stayText) {
+          stayText.style.display = "";
+          renderRichText(stayText, stay.description || stay.short_description || "");
+        }
 
-      if(hasBlocks){
-        renderContentBlocks(contentBlocksContainer, blocks);
-        if(contentBlocksSection) contentBlocksSection.style.display = "";
-      } else {
-        if(contentBlocksSection) contentBlocksSection.style.display = "none";
-      }
+        if(hasBlocks){
+          renderContentBlocks(contentBlocksContainer, blocks);
+          if(contentBlocksSection) contentBlocksSection.style.display = "";
+        } else {
+          if(contentBlocksSection) contentBlocksSection.style.display = "none";
+        }
 
-      if(stay.highlights && stay.highlights.length > 0){
-        if(highlightsSection) highlightsSection.style.display = "";
-        renderSimpleList(highlightsList, stay.highlights);
-      } else {
-        if(highlightsSection) highlightsSection.style.display = "none";
-      }
+        if(stay.highlights && stay.highlights.length > 0){
+          if(highlightsSection) highlightsSection.style.display = "";
+          renderSimpleList(highlightsList, stay.highlights);
+        } else {
+          if(highlightsSection) highlightsSection.style.display = "none";
+        }
 
       // Toujours afficher le programme, les inclusions et les options s'ils ont du contenu
       const progData = stay.program || [];
@@ -1534,7 +1510,10 @@
       } else {
         renderOtherStays(otherPublishedStays || []);
       }
+    } catch (err) {
+      console.error("Erreur lors du chargement du séjour :", err);
     }
+  }
 
     // Le header reste toujours visible sans masquage au scroll
     loadStay();

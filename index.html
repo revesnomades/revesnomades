@@ -584,7 +584,7 @@
       return clean;
     }
 
-    function formatDateRange(startRaw, endRaw) {
+    function formatDateRange(startRaw, endRaw, isSingleDay) {
       const start = parseIsoDateStr(startRaw);
       const end = parseIsoDateStr(endRaw);
 
@@ -593,10 +593,12 @@
       const s = start ? new Date(start + "T00:00:00") : null;
       const e = end ? new Date(end + "T00:00:00") : null;
 
-      if (s && (!e || start === end)) {
-        const day = s.getDate();
-        const month = s.toLocaleDateString("fr-FR", { month: "long" });
-        const year = s.getFullYear();
+      if (isSingleDay || (s && (!e || start === end))) {
+        const targetDate = s || e;
+        if (!targetDate) return "Dates à annoncer";
+        const day = targetDate.getDate();
+        const month = targetDate.toLocaleDateString("fr-FR", { month: "long" });
+        const year = targetDate.getFullYear();
         return `Le ${day} ${month} ${year}`;
       }
       if (!s && e) {
@@ -627,7 +629,8 @@
       return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
-    function getDurationLabel(startRaw, endRaw) {
+    function getDurationLabel(startRaw, endRaw, isSingleDay) {
+      if (isSingleDay) return "1 jour";
       const start = parseIsoDateStr(startRaw);
       const end = parseIsoDateStr(endRaw);
 
@@ -728,8 +731,8 @@
       }
 
       if (featuredStayTitle) featuredStayTitle.textContent = stay.title || "Séjour";
-      if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
-      if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date);
+      if (featuredStayDuration) featuredStayDuration.textContent = getDurationLabel(stayDate?.start_date, stayDate?.end_date, stay.is_single_day);
+      if (featuredStayDates) featuredStayDates.textContent = formatDateRange(stayDate?.start_date, stayDate?.end_date, stay.is_single_day);
 
       // Prix de départ
       let minPrice = null;

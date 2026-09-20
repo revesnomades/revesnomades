@@ -900,7 +900,6 @@
 
       const nights = Math.max(0, days - 1);
       return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
-    } jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function buildStayMetaDescription(stay){
@@ -1243,7 +1242,10 @@
       } else {
         renderOtherStays(otherPublishedStays || []);
       }
+    } catch (err) {
+      console.error("Erreur lors du chargement de l'aperçu du séjour :", err);
     }
+  }
 
     // ── NOUVELLES ANIMATIONS (HEADER + SCROLL 5S) ──
     const navHeader = document.getElementById("top");
