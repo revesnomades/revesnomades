@@ -203,7 +203,11 @@
           </div>
 
           <div id="bookingsBox" class="account-card" style="display:none;">
-            <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <h3 style="font-weight:500; margin:0;">Mes réservations & factures</h3>
+              <button id="btnStripePortal" class="btn tiny on-light" type="button" style="font-size:12px; background:var(--text); color:#fff; border:none; padding:8px 16px; cursor:pointer;">📄 Mes factures & cartes (Stripe)</button>
+            </div>
+            <div id="portalMsg" style="margin-top:6px; font-size:12px; color:var(--muted);"></div>
             <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
           </div>
 
@@ -1298,6 +1302,39 @@
         ]);
       }
     }
+
+    const btnStripePortal = document.getElementById("btnStripePortal");
+    const portalMsg = document.getElementById("portalMsg");
+
+    btnStripePortal?.addEventListener("click", async () => {
+      if (portalMsg) {
+        portalMsg.style.color = "var(--text)";
+        portalMsg.textContent = "Ouverture de votre espace factures Stripe…";
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email) {
+        alert("Veuillez vous connecter pour accéder à vos factures.");
+        return;
+      }
+
+      const { data: portalData, error: portalErr } = await supabase.functions.invoke("create-portal-session", {
+        body: {
+          userEmail: user.email,
+          returnUrl: window.location.href
+        }
+      });
+
+      if (portalErr || !portalData?.url) {
+        console.error("Portal error:", portalErr);
+        if (portalMsg) {
+          portalMsg.style.color = "#c00";
+          portalMsg.textContent = portalData?.error || "Aucune facture disponible pour cet email.";
+        }
+        return;
+      }
+
+      window.location.href = portalData.url;
+    });
 
     // Détection reset password
     const hash = window.location.hash || "";

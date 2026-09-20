@@ -1498,16 +1498,70 @@
       const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
       renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
 
-      if(bookingUrl && (!optData || !optData.length)){
+      const isSingleDay = stay.is_single_day === true;
+
+      if(isSingleDay) {
+        bookingBtn.href = "#";
+        bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
+        bookingMsg.textContent = "Réservation directe avec création de compte obligatoire.";
+
+        bookingBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          bookingMsg.style.color = "var(--text)";
+          bookingMsg.textContent = "Vérification du compte…";
+
+          const { data: { user } } = await supabase.auth.getUser();
+          if(!user) {
+            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour 1 jour.");
+            window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+            return;
+          }
+
+          bookingMsg.textContent = "Redirection vers le paiement sécurisé Stripe…";
+          
+          let stayPrice = 0;
+          if (stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
+            stayPrice = Number(stay.extra_options[0].price || 0);
+          }
+
+          const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
+            body: {
+              items: [{
+                id: stay.id,
+                title: stay.title || 'Séjour 1 jour',
+                price: stayPrice,
+                type: 'stay'
+              }],
+              userId: user.id,
+              userEmail: user.email,
+              stayDate: firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "",
+              returnUrl: window.location.origin
+            }
+          });
+
+          if(sessionErr || !sessionData?.url) {
+            console.error("Erreur Checkout:", sessionErr);
+            bookingMsg.style.color = "#c00";
+            bookingMsg.textContent = "Erreur lors de la création de la session de paiement.";
+            return;
+          }
+
+          if (window.MetaPixel) {
+            window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, stayPrice);
+          }
+
+          window.location.href = sessionData.url;
+        });
+      } else if(bookingUrl && (!optData || !optData.length)){
         bookingBtn.href = bookingUrl;
-        bookingMsg.textContent = "Tu peux réserver directement via ce lien.";
+        bookingMsg.textContent = "Tu peux réserver directement via notre partenaire.";
       } else if (!bookingUrl && (!optData || !optData.length)) {
         bookingBtn.removeAttribute("href");
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
 
-      // Meta Pixel AddToCart event tracking
-      if (bookingBtn) {
+      // Meta Pixel AddToCart event tracking (si non single day)
+      if (bookingBtn && !isSingleDay) {
         bookingBtn.addEventListener("click", () => {
           if (window.MetaPixel) {
             let basePrice = 0;
