@@ -3134,37 +3134,72 @@
       const isSingle = !!document.getElementById("wizIsSingleDay")?.checked;
       const endDateVal = isSingle ? startDateVal : (document.getElementById("wizEndDate")?.value || startDateVal);
       const shortDesc = document.getElementById("wizShortDesc")?.value?.trim();
+      const fullDesc = document.getElementById("wizDesc")?.value?.trim() || "";
+      const customSlug = document.getElementById("wizSlug")?.value?.trim();
 
       if (!title || !location || !startDateVal || !endDateVal || !shortDesc) {
         if (wizardErrorMsg) wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, la date et l'accroche courte.";
         return;
       }
 
-      const slug = slugify(title);
+      const slug = customSlug || slugify(title);
       const heroImage = document.getElementById("wizHeroImage")?.value?.trim() || "";
       const indexImage = document.getElementById("wizIndexImage")?.value?.trim() || "";
-      const bookingUrl = document.getElementById("wizBookingUrl")?.value?.trim() || "";
-      const seatsTotal = Number(document.getElementById("wizSeatsTotal")?.value || 10);
-      const priceFrom = Number(document.getElementById("wizPriceFrom")?.value || 0);
+      const seatsTotal = Number(document.getElementById("wizSeats")?.value || 10);
+      const includedItems = linesToArray(document.getElementById("wizIncluded")?.value || "");
+      const notIncludedItems = linesToArray(document.getElementById("wizNotIncluded")?.value || "");
+      const programNote = document.getElementById("wizProgramNote")?.value?.trim() || "";
+
+      // Construire content_blocks depuis toutes les étapes du wizard
+      const contentBlocks = [];
+      if (indexImage) {
+        contentBlocks.push({ type: "index_image", image: indexImage });
+      }
+      if (typeof wizGalList !== "undefined" && wizGalList.length > 0) {
+        contentBlocks.push({ type: "gallery_2", images: wizGalList });
+      }
+      const accomDesc = document.getElementById("wizAccomDesc")?.value?.trim() || "";
+      const accomPhoto = document.getElementById("wizAccomPhoto")?.value?.trim() || "";
+      if (accomDesc || accomPhoto) {
+        contentBlocks.push({ type: "image_text", title: "Hébergement", text: accomDesc, image: accomPhoto });
+      }
+      if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
+        wizSpeakerList.forEach(s => contentBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "" }));
+      }
+      const chefName = document.getElementById("wizChefName")?.value?.trim() || "";
+      const chefPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
+      const chefBio = document.getElementById("wizChefBio")?.value?.trim() || "";
+      if (chefName || chefPhoto || chefBio) {
+        contentBlocks.push({ type: "chef", title: chefName, text: chefBio, image: chefPhoto });
+      }
+      if (Array.isArray(stayContentBlocks)) {
+        stayContentBlocks.forEach(b => {
+          if (!["index_image", "gallery_2", "chef"].includes(b.type) && !(b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
+            contentBlocks.push(b);
+          }
+        });
+      }
 
       const payload = {
         title,
         slug,
         location,
         short_description: shortDesc,
-        description: document.getElementById("wizDescription")?.value?.trim() || "",
+        description: fullDesc,
         hero_image: heroImage,
-        booking_url: bookingUrl,
-        reservation_url: bookingUrl,
+        booking_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
+        reservation_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
         is_single_day: isSingle,
         published: !!document.getElementById("wizPublished")?.checked,
         published_at: document.getElementById("wizPublished")?.checked ? new Date().toISOString() : null,
         min_bookings: seatsTotal,
-        highlights: linesToArray(document.getElementById("wizHighlights")?.value || ""),
-        included_items: linesToArray(document.getElementById("wizIncludedItems")?.value || ""),
-        not_included_items: linesToArray(document.getElementById("wizNotIncludedItems")?.value || ""),
+        highlights: typeof stayHighlights !== "undefined" ? linesToArray(stayHighlights?.value || "") : [],
+        included_items: includedItems,
+        not_included_items: notIncludedItems,
         extra_options: typeof wizOptList !== "undefined" ? wizOptList : [],
         program: typeof wizProgList !== "undefined" ? wizProgList : [],
+        program_note: programNote,
+        content_blocks: contentBlocks,
         show_faq_section: !!document.getElementById("wizShowFaq")?.checked,
         show_other_stays_section: !!document.getElementById("wizShowOtherStays")?.checked
       };
