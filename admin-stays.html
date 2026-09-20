@@ -1769,7 +1769,7 @@
       row.className = "program-slot-row";
 
       row.innerHTML = `
-        <input type="time" class="input slot-time" value="${slot.time || ""}">
+        <input type="text" class="input slot-time" value="${(slot.time || "").replace(/"/g, "&quot;")}" placeholder="09:00 ou 18h00" style="max-width:120px;">
         <input type="text" class="input slot-text" value="${(slot.text || "").replace(/"/g, "&quot;")}" placeholder="Texte de l’activité">
         <button type="button" class="btn on-light btn-remove-slot" aria-label="Supprimer">✕</button>
       `;
@@ -2242,7 +2242,10 @@
       }
     }
 
+    const isValidUUID = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
         async function editStay(id){
+      if(!id || !isValidUUID(id)) return;
       currentWizardEditId = id;
       currentStayId = id;
       editingSpkIdx = null;
