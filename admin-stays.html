@@ -2354,7 +2354,7 @@
           stayContentBlocks
             .filter(b => b && (b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg"))))
             .forEach(b => {
-              wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "" });
+              wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "", layout: b.layout || b.image_position || "image_left", layout: b.layout || b.image_position || "image_left" });
             });
         }
         renderWizSpeakers();
@@ -3083,22 +3083,24 @@ function renderWizGal() {
 
     // ── SPEAKER : ajouter ou modifier dans la liste ──
     document.getElementById("btnAddWizSpk")?.addEventListener("click", () => {
-      const name  = (document.getElementById("wizSpkName")?.value || "").trim();
-      const photo = (document.getElementById("wizSpkPhoto")?.value || "").trim();
-      const bio   = (document.getElementById("wizSpkBio")?.value || "").trim();
+      const name   = (document.getElementById("wizSpkName")?.value || "").trim();
+      const photo  = (document.getElementById("wizSpkPhoto")?.value || "").trim();
+      const bio    = (document.getElementById("wizSpkBio")?.value || "").trim();
+      const layout = (document.getElementById("wizSpkLayout")?.value || "image_left");
       if (!name) { alert("Veuillez renseigner le nom de l'intervenant."); return; }
 
       if (editingSpkIdx !== null && editingSpkIdx >= 0 && editingSpkIdx < wizSpeakerList.length) {
-        wizSpeakerList[editingSpkIdx] = { type: "speaker", title: name, image: photo, text: bio };
+        wizSpeakerList[editingSpkIdx] = { type: "speaker", title: name, image: photo, text: bio, layout: layout };
         editingSpkIdx = null;
       } else {
-        wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
+        wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio, layout: layout });
       }
 
       renderWizSpeakers();
       if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = "";
       if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = "";
       if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = "";
+      if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = "image_left";
       const btnAdd = document.getElementById("btnAddWizSpk");
       if (btnAdd) btnAdd.textContent = "+ Ajouter cet intervenant";
     });

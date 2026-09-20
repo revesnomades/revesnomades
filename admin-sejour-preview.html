@@ -1190,8 +1190,8 @@
       }
       if(giftSection) giftSection.style.display = "none";
 
-      const incData = stay.included_items || arrayFromField(stay.included);
-      const notIncData = stay.not_included_items || [];
+      const incData = arrayFromField(stay.included_items || stay.included);
+      const notIncData = arrayFromField(stay.not_included_items || stay.not_included);
       renderSimpleList(includedList, incData);
       renderSimpleList(notIncludedList, notIncData);
       if(includedSection) {

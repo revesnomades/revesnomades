@@ -191,15 +191,15 @@
         <div style="margin-bottom:16px;">
           <h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">03. Programme</h3>
         </div>
+        <p class="small muted" id="programNote" style="margin-top:10px;">
+          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
+        </p>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
             <div class="kicker">Chargement…</div>
             <p class="sub" style="margin-top:8px;">Le programme s’affichera ici.</p>
           </div>
         </div>
-        <p class="small muted" id="programNote" style="margin-top:10px;">
-          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
-        </p>
       </section>
 
       
@@ -1464,8 +1464,8 @@
       }
       if(giftSection) giftSection.style.display = "none";
 
-      const incData = stay.included_items || arrayFromField(stay.included);
-      const notIncData = stay.not_included_items || [];
+      const incData = arrayFromField(stay.included_items || stay.included);
+      const notIncData = arrayFromField(stay.not_included_items || stay.not_included);
       renderSimpleList(includedList, incData);
       renderSimpleList(notIncludedList, notIncData);
       if(includedSection) {
