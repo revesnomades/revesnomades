@@ -446,9 +446,7 @@
               <div style="margin-top:12px;">
                 ${isSoldOut
                   ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
-                  : (p.stripe_url 
-                      ? `<a href="${p.stripe_url}" class="stay-mini-btn" style="text-decoration:none; text-align:center; display:block; width:100%; background:rgba(255,255,255,0.15);" onclick="if(window.MetaPixel) window.MetaPixel.trackAddToCart('${p.name.replace(/'/g, "\\'")}', '${p.id}', ${p.price || 0});">Acheter</a>` 
-                      : `<span class="stay-mini-btn" style="opacity:0.7; display:block; text-align:center;">Bientôt dispo</span>`)
+                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; border:none; background:rgba(255,255,255,0.15); color:#fff;" onclick="window.buyProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price || 0}, '${p.stripe_url || ''}')">Acheter</button>`
                 }
               </div>
             </div>
@@ -484,6 +482,41 @@
 
     filterCategory?.addEventListener("change", renderProducts);
     sortProducts?.addEventListener("change", renderProducts);
+
+    window.buyProduct = async (id, name, price, fallbackStripeUrl) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Veuillez vous connecter ou créer un compte pour commander cet article.");
+        window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+      }
+
+      if (window.MetaPixel) {
+        window.MetaPixel.trackAddToCart(name, id, price);
+      }
+
+      const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          items: [{
+            id: id,
+            title: name,
+            price: Number(price) || 0,
+            type: 'product'
+          }],
+          userId: user.id,
+          userEmail: user.email,
+          returnUrl: window.location.origin
+        }
+      });
+
+      if (sessionData && sessionData.url) {
+        window.location.href = sessionData.url;
+      } else if (fallbackStripeUrl) {
+        window.location.href = fallbackStripeUrl;
+      } else {
+        alert("Erreur lors du traitement de la commande avec Stripe.");
+      }
+    };
 
     window.openRestockModal = async (id, name) => {
       restockProductId.value = id;

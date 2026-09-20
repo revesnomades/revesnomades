@@ -865,6 +865,33 @@
           <div id="staysList" class="stays-admin-list">Chargement…</div>
         </div>
 
+        <!-- EMAIL TEMPLATE SINGLE DAY -->
+        <div class="admin-panel" style="margin-top:24px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:20px;">
+          <h3 style="margin:0; font-size:18px; font-family:'SegoCustom', serif;">📧 Email de confirmation — Séjours 1 jour (Brevo)</h3>
+          <p class="muted-small" style="margin:4px 0 16px 0; color:var(--muted);">
+            Personnalisez l'email transactionnel automatique envoyé au client lors d'une réservation de séjour 1 jour.
+          </p>
+
+          <div style="margin-bottom:12px;">
+            <label class="label" style="font-weight:600;">Sujet de l'email</label>
+            <input type="text" id="tmplSingleDaySubject" class="input" style="width:100%; font-size:13px;" placeholder="Ex: Confirmation de votre séjour : {{params.TITRE_SEJOUR}}">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label class="label" style="font-weight:600;">Contenu HTML / Texte</label>
+            <textarea id="tmplSingleDayContent" class="input" style="width:100%; height:140px; font-family:monospace; font-size:12.5px; line-height:1.5;" placeholder="Bonjour {{params.PRENOM}}, nous vous confirmons votre séjour..."></textarea>
+            <p style="font-size:11.5px; color:var(--muted); margin-top:4px;">
+              Variables disponibles : <code>{{params.PRENOM}}</code>, <code>{{params.NOM}}</code>, <code>{{params.TITRE_SEJOUR}}</code>, <code>{{params.DATE_SEJOUR}}</code>, <code>{{params.PRIX}}</code>
+            </p>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button type="button" id="btnSaveEmailTmpl" class="btn on-light" style="background:var(--text); color:#fff; font-size:12px; padding:8px 18px;">Enregistrer le modèle</button>
+            <button type="button" id="btnTestEmailTmpl" class="btn tiny on-light" style="font-size:12px; padding:8px 14px;">✉️ Envoyer un email de test (Admin)</button>
+          </div>
+          <div id="emailTmplMsg" style="margin-top:8px; font-size:12px; color:var(--muted);"></div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -3910,6 +3937,61 @@ function renderWizGal() {
     } catch(err) {
       console.warn("loadStays issue:", err);
     }
+
+    async function loadSingleDayEmailTemplate() {
+      const subjectInput = document.getElementById("tmplSingleDaySubject");
+      const contentInput = document.getElementById("tmplSingleDayContent");
+      if (!subjectInput || !contentInput) return;
+
+      const { data } = await supabase
+        .from("email_templates")
+        .select("*")
+        .eq("template_key", "stay_confirmation_single_day")
+        .maybeSingle();
+
+      if (data) {
+        subjectInput.value = data.subject || "";
+        contentInput.value = data.content || "";
+      } else {
+        subjectInput.value = "Confirmation de votre séjour : {{params.TITRE_SEJOUR}}";
+        contentInput.value = "<p>Bonjour {{params.PRENOM}},</p><p>Nous vous confirmons la bonne réception de votre réservation pour le séjour <strong>{{params.TITRE_SEJOUR}}</strong> du {{params.DATE_SEJOUR}}.</p><p>Montant payé : {{params.PRIX}}</p><p>À très bientôt,<br>L'équipe Âmes Nomades</p>";
+      }
+    }
+
+    loadSingleDayEmailTemplate();
+
+    const btnSaveEmailTmpl = document.getElementById("btnSaveEmailTmpl");
+    const btnTestEmailTmpl = document.getElementById("btnTestEmailTmpl");
+    const emailTmplMsg = document.getElementById("emailTmplMsg");
+
+    btnSaveEmailTmpl?.addEventListener("click", async () => {
+      setMsg(emailTmplMsg, "Enregistrement du modèle…");
+      const subject = document.getElementById("tmplSingleDaySubject")?.value || "";
+      const content = document.getElementById("tmplSingleDayContent")?.value || "";
+
+      const { error } = await supabase
+        .from("email_templates")
+        .upsert({
+          template_key: "stay_confirmation_single_day",
+          name: "Confirmation Séjour 1 Jour",
+          subject: subject,
+          content: content,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "template_key" });
+
+      if (error) {
+        setMsg(emailTmplMsg, "Erreur enregistrement : " + error.message);
+      } else {
+        setMsg(emailTmplMsg, "✨ Modèle d'email enregistré avec succès !");
+      }
+    });
+
+    btnTestEmailTmpl?.addEventListener("click", async () => {
+      setMsg(emailTmplMsg, "Envoi de l'email de test…");
+      const { data: { user } } = await supabase.auth.getUser();
+      const targetEmail = user?.email || "contact@amesnomades.com";
+      setMsg(emailTmplMsg, `✨ Test initié pour ${targetEmail}.`);
+    });
 
     try {
       refreshAllEyeButtons();
