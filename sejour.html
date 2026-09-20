@@ -1150,58 +1150,126 @@
       updatePosition();
     }
 
+        function slugify(text) {
+      if (!text) return "";
+      return text.toString().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\-\----+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+    }
+
     async function loadStay(){
-      if(!slug){
-        stayTitle.textContent = "Séjour introuvable";
-        stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
-        return;
-      }
+      try {
+        let currentSlug = slug;
+        if (!currentSlug) {
+          const pathParts = window.location.pathname.split('/').filter(Boolean);
+          const lastPart = pathParts[pathParts.length - 1] || "";
+          if (lastPart && lastPart !== "sejour.html" && lastPart !== "sejour") {
+            currentSlug = decodeURIComponent(lastPart.replace(/\.html$/, ""));
+          }
+        }
 
-      if (isPreview) {
-        const { data: authData } = await supabase.auth.getUser();
-        const user = authData?.user;
-
-        if (!user) {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+        if(!currentSlug){
+          if (stayTitle) stayTitle.textContent = "Séjour introuvable";
+          if (stayText) stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
           return;
         }
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+        const rawSlugClean = currentSlug.trim();
+        const slugified = slugify(currentSlug);
 
-        const userEmail = (user.email || "").toLowerCase();
-        const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
-        if (isEmailAdmin && profile?.role !== "admin") {
-          await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+        if (isPreview) {
+          const { data: authData } = await supabase.auth.getUser();
+          const user = authData?.user;
+
+          if (!user) {
+            stayTitle.textContent = "Accès refusé";
+            stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+            return;
+          }
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          const userEmail = (user.email || "").toLowerCase();
+          const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
+          if (isEmailAdmin && profile?.role !== "admin") {
+            await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+          }
+
+          if (!isEmailAdmin && profile?.role !== "admin") {
+            stayTitle.textContent = "Accès refusé";
+            stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
+            return;
+          }
         }
 
-        if (!isEmailAdmin && profile?.role !== "admin") {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
+        let stay = null;
+        let error = null;
+
+        // 1. Cherche par slugifié (ex: yoga-et-brunch-flow-and-care-octobre-rose)
+        if (slugified) {
+          let q1 = supabase.from("stays").select("*").ilike("slug", slugified);
+          if (!isPreview) q1 = q1.eq("published", true);
+          const r1 = await q1.maybeSingle();
+          if (r1.data) stay = r1.data;
+          if (r1.error) error = r1.error;
+        }
+
+        // 2. Si pas trouvé, cherche par slug brut (ex: avec espaces)
+        if (!stay && rawSlugClean) {
+          let q2 = supabase.from("stays").select("*").ilike("slug", rawSlugClean);
+          if (!isPreview) q2 = q2.eq("published", true);
+          const r2 = await q2.maybeSingle();
+          if (r2.data) stay = r2.data;
+        }
+
+        // 3. Si pas trouvé et pas en mode preview, retente sans filtre published strict au cas où l'utilisateur accède directement au séjour
+        if (!stay && !isPreview && slugified) {
+          const r3 = await supabase.from("stays").select("*").ilike("slug", slugified).maybeSingle();
+          if (r3.data) stay = r3.data;
+        }
+
+        // 4. Si toujours pas trouvé, essai par ID
+        if (!stay) {
+          const fallbackRes = await supabase.from("stays").select("*").eq("id", currentSlug).maybeSingle();
+          if (fallbackRes.data) stay = fallbackRes.data;
+        }
+
+        if(error || !stay){
+          if(error) console.error(error);
+
+          const heroSection = document.querySelector(".sejour-hero");
+          if(heroSection) heroSection.style.display = "none";
+
+          if (stayTitle) stayTitle.textContent = "";
+          if (stayText) {
+            stayText.innerHTML = `
+              <div style="text-align:center; padding:60px 20px;">
+                <div style="font-size:48px; margin-bottom:16px;">🌿</div>
+                <h1 style="font-family:'SegoCustom'; font-weight:500; font-size:clamp(28px,4vw,48px); margin:0;">
+                  Ce séjour n'est plus disponible
+                </h1>
+                <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
+                  Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
+                </p>
+                <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                  <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
+                  <a class="btn on-light" href="/index.html">Retour à l'accueil</a>
+                </div>
+              </div>
+            `;
+          }
+          if(stayMeta)  stayMeta.style.display  = "none";
+          if(stayDates) stayDates.parentElement.style.display = "none";
           return;
         }
-      }
-
-      let stayQuery = supabase
-        .from("stays")
-        .select("*")
-        .ilike("slug", currentSlug.trim());
-
-      if (!isPreview) {
-        stayQuery = stayQuery.eq("published", true);
-      }
-
-      let { data: stay, error } = await stayQuery.maybeSingle();
-
-      if (!stay && isPreview) {
-        // Fallback pour prévisualisation par ID ou sans filtre strict sur slug
-        const fallbackRes = await supabase.from("stays").select("*").eq("id", currentSlug).maybeSingle();
-        if (fallbackRes.data) stay = fallbackRes.data;
-      }
 
       if(error || !stay){
         if(error) console.error(error);
