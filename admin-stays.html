@@ -1469,7 +1469,7 @@
           </div>
 
           <div class="admin-grid-2-tight">
-            <input class="input block-id" value="${block.id.replace(/"/g, "&quot;")}" placeholder="id">
+            <input class="input block-id" value="${(block.id || "").replace(/"/g, "&quot;")}" placeholder="id">
             <select class="input block-type">
               <option value="text" ${block.type === "text" ? "selected" : ""}>text</option>
               <option value="image_full" ${block.type === "image_full" ? "selected" : ""}>image_full</option>
@@ -1490,15 +1490,15 @@
               <option value="image_left" ${block.layout === "image_left" ? "selected" : ""}>image_left</option>
               <option value="image_right" ${block.layout === "image_right" ? "selected" : ""}>image_right</option>
             </select>
-            <input class="input block-title" value="${block.title.replace(/"/g, "&quot;")}" placeholder="title">
+            <input class="input block-title" value="${(block.title || "").replace(/"/g, "&quot;")}" placeholder="title">
           </div>
 
-          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text}</textarea>
-          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
-          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
-          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
-          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
-          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
+          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text || ""}</textarea>
+          <input class="input block-image" value="${(block.image || "").replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
+          <input class="input block-image-alt" value="${(block.image_alt || "").replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
+          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${(block.images || []).join("\n")}</textarea>
+          <input class="input block-quote" value="${(block.quote || "").replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
+          <input class="input block-caption" value="${(block.caption || "").replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
         `;
 
         function syncBlockFromCard(){
@@ -2124,12 +2124,12 @@
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       const userEmail = (user.email || "").toLowerCase();
       const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
       if (isEmailAdmin && data?.role !== "admin") {
-        await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+        await supabase.from("profiles").upsert({ id: user.id, role: "admin" });
       }
 
       if(!isEmailAdmin && (error || data?.role !== "admin")){
