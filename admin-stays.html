@@ -1038,6 +1038,13 @@
                 <button type="button" class="btn tiny on-light" id="btnUploadWizSpk" style="padding:6px 12px; white-space:nowrap;">Importer</button>
               </div>
               <div id="wizSpkPhotoMsg" style="font-size:12px; color:var(--muted);"></div>
+              <div>
+                <label class="muted-small" style="display:block; margin-bottom:4px;">Position de la photo</label>
+                <select id="wizSpkLayout" class="input" style="font-size:13px;">
+                  <option value="image_left">Photo à gauche du texte (par défaut)</option>
+                  <option value="image_right">Photo à droite du texte</option>
+                </select>
+              </div>
               <textarea id="wizSpkBio" class="input" rows="4" placeholder="Biographie..."></textarea>
             </div>
             <button type="button" class="btn tiny on-light" id="btnAddWizSpk" style="margin-top:10px; padding:7px 18px;">Ajouter cet intervenant</button>
@@ -2550,12 +2557,14 @@ function renderWizSpeakers() {
         container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun intervenant ajouté.</div>`;
         return;
       }
-      container.innerHTML = wizSpeakerList.map((sp, idx) => `
+      container.innerHTML = wizSpeakerList.map((sp, idx) => {
+        const layoutRight = sp.layout === "image_right";
+        return `
         <div class="wiz-spk-item" draggable="true" data-idx="${idx}" style="display:grid; grid-template-columns:24px 48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; cursor:grab; user-select:none; transition:background 0.2s, border-color 0.2s; ${editingSpkIdx === idx ? 'border-color:var(--accent,#c5a880); background:#faf8f5;' : ''}">
           <span style="color:#aaa; font-size:16px; cursor:grab; text-align:center;">⠿</span>
           ${sp.image ? `<img src="${sp.image}" style="width:48px; height:48px; object-fit:cover; border-radius:3px; pointer-events:none;">` : `<div style="width:48px; height:48px; background:var(--cream); border-radius:3px;"></div>`}
           <div>
-            <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")}</div>
+            <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")} <span style="font-size:10px; font-weight:normal; background:var(--cream); padding:1px 5px; border-radius:3px; margin-left:4px;">${layoutRight ? '🖼️ Photo à droite' : '🖼️ Photo à gauche'}</span></div>
             <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
           </div>
           <div style="display:flex; gap:4px; align-items:center;">
@@ -2564,7 +2573,8 @@ function renderWizSpeakers() {
             <button type="button" class="btn-edit-wizspk" data-idx="${idx}" style="background:#4a90e2; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Modifier</button>
             <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Supprimer</button>
           </div>
-        </div>`).join("");
+        </div>`;
+      }).join("");
 
       // Drag and Drop Intervenants
       let dragSpkSrcIdx = null;
@@ -2639,6 +2649,7 @@ function renderWizSpeakers() {
           if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = sp.title || "";
           if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = sp.image || "";
           if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = sp.text || "";
+          if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = sp.layout || "image_left";
           const btnAdd = document.getElementById("btnAddWizSpk");
           if (btnAdd) btnAdd.textContent = "✏️ Mettre à jour l'intervenant";
           renderWizSpeakers();
@@ -3521,6 +3532,35 @@ function renderWizGal() {
       const homepagePosition = getHomepagePositionValue();
       const contentBlocksValue = serializeContentBlocks();
 
+      const idxImg = document.getElementById("wizIndexImage")?.value?.trim() || stayHeroImage.value.trim();
+      const accomD = document.getElementById("wizAccomDesc")?.value?.trim() || "";
+      const accomP = document.getElementById("wizAccomPhoto")?.value?.trim() || "";
+      const cName = document.getElementById("wizChefName")?.value?.trim() || "";
+      const cPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
+      const cBio = document.getElementById("wizChefBio")?.value?.trim() || "";
+
+      // Fusionner les blocs de l'assistant dans content_blocks si non sérialisés dans l'éditeur
+      let mergedBlocks = Array.isArray(contentBlocksValue) ? [...contentBlocksValue] : [];
+      if (idxImg && !mergedBlocks.some(b => b.type === "index_image")) {
+        mergedBlocks.unshift({ type: "index_image", image: idxImg });
+      }
+      if (typeof wizGalList !== "undefined" && wizGalList.length > 0 && !mergedBlocks.some(b => b.type === "gallery_2")) {
+        mergedBlocks.push({ type: "gallery_2", images: wizGalList });
+      }
+      if ((accomD || accomP) && !mergedBlocks.some(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
+        mergedBlocks.push({ type: "image_text", title: "Hébergement", text: accomD, image: accomP });
+      }
+      if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
+        wizSpeakerList.forEach(s => {
+          if (!mergedBlocks.some(b => b.type === "speaker" && (b.title || "").toLowerCase().trim() === (s.title || "").toLowerCase().trim())) {
+            mergedBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "", layout: s.layout || "image_left" });
+          }
+        });
+      }
+      if ((cName || cPhoto || cBio) && !mergedBlocks.some(b => b.type === "chef")) {
+        mergedBlocks.push({ type: "chef", title: cName, text: cBio, image: cPhoto });
+      }
+
       const payload = {
         title,
         slug,
@@ -3528,6 +3568,14 @@ function renderWizGal() {
         short_description: stayShortDescription.value.trim(),
         description: stayDescription.value.trim(),
         hero_image: stayHeroImage.value.trim(),
+        index_image: idxImg,
+        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
+        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
+        chef_name: cName,
+        chef_photo: cPhoto,
+        chef_bio: cBio,
+        accommodation_desc: accomD,
+        accommodation_photo: accomP,
         booking_url: stayBookingUrl.value.trim(),
         reservation_url: stayBookingUrl.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
@@ -3548,7 +3596,7 @@ function renderWizGal() {
         gift_outro: giftOutro.value.trim(),
         gift_image: giftImage.value.trim(),
         faq: faqValue,
-        content_blocks: contentBlocksValue,
+        content_blocks: mergedBlocks,
         show_gift_section: showGiftSection,
         show_faq_section: showFaqSection,
         show_program_section: showProgramSection,

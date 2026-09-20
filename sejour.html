@@ -725,37 +725,39 @@
     function renderSpeakers(speakers) {
       if (!speakers || !speakers.length) return "";
       return speakers.map((sp, i) => {
-        const num = String(i + 1).padStart(2, "0");
+        const name = escapeHtml(sp.title || sp.name || "");
+        const bio = escapeHtml(sp.text || sp.bio || "").replace(/\n/g, "<br>");
         const photo = sp.image || sp.photo || "";
-        const name  = escapeHtml(sp.title || sp.name || "");
-        const bio   = escapeHtml(sp.text  || sp.bio  || "");
-        const bioParagraphs = bio.split(/\n|<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
-          <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
-        `).join("");
+        const layoutRight = sp.layout === "image_right" || sp.image_position === "right";
+
+        const photoHtml = photo ? `
+          <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
+            <img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300" style="width:100%; height:auto; display:block; object-fit:cover; border-radius:3px;">
+          </div>
+        ` : "";
+
+        const textHtml = `
+          <div class="speaker-bio speaker-text-container" style="flex:1;">
+            ${bio.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}
+          </div>
+        `;
 
         return `
           <div class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
-            <!-- Grille à 2 colonnes (titre, biographie + portrait) -->
-            <div class="speaker-row">
-              <!-- Titre -->
-              <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px;">
-                <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
-                <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
-              </div>
-              <!-- Biographie -->
-              <div class="speaker-bio speaker-text-container">
-                ${bioParagraphs}
-              </div>
-              <!-- Photo -->
-              <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
-                ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300">` : ""}
+            <div class="speaker-row" style="display:flex; gap:32px; align-items:start; flex-wrap:wrap; ${layoutRight ? 'flex-direction:row-reverse;' : ''}">
+              ${photoHtml}
+              <div style="flex:1; min-width:260px;">
+                <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px; margin-bottom:12px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:500;">0${i + 1}</span>
+                  <h4 style="font-family:'Seasons',serif; font-size:22px; font-weight:400; color:var(--text); margin:0;">${name}</h4>
+                </div>
+                ${textHtml}
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
       }).join("");
     }
-
-    // ── CUISINIER/CHEF ──
     function renderChef(block) {
       const photo = block.image || "";
       const name  = escapeHtml(block.title || "Notre Cuisinière");
@@ -837,25 +839,36 @@
         }
       });
 
-      // 2. Hébergements (sous la galerie, SANS image)
+      // 2. Hébergements (avec image si présente)
       accomBlocks.forEach(block => {
-        const safeTitle   = escapeHtml(block.title);
-        const safeText    = escapeHtml(block.text).replace(/\n/g, "<br>");
+        const safeTitle   = escapeHtml(block.title || "Hébergement");
+        const safeText    = escapeHtml(block.text || "").replace(/\n/g, "<br>");
+        const photo       = block.image || "";
         
         const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
-        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. Hébergement</h3>`;
+        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. ${safeTitle}</h3>`;
+
+        const photoHtml = photo ? `
+          <div class="accom-photo-wrapper" style="width:320px; max-width:100%; flex-shrink:0; border-radius:4px; overflow:hidden;">
+            <img src="${escapeHtml(photo)}" alt="${safeTitle}" style="width:100%; height:auto; display:block; object-fit:cover; border-radius:4px;">
+          </div>
+        ` : "";
 
         html += `
           <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
             <div style="margin-bottom:16px;">
               ${titleHtml}
             </div>
-            ${textPanel}
+            <div style="display:flex; gap:32px; align-items:start; flex-wrap:wrap;">
+              <div style="flex:1; min-width:280px;">
+                ${textPanel}
+              </div>
+              ${photoHtml}
+            </div>
           </article>
         `;
       });
-
       // 3. Intervenants (après hébergement)
       if(speakers.length){
         const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">02. Intervenant</h3>`;
