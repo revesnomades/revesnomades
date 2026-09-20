@@ -2246,6 +2246,38 @@
       currentWizardEditId = id;
       currentStayId = id;
       editingSpkIdx = null;
+
+      // ── RESET COMPLET : vider toutes les listes et tous les champs avant de charger ──
+      wizGalList = [];
+      wizProgList = [];
+      wizOptList = [];
+      wizSpeakerList = [];
+      stayContentBlocks = [];
+
+      if (stayWizardForm) stayWizardForm.reset();
+
+      // Vider les champs non couverts par form.reset()
+      const fieldsToClear = [
+        "wizTitle","wizSlug","wizLocation","wizCountry","wizStartDate","wizEndDate",
+        "wizShortDesc","wizDesc","wizHeroImage","wizIndexImage","wizSeats",
+        "wizIncluded","wizNotIncluded","wizProgramNote",
+        "wizChefName","wizChefPhoto","wizChefBio",
+        "wizAccomDesc","wizAccomPhoto",
+        "wizSpkName","wizSpkPhoto","wizSpkBio"
+      ];
+      fieldsToClear.forEach(fid => {
+        const el = document.getElementById(fid);
+        if (el) el.value = "";
+      });
+      if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = "image_left";
+
+      // Réinitialiser les rendus de listes vides
+      renderWizGal();
+      renderWizProg();
+      renderWizOpt();
+      renderWizSpeakers();
+      renderContentBlocksEditor();
+
       const btnAddSpk = document.getElementById("btnAddWizSpk");
       if (btnAddSpk) btnAddSpk.textContent = "+ Ajouter cet intervenant";
 
@@ -2254,7 +2286,11 @@
       const btnSub = stayWizardForm ? stayWizardForm.querySelector("button[type='submit']") : null;
       if(btnSub) btnSub.textContent = "Enregistrer les modifications";
       updateWizardStep(1);
+
+      // Ouvrir la modale avec indicateur de chargement
       if (stayWizardModal) stayWizardModal.classList.add("active");
+      const wizardErrorMsg = document.getElementById("wizardErrorMsg");
+      if (wizardErrorMsg) { wizardErrorMsg.style.color = "var(--muted)"; wizardErrorMsg.textContent = "Chargement des données…"; }
 
       let stay = null;
       let dates = [];
@@ -2283,6 +2319,8 @@
         alert("Erreur de communication avec Supabase.");
         return;
       }
+
+      if (wizardErrorMsg) { wizardErrorMsg.style.color = ""; wizardErrorMsg.textContent = ""; }
 
       try {
         const firstDate = dates?.[0] || null;
@@ -2331,7 +2369,11 @@
         if (stayBookingUrl) stayBookingUrl.value = stay.booking_url || stay.reservation_url || "";
         if (stayMinBookings) stayMinBookings.value = stay.min_bookings || "10";
         if (stayPublished) stayPublished.checked = !!stay.published;
+        // Sync wizard published checkbox
+        const wizPub = document.getElementById("wizPublished");
+        if (wizPub) wizPub.checked = !!stay.published;
         updatePublishToggleUI();
+        if (typeof updateWizPublishedUI === "function") updateWizPublishedUI();
         if (stayHighlights) stayHighlights.value = arrayToLines(stay.highlights);
         if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
 
@@ -3290,6 +3332,7 @@ function renderWizGal() {
 
     btnCancelWizard?.addEventListener("click", () => {
       stayWizardModal.classList.remove("active");
+      currentWizardEditId = null;
     });
 
     btnWizPrev?.addEventListener("click", () => {
@@ -3361,7 +3404,7 @@ function renderWizGal() {
         contentBlocks.push({ type: "image_text", title: "Hébergement", text: accomDesc, image: accomPhoto });
       }
       if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
-        wizSpeakerList.forEach(s => contentBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "" }));
+        wizSpeakerList.forEach(s => contentBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "", layout: s.layout || "image_left" }));
       }
       const chefName = document.getElementById("wizChefName")?.value?.trim() || "";
       const chefPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
@@ -3384,6 +3427,14 @@ function renderWizGal() {
         short_description: shortDesc,
         description: fullDesc,
         hero_image: heroImage,
+        index_image: indexImage,
+        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
+        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
+        chef_name: chefName,
+        chef_photo: chefPhoto,
+        chef_bio: chefBio,
+        accommodation_desc: accomDesc,
+        accommodation_photo: accomPhoto,
         booking_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
         reservation_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
         is_single_day: isSingle,

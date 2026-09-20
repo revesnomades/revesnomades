@@ -1137,7 +1137,20 @@
         stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
       }
 
-      const blocks = normalizeContentBlocks(stay.content_blocks);
+      let blocks = normalizeContentBlocks(stay.content_blocks);
+      // Merge top-level speakers column into blocks if not already present
+      if (Array.isArray(stay.speakers) && stay.speakers.length > 0) {
+        const existingSpkTitles = new Set(
+          blocks.filter(b => b.type === "speaker").map(b => (b.title||"").toLowerCase().trim())
+        );
+        stay.speakers.forEach(sp => {
+          const titleKey = (sp.title||"").toLowerCase().trim();
+          if (!existingSpkTitles.has(titleKey)) {
+            blocks.push({ type: "speaker", title: sp.title||"", text: sp.text||"", image: sp.image||"", layout: sp.layout||"image_left" });
+            if (titleKey) existingSpkTitles.add(titleKey);
+          }
+        });
+      }
       const hasBlocks = blocks.length > 0;
 
       if(stayText) {
