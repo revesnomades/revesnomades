@@ -2472,6 +2472,7 @@
       try {
         const elProgNote = document.getElementById("wizProgramNote");
         if (elProgNote) elProgNote.value = stay.program_note || "";
+        if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
         wizProgList = [];
         let rawProg = stay.program;
         if (typeof rawProg === 'string') { try { rawProg = JSON.parse(rawProg); } catch(e){} }
@@ -2494,6 +2495,26 @@
           }
         });
         renderWizProg();
+
+        // Populer l'éditeur de programme inline sur la page admin
+        let normalizedProgForInline = [];
+        if (Array.isArray(rawProg) && rawProg.length > 0) {
+          if (rawProg[0] && rawProg[0].slots) {
+            normalizedProgForInline = rawProg;
+          } else {
+            normalizedProgForInline = [{
+              day_number: 1,
+              title: "Jour 1",
+              slots: rawProg.map(p => ({
+                time: p.time || "",
+                text: p.activity || p.text || p.description || ""
+              }))
+            }];
+          }
+        }
+        const durationData = getDurationData();
+        const daysCount = (durationData && durationData.valid && durationData.days > 0) ? durationData.days : (normalizedProgForInline.length || 1);
+        buildProgramEditors(daysCount, normalizedProgForInline);
       } catch(e) { console.warn("editStay programme:", e); }
 
       // ── ÉTAPE 6 : Hébergement & Tarifs ──
@@ -3430,6 +3451,14 @@ function renderWizGal() {
       if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
         wizSpeakerList.forEach(s => contentBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "", layout: s.layout || "image_left" }));
       }
+      const editorProgWiz = getCurrentProgramFromEditors();
+      const hasEditorProgWiz = editorProgWiz && editorProgWiz.some(d => d.slots && d.slots.length > 0);
+      const finalProgWiz = (typeof wizProgList !== "undefined" && wizProgList.length > 0)
+        ? wizProgList
+        : (hasEditorProgWiz ? editorProgWiz : []);
+
+      const countryValWiz = document.getElementById("wizCountry")?.value?.trim() || document.getElementById("stayCountry")?.value?.trim() || "";
+
       const chefName = document.getElementById("wizChefName")?.value?.trim() || "";
       const chefPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
       const chefBio = document.getElementById("wizChefBio")?.value?.trim() || "";
@@ -3448,6 +3477,7 @@ function renderWizGal() {
         title,
         slug,
         location,
+        country: countryValWiz,
         short_description: shortDesc,
         description: fullDesc,
         hero_image: heroImage,
@@ -3469,7 +3499,7 @@ function renderWizGal() {
         included_items: includedItems,
         not_included_items: notIncludedItems,
         extra_options: typeof wizOptList !== "undefined" ? wizOptList : [],
-        program: typeof wizProgList !== "undefined" ? wizProgList : [],
+        program: finalProgWiz,
         program_note: programNote,
         content_blocks: contentBlocks,
         show_faq_section: !!document.getElementById("wizShowFaq")?.checked,
@@ -3659,6 +3689,7 @@ function renderWizGal() {
         title,
         slug,
         location: stayLocation.value.trim(),
+        country: countryValMain,
         short_description: stayShortDescription.value.trim(),
         description: stayDescription.value.trim(),
         hero_image: stayHeroImage.value.trim(),
