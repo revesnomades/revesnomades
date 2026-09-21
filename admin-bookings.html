@@ -168,7 +168,7 @@
           <div>
             <h1 style="margin:0; font-family:'SegoCustom', serif; font-weight:300; font-size:32px;">Réservations des Séjours</h1>
             <p style="color:var(--muted); margin-top:6px; font-size:14px;">
-              Suivi détaillé des clientes par séjour en cours et passé (onglets dépliables).
+              Suivi détaillé des clientes par séjour en cours, brouillon et passé.
             </p>
           </div>
 
@@ -183,8 +183,8 @@
           <div style="display:flex; gap:8px; flex-wrap:wrap;" id="filterButtons">
             <button class="filter-btn active" data-filter="all">Tous les séjours (<span id="countAll">0</span>)</button>
             <button class="filter-btn" data-filter="published">En cours / À venir (<span id="countPublished">0</span>)</button>
-            <button class="filter-btn" data-filter="past">Passés (<span id="countPast">0</span>)</button>
             <button class="filter-btn" data-filter="draft">Brouillons (<span id="countDraft">0</span>)</button>
+            <button class="filter-btn" data-filter="past">Passés (<span id="countPast">0</span>)</button>
           </div>
 
           <div style="position:relative; min-width:240px; flex:1; max-width:320px;">
@@ -297,11 +297,11 @@
       }
 
       if (!isPublished) {
-        return { code: 'draft', label: 'Brouillon', badgeClass: 'status-badge-draft' };
+        return { code: 'draft', label: 'Brouillon', prio: 2, badgeClass: 'status-badge-draft' };
       } else if (isPast) {
-        return { code: 'past', label: 'Passé', badgeClass: 'status-badge-past' };
+        return { code: 'past', label: 'Passé', prio: 3, badgeClass: 'status-badge-past' };
       } else {
-        return { code: 'published', label: 'Publié', badgeClass: 'status-badge-published' };
+        return { code: 'published', label: 'Publié', prio: 1, badgeClass: 'status-badge-published' };
       }
     }
 
@@ -354,14 +354,10 @@
     async function loadBookings(){
       staysAccordionList.innerHTML = `<div style="color:var(--muted); text-align:center; padding:40px;">Chargement des données...</div>`;
 
-      // 1. Charger tous les séjours avec leurs dates et leurs réservations
+      // 1. Charger tous les séjours
       const { data: stays, error: staysErr } = await supabase
         .from("stays")
-        .select(`
-          *,
-          stay_dates(*),
-          bookings(*)
-        `)
+        .select(`*, stay_dates(*)`)
         .order("created_at", { ascending: false });
 
       if (staysErr) {
@@ -370,7 +366,7 @@
         return;
       }
 
-      // 2. Charger toutes les réservations pour vérifier celles sans séjour lié
+      // 2. Charger toutes les réservations
       const { data: allBookings, error: bookingsErr } = await supabase
         .from("bookings")
         .select("*")
@@ -378,15 +374,61 @@
 
       if (bookingsErr) console.warn("Erreur chargement réservations globales:", bookingsErr);
 
-      const knownBookingIds = new Set();
-      (stays || []).forEach(s => {
-        (s.bookings || []).forEach(b => knownBookingIds.add(b.id));
+      const assignedBookingIds = new Set();
+      const rawBookings = allBookings || [];
+      const rawStays = stays || [];
+
+      // Mapper les réservations aux séjours par ID, par Titre ou par Option
+      rawStays.forEach(stay => {
+        const stayId = stay.id;
+        const stayTitleClean = (stay.title || "").trim().toLowerCase();
+
+        stay.bookings = rawBookings.filter(b => {
+          if (assignedBookingIds.has(b.id)) return false;
+
+          // 1. Match par stay_id
+          if (b.stay_id && b.stay_id === stayId) {
+            assignedBookingIds.add(b.id);
+            return true;
+          }
+
+          // 2. Match par stay_title
+          const bTitle = (b.stay_title || "").trim().toLowerCase();
+          if (stayTitleClean && bTitle && (bTitle === stayTitleClean || bTitle.includes(stayTitleClean) || stayTitleClean.includes(bTitle))) {
+            assignedBookingIds.add(b.id);
+            return true;
+          }
+
+          // 3. Match par price_label / option
+          const pLabel = (b.price_label || "").trim().toLowerCase();
+          if (stayTitleClean && pLabel && (pLabel.includes(stayTitleClean) || stayTitleClean.includes(pLabel))) {
+            assignedBookingIds.add(b.id);
+            return true;
+          }
+
+          return false;
+        });
       });
 
-      orphanBookings = (allBookings || []).filter(b => !knownBookingIds.has(b.id));
-      allStaysData = stays || [];
+      // Capturer toutes les réservations orphelines (s'il y en a)
+      orphanBookings = rawBookings.filter(b => !assignedBookingIds.has(b.id));
 
-      // Mettre à jour les compteurs
+      // 3. Trier les séjours par Ordre de Statut :
+      // 1er : Publié (En cours / À venir)
+      // 2ème : Brouillon
+      // 3ème : Passé
+      rawStays.sort((a, b) => {
+        const prioA = getStayStatusInfo(a).prio;
+        const prioB = getStayStatusInfo(b).prio;
+        if (prioA !== prioB) return prioA - prioB;
+
+        // Tri secondaire par date de création descendante
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      });
+
+      allStaysData = rawStays;
+
+      // Mettre à jour les compteurs et afficher
       updateFilterCounts();
       renderStays();
     }
@@ -394,28 +436,28 @@
     function updateFilterCounts() {
       let countAll = allStaysData.length;
       let countPublished = 0;
-      let countPast = 0;
       let countDraft = 0;
+      let countPast = 0;
 
       allStaysData.forEach(stay => {
         const info = getStayStatusInfo(stay);
         if (info.code === "published") countPublished++;
-        else if (info.code === "past") countPast++;
         else if (info.code === "draft") countDraft++;
+        else if (info.code === "past") countPast++;
       });
 
       document.getElementById("countAll").textContent = countAll;
       document.getElementById("countPublished").textContent = countPublished;
-      document.getElementById("countPast").textContent = countPast;
       document.getElementById("countDraft").textContent = countDraft;
+      document.getElementById("countPast").textContent = countPast;
     }
 
     function renderStays() {
       let filtered = allStaysData.filter(stay => {
         const info = getStayStatusInfo(stay);
         if (currentFilter === "published" && info.code !== "published") return false;
-        if (currentFilter === "past" && info.code !== "past") return false;
         if (currentFilter === "draft" && info.code !== "draft") return false;
+        if (currentFilter === "past" && info.code !== "past") return false;
 
         if (currentSearch) {
           const q = currentSearch.toLowerCase();
@@ -443,13 +485,14 @@
         
         const bookings = stay.bookings || [];
         const clientCount = bookings.length;
+        const titleUpper = (stay.title || "Séjour sans titre").toUpperCase();
 
         return `
           <details class="stay-accordion">
             <summary class="stay-summary">
               <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                 <span class="status-badge ${statusInfo.badgeClass}">${statusInfo.label}</span>
-                <strong style="font-family:'SegoCustom', serif; font-size:18px; font-weight:500; color:#1e1f22;">${stay.title || "Séjour sans titre"}</strong>
+                <strong style="font-family:inherit; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#1e1f22;">${titleUpper}</strong>
                 <span style="font-size:13px; color:var(--muted); font-family:'IBM Plex Mono', monospace;">📅 ${formattedDate}</span>
               </div>
 
@@ -473,7 +516,7 @@
             <summary class="stay-summary" style="background:#faf8f2;">
               <div style="display:flex; align-items:center; gap:14px;">
                 <span class="status-badge" style="background:#e2e3e5; color:#383d41;">Hors Séjour</span>
-                <strong style="font-family:'SegoCustom', serif; font-size:18px; font-weight:500;">Autres réservations</strong>
+                <strong style="font-family:inherit; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#1e1f22;">AUTRES RÉSERVATIONS</strong>
               </div>
               <div style="display:flex; align-items:center; gap:16px;">
                 <span class="client-badge">👥 ${orphanBookings.length} cliente(s)</span>
@@ -523,16 +566,17 @@
                   ? new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
                   : "—";
 
-                const amount = b.amount ? `${b.amount} €` : (b.amount_paid ? `${b.amount_paid} €` : "—");
+                const amountVal = b.amount || b.amount_paid;
+                const amountStr = amountVal ? `${amountVal} €` : "—";
                 const priceLabel = b.price_label || b.stay_title || "Standard";
                 const status = b.status || "confirmed";
 
-                let invoiceBtnHTML = `<span style="color:var(--muted); font-size:12px;">Payé ${amount}</span>`;
+                let invoiceBtnHTML = `<span style="color:var(--muted); font-size:12px;">Payé ${amountStr}</span>`;
                 if (b.stripe_session_id) {
                   invoiceBtnHTML = `
                     <a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" 
                        style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-family:'IBM Plex Mono', monospace; background:#f0f4f8; color:#1e3a8a; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; text-decoration:none; font-weight:600;">
-                      🧾 Facture (${amount})
+                      🧾 Facture (${amountStr})
                     </a>
                   `;
                 }
