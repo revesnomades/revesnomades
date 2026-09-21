@@ -139,6 +139,42 @@
       color: #fff;
       border-color: #1e1f22;
     }
+
+    .btn-view-invoice:hover {
+      background: #333438 !important;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      body > *:not(#invoiceModal) {
+        display: none !important;
+      }
+      #invoiceModal {
+        position: absolute !important;
+        inset: 0 !important;
+        background: #ffffff !important;
+        backdrop-filter: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 999999 !important;
+        display: block !important;
+      }
+      #invoiceModal > div {
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .invoice-card {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 30px !important;
+      }
+    }
   </style>
 </head>
 
@@ -263,6 +299,125 @@
           <button type="submit" id="btnSubmitAddBooking" class="btn" style="background:#4f8c5b; color:#fff; padding:10px 22px; font-weight:600; border:none; cursor:pointer;">Valider et Enregistrer</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL FACTURE CLIENTE -->
+  <div id="invoiceModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(5px); z-index:10000; overflow-y:auto; padding:20px 10px;">
+    <div style="max-width:760px; margin:20px auto;">
+      
+      <!-- Barre d'actions non-imprimable -->
+      <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:#1e1f22; color:#fff; padding:14px 20px; border-top-left-radius:10px; border-top-right-radius:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">📄</span>
+          <strong style="font-size:15px; font-weight:600;">Facture / Attestation de paiement</strong>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button type="button" id="btnPrintInvoice" class="btn" style="background:#4f8c5b; color:#fff; border:none; padding:8px 16px; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+            📥 Imprimer / Télécharger (PDF)
+          </button>
+          <a id="btnStripeReceipt" href="#" target="_blank" rel="noopener" class="btn" style="display:none; background:#635bff; color:#fff; border:none; padding:8px 14px; font-weight:600; font-size:12.5px; text-decoration:none; align-items:center; gap:6px;">
+            ⚡ Stripe
+          </a>
+          <button type="button" id="btnCloseInvoiceModal" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:0 6px;">✕</button>
+        </div>
+      </div>
+
+      <!-- Zone Imprimable de la Facture -->
+      <div id="invoicePrintArea" class="invoice-card" style="background:#ffffff; padding:45px 50px; border-bottom-left-radius:10px; border-bottom-right-radius:10px; color:#1e1f22; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+        
+        <!-- En-tête Facture -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #1e1f22; padding-bottom:24px; margin-bottom:28px;">
+          <div>
+            <div style="font-family:'SegoCustom', serif, Georgia; font-size:26px; font-weight:400; letter-spacing:0.02em; color:#1e1f22; margin-bottom:4px;">
+              ÂmesNomades
+            </div>
+            <div style="font-size:12px; color:#666; line-height:1.5;">
+              Retraites & Expériences Holistiques<br>
+              Email : contact@amesnomades.com<br>
+              Web : www.amesnomades.com
+            </div>
+          </div>
+
+          <div style="text-align:right;">
+            <h2 style="margin:0 0 6px 0; font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; letter-spacing:0.05em; color:#1e1f22;">FACTURE</h2>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; color:#444;">
+              N° : <strong id="invNumDisplay" style="color:#1e1f22;">FAC-2026-0001</strong>
+            </div>
+            <div style="font-size:12.5px; color:#666; margin-top:3px;">
+              Date : <span id="invDateDisplay">21 septembre 2026</span>
+            </div>
+            <div style="margin-top:8px;">
+              <span style="display:inline-block; background:#d4edda; color:#155724; border:1px solid #c3e6cb; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase;">
+                ✓ PAYÉ
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Destinataire & Séjour -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:32px; background:#fbfaf6; padding:20px; border-radius:8px; border:1px solid #eee;">
+          <div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-transform:uppercase; color:#888; letter-spacing:0.05em; margin-bottom:8px;">Facturé à</div>
+            <div id="invCustomerNameDisplay" style="font-size:15px; font-weight:700; color:#1e1f22; margin-bottom:2px;">—</div>
+            <div id="invCustomerEmailDisplay" style="font-size:13px; color:#555;">—</div>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-transform:uppercase; color:#888; letter-spacing:0.05em; margin-bottom:8px;">Détails du séjour</div>
+            <div id="invStayTitleDisplay" style="font-size:14px; font-weight:700; color:#1e1f22; text-transform:uppercase; margin-bottom:2px;">—</div>
+            <div id="invStayDatesDisplay" style="font-size:12.5px; color:#555; font-family:'IBM Plex Mono', monospace;">—</div>
+          </div>
+        </div>
+
+        <!-- Tableau des prestations -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:28px;">
+          <thead>
+            <tr style="border-bottom:2px solid #e5e5e5; text-align:left;">
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666;">Description</th>
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666; text-align:center; width:80px;">Qté</th>
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666; text-align:right; width:130px;">Total TTC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #eee;">
+              <td style="padding:16px 12px;">
+                <div id="invOptionDisplay" style="font-size:14px; font-weight:600; color:#1e1f22;">Réservation Séjour</div>
+                <div style="font-size:12px; color:#777; margin-top:2px;">Accès complet au séjour et prestations incluses.</div>
+              </td>
+              <td style="padding:16px 12px; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:13px;">1</td>
+              <td style="padding:16px 12px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:600; color:#1e1f22;" id="invAmountDisplay">0,00 €</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Totaux -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:35px;">
+          <div style="width:260px;">
+            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:13px; color:#666;">
+              <span>Sous-total HT :</span>
+              <span id="invSubtotalDisplay" style="font-family:'IBM Plex Mono', monospace;">0,00 €</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12px; color:#888; border-bottom:1px solid #eee;">
+              <span>TVA :</span>
+              <span>Non applicable*</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:12px 0; font-size:16px; font-weight:700; color:#1e1f22;">
+              <span>Total TTC :</span>
+              <span id="invTotalDisplay" style="font-family:'IBM Plex Mono', monospace; font-size:18px;">0,00 €</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mentions bas de page -->
+        <div style="border-top:1px dashed #ddd; padding-top:20px; text-align:center; font-size:11px; color:#888; line-height:1.6;">
+          <p style="margin:0 0 4px 0;">*TVA non applicable, article 293 B du Code Général des Impôts.</p>
+          <p style="margin:0;">Règlement effectué. Ce document vaut attestation de paiement et facture officielle.</p>
+          <p style="margin:4px 0 0 0; font-weight:600; color:#555;">Âmes Nomades — www.amesnomades.com — contact@amesnomades.com</p>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -711,15 +866,18 @@
                 const priceLabel = b.price_label || b.stay_title || "Standard";
                 const status = b.status || "confirmed";
 
-                let invoiceBtnHTML = `<span style="color:var(--muted); font-size:12px;">Payé ${amountStr}</span>`;
-                if (b.stripe_session_id) {
-                  invoiceBtnHTML = `
-                    <a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" 
-                       style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-family:'IBM Plex Mono', monospace; background:#f0f4f8; color:#1e3a8a; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; text-decoration:none; font-weight:600;">
-                      🧾 Facture (${amountStr})
-                    </a>
-                  `;
-                }
+                const invoiceBtnHTML = `
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <button type="button" class="btn-view-invoice" data-booking-id="${b.id}" style="display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-family:'IBM Plex Mono', monospace; background:#1e1f22; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:600;">
+                      📄 Facture (${amountStr})
+                    </button>
+                    ${b.stripe_session_id ? `
+                      <a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" title="Voir la transaction sur Stripe" style="color:#635bff; font-size:12px; text-decoration:none; padding:3px 6px; background:#f0efff; border-radius:4px; border:1px solid #dcd7ff;">
+                        ⚡ Stripe
+                      </a>
+                    ` : ''}
+                  </div>
+                `;
 
                 return `
                   <tr>
@@ -863,6 +1021,103 @@
     searchInput.addEventListener("input", (e) => {
       currentSearch = e.target.value.trim();
       renderStays();
+    });
+
+    // GESTION DU MODAL FACTURE
+    const invoiceModal = document.getElementById("invoiceModal");
+    const btnCloseInvoiceModal = document.getElementById("btnCloseInvoiceModal");
+    const btnPrintInvoice = document.getElementById("btnPrintInvoice");
+
+    function findBookingAndStay(bookingId) {
+      for (const stay of allStaysData) {
+        if (stay.bookings) {
+          const found = stay.bookings.find(b => String(b.id) === String(bookingId));
+          if (found) return { booking: found, stay };
+        }
+      }
+      const orphan = orphanBookings.find(b => String(b.id) === String(bookingId));
+      if (orphan) return { booking: orphan, stay: null };
+      return { booking: null, stay: null };
+    }
+
+    function openInvoiceModal(bookingId) {
+      const { booking: b, stay } = findBookingAndStay(bookingId);
+      if (!b) return;
+
+      const { firstName, lastName } = splitCustomerName(b.customer_name, b.customer_email);
+      const fullName = `${firstName} ${lastName}`.trim();
+      const createdDate = b.created_at ? new Date(b.created_at) : new Date();
+      const year = createdDate.getFullYear();
+      const dateFormatted = createdDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+      
+      const shortId = String(b.id).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(-6) || "0001";
+      const invoiceNum = `FAC-${year}-${shortId}`;
+
+      const stayTitle = stay ? stay.title.toUpperCase() : (b.stay_title || "SÉJOUR ÂMES NOMADES").toUpperCase();
+      const stayDateObj = stay && Array.isArray(stay.stay_dates) && stay.stay_dates.length > 0 ? stay.stay_dates[0] : null;
+      const stayDatesFormatted = stay ? formatDateRange(stayDateObj?.start_date, stayDateObj?.end_date, stay.is_single_day) : (b.booking_date || "Dates confirmées");
+
+      const amountVal = b.amount || b.amount_paid || 0;
+      const amountStr = amountVal ? `${amountVal},00 €` : "0,00 €";
+      const optionName = b.price_label || "Formule Réservation";
+
+      document.getElementById("invNumDisplay").textContent = invoiceNum;
+      document.getElementById("invDateDisplay").textContent = dateFormatted;
+      document.getElementById("invCustomerNameDisplay").textContent = fullName || b.customer_email || "Client";
+      document.getElementById("invCustomerEmailDisplay").textContent = b.customer_email || "—";
+      document.getElementById("invStayTitleDisplay").textContent = stayTitle;
+      document.getElementById("invStayDatesDisplay").textContent = stayDatesFormatted;
+      document.getElementById("invOptionDisplay").textContent = `Réservation — ${stayTitle} (${optionName})`;
+      document.getElementById("invAmountDisplay").textContent = amountStr;
+      document.getElementById("invSubtotalDisplay").textContent = amountStr;
+      document.getElementById("invTotalDisplay").textContent = amountStr;
+
+      const stripeBtn = document.getElementById("btnStripeReceipt");
+      if (stripeBtn) {
+        if (b.stripe_session_id) {
+          stripeBtn.style.display = "inline-flex";
+          stripeBtn.href = "https://dashboard.stripe.com/payments";
+        } else {
+          stripeBtn.style.display = "none";
+        }
+      }
+
+      if (invoiceModal) invoiceModal.style.display = "block";
+    }
+
+    const closeInvoiceModal = () => {
+      if (invoiceModal) invoiceModal.style.display = "none";
+    };
+
+    if (btnCloseInvoiceModal) btnCloseInvoiceModal.addEventListener("click", closeInvoiceModal);
+
+    if (btnPrintInvoice) {
+      btnPrintInvoice.addEventListener("click", () => {
+        window.print();
+      });
+    }
+
+    // Event delegation pour ouvrir la facture au clic sur "📄 Facture"
+    if (staysAccordionList) {
+      staysAccordionList.addEventListener("click", (e) => {
+        const invBtn = e.target.closest(".btn-view-invoice");
+        if (invBtn) {
+          const bookingId = invBtn.getAttribute("data-booking-id");
+          openInvoiceModal(bookingId);
+        }
+      });
+    }
+
+    window.addEventListener("click", (e) => {
+      if (e.target === invoiceModal) closeInvoiceModal();
+      if (e.target === addBookingModal) closeAddModal();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeInvoiceModal();
+        closeAddModal();
+      }
     });
 
     try {
