@@ -1164,17 +1164,17 @@
           </div>
           <hr style="margin:16px 0; border:none; border-top:1px dashed var(--line);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <label class="muted-small" style="display:block; font-weight:600; margin:0;">Options d'hébergement & Tarifs (avec redirection Stripe)</label>
+            <label id="wizStep6Title" class="muted-small" style="display:block; font-weight:600; margin:0;">Options d'hébergement & Tarifs (avec redirection Stripe)</label>
             <div style="font-size:12px; color:var(--muted);">Nombre de places total : <input type="number" id="wizSeats" value="12" style="width:50px; padding:2px 4px; border:1px solid var(--line); border-radius:3px;"></div>
           </div>
-          <p class="muted-small" style="margin:0 0 10px 0;">Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.</p>
+          <p id="wizStep6Subtitle" class="muted-small" style="margin:0 0 10px 0;">Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.</p>
           <div id="wizOptContainer" style="display:grid; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
             <div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>
           </div>
           <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px;">
             <div style="display:grid; grid-template-columns:1fr 100px; gap:8px;">
               <div>
-                <label class="label" style="font-size:11px;">Texte de l'option (ex : Chambre partagée 2 lits)</label>
+                <label id="wizOptLabelText" class="label" style="font-size:11px;">Texte de l'option (ex : Chambre partagée 2 lits)</label>
                 <input type="text" id="wizOptLabel" class="input" placeholder="Ex : Chambre partagée (2 personnes)" style="font-size:13px;">
               </div>
               <div>
@@ -1182,7 +1182,7 @@
                 <input type="number" id="wizOptPrice" class="input" placeholder="650" style="font-size:13px;">
               </div>
             </div>
-            <div style="margin-top:8px;">
+            <div id="wizOptStripeGroup" style="margin-top:8px;">
               <label class="label" style="font-size:11px;">Lien de paiement Stripe *</label>
               <input type="text" id="wizOptStripe" class="input" placeholder="Ex : https://buy.stripe.com/..." style="font-size:13px;">
             </div>
@@ -3001,15 +3001,23 @@ function renderWizGal() {
         container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>`;
         return;
       }
-      container.innerHTML = wizOptList.map((o, idx) => `
+      const isSingle = !!wizIsSingleDay?.checked || !!mainIsSingleDay?.checked;
+      container.innerHTML = wizOptList.map((o, idx) => {
+        const isStripeIntegrated = o.stripe_url === "#stripe-checkout" || (isSingle && (!o.stripe_url || o.stripe_url.trim() === ""));
+        const urlDisplay = isStripeIntegrated
+          ? "⚡ Paiement direct Stripe intégré"
+          : `🔗 ${o.stripe_url || "Pas de lien Stripe"}`;
+
+        return `
         <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <div>
             <div style="font-weight:600; font-size:13.5px; color:var(--text);">${escapeHtml(o.label || "")} <span style="color:var(--text); font-weight:700;">(${o.price} €)</span></div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; max-width:280px;" title="${o.stripe_url || ''}">🔗 ${escapeHtml(o.stripe_url || "Pas de lien Stripe")}</div>
+            <div style="font-size:11.5px; color:${isStripeIntegrated ? '#2e7d32' : 'var(--muted)'}; margin-top:2px; font-weight:${isStripeIntegrated ? '600' : 'normal'}; overflow:hidden; text-overflow:ellipsis; max-width:320px;" title="${o.stripe_url || ''}">${escapeHtml(urlDisplay)}</div>
           </div>
           <button type="button" class="btn-del-wizopt" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 8px; cursor:pointer;">Supprimer</button>
         </div>
-      `).join("");
+        `;
+      }).join("");
       container.querySelectorAll(".btn-del-wizopt").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
@@ -3294,9 +3302,13 @@ function renderWizGal() {
       const labelEl = document.getElementById("wizOptLabel");
       const priceEl = document.getElementById("wizOptPrice");
       const stripeEl = document.getElementById("wizOptStripe");
-      const label = labelEl?.value?.trim() || "Option hébergement";
+      const isSingle = !!wizIsSingleDay?.checked || !!mainIsSingleDay?.checked;
+      const label = labelEl?.value?.trim() || (isSingle ? "Journée complète" : "Option hébergement");
       const price = priceEl?.value?.trim() || "0";
-      const stripe_url = stripeEl?.value?.trim() || "";
+      let stripe_url = stripeEl?.value?.trim() || "";
+      if (isSingle && !stripe_url) {
+        stripe_url = "#stripe-checkout";
+      }
       if (!label && !price) return;
       wizOptList.push({ label, price, stripe_url });
       if (labelEl) labelEl.value = "";
@@ -3339,6 +3351,26 @@ function renderWizGal() {
       if (isSingle && wizStartDate && wizEndDate) {
         wizEndDate.value = wizStartDate.value;
       }
+
+      // Adaptation dynamique de l'Étape 6
+      const wizStep6Title = document.getElementById("wizStep6Title");
+      const wizStep6Subtitle = document.getElementById("wizStep6Subtitle");
+      const wizOptLabelText = document.getElementById("wizOptLabelText");
+      const wizOptStripeGroup = document.getElementById("wizOptStripeGroup");
+
+      if (isSingle) {
+        if (wizStep6Title) wizStep6Title.textContent = "Tarif & Option du séjour (Paiement direct Stripe)";
+        if (wizStep6Subtitle) wizStep6Subtitle.textContent = "Pour un séjour 1 jour, le paiement sécurisé Stripe est directement géré par le site. Aucun lien externe n'est requis.";
+        if (wizOptLabelText) wizOptLabelText.textContent = "Texte de l'option / du bouton (ex : Journée complète)";
+        if (wizOptStripeGroup) wizOptStripeGroup.style.display = "none";
+      } else {
+        if (wizStep6Title) wizStep6Title.textContent = "Options d'hébergement & Tarifs (avec redirection Stripe)";
+        if (wizStep6Subtitle) wizStep6Subtitle.textContent = "Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.";
+        if (wizOptLabelText) wizOptLabelText.textContent = "Texte de l'option (ex : Chambre partagée 2 lits)";
+        if (wizOptStripeGroup) wizOptStripeGroup.style.display = "block";
+      }
+
+      renderWizOpt();
     }
 
     function updateWizPublishedUI() {
