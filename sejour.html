@@ -1662,7 +1662,8 @@
           }
           let optionLabel = bookingBtn.getAttribute("data-label") || "";
           let itemTitle = stay.title || 'Séjour 1 jour';
-          if (optionLabel && optionLabel !== stay.title) {
+          const cleanOptLabel = optionLabel.trim().toLowerCase();
+          if (optionLabel && optionLabel !== stay.title && !["tarif", "option", "default", "standard"].includes(cleanOptLabel)) {
             itemTitle += ` (${optionLabel})`;
           }
 

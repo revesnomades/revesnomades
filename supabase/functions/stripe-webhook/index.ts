@@ -138,11 +138,16 @@ serve(async (req) => {
 
           // 4. Envoi de l'Email de Confirmation Transactionnel via Brevo API
           if (isStayOrder && stayItem) {
+            // Nettoyage du titre pour retirer les labels génériques type "(tarif)"
+            let cleanStayTitle = (stayItem.title || "Séjour 1 jour")
+              .replace(/\s*\((tarif|Tarif|option|Option|default|standard)\)\s*/gi, "")
+              .trim();
+
             // Email Séjour 1 jour (Personnalisé depuis template Supabase)
-            let emailSubject = `Confirmation de votre séjour : ${stayItem.title}`;
+            let emailSubject = `Confirmation de votre séjour : ${cleanStayTitle}`;
             let emailBody = `
               <p>Bonjour ${firstName || customerEmail},</p>
-              <p>Nous avons bien confirmé votre réservation pour le séjour <strong>${stayItem.title}</strong>.</p>
+              <p>Nous avons bien confirmé votre réservation pour le séjour <strong>${cleanStayTitle}</strong>.</p>
               <p><strong>Date retenue :</strong> ${stayDate || "À déterminer ensemble"}</p>
               <p><strong>Montant réglé :</strong> ${stayItem.price} €</p>
               <p>Nous avons hâte de vous accueillir !</p>
@@ -157,11 +162,11 @@ serve(async (req) => {
               .single();
 
             if (templateData && templateData.content) {
-              emailSubject = templateData.subject || emailSubject;
+              emailSubject = (templateData.subject || emailSubject).replaceAll("{{params.TITRE_SEJOUR}}", cleanStayTitle);
               emailBody = templateData.content
                 .replaceAll("{{params.PRENOM}}", firstName || customerEmail)
                 .replaceAll("{{params.NOM}}", lastName)
-                .replaceAll("{{params.TITRE_SEJOUR}}", stayItem.title)
+                .replaceAll("{{params.TITRE_SEJOUR}}", cleanStayTitle)
                 .replaceAll("{{params.DATE_SEJOUR}}", stayDate || "À convenir")
                 .replaceAll("{{params.PRIX}}", `${stayItem.price} €`);
             }
