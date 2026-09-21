@@ -784,7 +784,16 @@
           featIndexImage = idxImgBlock.image;
         }
       }
-      if (featuredStayMedia && featIndexImage) featuredStayMedia.style.backgroundImage = `url('${featIndexImage}')`;
+      if (featuredStayMedia && featIndexImage) {
+        featuredStayMedia.style.backgroundImage = `url('${featIndexImage}')`;
+        let featPos = homepageImagePositions?.featured || {};
+        if (stay && homepageImagePositions?.stays && homepageImagePositions.stays[stay.id]?.hero) {
+          featPos = homepageImagePositions.stays[stay.id].hero;
+        }
+        const posX = featPos.x !== undefined ? featPos.x : 50;
+        const posY = featPos.y !== undefined ? featPos.y : 50;
+        featuredStayMedia.style.backgroundPosition = `${posX}% ${posY}%`;
+      }
 
       if (featuredStayMissing) featuredStayMissing.textContent = "";
     }
@@ -845,11 +854,14 @@
       }
     }
     const image = indexImage || "assets/img/sejour-camargue.jpg";
+    const pos = (homepageImagePositions?.stays && homepageImagePositions.stays[stay.id]?.index) || { x: 50, y: 50 };
+    const posX = pos.x !== undefined ? pos.x : 50;
+    const posY = pos.y !== undefined ? pos.y : 50;
 
     return `
       <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
         
-        <div class="stay-card-media" style="background-image:url('${image}')">
+        <div class="stay-card-media" style="background-image:url('${image}'); background-position:${posX}% ${posY}%;">
 
           <div class="stay-card-overlay"></div>
 
@@ -1183,6 +1195,23 @@
       indexContactForm.reset();
     });
 
+    let homepageImagePositions = {};
+    async function loadHomepageImagePositions() {
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "homepage_image_positions")
+          .maybeSingle();
+        if (data && data.value) {
+          homepageImagePositions = data.value;
+        }
+      } catch(e) {
+        console.warn("Erreur chargement positions images:", e);
+      }
+    }
+
+    await loadHomepageImagePositions();
     await loadFeaturedStay();
     await loadHighlightStays();
     await loadBoutiqueVedette();
