@@ -1209,6 +1209,7 @@
     // Quand un séjour est créé avec le slug "camargue", son URL est /sejour.html?slug=camargue
     // Le slug doit être unique dans la table stays de Supabase.
     import { supabase } from "/assets/js/supabaseClient.js";
+    window.supabase = supabase;
 
     const adminStatus = document.getElementById("adminStatus");
     const editorMsg = document.getElementById("editorMsg");
@@ -4141,7 +4142,9 @@ function renderWizGal() {
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { supabase } from "/assets/js/supabaseClient.js";
+
     // ── GESTIONNAIRE RECADRAGE DES IMAGES D'ACCUEIL ──
     (function initHomeImagePositioningTool() {
       const btnOpen = document.getElementById("btnOpenHomePreviewModal");
