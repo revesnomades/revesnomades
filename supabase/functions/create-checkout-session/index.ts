@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { items, userId, userEmail, stayDate, returnUrl } = await req.json();
+    const { items, userId, userEmail, stayDate, returnUrl, cancelUrl } = await req.json();
 
     if (!items || !items.length) {
       return new Response(JSON.stringify({ error: "Aucun article fourni" }), {
@@ -57,6 +57,7 @@ serve(async (req) => {
     }
 
     const domain = returnUrl || "https://amesnomades.com";
+    const cancelDestination = cancelUrl || returnUrl || `${domain}/index.html`;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -65,7 +66,7 @@ serve(async (req) => {
       line_items: line_items,
       mode: "payment",
       success_url: `${domain}/merci.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${domain}/panier.html`,
+      cancel_url: cancelDestination,
       metadata: {
         user_id: userId || "",
         stay_date: stayDate || "",
