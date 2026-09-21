@@ -521,7 +521,7 @@
       `;
     }
 
-    function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl){
+    function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl, isSingleDay = false){
       if(!container) return;
       const optionsTitleEl = document.getElementById("optionsTitle");
 
@@ -535,14 +535,19 @@
         if(optionsTitleEl) optionsTitleEl.style.display = "none";
         const opt = options[0];
         const label = typeof opt === "string" ? opt : (opt.label || "");
-        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
-        const url   = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        const rawPrice = typeof opt === "object" && opt.price ? opt.price : 0;
+        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
+        const url   = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "#stripe-checkout");
         const btnText = price ? `${label} — ${price}` : label;
-        container.innerHTML = url ? `
+
+        container.innerHTML = `
           <div style="margin-top:8px;">
-            <a
-              href="${escapeHtml(url)}"
-              class="btn on-light"
+            <button
+              type="button"
+              class="btn on-light btn-opt-single-checkout"
+              data-url="${escapeHtml(url)}"
+              data-label="${escapeHtml(label)}"
+              data-price="${escapeHtml(String(rawPrice))}"
               style="
                 display:inline-flex;
                 font-family:'IBM Plex Mono', monospace;
@@ -553,11 +558,21 @@
                 background:var(--text);
                 color:#fff;
                 border:none;
-                text-decoration:none;
+                cursor:pointer;
               "
-            >${escapeHtml(btnText)} →</a>
+            >${escapeHtml(btnText)} →</button>
           </div>
-        ` : `<div style="color:var(--muted);">${escapeHtml(label)}</div>`;
+        `;
+
+        const singleBtn = container.querySelector(".btn-opt-single-checkout");
+        if (singleBtn && bookingBtnEl) {
+          singleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            bookingBtnEl.setAttribute("data-price", String(rawPrice));
+            bookingBtnEl.setAttribute("data-label", label);
+            bookingBtnEl.click();
+          });
+        }
         return;
       }
 
@@ -565,19 +580,20 @@
       if(optionsTitleEl) optionsTitleEl.style.display = "";
       container.innerHTML = options.map((opt, idx) => {
         const label = typeof opt === "string" ? opt : (opt.label || "");
+        const rawPrice = typeof opt === "object" && opt.price ? opt.price : 0;
         const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
-        const url = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        const url = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "#stripe-checkout");
         return `
           <label class="option-card-label" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.75); cursor:pointer; transition:all 0.2s; gap:12px;">
             <div style="display:flex; align-items:center; gap:12px;">
-              <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(price)}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
+              <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
               <div>
                 <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.04em; color:var(--text);">${escapeHtml(label)}</div>
                 ${price ? `<div style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
               </div>
             </div>
             <div>
-              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>` : ""}
+              <button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>
             </div>
           </label>
         `;
@@ -591,21 +607,35 @@
           e.preventDefault();
           e.stopPropagation();
           const targetUrl = btn.getAttribute("data-url");
-          if(targetUrl) window.location.href = targetUrl;
+          const optPrice = btn.getAttribute("data-price");
+          const optLabel = btn.getAttribute("data-label");
+          if (bookingBtnEl) {
+            bookingBtnEl.setAttribute("data-price", optPrice);
+            bookingBtnEl.setAttribute("data-label", optLabel);
+            bookingBtnEl.click();
+          } else if (targetUrl && targetUrl !== "#stripe-checkout") {
+            window.location.href = targetUrl;
+          }
         });
       });
 
       function updateMainBookingBtn(){
         const selected = container.querySelector("input[type='radio']:checked");
         if(selected && bookingBtnEl){
-          const url = selected.getAttribute("data-url") || defaultUrl;
-          const label = selected.getAttribute("data-label");
-          const price = selected.getAttribute("data-price");
-          if(url){
+          const url = selected.getAttribute("data-url") || defaultUrl || "#stripe-checkout";
+          const label = selected.getAttribute("data-label") || "";
+          const price = selected.getAttribute("data-price") || "";
+          const priceDisplay = price ? `${price} €` : "";
+          bookingBtnEl.setAttribute("data-price", price);
+          bookingBtnEl.setAttribute("data-label", label);
+
+          if (url && url !== "#stripe-checkout") {
             bookingBtnEl.href = url;
-            bookingBtnEl.textContent = `Réserver — ${label}${price ? ' ' + price : ''}`;
-            if(bookingMsgEl) bookingMsgEl.textContent = "";
+          } else {
+            bookingBtnEl.href = "#";
           }
+          bookingBtnEl.textContent = `Réserver — ${label}${priceDisplay ? ' ' + priceDisplay : ''}`;
+          if(bookingMsgEl) bookingMsgEl.textContent = "";
         }
       }
 
@@ -1487,9 +1517,11 @@
         includedSection.style.display = (incData.length || notIncData.length) ? "" : "none";
       }
 
+      const isSingleDay = stay.is_single_day === true;
+
       const optData = stay.extra_options || [];
       const bookingUrl = stay.booking_url || stay.reservation_url || "";
-      renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg);
+      renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg, isSingleDay);
       if(optionsSection) {
         optionsSection.style.display = optData.length ? "" : "none";
       }
@@ -1498,11 +1530,11 @@
       const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
       renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
 
-      const isSingleDay = stay.is_single_day === true;
-
       if(isSingleDay) {
         bookingBtn.href = "#";
-        bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
+        if (!optData.length) {
+          bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
+        }
         bookingMsg.textContent = "Réservation directe avec création de compte obligatoire.";
 
         bookingBtn.addEventListener("click", async (e) => {
@@ -1519,16 +1551,21 @@
 
           bookingMsg.textContent = "Redirection vers le paiement sécurisé Stripe…";
           
-          let stayPrice = 0;
-          if (stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
+          let stayPrice = Number(bookingBtn.getAttribute("data-price") || 0);
+          if (!stayPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
             stayPrice = Number(stay.extra_options[0].price || 0);
+          }
+          let optionLabel = bookingBtn.getAttribute("data-label") || "";
+          let itemTitle = stay.title || 'Séjour 1 jour';
+          if (optionLabel && optionLabel !== stay.title) {
+            itemTitle += ` (${optionLabel})`;
           }
 
           const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
             body: {
               items: [{
                 id: stay.id,
-                title: stay.title || 'Séjour 1 jour',
+                title: itemTitle,
                 price: stayPrice,
                 type: 'stay'
               }],
