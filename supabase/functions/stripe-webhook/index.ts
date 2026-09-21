@@ -171,9 +171,10 @@ serve(async (req) => {
               headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
               body: JSON.stringify({
                 sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
+                replyTo: { email: "contact@amesnomades.com", name: "Âmes Nomades" },
                 to: [{ email: customerEmail, name: customerName }],
                 subject: emailSubject,
-                htmlContent: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6;">${emailBody}</div>`,
+                htmlContent: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6;">${emailBody}<hr style="border:none; border-top:1px solid #eee; margin:24px 0 16px 0;"><p style="font-size:12px; color:#666;">Une question ? Contactez-nous à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a></p></div>`,
               }),
             });
           } else {
@@ -187,6 +188,7 @@ serve(async (req) => {
               headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
               body: JSON.stringify({
                 sender: { name: "Boutique Âmes Nomades", email: "contact@amesnomades.com" },
+                replyTo: { email: "contact@amesnomades.com", name: "Âmes Nomades" },
                 to: [{ email: customerEmail, name: customerName }],
                 subject: "Confirmation de votre commande Âmes Nomades",
                 htmlContent: `
@@ -198,6 +200,8 @@ serve(async (req) => {
                     <ul>${itemsListHtml}</ul>
                     <p><strong>Total payé :</strong> ${amountTotal} €</p>
                     <p>À très bientôt,<br>L'équipe Âmes Nomades</p>
+                    <hr style="border:none; border-top:1px solid #eee; margin:24px 0 16px 0;">
+                    <p style="font-size:12px; color:#666;">Une question concernant votre commande ? Contactez-nous à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a></p>
                   </div>
                 `,
               }),
