@@ -4019,10 +4019,26 @@ function renderWizGal() {
     });
 
     btnTestEmailTmpl?.addEventListener("click", async () => {
-      setMsg(emailTmplMsg, "Envoi de l'email de test…");
+      setMsg(emailTmplMsg, "Envoi de l'email de test via Brevo…");
       const { data: { user } } = await supabase.auth.getUser();
-      const targetEmail = user?.email || "contact@amesnomades.com";
-      setMsg(emailTmplMsg, `✨ Test initié pour ${targetEmail}.`);
+      const targetEmail = user?.email || "sarnelli.ap@gmail.com";
+      const subject = document.getElementById("tmplSingleDaySubject")?.value || "";
+      const content = document.getElementById("tmplSingleDayContent")?.value || "";
+
+      const { data, error } = await supabase.functions.invoke("send-test-email", {
+        body: {
+          targetEmail: targetEmail,
+          subject: subject,
+          content: content
+        }
+      });
+
+      if (error || data?.error) {
+        console.error("Test email error:", error || data?.error);
+        setMsg(emailTmplMsg, "Erreur envoi email : " + (data?.error || error?.message || "Vérifiez la clé BREVO_API_KEY dans Supabase."));
+      } else {
+        setMsg(emailTmplMsg, `✨ Email de test envoyé avec succès à ${targetEmail} !`);
+      }
     });
 
     try {
