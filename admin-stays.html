@@ -4186,112 +4186,132 @@ function renderWizGal() {
       });
 
       async function loadHomePreviewData() {
-        if (msgEl) msgEl.textContent = "Chargement des données d'accueil…";
+        if (msgEl) {
+          msgEl.style.color = "#81c784";
+          msgEl.textContent = "Chargement des données d'accueil…";
+        }
 
-        // 1. Charger les positions enregistrées
-        const { data: posData } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "homepage_image_positions")
-          .maybeSingle();
+        try {
+          // 1. Charger les positions enregistrées
+          const { data: posData } = await supabase
+            .from("site_settings")
+            .select("value")
+            .eq("key", "homepage_image_positions")
+            .limit(1)
+            .maybeSingle();
 
-        if (posData && posData.value) {
-          homePositionsState = posData.value;
+          if (posData && posData.value) {
+            homePositionsState = posData.value;
+          }
+          if (!homePositionsState) homePositionsState = { featured: { x: 50, y: 50 }, stays: {} };
           if (!homePositionsState.featured) homePositionsState.featured = { x: 50, y: 50 };
           if (!homePositionsState.stays) homePositionsState.stays = {};
-        }
 
-        // 2. Charger le séjour vedette
-        const { data: featured } = await supabase
-          .from("stays")
-          .select("*")
-          .eq("is_featured", true)
-          .maybeSingle();
+          // 2. Charger le séjour vedette (limit 1 pour éviter erreur multiple rows)
+          const { data: featuredList, error: featErr } = await supabase
+            .from("stays")
+            .select("*")
+            .eq("is_featured", true)
+            .order("created_at", { ascending: false })
+            .limit(1);
 
-        currentFeaturedStay = featured;
+          if (featErr) console.warn("Erreur chargement séjour vedette:", featErr);
 
-        if (currentFeaturedStay) {
-          dragFeaturedTitle.textContent = currentFeaturedStay.title || "Séjour Vedette";
-          let img = currentFeaturedStay.hero_image;
-          if (currentFeaturedStay.content_blocks && Array.isArray(currentFeaturedStay.content_blocks)) {
-            const idxImgBlock = currentFeaturedStay.content_blocks.find(b => b.type === "index_image");
-            if (idxImgBlock && idxImgBlock.image) img = idxImgBlock.image;
+          currentFeaturedStay = featuredList && featuredList.length > 0 ? featuredList[0] : null;
+
+          if (currentFeaturedStay) {
+            dragFeaturedTitle.textContent = currentFeaturedStay.title || "Séjour Vedette";
+            let img = currentFeaturedStay.hero_image;
+            if (currentFeaturedStay.content_blocks && Array.isArray(currentFeaturedStay.content_blocks)) {
+              const idxImgBlock = currentFeaturedStay.content_blocks.find(b => b.type === "index_image");
+              if (idxImgBlock && idxImgBlock.image) img = idxImgBlock.image;
+            }
+            dragFeaturedMedia.style.backgroundImage = `url('${img || "/assets/img/sejour-camargue.jpg"}')`;
+
+            let pos = homePositionsState.featured || { x: 50, y: 50 };
+            if (homePositionsState.stays && homePositionsState.stays[currentFeaturedStay.id]?.hero) {
+              pos = homePositionsState.stays[currentFeaturedStay.id].hero;
+            }
+
+            bindDraggableImage(dragFeaturedContainer, dragFeaturedMedia, featuredPosBadge, pos.x, pos.y, (newX, newY) => {
+              homePositionsState.featured = { x: newX, y: newY };
+              if (currentFeaturedStay) {
+                if (!homePositionsState.stays[currentFeaturedStay.id]) homePositionsState.stays[currentFeaturedStay.id] = {};
+                homePositionsState.stays[currentFeaturedStay.id].hero = { x: newX, y: newY };
+              }
+            });
+          } else {
+            dragFeaturedTitle.textContent = "Aucun séjour vedette sélectionné";
+            dragFeaturedMedia.style.backgroundImage = "none";
           }
-          dragFeaturedMedia.style.backgroundImage = `url('${img || "/assets/img/sejour-camargue.jpg"}')`;
 
-          let pos = homePositionsState.featured || { x: 50, y: 50 };
-          if (homePositionsState.stays && homePositionsState.stays[currentFeaturedStay.id]?.hero) {
-            pos = homePositionsState.stays[currentFeaturedStay.id].hero;
+          // 3. Charger la grille des 5 séjours
+          const { data: highlights, error: highErr } = await supabase
+            .from("stays")
+            .select("*")
+            .eq("is_highlight", true)
+            .order("highlight_order", { ascending: true })
+            .limit(5);
+
+          if (highErr) console.warn("Erreur chargement grille séjours:", highErr);
+
+          currentHighlightStays = highlights || [];
+
+          if (!currentHighlightStays.length) {
+            dragGridContainer.innerHTML = `<div style="color:var(--muted); grid-column:1/-1;">Aucun séjour sélectionné pour le bandeau des 5 séjours.</div>`;
+          } else {
+            dragGridContainer.innerHTML = currentHighlightStays.map((stay, idx) => {
+              let indexImage = stay.hero_image;
+              if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+                const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
+                if (idxImgBlock && idxImgBlock.image) indexImage = idxImgBlock.image;
+              }
+              const img = indexImage || "/assets/img/sejour-camargue.jpg";
+              const pos = (homePositionsState.stays && homePositionsState.stays[stay.id]?.index) || { x: 50, y: 50 };
+
+              return `
+                <div style="background:#faf5dc; border:1px solid rgba(0,0,0,0.1); border-radius:6px; padding:10px;">
+                  <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${stay.title || 'Séjour ' + (idx + 1)}
+                  </div>
+                  <div id="gridCardBox_${stay.id}" style="position:relative; width:100%; aspect-ratio:1/1; border-radius:4px; overflow:hidden; cursor:grab; user-select:none; border:1px dashed rgba(0,0,0,0.3);">
+                    <div id="gridCardMedia_${stay.id}" style="position:absolute; inset:0; background-image:url('${img}'); background-size:cover; background-position:${pos.x}% ${pos.y}%;"></div>
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.15); pointer-events:none;"></div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                    <span id="gridCardBadge_${stay.id}" style="font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:600; background:#1e1f22; color:#fff; padding:2px 6px; border-radius:3px;">
+                      X: ${Math.round(pos.x)}% | Y: ${Math.round(pos.y)}%
+                    </span>
+                  </div>
+                </div>
+              `;
+            }).join("");
+
+            // Attacher le drag engine sur chaque vignette de la grille
+            currentHighlightStays.forEach(stay => {
+              const container = document.getElementById(`gridCardBox_${stay.id}`);
+              const media = document.getElementById(`gridCardMedia_${stay.id}`);
+              const badge = document.getElementById(`gridCardBadge_${stay.id}`);
+              const pos = (homePositionsState.stays && homePositionsState.stays[stay.id]?.index) || { x: 50, y: 50 };
+
+              if (container && media) {
+                bindDraggableImage(container, media, badge, pos.x, pos.y, (newX, newY) => {
+                  if (!homePositionsState.stays) homePositionsState.stays = {};
+                  if (!homePositionsState.stays[stay.id]) homePositionsState.stays[stay.id] = {};
+                  homePositionsState.stays[stay.id].index = { x: newX, y: newY };
+                });
+              }
+            });
           }
 
-          bindDraggableImage(dragFeaturedContainer, dragFeaturedMedia, featuredPosBadge, pos.x, pos.y, (newX, newY) => {
-            homePositionsState.featured = { x: newX, y: newY };
-            if (currentFeaturedStay) {
-              if (!homePositionsState.stays[currentFeaturedStay.id]) homePositionsState.stays[currentFeaturedStay.id] = {};
-              homePositionsState.stays[currentFeaturedStay.id].hero = { x: newX, y: newY };
-            }
-          });
-        } else {
-          dragFeaturedTitle.textContent = "Aucun séjour vedette sélectionné";
+          if (msgEl) msgEl.textContent = "";
+        } catch (err) {
+          console.error("Erreur chargement preview home:", err);
+          if (msgEl) {
+            msgEl.style.color = "#c00";
+            msgEl.textContent = "Erreur de chargement : " + (err.message || err);
+          }
         }
-
-        // 3. Charger la grille des 5 séjours
-        const { data: highlights } = await supabase
-          .from("stays")
-          .select("*")
-          .eq("is_highlight", true)
-          .order("highlight_order", { ascending: true })
-          .limit(5);
-
-        currentHighlightStays = highlights || [];
-
-        if (!currentHighlightStays.length) {
-          dragGridContainer.innerHTML = `<div style="color:var(--muted); grid-column:1/-1;">Aucun séjour sélectionné pour le bandeau des 5 séjours.</div>`;
-        } else {
-          dragGridContainer.innerHTML = currentHighlightStays.map((stay, idx) => {
-            let indexImage = stay.hero_image;
-            if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-              const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
-              if (idxImgBlock && idxImgBlock.image) indexImage = idxImgBlock.image;
-            }
-            const img = indexImage || "/assets/img/sejour-camargue.jpg";
-            const pos = homePositionsState.stays[stay.id]?.index || { x: 50, y: 50 };
-
-            return `
-              <div style="background:#faf5dc; border:1px solid rgba(0,0,0,0.1); border-radius:6px; padding:10px;">
-                <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                  ${stay.title || 'Séjour ' + (idx + 1)}
-                </div>
-                <div id="gridCardBox_${stay.id}" style="position:relative; width:100%; aspect-ratio:1/1; border-radius:4px; overflow:hidden; cursor:grab; user-select:none; border:1px dashed rgba(0,0,0,0.3);">
-                  <div id="gridCardMedia_${stay.id}" style="position:absolute; inset:0; background-image:url('${img}'); background-size:cover; background-position:${pos.x}% ${pos.y}%;"></div>
-                  <div style="position:absolute; inset:0; background:rgba(0,0,0,0.15); pointer-events:none;"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                  <span id="gridCardBadge_${stay.id}" style="font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:600; background:#1e1f22; color:#fff; padding:2px 6px; border-radius:3px;">
-                    X: ${Math.round(pos.x)}% | Y: ${Math.round(pos.y)}%
-                  </span>
-                </div>
-              </div>
-            `;
-          }).join("");
-
-          // Attacher le drag engine sur chaque vignette de la grille
-          currentHighlightStays.forEach(stay => {
-            const container = document.getElementById(`gridCardBox_${stay.id}`);
-            const media = document.getElementById(`gridCardMedia_${stay.id}`);
-            const badge = document.getElementById(`gridCardBadge_${stay.id}`);
-            const pos = homePositionsState.stays[stay.id]?.index || { x: 50, y: 50 };
-
-            if (container && media) {
-              bindDraggableImage(container, media, badge, pos.x, pos.y, (newX, newY) => {
-                if (!homePositionsState.stays[stay.id]) homePositionsState.stays[stay.id] = {};
-                homePositionsState.stays[stay.id].index = { x: newX, y: newY };
-              });
-            }
-          });
-        }
-
-        if (msgEl) msgEl.textContent = "";
       }
 
       function bindDraggableImage(containerEl, mediaEl, badgeEl, startPosX, startPosY, onPosChange) {
