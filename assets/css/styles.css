@@ -1051,8 +1051,8 @@ footer.band.cream{
 .stay-card-media{
   position:relative;
   width:100%;
-  aspect-ratio: 4 / 5;   /* ✅ pas minuscule */
-  min-height: 260px;     /* ✅ empêche “tout petit” */
+  aspect-ratio: 1 / 1;   /* ✅ format carré 1:1 */
+  min-height: 220px;
   background-size:cover;
   background-position:center;
   overflow:hidden;
@@ -1169,8 +1169,8 @@ footer.band.cream{
   }
   .stay-grid{ gap: 14px; }
   .stay-card-media{
-    aspect-ratio: 16 / 10;
-    min-height: 220px;
+    aspect-ratio: 1 / 1;
+    min-height: 200px;
   }
 
   /* ✅ mobile: pas de hover -> overlay + texte visibles */
