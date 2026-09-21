@@ -464,25 +464,67 @@
     async function loadBookings(){
       staysAccordionList.innerHTML = `<div style="color:var(--muted); text-align:center; padding:40px;">Chargement des données...</div>`;
 
-      // 1. Charger tous les séjours avec leurs dates
-      const { data: stays, error: staysErr } = await supabase
-        .from("stays")
-        .select(`*, stay_dates(*)`)
-        .order("created_at", { ascending: false });
+      let stays = null;
+      let allBookings = null;
 
-      if (staysErr) {
-        console.error("Erreur chargement séjours:", staysErr);
-        adminStatus.textContent = "Erreur lors du chargement des séjours.";
-        return;
+      // 1. Charger via l'Edge Function get-admin-bookings (qui utilise la Service Role Key pour outrepasser le RLS Supabase)
+      try {
+        const { data: edgeData, error: edgeErr } = await supabase.functions.invoke("get-admin-bookings");
+        if (!edgeErr && edgeData && Array.isArray(edgeData.stays)) {
+          stays = edgeData.stays;
+          allBookings = edgeData.bookings || [];
+
+          // Convertir les commandes 'orders' éventuelles en réservations si présentes
+          if (Array.isArray(edgeData.orders)) {
+            edgeData.orders.forEach(ord => {
+              if (ord.order_items && Array.isArray(ord.order_items)) {
+                ord.order_items.forEach(item => {
+                  allBookings.push({
+                    id: ord.id + "_" + item.id,
+                    stay_id: item.product_id || null,
+                    stay_title: item.product_name || "Séjour",
+                    customer_email: ord.customer_email,
+                    customer_name: ord.customer_name,
+                    amount_paid: item.unit_price * item.quantity,
+                    amount: item.unit_price * item.quantity,
+                    price_label: item.product_name,
+                    status: ord.status || "confirmed",
+                    created_at: ord.created_at,
+                    stripe_session_id: ord.stripe_session_id
+                  });
+                });
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Edge Function get-admin-bookings non accessible, fallback direct:", e);
       }
 
-      // 2. Charger toutes les réservations
-      const { data: allBookings, error: bookingsErr } = await supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // 2. Fallback direct en cas de besoin
+      if (!stays) {
+        const { data: staysDb, error: staysErr } = await supabase
+          .from("stays")
+          .select(`*, stay_dates(*)`)
+          .order("created_at", { ascending: false });
 
-      if (bookingsErr) console.warn("Erreur chargement réservations globales:", bookingsErr);
+        if (staysErr) {
+          console.error("Erreur chargement séjours:", staysErr);
+          adminStatus.textContent = "Erreur lors du chargement des séjours.";
+          return;
+        }
+        stays = staysDb || [];
+      }
+
+      if (!allBookings) {
+        const { data: bookingsDb, error: bookingsErr } = await supabase
+          .from("bookings")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (bookingsErr) console.warn("Erreur chargement réservations globales:", bookingsErr);
+        allBookings = bookingsDb || [];
+      }
 
       const assignedBookingIds = new Set();
       const rawBookings = allBookings || [];
