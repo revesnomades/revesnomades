@@ -603,7 +603,7 @@
               <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
               <div>
                 <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.04em; color:var(--text);">${escapeHtml(label)}</div>
-                ${price ? `<div style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
+                ${price ? `<div class="opt-price-val" data-unit-price="${rawPrice}" style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
               </div>
             </div>
             <div>
@@ -665,6 +665,9 @@
             parent.style.background = "#ffffff";
           }
           updateMainBookingBtn();
+          if (typeof window.updateSingleDayQtyUI === "function") {
+            window.updateSingleDayQtyUI();
+          }
         });
       });
 
@@ -1557,13 +1560,58 @@
 
         const updateQtyUI = () => {
           if (stayQtyVal) stayQtyVal.textContent = String(currentQty);
-          
-          let unitPrice = Number(bookingBtn.getAttribute("data-price") || 0);
+
+          // 1. Bouton unique (single option)
+          const singleBtn = optionsList ? optionsList.querySelector(".btn-opt-single-checkout") : null;
+          if (singleBtn) {
+            const unitPrice = Number(singleBtn.getAttribute("data-price") || 0);
+            const label = singleBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
+            const totalPrice = unitPrice * currentQty;
+            if (unitPrice > 0) {
+              singleBtn.textContent = `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
+            } else {
+              singleBtn.textContent = `${label} →`;
+            }
+          }
+
+          // 2. Cartes d'options multiples (multi options)
+          if (optionsList) {
+            const cards = optionsList.querySelectorAll(".option-card-label");
+            cards.forEach(card => {
+              const priceValEl = card.querySelector(".opt-price-val");
+              const btnStripe = card.querySelector(".btn-opt-stripe");
+              const radioInput = card.querySelector("input[type='radio']");
+
+              const unitPrice = Number(priceValEl?.getAttribute("data-unit-price") || radioInput?.getAttribute("data-price") || btnStripe?.getAttribute("data-price") || 0);
+              const totalPrice = unitPrice * currentQty;
+
+              if (priceValEl && unitPrice > 0) {
+                if (currentQty > 1) {
+                  priceValEl.textContent = `${totalPrice} € (${currentQty} x ${unitPrice} €)`;
+                } else {
+                  priceValEl.textContent = `${unitPrice} €`;
+                }
+              }
+
+              if (btnStripe) {
+                if (totalPrice > 0) {
+                  btnStripe.textContent = `Réserver — ${totalPrice} € →`;
+                } else {
+                  btnStripe.textContent = `Réserver →`;
+                }
+              }
+            });
+          }
+
+          // 3. Bouton de réservation principal
+          let selectedRadio = optionsList ? optionsList.querySelector("input[type='radio']:checked") : null;
+          let unitPrice = Number(selectedRadio?.getAttribute("data-price") || bookingBtn.getAttribute("data-price") || 0);
           if (!unitPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
             unitPrice = Number(stay.extra_options[0].price || 0);
           }
-          let optionLabel = bookingBtn.getAttribute("data-label") || "";
-          let labelText = optionLabel || stay.title || "Séjour 1 jour";
+          let optionLabel = selectedRadio?.getAttribute("data-label") || bookingBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
+          bookingBtn.setAttribute("data-price", String(unitPrice));
+          bookingBtn.setAttribute("data-label", optionLabel);
 
           const totalPrice = unitPrice * currentQty;
           if (totalPrice > 0) {
@@ -1572,6 +1620,8 @@
             bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
           }
         };
+
+        window.updateSingleDayQtyUI = updateQtyUI;
 
         btnQtyMinus?.addEventListener("click", () => {
           if (currentQty > 1) {
