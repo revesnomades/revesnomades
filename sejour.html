@@ -217,7 +217,21 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="optionsSection">
-        <h2 class="sejour-section-title" id="optionsTitle">Options</h2>
+        <h2 class="sejour-section-title" id="optionsTitle">Options & Tarifs</h2>
+
+        <!-- Single Day Quantity Control -->
+        <div id="singleDayQtyBox" style="display:none; margin-top:14px; margin-bottom:14px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.85); justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text);">Nombre de personnes / places</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations à réserver</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
+            <span id="stayQtyVal" style="font-family:'IBM Plex Mono', monospace; font-size:16px; font-weight:700; min-width:24px; text-align:center;">1</span>
+            <button type="button" id="btnQtyPlus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">+</button>
+          </div>
+        </div>
+
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
@@ -229,21 +243,8 @@
         <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
       </p>
 
-      <div class="booking-box reveal" style="display:none;">
+      <div class="booking-box reveal" id="mainBookingBox" style="display:none;">
         <h3>Réserver</h3>
-
-        <!-- Single Day Quantity Control -->
-        <div id="singleDayQtyBox" style="display:none; margin-top:14px; margin-bottom:14px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.7); justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
-          <div>
-            <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text);">Nombre de personnes / places</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
-            <span id="stayQtyVal" style="font-family:'IBM Plex Mono', monospace; font-size:15px; font-weight:700; min-width:24px; text-align:center;">1</span>
-            <button type="button" id="btnQtyPlus" class="btn tiny on-light" style="width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">+</button>
-          </div>
-        </div>
 
         <div class="actions" style="margin-top:16px;">
           <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener noreferrer">
@@ -1536,7 +1537,7 @@
       const bookingUrl = stay.booking_url || stay.reservation_url || "";
       renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg, isSingleDay);
       if(optionsSection) {
-        optionsSection.style.display = optData.length ? "" : "none";
+        optionsSection.style.display = (optData.length || isSingleDay) ? "" : "none";
       }
 
       const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
