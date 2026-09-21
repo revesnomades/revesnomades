@@ -4109,19 +4109,38 @@ function renderWizGal() {
       <!-- Modal Body (Preview Canvas) -->
       <div style="padding:28px 24px; display:grid; gap:36px;">
         
-        <!-- Section 1 : Bandeau Principal -->
+        <!-- Section 1 : Bandeau Principal (Rendu exact 2 colonnes comme la homepage) -->
         <div style="background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:8px; padding:20px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <h3 style="font-family:'IBM Plex Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; margin:0;">01. Bandeau Principal Vedette</h3>
+            <h3 style="font-family:'IBM Plex Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; margin:0;">01. Bandeau Principal Vedette (Rendu Page d'Accueil)</h3>
             <span id="featuredPosBadge" style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; background:#1e1f22; color:#fff; padding:4px 8px; border-radius:4px;">Position X: 50% | Y: 50%</span>
           </div>
 
-          <div id="dragFeaturedContainer" style="position:relative; height:360px; border-radius:6px; overflow:hidden; cursor:grab; user-select:none; border:2px dashed rgba(30,31,34,0.3); background:#eee;">
-            <div id="dragFeaturedMedia" style="position:absolute; inset:0; background-size:cover; background-position:50% 50%;"></div>
-            <div style="position:absolute; inset:0; background:rgba(0,0,0,0.25); pointer-events:none;"></div>
-            <div style="position:absolute; bottom:20px; left:20px; color:#fff; pointer-events:none; z-index:2;">
-              <div id="dragFeaturedTitle" style="font-family:'SegoCustom', serif; font-size:28px;">Chargement…</div>
-              <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; opacity:0.8; margin-top:4px;">↔️ Maintenez le clic et glissez pour recadrer</div>
+          <div style="overflow-x:auto; padding-bottom:4px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; border:1px solid rgba(0,0,0,0.12); border-radius:6px; overflow:hidden; min-height:440px; min-width:650px; background:#fffdf3;">
+              
+              <!-- Colonne Gauche (Média Draggable - 50% de la largeur du bandeau, exact rendu homepage) -->
+              <div id="dragFeaturedContainer" style="position:relative; min-height:440px; height:100%; overflow:hidden; cursor:grab; user-select:none; border-right:1px solid rgba(0,0,0,0.08);">
+                <div id="dragFeaturedMedia" style="position:absolute; inset:0; background-size:cover; background-position:50% 50%;"></div>
+                <div style="position:absolute; inset:0; background:rgba(0,0,0,0.08); pointer-events:none;"></div>
+                <div style="position:absolute; bottom:14px; left:14px; background:rgba(0,0,0,0.7); color:#fff; padding:5px 10px; border-radius:4px; font-family:'IBM Plex Mono', monospace; font-size:11px; pointer-events:none; z-index:2; backdrop-filter:blur(4px);">
+                  ↔️ Maintenez le clic et glissez pour recadrer
+                </div>
+              </div>
+
+              <!-- Colonne Droite (Copy Panel - exact rendu homepage) -->
+              <div style="padding:40px 36px; display:flex; flex-direction:column; justify-content:center; background:#fffdf3; color:#1e1f22; min-height:440px;">
+                <div id="dragFeaturedKicker" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">LIEU DU SÉJOUR</div>
+                <h2 id="dragFeaturedTitle" style="font-family:'SegoCustom', serif; font-size:clamp(24px, 3vw, 38px); font-weight:300; margin:0; line-height:1.2; color:#1e1f22;">Chargement…</h2>
+                <div style="width:40px; height:1px; background:rgba(0,0,0,0.15); margin:16px 0;"></div>
+                <div id="dragFeaturedDuration" style="font-family:'IBM Plex Mono', monospace; font-size:12px; margin-bottom:4px;">Durée</div>
+                <div id="dragFeaturedDates" style="font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted);">Dates</div>
+                <div id="dragFeaturedPrice" style="font-family:'IBM Plex Mono', monospace; font-size:12px; margin-top:8px;">Prix</div>
+                <div style="margin-top:20px;">
+                  <span style="display:inline-flex; width:38px; height:38px; border:1px solid #1e1f22; border-radius:999px; align-items:center; justify-content:center; font-size:16px;">→</span>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -4223,8 +4242,34 @@ function renderWizGal() {
           currentFeaturedStay = featuredList && featuredList.length > 0 ? featuredList[0] : null;
 
           if (currentFeaturedStay) {
+            const dragFeaturedKicker = document.getElementById("dragFeaturedKicker");
+            const dragFeaturedDuration = document.getElementById("dragFeaturedDuration");
+            const dragFeaturedDates = document.getElementById("dragFeaturedDates");
+            const dragFeaturedPrice = document.getElementById("dragFeaturedPrice");
+
             dragFeaturedTitle.textContent = currentFeaturedStay.title || "Séjour Vedette";
-            let img = currentFeaturedStay.hero_image;
+            if (dragFeaturedKicker) dragFeaturedKicker.textContent = (currentFeaturedStay.location || "").toUpperCase();
+
+            // Fetch date for featured stay
+            const { data: featDate } = await supabase
+              .from("stay_dates")
+              .select("*")
+              .eq("stay_id", currentFeaturedStay.id)
+              .order("start_date", { ascending: true })
+              .limit(1)
+              .maybeSingle();
+
+            if (dragFeaturedDuration) dragFeaturedDuration.textContent = getDurationLabel(featDate?.start_date, featDate?.end_date, currentFeaturedStay.is_single_day);
+            if (dragFeaturedDates) dragFeaturedDates.textContent = formatDateRange(featDate?.start_date, featDate?.end_date, currentFeaturedStay.is_single_day);
+
+            let minP = null;
+            if (currentFeaturedStay.extra_options && Array.isArray(currentFeaturedStay.extra_options)) {
+              const prices = currentFeaturedStay.extra_options.map(o => Number(o.price)).filter(p => !isNaN(p) && p > 0);
+              if (prices.length) minP = Math.min(...prices);
+            }
+            if (dragFeaturedPrice) dragFeaturedPrice.textContent = minP ? `À partir de ${minP} €` : "";
+
+            let img = currentFeaturedStay.index_image || currentFeaturedStay.hero_image;
             if (currentFeaturedStay.content_blocks && Array.isArray(currentFeaturedStay.content_blocks)) {
               const idxImgBlock = currentFeaturedStay.content_blocks.find(b => b.type === "index_image");
               if (idxImgBlock && idxImgBlock.image) img = idxImgBlock.image;
@@ -4264,7 +4309,7 @@ function renderWizGal() {
             dragGridContainer.innerHTML = `<div style="color:var(--muted); grid-column:1/-1;">Aucun séjour sélectionné pour le bandeau des 5 séjours.</div>`;
           } else {
             dragGridContainer.innerHTML = currentHighlightStays.map((stay, idx) => {
-              let indexImage = stay.hero_image;
+              let indexImage = stay.index_image || stay.hero_image;
               if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
                 const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
                 if (idxImgBlock && idxImgBlock.image) indexImage = idxImgBlock.image;

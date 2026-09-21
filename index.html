@@ -777,7 +777,7 @@
         };
       }
 
-      let featIndexImage = stay.hero_image;
+      let featIndexImage = stay.index_image || stay.hero_image;
       if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
         const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
         if (idxImgBlock && idxImgBlock.image) {
@@ -846,7 +846,7 @@
 
     const duration = getDurationLabel(stayDate?.start_date, stayDate?.end_date);
     const dates = formatDateRange(stayDate?.start_date, stayDate?.end_date);
-    let indexImage = stay.hero_image;
+    let indexImage = stay.index_image || stay.hero_image;
     if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
       const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
       if (idxImgBlock && idxImgBlock.image) {
