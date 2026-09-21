@@ -56,8 +56,17 @@ serve(async (req) => {
       }
     }
 
-    const domain = returnUrl || "https://amesnomades.com";
-    const cancelDestination = cancelUrl || returnUrl || `${domain}/index.html`;
+    let origin = "https://amesnomades.com";
+    if (returnUrl) {
+      try {
+        origin = new URL(returnUrl).origin;
+      } catch (e) {
+        origin = "https://amesnomades.com";
+      }
+    }
+
+    const cancelDestination = cancelUrl || returnUrl || `${origin}/index.html`;
+    const successDestination = `${origin}/merci.html?session_id={CHECKOUT_SESSION_ID}`;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -65,7 +74,7 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: line_items,
       mode: "payment",
-      success_url: `${domain}/merci.html?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successDestination,
       cancel_url: cancelDestination,
       metadata: {
         user_id: userId || "",
