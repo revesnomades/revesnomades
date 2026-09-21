@@ -49,6 +49,35 @@ serve(async (req) => {
         console.error("Erreur parsing items_json:", e);
       }
 
+      // Si items_json est absent (ex: lien de paiement direct Stripe), récupérer les line_items auprès de Stripe API
+      if (!items || !items.length) {
+        try {
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+          if (lineItems && lineItems.data && lineItems.data.length > 0) {
+            items = lineItems.data.map((li: any) => ({
+              id: null,
+              title: li.description || session.description || "Séjour",
+              price: li.amount_total ? li.amount_total / 100 : amountTotal,
+              quantity: li.quantity || 1,
+              type: "stay"
+            }));
+          }
+        } catch (err) {
+          console.error("Erreur récupération line_items de Stripe:", err);
+        }
+      }
+
+      // Fallback de sécurité si items toujours vide
+      if (!items || !items.length) {
+        items = [{
+          id: null,
+          title: session.description || "Séjour",
+          price: amountTotal,
+          quantity: 1,
+          type: "stay"
+        }];
+      }
+
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -76,26 +105,51 @@ serve(async (req) => {
 
         const orderId = orderData?.id || null;
 
+        // Récupérer la liste des séjours pour faire un matching automatique du stay_id si manquant
+        let allDbStays: any[] = [];
+        try {
+          const { data: dbStays } = await supabase.from("stays").select("id, title");
+          if (dbStays) allDbStays = dbStays;
+        } catch (e) {
+          console.warn("Impossible de pré-charger les séjours pour matching:", e);
+        }
+
         // 2. Traiter chaque article (Séjour vs Produit Boutique)
         let isStayOrder = false;
         let stayItem: any = null;
 
         for (const item of items) {
-          if (item.type === "stay") {
+          if (item.type === "stay" || !item.type) {
             isStayOrder = true;
             stayItem = item;
+
+            // Déterminer le stay_id par correspondance de titre si non fourni
+            let resolvedStayId = item.id && item.id.length === 36 ? item.id : null;
+            if (!resolvedStayId && item.title && allDbStays.length > 0) {
+              const cleanStr = (s: string) => s.toLowerCase().replace(/&/g, "").replace(/\band\b/g, "").replace(/[^a-z0-9]/g, "");
+              const targetTitle = cleanStr(item.title);
+              const matched = allDbStays.find(s => {
+                const sTitle = cleanStr(s.title);
+                return sTitle && (targetTitle.includes(sTitle) || sTitle.includes(targetTitle));
+              });
+              if (matched) resolvedStayId = matched.id;
+            }
+
+            const bookingAmount = item.price * (item.quantity || 1);
 
             // Insérer dans 'bookings'
             const { error: bookingErr } = await supabase
               .from("bookings")
               .insert({
                 user_id: userId || null,
-                stay_id: item.id && item.id.length === 36 ? item.id : null,
+                stay_id: resolvedStayId,
                 stay_title: item.title,
                 customer_email: customerEmail,
                 customer_name: customerName,
                 booking_date: stayDate || new Date().toISOString().split("T")[0],
-                amount_paid: item.price * (item.quantity || 1),
+                amount_paid: bookingAmount,
+                amount: bookingAmount,
+                price_label: item.title,
                 status: "confirmed",
                 stripe_session_id: session.id,
               });

@@ -173,6 +173,7 @@
           </div>
 
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" id="btnOpenAddBooking" class="btn" style="background:#4f8c5b; color:#fff; font-weight:600; padding:10px 18px; border:none; cursor:pointer;">➕ Ajouter une réservation</button>
             <a class="btn on-light" href="compte.html">Retour compte</a>
             <a class="btn on-light" href="admin-stays.html">Gérer les séjours</a>
           </div>
@@ -203,6 +204,68 @@
     </div>
   </section>
 
+  <!-- MODAL AJOUT MANUEL RÉSERVATION -->
+  <div id="addBookingModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); z-index:9999; overflow-y:auto; padding:30px 10px;">
+    <div style="max-width:540px; margin:40px auto; background:#fffdf3; border-radius:12px; padding:28px; box-shadow:0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--line); color:#1e1f22;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-family:'SegoCustom', serif; font-size:24px; font-weight:300;">➕ Ajouter une réservation cliente</h2>
+        <button type="button" id="btnCloseAddBooking" style="background:none; border:none; font-size:20px; cursor:pointer; color:#1e1f22;">✕</button>
+      </div>
+
+      <form id="addBookingForm" style="display:grid; gap:14px;">
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Séjour concerné *</label>
+          <select id="addStaySelect" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;" required>
+            <option value="">Sélectionner un séjour...</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Prénom cliente *</label>
+            <input type="text" id="addFirstName" placeholder="Ex: Sophie" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;" required>
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Nom cliente</label>
+            <input type="text" id="addLastName" placeholder="Ex: Martin" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;">
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Email cliente *</label>
+          <input type="email" id="addEmail" placeholder="Ex: sophie@example.com" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Tarif / Option</label>
+            <input type="text" id="addPriceLabel" placeholder="Ex: Tarif Solo (89 €)" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Montant payé (€)</label>
+            <input type="number" id="addAmount" placeholder="Ex: 89" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;">
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Statut de réservation</label>
+          <select id="addStatus" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;">
+            <option value="confirmed">Confirmé</option>
+            <option value="paid">Payé</option>
+            <option value="pending">En attente</option>
+          </select>
+        </div>
+
+        <div id="addBookingMsg" style="font-size:13px; font-weight:600; margin-top:4px;"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+          <button type="button" id="btnCancelAddBooking" class="btn on-light" style="padding:10px 18px;">Annuler</button>
+          <button type="submit" id="btnSubmitAddBooking" class="btn" style="background:#4f8c5b; color:#fff; padding:10px 22px; font-weight:600; border:none; cursor:pointer;">Valider et Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer class="band cream">
     <div class="container footer">
       <div class="footer-row">
@@ -223,6 +286,15 @@
     const staysAccordionList = document.getElementById("staysAccordionList");
     const searchInput = document.getElementById("searchInput");
     const filterButtons = document.querySelectorAll(".filter-btn");
+
+    // Éléments du Modal d'Ajout
+    const btnOpenAddBooking = document.getElementById("btnOpenAddBooking");
+    const addBookingModal = document.getElementById("addBookingModal");
+    const btnCloseAddBooking = document.getElementById("btnCloseAddBooking");
+    const btnCancelAddBooking = document.getElementById("btnCancelAddBooking");
+    const addBookingForm = document.getElementById("addBookingForm");
+    const addStaySelect = document.getElementById("addStaySelect");
+    const addBookingMsg = document.getElementById("addBookingMsg");
 
     let allStaysData = [];
     let orphanBookings = [];
@@ -450,6 +522,12 @@
       renderStays();
     }
 
+    function populateStaySelect() {
+      if (!addStaySelect) return;
+      addStaySelect.innerHTML = `<option value="">Sélectionner un séjour...</option>` + 
+        allStaysData.map(s => `<option value="${s.id}">${s.title.toUpperCase()}</option>`).join("");
+    }
+
     function updateFilterCounts() {
       let countAll = allStaysData.length;
       let countPublished = 0;
@@ -503,7 +581,7 @@
         const bookings = stay.bookings || [];
         const clientCount = bookings.length;
         const titleUpper = (stay.title || "Séjour sans titre").toUpperCase();
-        
+
         // Ouvrir automatiquement l'accordéon si le séjour a des clientes réservées
         const isOpenAttr = clientCount > 0 ? "open" : "";
 
@@ -584,7 +662,7 @@
                 const { firstName, lastName } = splitCustomerName(b.customer_name, b.customer_email);
                 const bookingDate = b.created_at
                   ? new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                  : "—";
+                  : (b.booking_date || "—");
 
                 const amountVal = b.amount || b.amount_paid;
                 const amountStr = amountVal ? `${amountVal} €` : "—";
@@ -658,6 +736,75 @@
           btn.textContent = "✓";
           setTimeout(() => { btn.textContent = "💾"; }, 2000);
         });
+      });
+    }
+
+    // Modal d'Ajout Manuel
+    if (btnOpenAddBooking) {
+      btnOpenAddBooking.addEventListener("click", () => {
+        populateStaySelect();
+        if (addBookingMsg) addBookingMsg.textContent = "";
+        if (addBookingForm) addBookingForm.reset();
+        addBookingModal.style.display = "block";
+      });
+    }
+
+    const closeAddModal = () => {
+      addBookingModal.style.display = "none";
+    };
+
+    if (btnCloseAddBooking) btnCloseAddBooking.addEventListener("click", closeAddModal);
+    if (btnCancelAddBooking) btnCancelAddBooking.addEventListener("click", closeAddModal);
+
+    if (addBookingForm) {
+      addBookingForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const stayId = addStaySelect.value;
+        const firstName = document.getElementById("addFirstName").value.trim();
+        const lastName = document.getElementById("addLastName").value.trim();
+        const email = document.getElementById("addEmail").value.trim();
+        const priceLabel = document.getElementById("addPriceLabel").value.trim();
+        const amount = Number(document.getElementById("addAmount").value || 0);
+        const status = document.getElementById("addStatus").value || "confirmed";
+
+        const selectedStay = allStaysData.find(s => s.id === stayId);
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (addBookingMsg) {
+          addBookingMsg.style.color = "#1e1f22";
+          addBookingMsg.textContent = "⏳ Enregistrement de la réservation...";
+        }
+
+        const { error } = await supabase.from("bookings").insert({
+          stay_id: stayId || null,
+          stay_title: selectedStay ? selectedStay.title : (priceLabel || "Séjour"),
+          customer_name: fullName,
+          customer_email: email,
+          price_label: priceLabel || (selectedStay ? selectedStay.title : "Standard"),
+          amount: amount,
+          amount_paid: amount,
+          status: status,
+          booking_date: new Date().toISOString().split("T")[0]
+        });
+
+        if (error) {
+          console.error("Erreur insertion booking:", error);
+          if (addBookingMsg) {
+            addBookingMsg.style.color = "#c00";
+            addBookingMsg.textContent = "❌ Erreur : " + error.message;
+          }
+          return;
+        }
+
+        if (addBookingMsg) {
+          addBookingMsg.style.color = "#4f8c5b";
+          addBookingMsg.textContent = "✅ Réservation ajoutée avec succès !";
+        }
+
+        setTimeout(async () => {
+          closeAddModal();
+          await loadBookings();
+        }, 1200);
       });
     }
 
