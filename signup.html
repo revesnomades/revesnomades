@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <!-- Google Tag Manager -->
@@ -196,7 +196,16 @@
         }
       }
 
-      // 3) Si case newsletter cochée -> ajout newsletter
+      // 3) Envoi de l'email de bienvenue & confirmation de compte via Brevo API
+      try {
+        await supabase.functions.invoke("signup-welcome", {
+          body: { firstname, email }
+        });
+      } catch (e) {
+        console.warn("Erreur envoi email bienvenue Brevo:", e);
+      }
+
+      // 4) Si case newsletter cochée -> ajout newsletter
       if(newsletterOptin){
         try {
           const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
@@ -220,7 +229,7 @@
         }
       }
 
-      setMsg("Compte créé. Vérifiez votre email pour confirmer votre inscription.");
+      setMsg("✅ Votre compte a été créé avec succès ! Un e-mail de confirmation vient de vous être envoyé.");
     });
   </script>
 
