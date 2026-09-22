@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { firstname, email } = await req.json();
+    const { firstname, email, newsletterOptin } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Email requis" }), {
@@ -32,6 +33,20 @@ serve(async (req) => {
     const cleanEmail = email.trim().toLowerCase();
     const safeName = (firstname || "").trim();
     const greeting = safeName ? `Hello ${safeName},` : "Hello,";
+
+    // 1. Si la case newsletter a été cochée -> enregistrer dans la table 'newsletter' de Supabase
+    if (newsletterOptin) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (supabaseUrl && serviceRoleKey) {
+        try {
+          const supabase = createClient(supabaseUrl, serviceRoleKey);
+          await supabase.from("newsletter").upsert([{ email: cleanEmail, name: safeName }], { onConflict: "email" });
+        } catch (dbErr) {
+          console.warn("Erreur insertion table newsletter Supabase:", dbErr);
+        }
+      }
+    }
 
     const htmlContent = `
 <!doctype html>
@@ -56,9 +71,13 @@ serve(async (req) => {
         <p>Votre compte a été créé avec succès ! Vous pouvez dès à présent vous connecter à votre espace personnel pour suivre vos réservations de séjours, télécharger vos factures et recevoir nos actualités exclusives.</p>
       </div>
 
-      <div style="text-align:center; margin:36px 0;">
-        <a href="https://www.amesnomades.com/compte.html" target="_blank" style="display:inline-block; background:#1e1f22; color:#ffffff; font-weight:600; font-size:14px; padding:14px 28px; border-radius:6px; text-decoration:none; letter-spacing:0.04em;">
+      <!-- Liens / Boutons CTA -->
+      <div style="text-align:center; margin:36px 0; display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <a href="https://www.amesnomades.com/compte.html" target="_blank" style="display:inline-block; width:85%; max-width:300px; background:#1e1f22; color:#ffffff; font-weight:600; font-size:14px; padding:14px 20px; border-radius:6px; text-decoration:none; letter-spacing:0.04em; text-align:center;">
           Accéder à mon espace compte →
+        </a>
+        <a href="https://www.amesnomades.com/index.html#sejours" target="_blank" style="display:inline-block; width:85%; max-width:300px; background:#f7f4ef; color:#1e1f22; border:1px solid #1e1f22; font-weight:600; font-size:14px; padding:13px 20px; border-radius:6px; text-decoration:none; letter-spacing:0.04em; text-align:center;">
+          Découvrir les prochains séjours 🌿
         </a>
       </div>
 
@@ -73,7 +92,7 @@ serve(async (req) => {
 </html>
     `;
 
-    // 1. Envoyer l'email transactionnel de bienvenue via Brevo API
+    // 2. Envoyer l'email transactionnel de bienvenue via Brevo API
     const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -93,14 +112,19 @@ serve(async (req) => {
       console.error("Erreur Brevo Signup Email:", errText);
     }
 
-    // 2. Synchroniser le contact dans Brevo (Liste 13)
+    // 3. Synchroniser le contact dans Brevo (Liste 13 = Membres, Liste 9 = Newsletter si cochée)
+    const targetLists = [13];
+    if (newsletterOptin) {
+      targetLists.push(9); // Liste 9 Newsletter Brevo
+    }
+
     try {
       await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
         body: JSON.stringify({
           email: cleanEmail,
-          listIds: [13],
+          listIds: targetLists,
           updateEnabled: true,
           attributes: { PRENOM: safeName }
         }),

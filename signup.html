@@ -196,10 +196,10 @@
         }
       }
 
-      // 3) Envoi de l'email de bienvenue & confirmation de compte via Brevo API
+      // 3) Envoi de l'email de bienvenue & confirmation de compte via Brevo API (avec opt-in newsletter)
       try {
         await supabase.functions.invoke("signup-welcome", {
-          body: { firstname, email }
+          body: { firstname, email, newsletterOptin }
         });
       } catch (e) {
         console.warn("Erreur envoi email bienvenue Brevo:", e);
