@@ -142,12 +142,36 @@
           button.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
         });
       });
-    }
-
-    // Active un affichage discret et progressif de la sécurité du mot de passe.
+    }    // Active un affichage discret et progressif de la sécurité du mot de passe.
     passwordEl?.addEventListener("input", updatePasswordStrength);
     setupPasswordToggles();
     updatePasswordStrength();
+
+    function translateAuthError(message) {
+      if (!message) return "Une erreur est survenue. Veuillez réessayer.";
+      const msg = String(message).toLowerCase();
+
+      if (msg.includes("user already registered") || msg.includes("already exists") || msg.includes("already registered")) {
+        return "Un compte existe déjà avec cette adresse email. Veuillez vous connecter.";
+      }
+      if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
+        return "Email ou mot de passe incorrect.";
+      }
+      if (msg.includes("password should be at least")) {
+        return "Le mot de passe doit contenir au moins 8 caractères.";
+      }
+      if (msg.includes("email not confirmed")) {
+        return "Veuillez confirmer votre adresse email avant de vous connecter.";
+      }
+      if (msg.includes("rate limit") || msg.includes("too many requests")) {
+        return "Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.";
+      }
+      if (msg.includes("invalid email")) {
+        return "Veuillez saisir une adresse email valide.";
+      }
+
+      return message;
+    }
 
     btnSignup?.addEventListener("click", async () => {
       setMsg("");
@@ -175,7 +199,7 @@
       });
 
       if(error){
-        setMsg(error.message);
+        setMsg(translateAuthError(error.message));
         return;
       }
 
