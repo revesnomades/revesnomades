@@ -196,36 +196,19 @@
         }
       }
 
-      // 3) Envoi de l'email de bienvenue & confirmation de compte via Brevo API (avec opt-in newsletter)
-      try {
-        await supabase.functions.invoke("signup-welcome", {
-          body: { firstname, email, newsletterOptin }
-        });
-      } catch (e) {
-        console.warn("Erreur envoi email bienvenue Brevo:", e);
-      }
-
-      // 4) Si case newsletter cochée -> ajout newsletter
+      // 3) Si case newsletter cochée -> Enregistrer dans la liste newsletter (base de données Supabase)
       if(newsletterOptin){
         try {
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              firstname,
-              email
-            })
-          });
+          const { error: newsErr } = await supabase
+            .from("newsletter")
+            .upsert([{
+              email: email,
+              name: firstname
+            }], { onConflict: "email" });
 
-          const newsletterData = await res.json().catch(() => ({}));
-          console.log("Newsletter signup:", newsletterData);
-
+          if (newsErr) console.warn("Erreur inscription newsletter:", newsErr);
         } catch (err) {
-          console.error("NEWSLETTER ERROR:", err);
+          console.error("NEWSLETTER DB ERROR:", err);
         }
       }
 
