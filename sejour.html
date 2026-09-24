@@ -95,6 +95,28 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
+    .btn.btn-loading, button.btn-loading, a.btn-loading, .btn-loading {
+      position: relative !important;
+      pointer-events: none !important;
+      opacity: 0.85 !important;
+      cursor: wait !important;
+    }
+    .btn.btn-loading::after, button.btn-loading::after, a.btn-loading::after, .btn-loading::after {
+      content: "" !important;
+      display: inline-block !important;
+      width: 13px !important;
+      height: 13px !important;
+      margin-left: 8px !important;
+      border: 2px solid currentColor !important;
+      border-right-color: transparent !important;
+      border-radius: 50% !important;
+      animation: btnSpin 0.6s linear infinite !important;
+      vertical-align: -2px !important;
+    }
+    @keyframes btnSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
@@ -582,6 +604,9 @@
         if (singleBtn && bookingBtnEl) {
           singleBtn.addEventListener("click", (e) => {
             e.preventDefault();
+            if (singleBtn.classList.contains("btn-loading")) return;
+            singleBtn.classList.add("btn-loading");
+            if (bookingBtnEl) bookingBtnEl.classList.add("btn-loading");
             bookingBtnEl.setAttribute("data-price", String(rawPrice));
             bookingBtnEl.setAttribute("data-label", label);
             bookingBtnEl.click();
@@ -620,15 +645,20 @@
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (btn.classList.contains("btn-loading")) return;
+          btn.classList.add("btn-loading");
           const targetUrl = btn.getAttribute("data-url");
           const optPrice = btn.getAttribute("data-price");
           const optLabel = btn.getAttribute("data-label");
           if (bookingBtnEl) {
             bookingBtnEl.setAttribute("data-price", optPrice);
             bookingBtnEl.setAttribute("data-label", optLabel);
+            bookingBtnEl.classList.add("btn-loading");
             bookingBtnEl.click();
           } else if (targetUrl && targetUrl !== "#stripe-checkout") {
-            window.location.href = targetUrl;
+            setTimeout(() => {
+              window.location.href = targetUrl;
+            }, 50);
           }
         });
       });
@@ -1644,12 +1674,15 @@
 
         bookingBtn.addEventListener("click", async (e) => {
           e.preventDefault();
+          bookingBtn.classList.add("btn-loading");
           bookingMsg.style.color = "var(--text)";
           bookingMsg.textContent = "Vérification du compte…";
 
           const { data: { user } } = await supabase.auth.getUser();
           if(!user) {
-            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour 1 jour.");
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour.");
             window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
             return;
           }
@@ -1661,7 +1694,7 @@
             stayPrice = Number(stay.extra_options[0].price || 0);
           }
           let optionLabel = bookingBtn.getAttribute("data-label") || "";
-          let itemTitle = stay.title || 'Séjour 1 jour';
+          let itemTitle = stay.title || 'Séjour';
           const cleanOptLabel = optionLabel.trim().toLowerCase();
           if (optionLabel && optionLabel !== stay.title && !["tarif", "option", "default", "standard"].includes(cleanOptLabel)) {
             itemTitle += ` (${optionLabel})`;
@@ -1686,6 +1719,8 @@
 
           if(sessionErr || !sessionData?.url) {
             console.error("Erreur Checkout:", sessionErr);
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
             bookingMsg.style.color = "#c00";
             bookingMsg.textContent = "Erreur lors de la création de la session de paiement.";
             return;
@@ -1705,9 +1740,12 @@
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
 
-      // Meta Pixel AddToCart event tracking (si non single day)
+      // Meta Pixel AddToCart event tracking & loading spinner (si non single day)
       if (bookingBtn && !isSingleDay) {
         bookingBtn.addEventListener("click", () => {
+          if (bookingBtn.hasAttribute("href") && bookingBtn.getAttribute("href") !== "#") {
+            bookingBtn.classList.add("btn-loading");
+          }
           if (window.MetaPixel) {
             let basePrice = 0;
             if (stay.extra_options && Array.isArray(stay.extra_options)) {

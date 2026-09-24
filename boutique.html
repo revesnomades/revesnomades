@@ -483,9 +483,11 @@
     filterCategory?.addEventListener("change", renderProducts);
     sortProducts?.addEventListener("change", renderProducts);
 
-    window.buyProduct = async (id, name, price, fallbackStripeUrl) => {
+    window.buyProduct = async (id, name, price, fallbackStripeUrl, btnEl) => {
+      if (btnEl) btnEl.classList.add("btn-loading");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        if (btnEl) btnEl.classList.remove("btn-loading");
         alert("Veuillez vous connecter ou créer un compte pour commander cet article.");
         window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
         return;
@@ -514,6 +516,7 @@
       } else if (fallbackStripeUrl) {
         window.location.href = fallbackStripeUrl;
       } else {
+        if (btnEl) btnEl.classList.remove("btn-loading");
         alert("Erreur lors du traitement de la commande avec Stripe.");
       }
     };

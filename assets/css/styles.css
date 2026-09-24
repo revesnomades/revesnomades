@@ -133,6 +133,38 @@ select, option{ color: var(--text) !important; }
 .btn.block{ width:100%; }
 .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
+/* Loading spinner state for buttons */
+.btn.btn-loading,
+button.btn-loading,
+a.btn-loading,
+.btn-loading {
+  position: relative !important;
+  pointer-events: none !important;
+  opacity: 0.85 !important;
+  cursor: wait !important;
+}
+
+.btn.btn-loading::after,
+button.btn-loading::after,
+a.btn-loading::after,
+.btn-loading::after {
+  content: "" !important;
+  display: inline-block !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin-left: 8px !important;
+  border: 2px solid currentColor !important;
+  border-right-color: transparent !important;
+  border-radius: 50% !important;
+  animation: btnSpin 0.6s linear infinite !important;
+  vertical-align: -2px !important;
+}
+
+@keyframes btnSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .on-photo{ color: rgba(255,255,255,.92); --btnHoverBg:#fff; --btnHoverColor:#000; }
 .on-light{ color: var(--text); --btnHoverBg:#111; --btnHoverColor:#fff; }
 
