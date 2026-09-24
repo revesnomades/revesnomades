@@ -1793,6 +1793,15 @@
 
     // Le header reste toujours visible sans masquage au scroll
     loadStay();
+
+    window.addEventListener("pageshow", () => {
+      document.querySelectorAll(".btn-loading").forEach(btn => btn.classList.remove("btn-loading"));
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        document.querySelectorAll(".btn-loading").forEach(btn => btn.classList.remove("btn-loading"));
+      }
+    });
   </script>
 
 </body>
