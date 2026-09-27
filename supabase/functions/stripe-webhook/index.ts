@@ -30,154 +30,119 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const event = await stripe.webhooks.constructEventAsync(
-      body,
-      signature,
-      webhookSecret
-    );
+    const event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      
+
       const customerEmail = session.customer_details?.email;
       const customerName = session.customer_details?.name || "";
-      const amount = session.amount_total ? session.amount_total / 100 : 0; // en euros
-      const eventName = "Pool, Brunch & Yoga"; // On peut le rendre dynamique plus tard si besoin
+      const amount = session.amount_total ? session.amount_total / 100 : 0;
 
-      if (customerEmail) {
-        
-        let firstName = "";
-        let lastName = "";
-        if (customerName) {
-          const parts = customerName.split(" ");
-          firstName = parts[0];
-          lastName = parts.slice(1).join(" ");
-        }
+      let firstName = "";
+      let lastName = "";
+      if (customerName) {
+        const parts = customerName.split(" ");
+        firstName = parts[0];
+        lastName = parts.slice(1).join(" ");
+      }
 
-        // 1. Sauvegarde dans Supabase
-        const supabaseUrl = Deno.env.get("SUPABASE_URL");
-        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-        
-        if (supabaseUrl && serviceRoleKey) {
-          const supabase = createClient(supabaseUrl, serviceRoleKey);
-          
-          if (session.metadata?.type === 'product') {
-            // Achat boutique
-            const productName = session.metadata?.product_name || "Produit Inconnu";
-            const { error } = await supabase
-              .from('purchases')
-              .insert({
-                email: customerEmail,
-                firstname: firstName,
-                lastname: lastName,
-                product_name: productName,
-                amount: amount,
-                status: 'paid'
-              });
-            if (error) console.error("Erreur insertion achat Supabase:", error);
-            else console.log(`Achat de produit enregistré pour ${customerEmail}`);
-          } else {
-            // Réservation séjour / événement
-            const { error } = await supabase
-              .from('event_registrations')
-              .insert({
-                email: customerEmail,
-                firstname: firstName,
-                lastname: lastName,
-                event_name: eventName,
-                amount: amount,
-                status: 'paid'
-              });
-            if (error) console.error("Erreur insertion séjour Supabase:", error);
-            else console.log(`Paiement événement enregistré pour ${customerEmail}`);
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const supabase = supabaseUrl && serviceRoleKey
+        ? createClient(supabaseUrl, serviceRoleKey)
+        : null;
+
+      if (customerEmail && supabase) {
+        if (session.metadata?.type === "product") {
+          const productName = session.metadata?.product_name || "Produit Inconnu";
+          const productId = session.metadata?.product_id;
+
+          // 1. Enregistrer l'achat
+          const { error: purchaseError } = await supabase.from("purchases").insert({
+            email: customerEmail,
+            firstname: firstName,
+            lastname: lastName,
+            product_name: productName,
+            amount,
+            status: "paid",
+          });
+          if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
+
+          // 2. Décrémenter le stock
+          if (productId) {
+            const { data: prod } = await supabase
+              .from("products")
+              .select("stock")
+              .eq("id", productId)
+              .single();
+
+            if (prod && prod.stock !== null && prod.stock > 0) {
+              const newStock = prod.stock - 1;
+              await supabase
+                .from("products")
+                .update({ stock: newStock })
+                .eq("id", productId);
+              console.log(`Stock produit ${productId} : ${prod.stock} → ${newStock}`);
+            }
           }
         } else {
-          console.error("Variables Supabase manquantes pour l'insertion.");
+          // Réservation séjour
+          const eventName = session.metadata?.event_name || "Séjour Âmes Nomades";
+          const { error } = await supabase.from("event_registrations").insert({
+            email: customerEmail,
+            firstname: firstName,
+            lastname: lastName,
+            event_name: eventName,
+            amount,
+            status: "paid",
+          });
+          if (error) console.error("Erreur insertion séjour:", error);
         }
 
-        // 2. Ajout du contact sur Brevo (Liste 13)
+        // 3. Ajouter le contact sur Brevo (liste 13)
         const brevoApiKey = Deno.env.get("BREVO_API_KEY");
-        if (!brevoApiKey) {
-          console.error("BREVO_API_KEY non configurée.");
-        } else {
+        if (brevoApiKey) {
           const payloads = [
-            {
-              email: customerEmail,
-              listIds: [13],
-              updateEnabled: true,
-              attributes: { PRENOM: firstName, NOM: lastName }
-            },
-            {
-              email: customerEmail,
-              listIds: [13],
-              updateEnabled: true,
-              attributes: { FIRSTNAME: firstName, LASTNAME: lastName }
-            },
-            {
-              email: customerEmail,
-              listIds: [13],
-              updateEnabled: true
-            }
+            { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { PRENOM: firstName, NOM: lastName } },
+            { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { FIRSTNAME: firstName, LASTNAME: lastName } },
+            { email: customerEmail, listIds: [13], updateEnabled: true },
           ];
 
-          let success = false;
-          for (const brevoPayloadContact of payloads) {
-            const brevoResponseContact = await fetch("https://api.brevo.com/v3/contacts", {
+          for (const payload of payloads) {
+            const res = await fetch("https://api.brevo.com/v3/contacts", {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "api-key": brevoApiKey
-              },
-              body: JSON.stringify(brevoPayloadContact)
+              headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
+              body: JSON.stringify(payload),
             });
-
-            if (brevoResponseContact.ok) {
-              console.log(`Client ajouté avec succès à la liste Brevo 13 : ${customerEmail}`);
-              success = true;
-              break;
-            } else {
-              console.error("Essai échoué Brevo Contact:", await brevoResponseContact.text());
-            }
+            if (res.ok) { console.log(`Contact Brevo ajouté : ${customerEmail}`); break; }
           }
 
-          if (!success) {
-            console.error(`Impossible d'ajouter le contact à Brevo pour ${customerEmail}`);
-          }
+          // 4. Email d'alerte admin
+          const subject = session.metadata?.type === "product"
+            ? `🛍️ Nouvel achat boutique — ${firstName} ${lastName} (${amount} €)`
+            : `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`;
 
-          // 3. Envoi de l'email Admin
-          const brevoPayloadAdmin = {
-            sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
-            to: [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
-            subject: `🎉 Nouveau paiement reçu - ${eventName} (${firstName} ${lastName})`,
-            htmlContent: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px;">
-                <h2 style="color: #2e7d32;">Nouveau paiement validé !</h2>
-                <p>Un client vient de valider son paiement sur Stripe.</p>
-                <ul>
-                  <li><strong>Nom :</strong> ${customerName}</li>
-                  <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
-                  <li><strong>Événement :</strong> ${eventName}</li>
-                  <li><strong>Montant payé :</strong> ${amount} €</li>
-                </ul>
-                <p>Le client a été automatiquement ajouté à la liste Brevo #13.</p>
-              </div>
-            `
-          };
-
-          const brevoResponseAdmin = await fetch("https://api.brevo.com/v3/smtp/email", {
+          await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "api-key": brevoApiKey
-            },
-            body: JSON.stringify(brevoPayloadAdmin)
+            headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
+            body: JSON.stringify({
+              sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
+              to: [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
+              subject,
+              htmlContent: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px;">
+                  <h2 style="color: #2e7d32;">Nouveau paiement validé !</h2>
+                  <ul>
+                    <li><strong>Nom :</strong> ${customerName}</li>
+                    <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
+                    <li><strong>Produit :</strong> ${session.metadata?.product_name || session.metadata?.event_name || "—"}</li>
+                    <li><strong>Montant :</strong> ${amount} €</li>
+                  </ul>
+                </div>
+              `,
+            }),
           });
-
-          if (!brevoResponseAdmin.ok) {
-            console.error("Erreur Brevo Admin Email:", await brevoResponseAdmin.text());
-          } else {
-            console.log(`Email Admin envoyé pour ${customerEmail}`);
-          }
         }
       }
     }
