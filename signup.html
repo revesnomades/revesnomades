@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
 <head>
   <!-- Google Tag Manager -->
@@ -146,30 +146,31 @@
       const password = passwordEl.value || "";
       const strength = getPasswordStrength(password);
 
-      fill.style.width = password ? strength.width : "0%";
-      fill.style.backgroundColor = strength.color;
-      text.textContent = `Sécurité : ${password ? strength.label : "faible"}`;
+    function translateAuthError(message) {
+      if (!message) return "Une erreur est survenue. Veuillez réessayer.";
+      const msg = String(message).toLowerCase();
+
+      if (msg.includes("user already registered") || msg.includes("already exists") || msg.includes("already registered")) {
+        return "Un compte existe déjà avec cette adresse email. Veuillez vous connecter.";
+      }
+      if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
+        return "Email ou mot de passe incorrect.";
+      }
+      if (msg.includes("password should be at least")) {
+        return "Le mot de passe doit contenir au moins 8 caractères.";
+      }
+      if (msg.includes("email not confirmed")) {
+        return "Veuillez confirmer votre adresse email avant de vous connecter.";
+      }
+      if (msg.includes("rate limit") || msg.includes("too many requests")) {
+        return "Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.";
+      }
+      if (msg.includes("invalid email")) {
+        return "Veuillez saisir une adresse email valide.";
+      }
+
+      return message;
     }
-
-    function setupPasswordToggles(){
-      document.querySelectorAll(".password-toggle").forEach((button) => {
-        const targetId = button.getAttribute("data-target");
-        const input = document.getElementById(targetId);
-        if (!input) return;
-
-        button.addEventListener("click", () => {
-          const isHidden = input.type === "password";
-          input.type = isHidden ? "text" : "password";
-          button.textContent = isHidden ? "Masquer" : "Afficher";
-          button.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
-        });
-      });
-    }
-
-    // Active un affichage discret et progressif de la sécurité du mot de passe.
-    passwordEl?.addEventListener("input", updatePasswordStrength);
-    setupPasswordToggles();
-    updatePasswordStrength();
 
     btnSignup?.addEventListener("click", async () => {
       setMsg("");
@@ -197,7 +198,7 @@
       });
 
       if(error){
-        setMsg(error.message);
+        setMsg(translateAuthError(error.message));
         return;
       }
 
@@ -218,31 +219,23 @@
         }
       }
 
-      // 3) Si case newsletter cochée -> ajout newsletter
+      // 3) Si case newsletter cochée -> Enregistrer dans la liste newsletter (base de données Supabase)
       if(newsletterOptin){
         try {
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-signup`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              firstname,
-              email
-            })
-          });
+          const { error: newsErr } = await supabase
+            .from("newsletter")
+            .upsert([{
+              email: email,
+              name: firstname
+            }], { onConflict: "email" });
 
-          const newsletterData = await res.json().catch(() => ({}));
-          console.log("Newsletter signup:", newsletterData);
-
+          if (newsErr) console.warn("Erreur inscription newsletter:", newsErr);
         } catch (err) {
-          console.error("NEWSLETTER ERROR:", err);
+          console.error("NEWSLETTER DB ERROR:", err);
         }
       }
 
-      setMsg("Compte créé. Vérifiez votre email pour confirmer votre inscription.");
+      setMsg("✅ Votre compte a été créé avec succès ! Un e-mail de confirmation vient de vous être envoyé.");
     });
   </script>
 

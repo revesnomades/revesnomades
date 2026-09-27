@@ -436,7 +436,39 @@
       background: #eaf4ec;
       color: #3b7045;
     }
-  </style>
+  
+    .switch-toggle input:checked + .slider {
+      background-color: #4f8c5b !important;
+    }
+    .switch-toggle input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    .switch-toggle .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .badge-published {
+      background: rgba(79, 140, 91, 0.15);
+      color: #2e6238;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-draft {
+      background: rgba(120, 120, 120, 0.15);
+      color: #555;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+</style>
 </head>
 
 <body class="on-light">
@@ -471,6 +503,7 @@
             <div class="admin-inline">
               <button class="btn on-light" id="btnReloadHomepage" type="button">Actualiser</button>
               <button class="btn on-light" id="btnSaveHomepage" type="button">Enregistrer homepage</button>
+              <button class="btn on-light" id="btnOpenHomePreviewModal" type="button" style="background:#1e1f22; color:#fff; font-weight:600;">🖼️ Preview & Recadrage Accueil</button>
               <button class="btn on-light" id="btnNewStay" type="button">➕ Créer un séjour</button>
             </div>
           </div>
@@ -833,6 +866,33 @@
           <div id="staysList" class="stays-admin-list">Chargement…</div>
         </div>
 
+        <!-- EMAIL TEMPLATE SINGLE DAY -->
+        <div class="admin-panel" style="margin-top:24px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:20px;">
+          <h3 style="margin:0; font-size:18px; font-family:'SegoCustom', serif;">📧 Email de confirmation — Séjours 1 jour (Brevo)</h3>
+          <p class="muted-small" style="margin:4px 0 16px 0; color:var(--muted);">
+            Personnalisez l'email transactionnel automatique envoyé au client lors d'une réservation de séjour 1 jour.
+          </p>
+
+          <div style="margin-bottom:12px;">
+            <label class="label" style="font-weight:600;">Sujet de l'email</label>
+            <input type="text" id="tmplSingleDaySubject" class="input" style="width:100%; font-size:13px;" placeholder="Ex: Confirmation de votre séjour : {{params.TITRE_SEJOUR}}">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label class="label" style="font-weight:600;">Contenu HTML / Texte</label>
+            <textarea id="tmplSingleDayContent" class="input" style="width:100%; height:140px; font-family:monospace; font-size:12.5px; line-height:1.5;" placeholder="Bonjour {{params.PRENOM}}, nous vous confirmons votre séjour..."></textarea>
+            <p style="font-size:11.5px; color:var(--muted); margin-top:4px;">
+              Variables disponibles : <code>{{params.PRENOM}}</code>, <code>{{params.NOM}}</code>, <code>{{params.TITRE_SEJOUR}}</code>, <code>{{params.DATE_SEJOUR}}</code>, <code>{{params.PRIX}}</code>
+            </p>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button type="button" id="btnSaveEmailTmpl" class="btn on-light" style="background:var(--text); color:#fff; font-size:12px; padding:8px 18px;">Enregistrer le modèle</button>
+            <button type="button" id="btnTestEmailTmpl" class="btn tiny on-light" style="font-size:12px; padding:8px 14px;">✉️ Envoyer un email de test (Admin)</button>
+          </div>
+          <div id="emailTmplMsg" style="margin-top:8px; font-size:12px; color:var(--muted);"></div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -863,7 +923,51 @@
         <!-- ÉTAPE 1 : Général -->
         <div class="wizard-step active" id="wizardStep1" style="max-height:60vh; overflow-y:auto; padding-right:8px;">
           <h3 style="margin:0; font-size:16px; color:var(--text);">Étape 1 : Général</h3>
-          <p class="muted-small" style="margin:0 0 12px 0;">Définissez les informations de base et les dates de ce séjour.</p>
+          <p class="muted-small" style="margin:0 0 12px 0;">Définissez les informations de base, le statut et les dates de ce séjour.</p>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Séjour d'une journée (1 jour)</div>
+              <div class="muted-small">Activez cette option si le séjour se déroule sur une seule date</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizIsSingleDay" style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Statut du séjour</div>
+              <div class="muted-small" id="wizPublishedLabel">Brouillon (non visible sur le site)</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizPublished" style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Afficher la FAQ</div>
+              <div class="muted-small">Afficher la foire aux questions en bas de la page séjour</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizShowFaq" checked style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f5f3ef; padding:12px 14px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:13.5px; font-weight:600; color:var(--text);">Afficher "Autres séjours"</div>
+              <div class="muted-small">Proposer les autres séjours en bas de page pour augmenter la visibilité</div>
+            </div>
+            <label class="switch-toggle" style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+              <input type="checkbox" id="wizShowOtherStays" checked style="opacity:0; width:0; height:0;">
+              <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.3s; border-radius:24px;"></span>
+            </label>
+          </div>
           <div>
             <label class="muted-small" style="display:block; margin-bottom:4px;">Titre du séjour *</label>
             <input id="wizTitle" class="input" placeholder="Ex : Retraite Yoga & Méditation en Camargue" required>
@@ -876,12 +980,12 @@
             <label class="muted-small" style="display:block; margin-bottom:4px;">Pays</label>
             <input id="wizCountry" class="input" placeholder="Ex : France">
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" id="wizDateGrid">
             <div>
-              <label class="muted-small" style="display:block; margin-bottom:4px;">Date de début *</label>
+              <label class="muted-small" style="display:block; margin-bottom:4px;" id="wizStartDateLabel">Date de début *</label>
               <input id="wizStartDate" type="date" class="input" required>
             </div>
-            <div>
+            <div id="wizEndDateGroup">
               <label class="muted-small" style="display:block; margin-bottom:4px;">Date de fin *</label>
               <input id="wizEndDate" type="date" class="input" required>
             </div>
@@ -924,7 +1028,7 @@
           </div>
           <div style="margin-top:16px; border-top:1px dashed var(--line); padding-top:16px;">
             <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Images de la galerie</label>
-            <p class="muted-small" style="margin:0 0 10px 0;">Ajoutez des photos pour illustrer le séjour dans sa galerie dédiée.</p>
+            <p class="muted-small" style="margin:0 0 10px 0;">Ajoutez et réordonnez les photos de la galerie (glisser-déposer ⠿ ou flèches ◀ ▶).</p>
             <div id="wizGalContainer" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; min-height:40px; background:#f9f9f9; padding:8px; border-radius:4px; border:1px solid var(--line);">
               <div style="color:var(--muted); font-size:12px; align-self:center;">Aucune photo de galerie ajoutée.</div>
             </div>
@@ -945,7 +1049,7 @@
 
           <!-- Liste des intervenants -->
           <div style="margin-bottom:12px;">
-            <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Intervenants</label>
+            <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Intervenants (glisser-déposer ⠿ ou flèches ▲ ▼ pour réordonner)</label>
             <div id="wizSpeakerContainer" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
               <div style="color:var(--muted); font-size:12px;">Aucun intervenant ajouté.</div>
             </div>
@@ -962,6 +1066,13 @@
                 <button type="button" class="btn tiny on-light" id="btnUploadWizSpk" style="padding:6px 12px; white-space:nowrap;">Importer</button>
               </div>
               <div id="wizSpkPhotoMsg" style="font-size:12px; color:var(--muted);"></div>
+              <div>
+                <label class="muted-small" style="display:block; margin-bottom:4px;">Position de la photo</label>
+                <select id="wizSpkLayout" class="input" style="font-size:13px;">
+                  <option value="image_left">Photo à gauche du texte (par défaut)</option>
+                  <option value="image_right">Photo à droite du texte</option>
+                </select>
+              </div>
               <textarea id="wizSpkBio" class="input" rows="4" placeholder="Biographie..."></textarea>
             </div>
             <button type="button" class="btn tiny on-light" id="btnAddWizSpk" style="margin-top:10px; padding:7px 18px;">Ajouter cet intervenant</button>
@@ -1054,17 +1165,17 @@
           </div>
           <hr style="margin:16px 0; border:none; border-top:1px dashed var(--line);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <label class="muted-small" style="display:block; font-weight:600; margin:0;">Options d'hébergement & Tarifs (avec redirection Stripe)</label>
+            <label id="wizStep6Title" class="muted-small" style="display:block; font-weight:600; margin:0;">Options d'hébergement & Tarifs (avec redirection Stripe)</label>
             <div style="font-size:12px; color:var(--muted);">Nombre de places total : <input type="number" id="wizSeats" value="12" style="width:50px; padding:2px 4px; border:1px solid var(--line); border-radius:3px;"></div>
           </div>
-          <p class="muted-small" style="margin:0 0 10px 0;">Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.</p>
+          <p id="wizStep6Subtitle" class="muted-small" style="margin:0 0 10px 0;">Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.</p>
           <div id="wizOptContainer" style="display:grid; gap:8px; margin-bottom:12px; background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid var(--line);">
             <div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>
           </div>
           <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px;">
             <div style="display:grid; grid-template-columns:1fr 100px; gap:8px;">
               <div>
-                <label class="label" style="font-size:11px;">Texte de l'option (ex : Chambre partagée 2 lits)</label>
+                <label id="wizOptLabelText" class="label" style="font-size:11px;">Texte de l'option (ex : Chambre partagée 2 lits)</label>
                 <input type="text" id="wizOptLabel" class="input" placeholder="Ex : Chambre partagée (2 personnes)" style="font-size:13px;">
               </div>
               <div>
@@ -1072,7 +1183,7 @@
                 <input type="number" id="wizOptPrice" class="input" placeholder="650" style="font-size:13px;">
               </div>
             </div>
-            <div style="margin-top:8px;">
+            <div id="wizOptStripeGroup" style="margin-top:8px;">
               <label class="label" style="font-size:11px;">Lien de paiement Stripe *</label>
               <input type="text" id="wizOptStripe" class="input" placeholder="Ex : https://buy.stripe.com/..." style="font-size:13px;">
             </div>
@@ -1098,6 +1209,7 @@
     // Quand un séjour est créé avec le slug "camargue", son URL est /sejour.html?slug=camargue
     // Le slug doit être unique dans la table stays de Supabase.
     import { supabase } from "/assets/js/supabaseClient.js";
+    window.supabase = supabase;
 
     const adminStatus = document.getElementById("adminStatus");
     const editorMsg = document.getElementById("editorMsg");
@@ -1178,15 +1290,13 @@
     const btnAddContentBlock = document.getElementById("btnAddContentBlock");
     const contentBlocksList = document.getElementById("contentBlocksList");
 
-    const featuredSlotContent = document.getElementById("featuredSlotContent");
-
     let currentStayId = null;
     let stayContentBlocks = [];
     let allStays = [];
     let homepageFeaturedId = null;
     let homepageHighlights = [null, null, null, null, null];
 
-    let showGiftSection = true;
+    let showGiftSection = false;
     let showFaqSection = true;
     let showProgramSection = true;
     let showIncludedSection = true;
@@ -1263,15 +1373,25 @@
     }
 
     function arrayToLines(value){
-      if(!value || !Array.isArray(value)) return "";
-      return value.map(item => {
-        if(typeof item === "object" && item !== null){
-          if(item.label) return `${item.label} | ${item.price || ''} | ${item.stripe_url || ''}`;
-          if(item.title) return `${item.title} : ${item.text || ''}`;
+      if (!value) return "";
+      let arr = value;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+          try { arr = JSON.parse(trimmed); } catch(e) { arr = trimmed.split("\n"); }
+        } else {
+          arr = trimmed.split("\n");
+        }
+      }
+      if (!Array.isArray(arr)) return String(value || "");
+      return arr.map(item => {
+        if (typeof item === "object" && item !== null){
+          if (item.label) return `${item.label} | ${item.price || ''} | ${item.stripe_url || ''}`;
+          if (item.title) return `${item.title} : ${item.text || ''}`;
           return JSON.stringify(item);
         }
         return String(item);
-      }).join("\n");
+      }).filter(Boolean).join("\n");
     }
 
     function linesToOptionsArray(text){
@@ -1378,7 +1498,7 @@
           </div>
 
           <div class="admin-grid-2-tight">
-            <input class="input block-id" value="${block.id.replace(/"/g, "&quot;")}" placeholder="id">
+            <input class="input block-id" value="${(block.id || "").replace(/"/g, "&quot;")}" placeholder="id">
             <select class="input block-type">
               <option value="text" ${block.type === "text" ? "selected" : ""}>text</option>
               <option value="image_full" ${block.type === "image_full" ? "selected" : ""}>image_full</option>
@@ -1399,15 +1519,15 @@
               <option value="image_left" ${block.layout === "image_left" ? "selected" : ""}>image_left</option>
               <option value="image_right" ${block.layout === "image_right" ? "selected" : ""}>image_right</option>
             </select>
-            <input class="input block-title" value="${block.title.replace(/"/g, "&quot;")}" placeholder="title">
+            <input class="input block-title" value="${(block.title || "").replace(/"/g, "&quot;")}" placeholder="title">
           </div>
 
-          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text}</textarea>
-          <input class="input block-image" value="${block.image.replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
-          <input class="input block-image-alt" value="${block.image_alt.replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
-          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${block.images.join("\n")}</textarea>
-          <input class="input block-quote" value="${block.quote.replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
-          <input class="input block-caption" value="${block.caption.replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
+          <textarea class="input block-text" style="min-height:90px; ${showText ? "" : "display:none;"}" placeholder="text">${block.text || ""}</textarea>
+          <input class="input block-image" value="${(block.image || "").replace(/"/g, "&quot;")}" placeholder="image URL" style="${showImage ? "" : "display:none;"}">
+          <input class="input block-image-alt" value="${(block.image_alt || "").replace(/"/g, "&quot;")}" placeholder="image_alt" style="${showImage ? "" : "display:none;"}">
+          <textarea class="input block-images" style="min-height:70px; ${showImages ? "" : "display:none;"}" placeholder="images (1 URL par ligne)">${(block.images || []).join("\n")}</textarea>
+          <input class="input block-quote" value="${(block.quote || "").replace(/"/g, "&quot;")}" placeholder="quote" style="${showQuote ? "" : "display:none;"}">
+          <input class="input block-caption" value="${(block.caption || "").replace(/"/g, "&quot;")}" placeholder="caption" style="${showCaption ? "" : "display:none;"}">
         `;
 
         function syncBlockFromCard(){
@@ -1678,7 +1798,7 @@
       row.className = "program-slot-row";
 
       row.innerHTML = `
-        <input type="time" class="input slot-time" value="${slot.time || ""}">
+        <input type="text" class="input slot-time" value="${(slot.time || "").replace(/"/g, "&quot;")}" placeholder="09:00 ou 18h00" style="max-width:120px;">
         <input type="text" class="input slot-text" value="${(slot.text || "").replace(/"/g, "&quot;")}" placeholder="Texte de l’activité">
         <button type="button" class="btn on-light btn-remove-slot" aria-label="Supprimer">✕</button>
       `;
@@ -2033,12 +2153,12 @@
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       const userEmail = (user.email || "").toLowerCase();
       const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
       if (isEmailAdmin && data?.role !== "admin") {
-        await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+        await supabase.from("profiles").upsert({ id: user.id, role: "admin" });
       }
 
       if(!isEmailAdmin && (error || data?.role !== "admin")){
@@ -2049,195 +2169,413 @@
       return user;
     }
 
-    async function loadStays(){
+        async function loadStays(){
+      const staysList = document.getElementById("staysList");
+      if (!staysList) return;
       staysList.innerHTML = "Chargement…";
 
-      const { data, error } = await supabase
-        .from("stays")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("stays")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if(error){
-        console.error(error);
-        staysList.innerHTML = "Impossible de charger les séjours.";
-        return;
-      }
+        if(error){
+          console.error("Supabase stays error:", error);
+          staysList.innerHTML = "<div style='color:red; padding:12px;'>Impossible de charger les séjours : " + (error.message || JSON.stringify(error)) + "</div>";
+          return;
+        }
 
-      if(!data?.length){
-        staysList.innerHTML = "Aucun séjour pour le moment.";
-        return;
-      }
+        if(!data?.length){
+          staysList.innerHTML = "<div style='padding:12px;'>Aucun séjour pour le moment.</div>";
+          return;
+        }
 
-      staysList.innerHTML = data.map(stay => `
-        <div class="stay-admin-item">
-          <div>
-            <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
-            <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
-            <div class="muted-small" style="margin-top:4px;">Statut : ${stay.published ? "Publié" : "Brouillon"}</div>
-            <div class="muted-small" style="margin-top:4px;">
-              Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
+        staysList.innerHTML = data.map(stay => {
+          const safeSlug = stay.slug ? encodeURIComponent(stay.slug) : "";
+          const isPub = !!stay.published;
+          return `
+            <div class="stay-admin-item">
+              <div>
+                <div style="font-weight:600;">${stay.title || "Sans titre"}</div>
+                <div class="muted-small" style="margin-top:4px;">Slug : ${stay.slug || "—"}</div>
+                <div class="muted-small" style="margin-top:4px;">Lieu : ${stay.location || "—"}</div>
+                <div class="muted-small" style="margin-top:4px;">Statut : <span class="${isPub ? 'badge-published' : 'badge-draft'}">${isPub ? "Publié" : "Brouillon"}</span></div>
+                <div class="muted-small" style="margin-top:4px;">
+                  Homepage : ${stay.is_featured ? "Bandeau principal" : "—"}${stay.is_highlight ? ` · Bandeau 5 séjours (position ${stay.highlight_order})` : ""}
+                </div>
+              </div>
+
+              <div class="admin-inline">
+                <button class="btn on-light data-toggle-publish-btn" type="button" data-toggle-publish="${stay.id}" data-published="${isPub}" style="${isPub ? 'border-color:#4f8c5b; color:#4f8c5b; font-weight:600;' : 'background:#4f8c5b; color:#fff; font-weight:600;'}">
+                  ${isPub ? "Passer en brouillon" : "⚡ Publier"}
+                </button>
+                <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
+                <button class="btn on-light" type="button" data-preview="${safeSlug}">Aperçu</button>
+                <a class="btn on-light" href="/sejour.html?slug=${safeSlug}" target="_blank" rel="noopener">Voir</a>
+                <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
+              </div>
             </div>
-          </div>
+          `;
+        }).join("");
 
-          <div class="admin-inline">
-            <button class="btn on-light" type="button" data-edit="${stay.id}">Modifier</button>
-            <button class="btn on-light" type="button" data-preview="${encodeURIComponent(stay.slug)}">Aperçu</button>
-            <a class="btn on-light" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" target="_blank" rel="noopener">Voir</a>
-            <button class="btn on-light" type="button" data-delete="${stay.id}">Supprimer</button>
-          </div>
-        </div>
-      `).join("");
+        staysList.querySelectorAll("[data-toggle-publish]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-toggle-publish");
+            const isCurrentlyPublished = btn.getAttribute("data-published") === "true";
+            const nextState = !isCurrentlyPublished;
+            
+            btn.disabled = true;
+            btn.textContent = "Mise à jour...";
 
-      staysList.querySelectorAll("[data-edit]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await editStay(btn.getAttribute("data-edit"));
+            const { error } = await supabase
+              .from("stays")
+              .update({
+                published: nextState,
+                published_at: nextState ? new Date().toISOString() : null
+              })
+              .eq("id", id);
+
+            if (error) {
+              alert("Erreur lors de la modification du statut : " + error.message);
+            }
+            await loadStays();
+          });
         });
-      });
 
-      staysList.querySelectorAll("[data-preview]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const slug = decodeURIComponent(btn.getAttribute("data-preview"));
-          window.open(
-            `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
-            "_blank"
-          );
+        staysList.querySelectorAll("[data-edit]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await editStay(btn.getAttribute("data-edit"));
+          });
         });
-      });
 
-      staysList.querySelectorAll("[data-delete]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await deleteStay(btn.getAttribute("data-delete"));
+        staysList.querySelectorAll("[data-preview]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const slug = decodeURIComponent(btn.getAttribute("data-preview") || "");
+            window.open(
+              `/admin-sejour-preview.html?slug=${encodeURIComponent(slug)}&preview=1`,
+              "_blank"
+            );
+          });
         });
-      });
+
+        staysList.querySelectorAll("[data-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await deleteStay(btn.getAttribute("data-delete"));
+          });
+        });
+
+      } catch (err) {
+        console.error("loadStays catch error:", err);
+        staysList.innerHTML = "<div style='color:red; padding:12px;'>Erreur lors du chargement des séjours : " + (err.message || err) + "</div>";
+      }
     }
 
-    async function editStay(id){
-      const { data: stay, error } = await supabase
-        .from("stays")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const isValidUUID = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
-      if(error || !stay){
-        console.error(error);
-        alert("Impossible de charger ce séjour.");
+        async function editStay(id){
+      if(!id || !isValidUUID(id)) return;
+      currentWizardEditId = id;
+      currentStayId = id;
+      editingSpkIdx = null;
+
+      // ── RESET COMPLET : vider toutes les listes et tous les champs avant de charger ──
+      wizGalList = [];
+      wizProgList = [];
+      wizOptList = [];
+      wizSpeakerList = [];
+      stayContentBlocks = [];
+
+      if (stayWizardForm) stayWizardForm.reset();
+
+      // Vider les champs non couverts par form.reset()
+      const fieldsToClear = [
+        "wizTitle","wizSlug","wizLocation","wizCountry","wizStartDate","wizEndDate",
+        "wizShortDesc","wizDesc","wizHeroImage","wizIndexImage","wizSeats",
+        "wizIncluded","wizNotIncluded","wizProgramNote",
+        "wizChefName","wizChefPhoto","wizChefBio",
+        "wizAccomDesc","wizAccomPhoto",
+        "wizSpkName","wizSpkPhoto","wizSpkBio"
+      ];
+      fieldsToClear.forEach(fid => {
+        const el = document.getElementById(fid);
+        if (el) el.value = "";
+      });
+      if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = "image_left";
+
+      // Réinitialiser les rendus de listes vides
+      renderWizGal();
+      renderWizProg();
+      renderWizOpt();
+      renderWizSpeakers();
+      renderContentBlocksEditor();
+
+      const btnAddSpk = document.getElementById("btnAddWizSpk");
+      if (btnAddSpk) btnAddSpk.textContent = "+ Ajouter cet intervenant";
+
+      const wizH2 = document.querySelector("#stayWizardModal h2");
+      if(wizH2) wizH2.textContent = "Modifier le séjour";
+      const btnSub = stayWizardForm ? stayWizardForm.querySelector("button[type='submit']") : null;
+      if(btnSub) btnSub.textContent = "Enregistrer les modifications";
+      updateWizardStep(1);
+
+      // Ouvrir la modale avec indicateur de chargement
+      if (stayWizardModal) stayWizardModal.classList.add("active");
+      const wizardErrorMsg = document.getElementById("wizardErrorMsg");
+      if (wizardErrorMsg) { wizardErrorMsg.style.color = "var(--muted)"; wizardErrorMsg.textContent = "Chargement des données…"; }
+
+      let stay = null;
+      let dates = [];
+      try {
+        const { data: stayData, error: stayErr } = await supabase
+          .from("stays")
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (stayErr || !stayData) {
+          console.error("Erreur chargement séjour:", stayErr);
+          alert("Impossible de charger ce séjour.");
+          return;
+        }
+        stay = stayData;
+
+        const { data: datesData } = await supabase
+          .from("stay_dates")
+          .select("*")
+          .eq("stay_id", id)
+          .order("start_date", { ascending: true })
+          .limit(1);
+        dates = datesData || [];
+      } catch (err) {
+        console.error("Erreur d'accès réseau Supabase:", err);
+        alert("Erreur de communication avec Supabase.");
         return;
       }
 
-      const { data: dates } = await supabase
-        .from("stay_dates")
-        .select("*")
-        .eq("stay_id", id)
-        .order("start_date", { ascending: true })
-        .limit(1);
+      if (wizardErrorMsg) { wizardErrorMsg.style.color = ""; wizardErrorMsg.textContent = ""; }
 
-      currentWizardEditId = id;
-      const wizH2 = document.querySelector("#stayWizardModal h2");
-      if(wizH2) wizH2.textContent = "Modifier le séjour";
-      const btnSub = stayWizardForm.querySelector("button[type='submit']");
-      if(btnSub) btnSub.textContent = "Enregistrer les modifications";
+      // ══════════════════════════════════════════════════════════════
+      // POPULATION DES CHAMPS — chaque section est indépendante
+      // ══════════════════════════════════════════════════════════════
 
+      // ── Dates ──
       const firstDate = dates?.[0] || null;
-      document.getElementById("wizTitle").value = stay.title || "";
-      document.getElementById("wizSlug").value = stay.slug || "";
-      document.getElementById("wizLocation").value = stay.location || "";
-      document.getElementById("wizStartDate").value = firstDate?.start_date || "";
-      document.getElementById("wizEndDate").value = firstDate?.end_date || "";
-      document.getElementById("wizSeats").value = firstDate?.seats_total ?? 12;
-      document.getElementById("wizShortDesc").value = stay.short_description || "";
-      document.getElementById("wizDesc").value = stay.description || "";
-      document.getElementById("wizHeroImage").value = stay.hero_image || "";
-      
-      // Image de l'index
-      let indexImage = "";
-      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const idxBlock = stay.content_blocks.find(b => b.type === "index_image");
-        if (idxBlock) {
-          indexImage = idxBlock.image || "";
+      const sStr = firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "";
+      const eStr = firstDate?.end_date   ? String(firstDate.end_date).substring(0, 10)   : "";
+      const isSingleStay = stay.is_single_day === true || (firstDate ? (!eStr || sStr === eStr) : false);
+
+      // ── Content blocks ──
+      try {
+        let rawBlocks = stay.content_blocks;
+        if (typeof rawBlocks === 'string') { try { rawBlocks = JSON.parse(rawBlocks); } catch(e){} }
+        stayContentBlocks = Array.isArray(rawBlocks) ? [...rawBlocks] : [];
+        renderContentBlocksEditor();
+      } catch(e) { console.warn("editStay content_blocks:", e); }
+
+      // ── ÉTAPE 1 : Général ──
+      try {
+        const locParts = (stay.location || "").split(",").map(s => s.trim());
+        const cityVal    = locParts[0] || stay.location || "";
+        const countryVal = locParts[1] || stay.country  || "";
+
+        const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+        setV("wizTitle",     stay.title            || "");
+        setV("wizSlug",      stay.slug             || "");
+        setV("wizLocation",  cityVal);
+        setV("wizCountry",   countryVal);
+        setV("wizStartDate", sStr);
+        setV("wizEndDate",   eStr || sStr);
+        setV("wizSeats",     firstDate?.seats_total ?? 12);
+        setV("wizShortDesc", stay.short_description || "");
+        setV("wizDesc",      stay.description       || "");
+        setV("wizHeroImage", stay.hero_image        || "");
+
+        if (wizIsSingleDay) wizIsSingleDay.checked = isSingleStay;
+        if (mainIsSingleDay) mainIsSingleDay.checked = isSingleStay;
+      } catch(e) { console.warn("editStay étape1 champs:", e); }
+
+      try { updateWizSingleDayUI(); }  catch(e) { console.warn("updateWizSingleDayUI:", e); }
+      try { updateMainSingleDayUI(); } catch(e) { console.warn("updateMainSingleDayUI:", e); }
+
+      // ── Sync éditeur inline ──
+      try {
+        const countryVal2 = ((stay.location||"").split(",")[1]||"").trim() || stay.country || "";
+        const sDate = firstDate?.start_date ? String(firstDate.start_date).substring(0,10) : "";
+        const eDate = firstDate?.end_date   ? String(firstDate.end_date).substring(0,10)   : "";
+        if (stayTitle)            stayTitle.value            = stay.title             || "";
+        if (staySlug)             staySlug.value             = stay.slug              || "";
+        if (stayLocation)         stayLocation.value         = stay.location          || "";
+        if (stayShortDescription) stayShortDescription.value = stay.short_description || "";
+        if (stayDescription)      stayDescription.value      = stay.description       || "";
+        if (stayHeroImage)        stayHeroImage.value        = stay.hero_image        || "";
+        if (stayBookingUrl)       stayBookingUrl.value       = stay.booking_url || stay.reservation_url || "";
+        if (stayMinBookings)      stayMinBookings.value      = stay.min_bookings || "10";
+        if (mainStartDate)        mainStartDate.value        = sDate;
+        if (mainEndDate)          mainEndDate.value          = eDate || sDate;
+        if (mainSeatsTotal)       mainSeatsTotal.value       = firstDate?.seats_total    ?? 10;
+        if (mainSeatsRemaining)   mainSeatsRemaining.value   = firstDate?.seats_remaining ?? 10;
+        const elStayCtr = document.getElementById("stayCountry");
+        if (elStayCtr) elStayCtr.value = countryVal2;
+        if (typeof updateDurationInfo === 'function') updateDurationInfo();
+      } catch(e) { console.warn("editStay inline editor:", e); }
+
+      // ── Publié ──
+      try {
+        if (stayPublished) stayPublished.checked = !!stay.published;
+        const wizPub = document.getElementById("wizPublished");
+        if (wizPub) wizPub.checked = !!stay.published;
+      } catch(e) { console.warn("editStay published:", e); }
+      try { updatePublishToggleUI(); } catch(e) { console.warn("updatePublishToggleUI:", e); }
+      try { if (typeof updateWizPublishedUI === "function") updateWizPublishedUI(); } catch(e) { console.warn("updateWizPublishedUI:", e); }
+
+      // ── Highlights & programme note ──
+      try {
+        if (stayHighlights)  stayHighlights.value  = arrayToLines(stay.highlights);
+        if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
+      } catch(e) { console.warn("editStay highlights:", e); }
+
+      // ── Inclus / Non inclus ──
+      try {
+        const incStr    = arrayToLines(stay.included_items    || stay.included);
+        const notIncStr = arrayToLines(stay.not_included_items || stay.not_included);
+        const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+        setV("wizIncluded",    incStr);
+        setV("wizNotIncluded", notIncStr);
+        if (stayIncludedItems)    stayIncludedItems.value    = incStr;
+        if (stayNotIncludedItems) stayNotIncludedItems.value = notIncStr;
+        if (stayFaq && stay.faq) stayFaq.value = typeof stay.faq === 'string' ? stay.faq : JSON.stringify(stay.faq, null, 2);
+      } catch(e) { console.warn("editStay inclus:", e); }
+
+      // ── Sections visibilité ──
+      try {
+        showGiftSection     = stay.show_gift_section     !== false;
+        showFaqSection      = stay.show_faq_section      !== false;
+        showProgramSection  = stay.show_program_section  !== false;
+        showIncludedSection = stay.show_included_section !== false;
+        showOptionsSection  = stay.show_options_section  !== false;
+        showHighlightsSection = stay.show_highlights_section !== false;
+        refreshAllEyeButtons();
+      } catch(e) { console.warn("editStay sections visibilité:", e); }
+
+      // ── ÉTAPE 2 : Visuels (Index Image & Galerie) ──
+      try {
+        let indexImage = stay.index_image || "";
+        if (!indexImage && Array.isArray(stayContentBlocks)) {
+          const idxBlock = stayContentBlocks.find(b => b && b.type === "index_image");
+          if (idxBlock) indexImage = idxBlock.image || "";
         }
-      }
-      document.getElementById("wizIndexImage").value = indexImage || stay.hero_image || "";
-      // Visuel
-      wizGalList = [];
-      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const galBlock = stay.content_blocks.find(b => b.type === "gallery_2" || (b.images && b.images.length > 0));
-        if (galBlock && galBlock.images) {
-          wizGalList = [...galBlock.images];
+        const elIdx = document.getElementById("wizIndexImage");
+        if (elIdx) elIdx.value = indexImage || stay.hero_image || "";
+
+        let rawGal = stay.gallery_images;
+        if (typeof rawGal === 'string') { try { rawGal = JSON.parse(rawGal); } catch(e){} }
+        wizGalList = Array.isArray(rawGal) && rawGal.length > 0 ? [...rawGal] : [];
+        if (wizGalList.length === 0 && Array.isArray(stayContentBlocks)) {
+          const galBlock = stayContentBlocks.find(b => b && (b.type === "gallery_2" || (b.images && b.images.length > 0)));
+          if (galBlock && galBlock.images) wizGalList = [...galBlock.images];
         }
-      }
-      renderWizGal();
+        renderWizGal();
+      } catch(e) { console.warn("editStay visuels:", e); }
 
-
-
-      // Inclus / Non inclus
-      document.getElementById("wizIncluded").value = arrayToLines(stay.included_items);
-      document.getElementById("wizNotIncluded").value = arrayToLines(stay.not_included_items);
-
-      // Programme
-      document.getElementById("wizProgramNote").value = stay.program_note || "";
-      wizProgList = [];
-      (Array.isArray(stay.program) ? stay.program : []).forEach(p => {
-        if (p.slots && Array.isArray(p.slots) && p.slots.length > 0) {
-          p.slots.forEach(s => {
-            const per = p.period || p.title || "Matin";
-            wizProgList.push({
-              period: per,
-              time: s.time || "",
-              activity: s.text || s.activity || "",
-              title: per,
-              text: s.text || s.activity || ""
+      // ── ÉTAPE 3 : Intervenants & Chef ──
+      try {
+        let rawSpk = stay.speakers;
+        if (typeof rawSpk === 'string') { try { rawSpk = JSON.parse(rawSpk); } catch(e){} }
+        wizSpeakerList = Array.isArray(rawSpk) && rawSpk.length > 0 ? [...rawSpk] : [];
+        if (wizSpeakerList.length === 0 && Array.isArray(stayContentBlocks)) {
+          stayContentBlocks
+            .filter(b => b && (b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg"))))
+            .forEach(b => {
+              wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "", layout: b.layout || b.image_position || "image_left" });
             });
-          });
-        } else {
-          const per = p.period || (["Matin", "Après-midi", "Soirée"].includes(p.title) ? p.title : "Matin");
-          const act = p.activity || p.text || p.description || "";
-          wizProgList.push({
-            period: per,
-            time: p.time || "",
-            activity: act,
-            title: p.title || per,
-            text: act
-          });
         }
-      });
-      renderWizProg();
+        renderWizSpeakers();
 
-      // Hébergement & Tarifs
-      let accomDesc = "", accomPhoto = "";
-      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        const accomBlock = stay.content_blocks.find(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"));
-        if (accomBlock) {
-          accomDesc = accomBlock.text || "";
-          accomPhoto = accomBlock.image || "";
+        const cName  = stay.chef_name  || (stayContentBlocks.find(b => b && b.type === "chef")?.title  || "");
+        const cPhoto = stay.chef_photo || (stayContentBlocks.find(b => b && b.type === "chef")?.image  || "");
+        const cBio   = stay.chef_bio   || (stayContentBlocks.find(b => b && b.type === "chef")?.text   || "");
+        const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+        setV("wizChefName",  cName);
+        setV("wizChefPhoto", cPhoto);
+        setV("wizChefBio",   cBio);
+      } catch(e) { console.warn("editStay intervenants:", e); }
+
+      // ── ÉTAPE 5 : Programme ──
+      try {
+        const elProgNote = document.getElementById("wizProgramNote");
+        if (elProgNote) elProgNote.value = stay.program_note || "";
+        if (stayProgramNote) stayProgramNote.value = stay.program_note || "";
+        wizProgList = [];
+        let rawProg = stay.program;
+        if (typeof rawProg === 'string') { try { rawProg = JSON.parse(rawProg); } catch(e){} }
+        if (!Array.isArray(rawProg) || rawProg.length === 0) {
+          const progBlock = stayContentBlocks.find(b => b && b.type === "program");
+          if (progBlock && Array.isArray(progBlock.items)) rawProg = progBlock.items;
         }
-      }
-      document.getElementById("wizAccomDesc").value = accomDesc;
-      document.getElementById("wizAccomPhoto").value = accomPhoto;
+        (Array.isArray(rawProg) ? rawProg : []).forEach(p => {
+          if (!p) return;
+          if (p.slots && Array.isArray(p.slots) && p.slots.length > 0) {
+            p.slots.forEach(s => {
+              if (!s) return;
+              const per = p.period || p.title || "Matin";
+              wizProgList.push({ period: per, time: s.time || "", activity: s.text || s.activity || "", title: per, text: s.text || s.activity || "" });
+            });
+          } else {
+            const per = p.period || (["Matin","Après-midi","Soirée"].includes(p.title) ? p.title : "Matin");
+            const act = p.activity || p.text || p.description || "";
+            wizProgList.push({ period: per, time: p.time || "", activity: act, title: p.title || per, text: act });
+          }
+        });
+        renderWizProg();
 
-      // Intervenants — charge wizSpeakerList depuis content_blocks
-      wizSpeakerList = [];
-      if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
-        stay.content_blocks
-          .filter(b => b.type === "speaker" || (b.type === "image_text" && !(b.title || "").toLowerCase().includes("héberg")))
-          .forEach(b => {
-            wizSpeakerList.push({ type: "speaker", title: b.title || "", text: b.text || "", image: b.image || "" });
-          });
-      }
-      renderWizSpeakers();
+        // Populer l'éditeur de programme inline sur la page admin
+        let normalizedProgForInline = [];
+        if (Array.isArray(rawProg) && rawProg.length > 0) {
+          if (rawProg[0] && rawProg[0].slots) {
+            normalizedProgForInline = rawProg;
+          } else {
+            normalizedProgForInline = [{
+              day_number: 1,
+              title: "Jour 1",
+              slots: rawProg.map(p => ({
+                time: p.time || "",
+                text: p.activity || p.text || p.description || ""
+              }))
+            }];
+          }
+        }
+        const durationData = getDurationData();
+        const daysCount = (durationData && durationData.valid && durationData.days > 0) ? durationData.days : (normalizedProgForInline.length || 1);
+        buildProgramEditors(daysCount, normalizedProgForInline);
+      } catch(e) { console.warn("editStay programme:", e); }
 
-      // Chef — charge depuis content_blocks type "chef"
-      const chefBlock = (stay.content_blocks || []).find(b => b.type === "chef");
-      if (document.getElementById("wizChefName")) document.getElementById("wizChefName").value = chefBlock?.title || "";
-      if (document.getElementById("wizChefPhoto")) document.getElementById("wizChefPhoto").value = chefBlock?.image || "";
-      if (document.getElementById("wizChefBio")) document.getElementById("wizChefBio").value = chefBlock?.text || "";
+      // ── ÉTAPE 6 : Hébergement & Tarifs ──
+      try {
+        let aDesc  = stay.accommodation_desc  || "";
+        let aPhoto = stay.accommodation_photo || "";
+        if (!aDesc && !aPhoto && Array.isArray(stayContentBlocks)) {
+          const accomBlock = stayContentBlocks.find(b => b && b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"));
+          if (accomBlock) { aDesc = accomBlock.text || ""; aPhoto = accomBlock.image || ""; }
+        }
+        const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+        setV("wizAccomDesc",  aDesc);
+        setV("wizAccomPhoto", aPhoto);
 
-      wizOptList = Array.isArray(stay.extra_options) ? [...stay.extra_options] : [];
-      renderWizOpt();
+        let rawOpt = stay.extra_options;
+        if (typeof rawOpt === 'string') { try { rawOpt = JSON.parse(rawOpt); } catch(e){} }
+        wizOptList = Array.isArray(rawOpt) ? [...rawOpt] : [];
+        renderWizOpt();
+        if (stayExtraOptions) stayExtraOptions.value = arrayToLines(wizOptList);
+      } catch(e) { console.warn("editStay hébergement:", e); }
 
+      // ── Options d'affichage finales ──
+      try {
+        const wShowFaq   = document.getElementById("wizShowFaq");
+        const wShowOther = document.getElementById("wizShowOtherStays");
+        if (wShowFaq)   wShowFaq.checked   = stay.show_faq_section         !== false;
+        if (wShowOther) wShowOther.checked = stay.show_other_stays_section  !== false;
+      } catch(e) { console.warn("editStay options affichage:", e); }
 
-      updateWizardStep(1);
-      stayWizardModal.classList.add("active");
     }
 
     function getStoragePathFromUrl(url) {
@@ -2345,33 +2683,130 @@
     let wizOptList = [];
     let wizSpeakerList = [];
 
+    let editingSpkIdx = null;
+
     // ── GESTION SPEAKERS (intervenants multiples) ──
-    function renderWizSpeakers() {
+function renderWizSpeakers() {
       const container = document.getElementById("wizSpeakerContainer");
       if (!container) return;
       if (wizSpeakerList.length === 0) {
         container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucun intervenant ajouté.</div>`;
         return;
       }
-      container.innerHTML = wizSpeakerList.map((sp, idx) => `
-        <div style="display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px;">
-          ${sp.image ? `<img src="${sp.image}" style="width:48px; height:48px; object-fit:cover; border-radius:3px;">` : `<div style="width:48px; height:48px; background:var(--cream); border-radius:3px;"></div>`}
+      container.innerHTML = wizSpeakerList.map((sp, idx) => {
+        const layoutRight = sp.layout === "image_right";
+        return `
+        <div class="wiz-spk-item" draggable="true" data-idx="${idx}" style="display:grid; grid-template-columns:24px 48px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px; cursor:grab; user-select:none; transition:background 0.2s, border-color 0.2s; ${editingSpkIdx === idx ? 'border-color:var(--accent,#c5a880); background:#faf8f5;' : ''}">
+          <span style="color:#aaa; font-size:16px; cursor:grab; text-align:center;">⠿</span>
+          ${sp.image ? `<img src="${sp.image}" style="width:48px; height:48px; object-fit:cover; border-radius:3px; pointer-events:none;">` : `<div style="width:48px; height:48px; background:var(--cream); border-radius:3px;"></div>`}
           <div>
-            <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")}</div>
-            <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
+            <div style="font-weight:600; font-size:13px;">${escapeHtml(sp.title || "")} <span style="font-size:10px; font-weight:normal; background:var(--cream); padding:1px 5px; border-radius:3px; margin-left:4px;">${layoutRight ? '🖼️ Photo à droite' : '🖼️ Photo à gauche'}</span></div>
+            <div style="color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;">${escapeHtml((sp.text || "").substring(0,60))}${(sp.text||"").length>60?"…":""}</div>
           </div>
-          <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:3px 8px; cursor:pointer; white-space:nowrap;">Supprimer</button>
-        </div>`).join("");
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button type="button" class="btn-move-wizspk" data-idx="${idx}" data-dir="-1" title="Déplacer vers le haut" style="background:#f0f0f0; color:#333; border:1px solid #ccc; border-radius:3px; font-size:11px; padding:3px 7px; cursor:pointer;" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>▲</button>
+            <button type="button" class="btn-move-wizspk" data-idx="${idx}" data-dir="1" title="Déplacer vers le bas" style="background:#f0f0f0; color:#333; border:1px solid #ccc; border-radius:3px; font-size:11px; padding:3px 7px; cursor:pointer;" ${idx === wizSpeakerList.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>▼</button>
+            <button type="button" class="btn-edit-wizspk" data-idx="${idx}" style="background:#4a90e2; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Modifier</button>
+            <button type="button" class="btn-del-wizspk" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 9px; cursor:pointer; white-space:nowrap;">Supprimer</button>
+          </div>
+        </div>`;
+      }).join("");
+
+      // Drag and Drop Intervenants
+      let dragSpkSrcIdx = null;
+      container.querySelectorAll(".wiz-spk-item").forEach(item => {
+        item.addEventListener("dragstart", e => {
+          dragSpkSrcIdx = parseInt(item.getAttribute("data-idx"), 10);
+          item.style.opacity = "0.4";
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        item.addEventListener("dragover", e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        });
+
+        item.addEventListener("dragenter", e => {
+          item.style.borderColor = "var(--accent, #c5a880)";
+          item.style.background = "#f4efe6";
+        });
+
+        item.addEventListener("dragleave", e => {
+          item.style.borderColor = "var(--line)";
+          item.style.background = "#fff";
+        });
+
+        item.addEventListener("drop", e => {
+          e.preventDefault();
+          item.style.borderColor = "var(--line)";
+          item.style.background = "#fff";
+          const targetIdx = parseInt(item.getAttribute("data-idx"), 10);
+          if (dragSpkSrcIdx !== null && dragSpkSrcIdx !== targetIdx) {
+            const movedSpk = wizSpeakerList.splice(dragSpkSrcIdx, 1)[0];
+            wizSpeakerList.splice(targetIdx, 0, movedSpk);
+            if (editingSpkIdx === dragSpkSrcIdx) {
+              editingSpkIdx = targetIdx;
+            } else if (editingSpkIdx !== null) {
+              if (dragSpkSrcIdx < editingSpkIdx && targetIdx >= editingSpkIdx) editingSpkIdx--;
+              else if (dragSpkSrcIdx > editingSpkIdx && targetIdx <= editingSpkIdx) editingSpkIdx++;
+            }
+            renderWizSpeakers();
+          }
+        });
+
+        item.addEventListener("dragend", () => {
+          item.style.opacity = "1";
+        });
+      });
+
+      // Boutons Déplacer ▲ / ▼
+      container.querySelectorAll(".btn-move-wizspk").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const dir = parseInt(btn.getAttribute("data-dir"), 10);
+          const targetIdx = idx + dir;
+          if (targetIdx >= 0 && targetIdx < wizSpeakerList.length) {
+            const spk = wizSpeakerList.splice(idx, 1)[0];
+            wizSpeakerList.splice(targetIdx, 0, spk);
+            if (editingSpkIdx === idx) editingSpkIdx = targetIdx;
+            else if (editingSpkIdx === targetIdx) editingSpkIdx = idx;
+            renderWizSpeakers();
+          }
+        });
+      });
+
+      // Modifier
+      container.querySelectorAll(".btn-edit-wizspk").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          const sp = wizSpeakerList[idx];
+          if (!sp) return;
+          editingSpkIdx = idx;
+          if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = sp.title || "";
+          if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = sp.image || "";
+          if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = sp.text || "";
+          if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = sp.layout || "image_left";
+          const btnAdd = document.getElementById("btnAddWizSpk");
+          if (btnAdd) btnAdd.textContent = "✏️ Mettre à jour l'intervenant";
+          renderWizSpeakers();
+        });
+      });
+
+      // Supprimer
       container.querySelectorAll(".btn-del-wizspk").forEach(btn => {
         btn.addEventListener("click", e => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          if (editingSpkIdx === idx) {
+            editingSpkIdx = null;
+            const btnAdd = document.getElementById("btnAddWizSpk");
+            if (btnAdd) btnAdd.textContent = "+ Ajouter cet intervenant";
+          }
           wizSpeakerList.splice(idx, 1);
           renderWizSpeakers();
         });
       });
     }
-
-    function renderWizGal() {
+function renderWizGal() {
       const container = document.getElementById("wizGalContainer");
       if (!container) return;
       if (wizGalList.length === 0) {
@@ -2379,22 +2814,87 @@
         return;
       }
       container.innerHTML = wizGalList.map((url, idx) => `
-        <div style="border:1px solid var(--line); border-radius:4px; padding:4px; background:#fff; width:90px; text-align:center;">
-          <div style="width:100%; aspect-ratio:3/2; overflow:hidden; border-radius:2px; background:#eee;">
-            <img src="${url}" style="width:100%; height:100%; object-fit:cover; display:block;">
+        <div class="wiz-gal-item" draggable="true" data-idx="${idx}" style="border:1px solid var(--line); border-radius:6px; padding:6px; background:#fff; width:100px; text-align:center; position:relative; cursor:grab; user-select:none; transition:transform 0.2s, box-shadow 0.2s;">
+          <div style="position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.6); color:#fff; border-radius:3px; padding:1px 5px; font-size:10px; font-weight:bold; cursor:grab;" title="Glisser pour réordonner">⠿ ${idx + 1}</div>
+          <div style="width:100%; aspect-ratio:3/2; overflow:hidden; border-radius:3px; background:#eee; margin-top:16px;">
+            <img src="${url}" style="width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;">
           </div>
-          <button type="button" class="btn-del-wizgal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:10px; padding:2px 4px; margin-top:4px; cursor:pointer; width:100%;">X</button>
+          <div style="display:flex; justify-content:space-between; gap:2px; margin-top:6px;">
+            <button type="button" class="btn-move-wizgal" data-idx="${idx}" data-dir="-1" title="Déplacer à gauche" style="background:#f0f0f0; color:#333; border:1px solid #ccc; border-radius:2px; font-size:10px; padding:2px 5px; cursor:pointer;" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>◀</button>
+            <button type="button" class="btn-del-wizgal" data-idx="${idx}" title="Supprimer" style="background:#d9534f; color:#fff; border:none; border-radius:2px; font-size:10px; padding:2px 6px; cursor:pointer; flex:1; margin:0 2px;">🗑️</button>
+            <button type="button" class="btn-move-wizgal" data-idx="${idx}" data-dir="1" title="Déplacer à droite" style="background:#f0f0f0; color:#333; border:1px solid #ccc; border-radius:2px; font-size:10px; padding:2px 5px; cursor:pointer;" ${idx === wizGalList.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>▶</button>
+          </div>
         </div>
       `).join("");
+
+      // Drag and Drop Galerie
+      let dragGalSrcIdx = null;
+      container.querySelectorAll(".wiz-gal-item").forEach(item => {
+        item.addEventListener("dragstart", e => {
+          dragGalSrcIdx = parseInt(item.getAttribute("data-idx"), 10);
+          item.style.opacity = "0.4";
+          item.style.transform = "scale(0.95)";
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        item.addEventListener("dragover", e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        });
+
+        item.addEventListener("dragenter", e => {
+          item.style.borderColor = "var(--accent, #c5a880)";
+          item.style.boxShadow = "0 0 8px rgba(197, 168, 128, 0.5)";
+        });
+
+        item.addEventListener("dragleave", e => {
+          item.style.borderColor = "var(--line)";
+          item.style.boxShadow = "none";
+        });
+
+        item.addEventListener("drop", e => {
+          e.preventDefault();
+          item.style.borderColor = "var(--line)";
+          item.style.boxShadow = "none";
+          const targetIdx = parseInt(item.getAttribute("data-idx"), 10);
+          if (dragGalSrcIdx !== null && dragGalSrcIdx !== targetIdx) {
+            const movedItem = wizGalList.splice(dragGalSrcIdx, 1)[0];
+            wizGalList.splice(targetIdx, 0, movedItem);
+            renderWizGal();
+          }
+        });
+
+        item.addEventListener("dragend", () => {
+          item.style.opacity = "1";
+          item.style.transform = "none";
+          item.style.borderColor = "var(--line)";
+          item.style.boxShadow = "none";
+        });
+      });
+
+      // Boutons Déplacer ◀ / ▶
+      container.querySelectorAll(".btn-move-wizgal").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const dir = parseInt(btn.getAttribute("data-dir"), 10);
+          const targetIdx = idx + dir;
+          if (targetIdx >= 0 && targetIdx < wizGalList.length) {
+            const item = wizGalList.splice(idx, 1)[0];
+            wizGalList.splice(targetIdx, 0, item);
+            renderWizGal();
+          }
+        });
+      });
+
+      // Supprimer photo
       container.querySelectorAll(".btn-del-wizgal").forEach(btn => {
         btn.addEventListener("click", (e) => {
-          const idx = parseInt(e.target.getAttribute("data-idx"), 10);
+          const idx = parseInt(e.currentTarget.getAttribute("data-idx"), 10);
           wizGalList.splice(idx, 1);
           renderWizGal();
         });
       });
     }
-
     let editingProgIdx = null; // track which item is being edited
 
     function renderWizProg() {
@@ -2503,15 +3003,23 @@
         container.innerHTML = `<div style="color:var(--muted); font-size:12px;">Aucune option de tarif ajoutée.</div>`;
         return;
       }
-      container.innerHTML = wizOptList.map((o, idx) => `
+      const isSingle = !!wizIsSingleDay?.checked || !!mainIsSingleDay?.checked;
+      container.innerHTML = wizOptList.map((o, idx) => {
+        const isStripeIntegrated = o.stripe_url === "#stripe-checkout" || (isSingle && (!o.stripe_url || o.stripe_url.trim() === ""));
+        const urlDisplay = isStripeIntegrated
+          ? "⚡ Paiement direct Stripe intégré"
+          : `🔗 ${o.stripe_url || "Pas de lien Stripe"}`;
+
+        return `
         <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <div>
             <div style="font-weight:600; font-size:13.5px; color:var(--text);">${escapeHtml(o.label || "")} <span style="color:var(--text); font-weight:700;">(${o.price} €)</span></div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; max-width:280px;" title="${o.stripe_url || ''}">🔗 ${escapeHtml(o.stripe_url || "Pas de lien Stripe")}</div>
+            <div style="font-size:11.5px; color:${isStripeIntegrated ? '#2e7d32' : 'var(--muted)'}; margin-top:2px; font-weight:${isStripeIntegrated ? '600' : 'normal'}; overflow:hidden; text-overflow:ellipsis; max-width:320px;" title="${o.stripe_url || ''}">${escapeHtml(urlDisplay)}</div>
           </div>
           <button type="button" class="btn-del-wizopt" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:3px; font-size:11px; padding:4px 8px; cursor:pointer;">Supprimer</button>
         </div>
-      `).join("");
+        `;
+      }).join("");
       container.querySelectorAll(".btn-del-wizopt").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.getAttribute("data-idx"), 10);
@@ -2717,17 +3225,28 @@
       }
     });
 
-    // ── SPEAKER : ajouter à la liste ──
+    // ── SPEAKER : ajouter ou modifier dans la liste ──
     document.getElementById("btnAddWizSpk")?.addEventListener("click", () => {
-      const name  = (document.getElementById("wizSpkName")?.value || "").trim();
-      const photo = (document.getElementById("wizSpkPhoto")?.value || "").trim();
-      const bio   = (document.getElementById("wizSpkBio")?.value || "").trim();
+      const name   = (document.getElementById("wizSpkName")?.value || "").trim();
+      const photo  = (document.getElementById("wizSpkPhoto")?.value || "").trim();
+      const bio    = (document.getElementById("wizSpkBio")?.value || "").trim();
+      const layout = (document.getElementById("wizSpkLayout")?.value || "image_left");
       if (!name) { alert("Veuillez renseigner le nom de l'intervenant."); return; }
-      wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio });
+
+      if (editingSpkIdx !== null && editingSpkIdx >= 0 && editingSpkIdx < wizSpeakerList.length) {
+        wizSpeakerList[editingSpkIdx] = { type: "speaker", title: name, image: photo, text: bio, layout: layout };
+        editingSpkIdx = null;
+      } else {
+        wizSpeakerList.push({ type: "speaker", title: name, image: photo, text: bio, layout: layout });
+      }
+
       renderWizSpeakers();
       if (document.getElementById("wizSpkName")) document.getElementById("wizSpkName").value = "";
       if (document.getElementById("wizSpkPhoto")) document.getElementById("wizSpkPhoto").value = "";
       if (document.getElementById("wizSpkBio")) document.getElementById("wizSpkBio").value = "";
+      if (document.getElementById("wizSpkLayout")) document.getElementById("wizSpkLayout").value = "image_left";
+      const btnAdd = document.getElementById("btnAddWizSpk");
+      if (btnAdd) btnAdd.textContent = "+ Ajouter cet intervenant";
     });
 
     // ── CHEF : upload photo avec recadrage ──
@@ -2785,9 +3304,13 @@
       const labelEl = document.getElementById("wizOptLabel");
       const priceEl = document.getElementById("wizOptPrice");
       const stripeEl = document.getElementById("wizOptStripe");
-      const label = labelEl?.value?.trim() || "Option hébergement";
+      const isSingle = !!wizIsSingleDay?.checked || !!mainIsSingleDay?.checked;
+      const label = labelEl?.value?.trim() || (isSingle ? "Journée complète" : "Option hébergement");
       const price = priceEl?.value?.trim() || "0";
-      const stripe_url = stripeEl?.value?.trim() || "";
+      let stripe_url = stripeEl?.value?.trim() || "";
+      if (isSingle && !stripe_url) {
+        stripe_url = "#stripe-checkout";
+      }
       if (!label && !price) return;
       wizOptList.push({ label, price, stripe_url });
       if (labelEl) labelEl.value = "";
@@ -2813,13 +3336,93 @@
       btnWizSubmit.style.display = step === 6 ? "inline-flex" : "none";
     }
 
+    const wizIsSingleDay = document.getElementById("wizIsSingleDay");
+    const wizEndDateGroup = document.getElementById("wizEndDateGroup");
+    const wizStartDateLabel = document.getElementById("wizStartDateLabel");
+    const wizPublished = document.getElementById("wizPublished");
+    const wizPublishedLabel = document.getElementById("wizPublishedLabel");
+    const mainIsSingleDay = document.getElementById("mainIsSingleDay");
+    const mainEndDateGroup = document.getElementById("mainEndDateGroup");
+    const mainStartDateLabel = document.getElementById("mainStartDateLabel");
+
+    function updateWizSingleDayUI() {
+      const isSingle = !!wizIsSingleDay?.checked;
+      if (wizEndDateGroup) wizEndDateGroup.style.display = isSingle ? "none" : "";
+      if (wizEndDate) wizEndDate.required = !isSingle;
+      if (wizStartDateLabel) wizStartDateLabel.textContent = isSingle ? "Date du séjour *" : "Date de début *";
+      if (isSingle && wizStartDate && wizEndDate) {
+        wizEndDate.value = wizStartDate.value;
+      }
+
+      // Adaptation dynamique de l'Étape 6
+      const wizStep6Title = document.getElementById("wizStep6Title");
+      const wizStep6Subtitle = document.getElementById("wizStep6Subtitle");
+      const wizOptLabelText = document.getElementById("wizOptLabelText");
+      const wizOptStripeGroup = document.getElementById("wizOptStripeGroup");
+
+      if (isSingle) {
+        if (wizStep6Title) wizStep6Title.textContent = "Tarif & Option du séjour (Paiement direct Stripe)";
+        if (wizStep6Subtitle) wizStep6Subtitle.textContent = "Pour un séjour 1 jour, le paiement sécurisé Stripe est directement géré par le site. Aucun lien externe n'est requis.";
+        if (wizOptLabelText) wizOptLabelText.textContent = "Texte de l'option / du bouton (ex : Journée complète)";
+        if (wizOptStripeGroup) wizOptStripeGroup.style.display = "none";
+      } else {
+        if (wizStep6Title) wizStep6Title.textContent = "Options d'hébergement & Tarifs (avec redirection Stripe)";
+        if (wizStep6Subtitle) wizStep6Subtitle.textContent = "Le client pourra choisir une option qui le dirigera vers la page Stripe correspondante.";
+        if (wizOptLabelText) wizOptLabelText.textContent = "Texte de l'option (ex : Chambre partagée 2 lits)";
+        if (wizOptStripeGroup) wizOptStripeGroup.style.display = "block";
+      }
+
+      renderWizOpt();
+    }
+
+    function updateWizPublishedUI() {
+      const isPub = !!wizPublished?.checked;
+      if (wizPublishedLabel) {
+        wizPublishedLabel.textContent = isPub ? "Publié (visible sur le site)" : "Brouillon (non visible sur le site)";
+      }
+    }
+
+    function updateMainSingleDayUI() {
+      const isSingle = !!mainIsSingleDay?.checked;
+      if (mainEndDateGroup) mainEndDateGroup.style.display = isSingle ? "none" : "";
+      if (mainStartDateLabel) mainStartDateLabel.textContent = isSingle ? "Date du séjour" : "Date de début";
+      if (isSingle && mainStartDate && mainEndDate) {
+        mainEndDate.value = mainStartDate.value;
+      }
+      if (typeof updateDurationInfo === 'function') updateDurationInfo();
+    }
+
+    wizIsSingleDay?.addEventListener("change", updateWizSingleDayUI);
+    document.getElementById("wizStartDate")?.addEventListener("change", () => {
+      if (wizIsSingleDay?.checked && document.getElementById("wizEndDate")) {
+        document.getElementById("wizEndDate").value = document.getElementById("wizStartDate").value;
+      }
+    });
+
+    wizPublished?.addEventListener("change", updateWizPublishedUI);
+
+    mainIsSingleDay?.addEventListener("change", updateMainSingleDayUI);
+    document.getElementById("mainStartDate")?.addEventListener("change", () => {
+      if (mainIsSingleDay?.checked && document.getElementById("mainEndDate")) {
+        document.getElementById("mainEndDate").value = document.getElementById("mainStartDate").value;
+        if (typeof updateDurationInfo === 'function') updateDurationInfo();
+      }
+    });
+
     btnNewStay?.addEventListener("click", () => {
+      stayContentBlocks = [];
       currentWizardEditId = null;
       const wizH2 = document.querySelector("#stayWizardModal h2");
       if(wizH2) wizH2.textContent = "Nouveau séjour";
       const btnSub = stayWizardForm.querySelector("button[type='submit']");
       if(btnSub) btnSub.textContent = "Créer le séjour";
       stayWizardForm.reset();
+      if (wizIsSingleDay) wizIsSingleDay.checked = false;
+      if (wizPublished) wizPublished.checked = false;
+      if (document.getElementById("wizShowFaq")) document.getElementById("wizShowFaq").checked = true;
+      if (document.getElementById("wizShowOtherStays")) document.getElementById("wizShowOtherStays").checked = true;
+      updateWizSingleDayUI();
+      updateWizPublishedUI();
       wizGalList = [];
       wizProgList = [];
       wizOptList = [];
@@ -2838,6 +3441,7 @@
 
     btnCancelWizard?.addEventListener("click", () => {
       stayWizardModal.classList.remove("active");
+      currentWizardEditId = null;
     });
 
     btnWizPrev?.addEventListener("click", () => {
@@ -2846,8 +3450,11 @@
 
     btnWizNext?.addEventListener("click", () => {
       if(currentWizStep === 1){
-        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !document.getElementById("wizStartDate").value || !document.getElementById("wizEndDate").value || !document.getElementById("wizShortDesc").value.trim()){
-          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, les dates et l'accroche courte.";
+        const isSingle = !!document.getElementById("wizIsSingleDay")?.checked;
+        const startDateVal = document.getElementById("wizStartDate")?.value;
+        const endDateVal = isSingle ? startDateVal : document.getElementById("wizEndDate")?.value;
+        if(!document.getElementById("wizTitle").value.trim() || !document.getElementById("wizLocation").value.trim() || !startDateVal || !endDateVal || !document.getElementById("wizShortDesc").value.trim()){
+          wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, la date et l'accroche courte.";
           return;
         }
       } else if(currentWizStep === 2){
@@ -2859,182 +3466,143 @@
       updateWizardStep(currentWizStep + 1);
     });
 
-    stayWizardForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      wizardErrorMsg.textContent = "Création du séjour en cours...";
-      
-      const title = document.getElementById("wizTitle").value.trim();
-      const customSlug = document.getElementById("wizSlug").value.trim();
-      const slug = customSlug || slugify(title);
-      const location = document.getElementById("wizLocation").value.trim();
-      const country = document.getElementById("wizCountry")?.value.trim() || "";
-      const fullLocation = country ? `${location}, ${country}` : location;
-      const short_description = document.getElementById("wizShortDesc").value.trim();
-      const description = document.getElementById("wizDesc").value.trim();
-      const hero_image = document.getElementById("wizHeroImage").value.trim();
-      const booking_url = wizOptList.length > 0 && wizOptList[0].stripe_url ? wizOptList[0].stripe_url : "";
-      const min_bookings = 10;
-      const published = false;
-      
-      const program_note = document.getElementById("wizProgramNote").value.trim();
-      const included_items = linesToArray(document.getElementById("wizIncluded").value);
-      const not_included_items = linesToArray(document.getElementById("wizNotIncluded").value);
-
-      const { data: existing } = await supabase.from("stays").select("id").eq("slug", slug).maybeSingle();
-      if(existing && (!currentWizardEditId || existing.id !== currentWizardEditId)){
-        wizardErrorMsg.textContent = `Un séjour avec un titre ou slug similaire ("${slug}") existe déjà. Veuillez modifier le titre ou le slug.`;
-        return;
-      }
-
-      const content_blocks = [];
-      const index_image = document.getElementById("wizIndexImage").value.trim();
-      if(index_image){
-        content_blocks.push({
-          id: `block_index_img_${Date.now()}`,
-          type: "index_image",
-          enabled: true,
-          title: "Image index",
-          text: "",
-          image: index_image,
-          image_alt: "Image index",
-          images: [], quote: "", caption: ""
-        });
-      }
-      if(wizGalList.length > 0){
-        content_blocks.push({
-          id: `block_gal_${Date.now()}`,
-          type: "gallery_2",
-          enabled: true,
-          title: "Aperçu en images",
-          images: wizGalList,
-          text: "", layout: "image_left", image: "", image_alt: "", quote: "", caption: ""
-        });
-      }
-      // Speakers (intervenants multiples)
-      wizSpeakerList.forEach((sp, i) => {
-        content_blocks.push({
-          id: `block_spk_${Date.now()}_${i}`,
-          type: "speaker",
-          enabled: true,
-          layout: "image_left",
-          title: sp.title || "",
-          text: sp.text || "",
-          image: sp.image || "",
-          image_alt: sp.title || "",
-          images: [], quote: "", caption: ""
-        });
-      });
-      // Chef / Cuisinier
-      const chefName  = (document.getElementById("wizChefName")?.value || "").trim();
-      const chefPhoto = (document.getElementById("wizChefPhoto")?.value || "").trim();
-      const chefBio   = (document.getElementById("wizChefBio")?.value || "").trim();
-      if(chefName || chefPhoto || chefBio){
-        content_blocks.push({
-          id: `block_chef_${Date.now()}`,
-          type: "chef",
-          enabled: true,
-          layout: "image_left",
-          title: chefName || "Notre Chef",
-          text: chefBio,
-          image: chefPhoto,
-          image_alt: chefName,
-          images: [], quote: "", caption: ""
-        });
-      }
-      const accomDesc = document.getElementById("wizAccomDesc").value.trim();
-      const accomPhoto = document.getElementById("wizAccomPhoto").value.trim();
-      if(accomDesc || accomPhoto){
-        content_blocks.push({
-          id: `block_accom_${Date.now()}`,
-          type: "image_text",
-          enabled: true,
-          layout: "image_right",
-          title: "L'Hébergement",
-          text: accomDesc,
-          image: accomPhoto,
-          image_alt: "Hébergement du séjour",
-          images: [], quote: "", caption: ""
-        });
-      }
-
-
-      const payload = {
-        title, slug, location: fullLocation, short_description, description, hero_image,
-        booking_url, reservation_url: booking_url, min_bookings,
-        program_note, included_items, not_included_items,
-        program: wizProgList.map(p => ({ period: p.period || p.title || "Matin", time: p.time || "", activity: p.activity || p.text || "", title: p.title || p.period || "Matin", text: p.activity || p.text || "" })),
-        extra_options: wizOptList,
-        content_blocks
-      };
-      if (!currentWizardEditId) {
-        payload.published = false;
-      }
-
-      if (currentWizardEditId) {
-        const { error: updErr } = await supabase.from("stays").update(payload).eq("id", currentWizardEditId);
-        if(updErr){
-          wizardErrorMsg.textContent = "Erreur modification : " + updErr.message;
-          return;
-        }
-        const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
-        const { data: exDate } = await supabase.from("stay_dates").select("id").eq("stay_id", currentWizardEditId).limit(1);
-        if (exDate && exDate.length > 0) {
-          await supabase.from("stay_dates").update({
-            start_date: document.getElementById("wizStartDate").value,
-            end_date: document.getElementById("wizEndDate").value,
-            seats_total: Number(document.getElementById("wizSeats").value || 12),
-            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-            amount: firstPrice
-          }).eq("id", exDate[0].id);
-        } else {
-          await supabase.from("stay_dates").insert([{
-            stay_id: currentWizardEditId,
-            start_date: document.getElementById("wizStartDate").value,
-            end_date: document.getElementById("wizEndDate").value,
-            seats_total: Number(document.getElementById("wizSeats").value || 12),
-            seats_remaining: Number(document.getElementById("wizSeats").value || 12),
-            price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-            amount: firstPrice
-          }]);
-        }
-        stayWizardModal.classList.remove("active");
-        setMsg(adminStatus, "✨ Séjour modifié avec succès via l'assistant !");
-        await loadStays();
-        return;
-      }
-
-      const { data: newStay, error } = await supabase.from("stays").insert([payload]).select().single();
-      if(error){
-        wizardErrorMsg.textContent = "Erreur création : " + error.message;
-        return;
-      }
-
-      const firstPrice = wizOptList.length > 0 ? Number(wizOptList[0].price || 0) : 0;
-      await supabase.from("stay_dates").insert([{
-        stay_id: newStay.id,
-        start_date: document.getElementById("wizStartDate").value,
-        end_date: document.getElementById("wizEndDate").value,
-        seats_total: Number(document.getElementById("wizSeats").value || 12),
-        seats_remaining: Number(document.getElementById("wizSeats").value || 12),
-        price_label: wizOptList.length > 0 ? wizOptList[0].label : null,
-        amount: firstPrice
-      }]);
-
-      stayWizardModal.classList.remove("active");
-      setMsg(adminStatus, "✨ Nouveau séjour créé avec succès via l'assistant !");
-      await loadStays();
-    });
-
-    btnCancelEdit?.addEventListener("click", () => {
-      resetEditor();
-      closeEditor();
-    });
-
     btnAddContentBlock?.addEventListener("click", () => {
       const type = newBlockType?.value || "text";
       stayContentBlocks.push(createDefaultBlock(type));
       renderContentBlocksEditor();
       setMsg(editorMsg, "");
+    });
+
+    stayWizardForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (wizardErrorMsg) wizardErrorMsg.textContent = "";
+
+      const title = document.getElementById("wizTitle")?.value?.trim();
+      const location = document.getElementById("wizLocation")?.value?.trim();
+      const startDateVal = document.getElementById("wizStartDate")?.value;
+      const isSingle = !!document.getElementById("wizIsSingleDay")?.checked;
+      const endDateVal = isSingle ? startDateVal : (document.getElementById("wizEndDate")?.value || startDateVal);
+      const shortDesc = document.getElementById("wizShortDesc")?.value?.trim();
+      const fullDesc = document.getElementById("wizDesc")?.value?.trim() || "";
+      const customSlug = document.getElementById("wizSlug")?.value?.trim();
+
+      if (!title || !location || !startDateVal || !endDateVal || !shortDesc) {
+        if (wizardErrorMsg) wizardErrorMsg.textContent = "Merci de remplir le titre, la destination, la date et l'accroche courte.";
+        return;
+      }
+
+      const slug = customSlug || slugify(title);
+      const heroImage = document.getElementById("wizHeroImage")?.value?.trim() || "";
+      const indexImage = document.getElementById("wizIndexImage")?.value?.trim() || "";
+      const seatsTotal = Number(document.getElementById("wizSeats")?.value || 10);
+      const includedItems = linesToArray(document.getElementById("wizIncluded")?.value || "");
+      const notIncludedItems = linesToArray(document.getElementById("wizNotIncluded")?.value || "");
+      const programNote = document.getElementById("wizProgramNote")?.value?.trim() || "";
+
+      // Construire content_blocks depuis toutes les étapes du wizard
+      const contentBlocks = [];
+      if (indexImage) {
+        contentBlocks.push({ type: "index_image", image: indexImage });
+      }
+      if (typeof wizGalList !== "undefined" && wizGalList.length > 0) {
+        contentBlocks.push({ type: "gallery_2", images: wizGalList });
+      }
+      const accomDesc = document.getElementById("wizAccomDesc")?.value?.trim() || "";
+      const accomPhoto = document.getElementById("wizAccomPhoto")?.value?.trim() || "";
+      if (accomDesc || accomPhoto) {
+        contentBlocks.push({ type: "image_text", title: "Hébergement", text: accomDesc, image: accomPhoto });
+      }
+      if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
+        wizSpeakerList.forEach(s => contentBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "", layout: s.layout || "image_left" }));
+      }
+      const editorProgWiz = getCurrentProgramFromEditors();
+      const hasEditorProgWiz = editorProgWiz && editorProgWiz.some(d => d.slots && d.slots.length > 0);
+      const finalProgWiz = (typeof wizProgList !== "undefined" && wizProgList.length > 0)
+        ? wizProgList
+        : (hasEditorProgWiz ? editorProgWiz : []);
+
+      const countryValWiz = document.getElementById("wizCountry")?.value?.trim() || document.getElementById("stayCountry")?.value?.trim() || "";
+
+      const chefName = document.getElementById("wizChefName")?.value?.trim() || "";
+      const chefPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
+      const chefBio = document.getElementById("wizChefBio")?.value?.trim() || "";
+      if (chefName || chefPhoto || chefBio) {
+        contentBlocks.push({ type: "chef", title: chefName, text: chefBio, image: chefPhoto });
+      }
+      if (Array.isArray(stayContentBlocks)) {
+        stayContentBlocks.forEach(b => {
+          if (!["index_image", "gallery_2", "chef", "speaker"].includes(b.type) && !(b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
+            contentBlocks.push(b);
+          }
+        });
+      }
+
+      const payload = {
+        title,
+        slug,
+        location,
+        country: countryValWiz,
+        short_description: shortDesc,
+        description: fullDesc,
+        hero_image: heroImage,
+        index_image: indexImage,
+        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
+        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
+        chef_name: chefName,
+        chef_photo: chefPhoto,
+        chef_bio: chefBio,
+        accommodation_desc: accomDesc,
+        accommodation_photo: accomPhoto,
+        booking_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
+        reservation_url: typeof stayBookingUrl !== "undefined" ? (stayBookingUrl?.value?.trim() || "") : "",
+        is_single_day: isSingle,
+        published: !!document.getElementById("wizPublished")?.checked,
+        published_at: document.getElementById("wizPublished")?.checked ? new Date().toISOString() : null,
+        min_bookings: seatsTotal,
+        highlights: typeof stayHighlights !== "undefined" ? linesToArray(stayHighlights?.value || "") : [],
+        included_items: includedItems,
+        not_included_items: notIncludedItems,
+        extra_options: typeof wizOptList !== "undefined" ? wizOptList : [],
+        program: finalProgWiz,
+        program_note: programNote,
+        content_blocks: contentBlocks,
+        show_faq_section: !!document.getElementById("wizShowFaq")?.checked,
+        show_other_stays_section: !!document.getElementById("wizShowOtherStays")?.checked
+      };
+
+      let stayId = typeof currentWizardEditId !== "undefined" ? currentWizardEditId : null;
+      if (stayId) {
+        const { error } = await supabase.from("stays").update(payload).eq("id", stayId);
+        if (error) {
+          if (wizardErrorMsg) wizardErrorMsg.textContent = "Erreur de mise à jour : " + error.message;
+          return;
+        }
+      } else {
+        const { data, error } = await supabase.from("stays").insert([payload]).select().single();
+        if (error) {
+          if (wizardErrorMsg) wizardErrorMsg.textContent = "Erreur de création : " + error.message;
+          return;
+        }
+        stayId = data.id;
+      }
+
+      if (startDateVal && stayId) {
+        await supabase.from("stay_dates").delete().eq("stay_id", stayId);
+        const { error: dateErr } = await supabase.from("stay_dates").insert([{
+          stay_id: stayId,
+          start_date: startDateVal,
+          end_date: endDateVal,
+          seats_total: seatsTotal,
+          seats_remaining: seatsTotal
+        }]);
+        if (dateErr) {
+          console.error("Erreur d'enregistrement des dates :", dateErr);
+        }
+      }
+
+      if (stayWizardModal) stayWizardModal.classList.remove("active");
+      await loadHomepageState();
+      await loadStays();
     });
 
     btnPreviewStayTop?.addEventListener("click", () => {
@@ -3152,13 +3720,51 @@
       const homepagePosition = getHomepagePositionValue();
       const contentBlocksValue = serializeContentBlocks();
 
+      const idxImg = document.getElementById("wizIndexImage")?.value?.trim() || stayHeroImage.value.trim();
+      const accomD = document.getElementById("wizAccomDesc")?.value?.trim() || "";
+      const accomP = document.getElementById("wizAccomPhoto")?.value?.trim() || "";
+      const cName = document.getElementById("wizChefName")?.value?.trim() || "";
+      const cPhoto = document.getElementById("wizChefPhoto")?.value?.trim() || "";
+      const cBio = document.getElementById("wizChefBio")?.value?.trim() || "";
+
+      // Fusionner les blocs de l'assistant dans content_blocks si non sérialisés dans l'éditeur
+      let mergedBlocks = Array.isArray(contentBlocksValue) ? [...contentBlocksValue] : [];
+      if (idxImg && !mergedBlocks.some(b => b.type === "index_image")) {
+        mergedBlocks.unshift({ type: "index_image", image: idxImg });
+      }
+      if (typeof wizGalList !== "undefined" && wizGalList.length > 0 && !mergedBlocks.some(b => b.type === "gallery_2")) {
+        mergedBlocks.push({ type: "gallery_2", images: wizGalList });
+      }
+      if ((accomD || accomP) && !mergedBlocks.some(b => b.type === "image_text" && (b.title || "").toLowerCase().includes("héberg"))) {
+        mergedBlocks.push({ type: "image_text", title: "Hébergement", text: accomD, image: accomP });
+      }
+      if (typeof wizSpeakerList !== "undefined" && wizSpeakerList.length > 0) {
+        wizSpeakerList.forEach(s => {
+          if (!mergedBlocks.some(b => b.type === "speaker" && (b.title || "").toLowerCase().trim() === (s.title || "").toLowerCase().trim())) {
+            mergedBlocks.push({ type: "speaker", title: s.title || "", text: s.text || "", image: s.image || "", layout: s.layout || "image_left" });
+          }
+        });
+      }
+      if ((cName || cPhoto || cBio) && !mergedBlocks.some(b => b.type === "chef")) {
+        mergedBlocks.push({ type: "chef", title: cName, text: cBio, image: cPhoto });
+      }
+
       const payload = {
         title,
         slug,
         location: stayLocation.value.trim(),
+        country: countryValMain,
         short_description: stayShortDescription.value.trim(),
         description: stayDescription.value.trim(),
         hero_image: stayHeroImage.value.trim(),
+        index_image: idxImg,
+        gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
+        speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
+        chef_name: cName,
+        chef_photo: cPhoto,
+        chef_bio: cBio,
+        accommodation_desc: accomD,
+        accommodation_photo: accomP,
         booking_url: stayBookingUrl.value.trim(),
         reservation_url: stayBookingUrl.value.trim(),
         min_bookings: Number(stayMinBookings.value || 10),
@@ -3179,13 +3785,14 @@
         gift_outro: giftOutro.value.trim(),
         gift_image: giftImage.value.trim(),
         faq: faqValue,
-        content_blocks: contentBlocksValue,
+        content_blocks: mergedBlocks,
         show_gift_section: showGiftSection,
         show_faq_section: showFaqSection,
         show_program_section: showProgramSection,
         show_included_section: showIncludedSection,
         show_options_section: showOptionsSection,
-        show_highlights_section: showHighlightsSection
+        show_highlights_section: showHighlightsSection,
+        is_single_day: !!document.getElementById("mainIsSingleDay")?.checked
       };
 
       // Vérification unicité du slug
@@ -3243,15 +3850,22 @@
         stayId = data.id;
       }
 
-      await supabase.from("stay_dates").delete().eq("stay_id", stayId);
+      const mStart = mainStartDate.value || document.getElementById("wizStartDate")?.value || null;
+      let mEnd = mainEndDate.value || document.getElementById("wizEndDate")?.value || null;
+      if (document.getElementById("mainIsSingleDay")?.checked || document.getElementById("wizIsSingleDay")?.checked || !mEnd) {
+        mEnd = mStart;
+      }
 
-      const { error: dateError } = await supabase.from("stay_dates").insert([{
-        stay_id: stayId,
-        start_date: mainStartDate.value,
-        end_date: mainEndDate.value,
-        seats_total: Number(mainSeatsTotal.value || 0),
-        seats_remaining: Number(mainSeatsRemaining.value || 0)
-      }]);
+      if (mStart) {
+        await supabase.from("stay_dates").delete().eq("stay_id", stayId);
+        const { error: dateError } = await supabase.from("stay_dates").insert([{
+          stay_id: stayId,
+          start_date: mStart,
+          end_date: mEnd,
+          seats_total: Number(mainSeatsTotal.value || 10),
+          seats_remaining: Number(mainSeatsRemaining.value || 10)
+        }]);
+      }
 
       if(dateError){
         console.error(dateError);
@@ -3339,11 +3953,97 @@
 
     attachDropEvents();
 
-    try{
+    try {
       await checkAdmin();
       setMsg(adminStatus, "Vous êtes connecté(e) en tant qu’administrateur.");
+    } catch(err) {
+      console.warn("checkAdmin issue:", err);
+    }
+
+    try {
       await loadHomepageState();
+    } catch(err) {
+      console.warn("loadHomepageState issue:", err);
+    }
+
+    try {
       await loadStays();
+    } catch(err) {
+      console.warn("loadStays issue:", err);
+    }
+
+    async function loadSingleDayEmailTemplate() {
+      const subjectInput = document.getElementById("tmplSingleDaySubject");
+      const contentInput = document.getElementById("tmplSingleDayContent");
+      if (!subjectInput || !contentInput) return;
+
+      const { data } = await supabase
+        .from("email_templates")
+        .select("*")
+        .eq("template_key", "stay_confirmation_single_day")
+        .maybeSingle();
+
+      if (data) {
+        subjectInput.value = data.subject || "";
+        contentInput.value = data.content || "";
+      } else {
+        subjectInput.value = "Confirmation de votre séjour : {{params.TITRE_SEJOUR}}";
+        contentInput.value = "<p>Bonjour {{params.PRENOM}},</p><p>Nous vous confirmons la bonne réception de votre réservation pour le séjour <strong>{{params.TITRE_SEJOUR}}</strong> du {{params.DATE_SEJOUR}}.</p><p>Montant payé : {{params.PRIX}}</p><p>Une question ? Écrivez-nous à <a href='mailto:contact@amesnomades.com'>contact@amesnomades.com</a></p><p>À très bientôt,<br>L'équipe Âmes Nomades</p>";
+      }
+    }
+
+    loadSingleDayEmailTemplate();
+
+    const btnSaveEmailTmpl = document.getElementById("btnSaveEmailTmpl");
+    const btnTestEmailTmpl = document.getElementById("btnTestEmailTmpl");
+    const emailTmplMsg = document.getElementById("emailTmplMsg");
+
+    btnSaveEmailTmpl?.addEventListener("click", async () => {
+      setMsg(emailTmplMsg, "Enregistrement du modèle…");
+      const subject = document.getElementById("tmplSingleDaySubject")?.value || "";
+      const content = document.getElementById("tmplSingleDayContent")?.value || "";
+
+      const { error } = await supabase
+        .from("email_templates")
+        .upsert({
+          template_key: "stay_confirmation_single_day",
+          name: "Confirmation Séjour 1 Jour",
+          subject: subject,
+          content: content,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "template_key" });
+
+      if (error) {
+        setMsg(emailTmplMsg, "Erreur enregistrement : " + error.message);
+      } else {
+        setMsg(emailTmplMsg, "✨ Modèle d'email enregistré avec succès !");
+      }
+    });
+
+    btnTestEmailTmpl?.addEventListener("click", async () => {
+      setMsg(emailTmplMsg, "Envoi de l'email de test via Brevo…");
+      const { data: { user } } = await supabase.auth.getUser();
+      const targetEmail = user?.email || "sarnelli.ap@gmail.com";
+      const subject = document.getElementById("tmplSingleDaySubject")?.value || "";
+      const content = document.getElementById("tmplSingleDayContent")?.value || "";
+
+      const { data, error } = await supabase.functions.invoke("send-test-email", {
+        body: {
+          targetEmail: targetEmail,
+          subject: subject,
+          content: content
+        }
+      });
+
+      if (error || data?.error) {
+        console.error("Test email error:", error || data?.error);
+        setMsg(emailTmplMsg, "Erreur envoi email : " + (data?.error || error?.message || "Vérifiez la clé BREVO_API_KEY dans Supabase."));
+      } else {
+        setMsg(emailTmplMsg, `✨ Email de test envoyé avec succès à ${targetEmail} !`);
+      }
+    });
+
+    try {
       refreshAllEyeButtons();
       renderContentBlocksEditor();
       updatePublishToggleUI();
@@ -3389,5 +4089,434 @@
     </div>
   </div>
 
+  <!-- MODALE PREVIEW & RECADRAGE HOMEPAGE -->
+  <div id="homePreviewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:99999; overflow-y:auto; padding:20px 10px;">
+    <div style="max-width:1100px; margin:0 auto; background:#fbf9f5; color:#1e1f22; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.5); overflow:hidden;">
+      
+      <!-- Modal Header -->
+      <div style="background:#1e1f22; color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div>
+          <h2 style="margin:0; font-family:'SegoCustom', serif; font-weight:300; font-size:22px; color:#fff;">🖼️ Repositionnement des images d'accueil</h2>
+          <p style="margin-top:4px; font-size:12px; color:rgba(255,255,255,0.7);">Maintenez le clic enfoncé sur n'importe quelle image et faites glisser pour ajuster le cadrage en temps réel.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span id="homePreviewMsg" style="font-size:12px; font-weight:600; color:#81c784;"></span>
+          <button type="button" id="btnSaveHomePositions" class="btn tiny" style="background:#4f8c5b; color:#fff; padding:10px 20px; font-weight:600; cursor:pointer; border:none; border-radius:4px;">✨ Enregistrer les positionnements</button>
+          <button type="button" id="btnCloseHomePreviewModal" style="background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:14px;">Fermer ✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Preview Canvas) -->
+      <div style="padding:28px 24px; display:grid; gap:36px;">
+        
+        <!-- Section 1 : Bandeau Principal (Rendu exact 2 colonnes comme la homepage) -->
+        <div style="background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:8px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3 style="font-family:'IBM Plex Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; margin:0;">01. Bandeau Principal Vedette (Rendu Page d'Accueil)</h3>
+            <span id="featuredPosBadge" style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; background:#1e1f22; color:#fff; padding:4px 8px; border-radius:4px;">Position X: 50% | Y: 50%</span>
+          </div>
+
+          <div style="overflow-x:auto; padding-bottom:4px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; border:1px solid rgba(0,0,0,0.12); border-radius:6px; overflow:hidden; min-height:440px; min-width:650px; background:#fffdf3;">
+              
+              <!-- Colonne Gauche (Média Draggable - 50% de la largeur du bandeau, exact rendu homepage) -->
+              <div id="dragFeaturedContainer" style="position:relative; min-height:440px; height:100%; overflow:hidden; cursor:grab; user-select:none; border-right:1px solid rgba(0,0,0,0.08);">
+                <div id="dragFeaturedMedia" style="position:absolute; inset:0; background-size:cover; background-position:50% 50%;"></div>
+                <div style="position:absolute; inset:0; background:rgba(0,0,0,0.08); pointer-events:none;"></div>
+                <div style="position:absolute; bottom:14px; left:14px; background:rgba(0,0,0,0.7); color:#fff; padding:5px 10px; border-radius:4px; font-family:'IBM Plex Mono', monospace; font-size:11px; pointer-events:none; z-index:2; backdrop-filter:blur(4px);">
+                  ↔️ Maintenez le clic et glissez pour recadrer
+                </div>
+              </div>
+
+              <!-- Colonne Droite (Copy Panel - exact rendu homepage) -->
+              <div style="padding:40px 36px; display:flex; flex-direction:column; justify-content:center; background:#fffdf3; color:#1e1f22; min-height:440px;">
+                <div id="dragFeaturedKicker" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">LIEU DU SÉJOUR</div>
+                <h2 id="dragFeaturedTitle" style="font-family:'SegoCustom', serif; font-size:clamp(24px, 3vw, 38px); font-weight:300; margin:0; line-height:1.2; color:#1e1f22;">Chargement…</h2>
+                <div style="width:40px; height:1px; background:rgba(0,0,0,0.15); margin:16px 0;"></div>
+                <div id="dragFeaturedDuration" style="font-family:'IBM Plex Mono', monospace; font-size:12px; margin-bottom:4px;">Durée</div>
+                <div id="dragFeaturedDates" style="font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted);">Dates</div>
+                <div id="dragFeaturedPrice" style="font-family:'IBM Plex Mono', monospace; font-size:12px; margin-top:8px;">Prix</div>
+                <div style="margin-top:20px;">
+                  <span style="display:inline-flex; width:38px; height:38px; border:1px solid #1e1f22; border-radius:999px; align-items:center; justify-content:center; font-size:16px;">→</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 : Grille des 5 Séjours -->
+        <div style="background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:8px; padding:20px;">
+          <div style="margin-bottom:14px;">
+            <h3 style="font-family:'SegoCustom', serif; font-weight:300; font-size:22px; margin:0;">02. Grille des 5 Séjours (Format Carré 1:1)</h3>
+            <p style="font-size:12px; color:var(--muted); margin-top:4px;">Maintenez le clic enfoncé et faites glisser sur chaque vignette pour ajuster le cadrage.</p>
+          </div>
+
+          <div id="dragGridContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px;">
+            <div style="color:var(--muted);">Chargement…</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from "/assets/js/supabaseClient.js";
+
+    // ── GESTIONNAIRE RECADRAGE DES IMAGES D'ACCUEIL ──
+    (function initHomeImagePositioningTool() {
+      const btnOpen = document.getElementById("btnOpenHomePreviewModal");
+      const modal = document.getElementById("homePreviewModal");
+      const btnClose = document.getElementById("btnCloseHomePreviewModal");
+      const btnSave = document.getElementById("btnSaveHomePositions");
+      const msgEl = document.getElementById("homePreviewMsg");
+
+      const dragFeaturedContainer = document.getElementById("dragFeaturedContainer");
+      const dragFeaturedMedia = document.getElementById("dragFeaturedMedia");
+      const dragFeaturedTitle = document.getElementById("dragFeaturedTitle");
+      const featuredPosBadge = document.getElementById("featuredPosBadge");
+
+      const dragGridContainer = document.getElementById("dragGridContainer");
+
+      let homePositionsState = { featured: { x: 50, y: 50 }, stays: {} };
+      let currentFeaturedStay = null;
+      let currentHighlightStays = [];
+
+      function parseIsoDateStr(str) {
+        if (!str) return null;
+        const clean = String(str).substring(0, 10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+        return clean;
+      }
+
+      function formatDateRange(startRaw, endRaw, isSingleDay) {
+        const start = parseIsoDateStr(startRaw);
+        const end = parseIsoDateStr(endRaw);
+
+        if (!start && !end) return "Dates à annoncer";
+        
+        const s = start ? new Date(start + "T00:00:00") : null;
+        const e = end ? new Date(end + "T00:00:00") : null;
+
+        if (isSingleDay || (s && (!e || start === end))) {
+          const targetDate = s || e;
+          if (!targetDate) return "Dates à annoncer";
+          const day = targetDate.getDate();
+          const month = targetDate.toLocaleDateString("fr-FR", { month: "long" });
+          const year = targetDate.getFullYear();
+          return `Le ${day} ${month} ${year}`;
+        }
+        if (!s && e) {
+          const day = e.getDate();
+          const month = e.toLocaleDateString("fr-FR", { month: "long" });
+          const year = e.getFullYear();
+          return `Le ${day} ${month} ${year}`;
+        }
+        if (s && e && s.getTime() === e.getTime()) {
+          const day = s.getDate();
+          const month = s.toLocaleDateString("fr-FR", { month: "long" });
+          const year = s.getFullYear();
+          return `Le ${day} ${month} ${year}`;
+        }
+        const sDay = s ? s.getDate() : "";
+        const eDay = e ? e.getDate() : "";
+        const sMonth = s ? s.toLocaleDateString("fr-FR", { month: "long" }) : "";
+        const eMonth = e ? e.toLocaleDateString("fr-FR", { month: "long" }) : "";
+        const sYear = s ? s.getFullYear() : "";
+        const eYear = e ? e.getFullYear() : "";
+
+        if (sMonth === eMonth && sYear === eYear) {
+          return `Du ${sDay} au ${eDay} ${sMonth} ${sYear}`;
+        }
+        if (sYear === eYear) {
+          return `Du ${sDay} ${sMonth} au ${eDay} ${eMonth} ${sYear}`;
+        }
+        return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
+      }
+
+      function getDurationLabel(startRaw, endRaw, isSingleDay) {
+        if (isSingleDay) return "1 jour";
+        const start = parseIsoDateStr(startRaw);
+        const end = parseIsoDateStr(endRaw);
+
+        if (!start) return "Durée à annoncer";
+        if (!end || start === end) return "1 jour";
+
+        const s = new Date(start + "T00:00:00");
+        const e = new Date(end + "T00:00:00");
+        const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
+
+        if (days <= 0) return "Durée à annoncer";
+        if (days === 1) return "1 jour";
+
+        const nights = Math.max(0, days - 1);
+        return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
+      }
+
+      if (!btnOpen || !modal) return;
+
+      btnOpen.addEventListener("click", async () => {
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden";
+        if (msgEl) msgEl.textContent = "";
+        await loadHomePreviewData();
+      });
+
+      const closeModal = () => {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      };
+
+      if (btnClose) btnClose.addEventListener("click", closeModal);
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.style.display === "block") closeModal();
+      });
+
+      async function loadHomePreviewData() {
+        if (msgEl) {
+          msgEl.style.color = "#81c784";
+          msgEl.textContent = "Chargement des données d'accueil…";
+        }
+
+        try {
+          // 1. Charger les positions enregistrées
+          const { data: posData } = await supabase
+            .from("site_settings")
+            .select("value")
+            .eq("key", "homepage_image_positions")
+            .limit(1)
+            .maybeSingle();
+
+          if (posData && posData.value) {
+            homePositionsState = posData.value;
+          }
+          if (!homePositionsState) homePositionsState = { featured: { x: 50, y: 50 }, stays: {} };
+          if (!homePositionsState.featured) homePositionsState.featured = { x: 50, y: 50 };
+          if (!homePositionsState.stays) homePositionsState.stays = {};
+
+          // 2. Charger le séjour vedette (limit 1 pour éviter erreur multiple rows)
+          const { data: featuredList, error: featErr } = await supabase
+            .from("stays")
+            .select("*")
+            .eq("is_featured", true)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (featErr) console.warn("Erreur chargement séjour vedette:", featErr);
+
+          currentFeaturedStay = featuredList && featuredList.length > 0 ? featuredList[0] : null;
+
+          if (currentFeaturedStay) {
+            const dragFeaturedKicker = document.getElementById("dragFeaturedKicker");
+            const dragFeaturedDuration = document.getElementById("dragFeaturedDuration");
+            const dragFeaturedDates = document.getElementById("dragFeaturedDates");
+            const dragFeaturedPrice = document.getElementById("dragFeaturedPrice");
+
+            dragFeaturedTitle.textContent = currentFeaturedStay.title || "Séjour Vedette";
+            if (dragFeaturedKicker) dragFeaturedKicker.textContent = (currentFeaturedStay.location || "").toUpperCase();
+
+            // Fetch date for featured stay
+            const { data: featDate } = await supabase
+              .from("stay_dates")
+              .select("*")
+              .eq("stay_id", currentFeaturedStay.id)
+              .order("start_date", { ascending: true })
+              .limit(1)
+              .maybeSingle();
+
+            if (dragFeaturedDuration) dragFeaturedDuration.textContent = getDurationLabel(featDate?.start_date, featDate?.end_date, currentFeaturedStay.is_single_day);
+            if (dragFeaturedDates) dragFeaturedDates.textContent = formatDateRange(featDate?.start_date, featDate?.end_date, currentFeaturedStay.is_single_day);
+
+            let minP = null;
+            if (currentFeaturedStay.extra_options && Array.isArray(currentFeaturedStay.extra_options)) {
+              const prices = currentFeaturedStay.extra_options.map(o => Number(o.price)).filter(p => !isNaN(p) && p > 0);
+              if (prices.length) minP = Math.min(...prices);
+            }
+            if (dragFeaturedPrice) dragFeaturedPrice.textContent = minP ? `À partir de ${minP} €` : "";
+
+            let img = currentFeaturedStay.index_image || currentFeaturedStay.hero_image;
+            if (currentFeaturedStay.content_blocks && Array.isArray(currentFeaturedStay.content_blocks)) {
+              const idxImgBlock = currentFeaturedStay.content_blocks.find(b => b.type === "index_image");
+              if (idxImgBlock && idxImgBlock.image) img = idxImgBlock.image;
+            }
+            dragFeaturedMedia.style.backgroundImage = `url('${img || "/assets/img/sejour-camargue.jpg"}')`;
+
+            let pos = homePositionsState.featured || { x: 50, y: 50 };
+            if (homePositionsState.stays && homePositionsState.stays[currentFeaturedStay.id]?.hero) {
+              pos = homePositionsState.stays[currentFeaturedStay.id].hero;
+            }
+
+            bindDraggableImage(dragFeaturedContainer, dragFeaturedMedia, featuredPosBadge, pos.x, pos.y, (newX, newY) => {
+              homePositionsState.featured = { x: newX, y: newY };
+              if (currentFeaturedStay) {
+                if (!homePositionsState.stays[currentFeaturedStay.id]) homePositionsState.stays[currentFeaturedStay.id] = {};
+                homePositionsState.stays[currentFeaturedStay.id].hero = { x: newX, y: newY };
+              }
+            });
+          } else {
+            dragFeaturedTitle.textContent = "Aucun séjour vedette sélectionné";
+            dragFeaturedMedia.style.backgroundImage = "none";
+          }
+
+          // 3. Charger la grille des 5 séjours
+          const { data: highlights, error: highErr } = await supabase
+            .from("stays")
+            .select("*")
+            .eq("is_highlight", true)
+            .order("highlight_order", { ascending: true })
+            .limit(5);
+
+          if (highErr) console.warn("Erreur chargement grille séjours:", highErr);
+
+          currentHighlightStays = highlights || [];
+
+          if (!currentHighlightStays.length) {
+            dragGridContainer.innerHTML = `<div style="color:var(--muted); grid-column:1/-1;">Aucun séjour sélectionné pour le bandeau des 5 séjours.</div>`;
+          } else {
+            dragGridContainer.innerHTML = currentHighlightStays.map((stay, idx) => {
+              let indexImage = stay.index_image || stay.hero_image;
+              if (stay.content_blocks && Array.isArray(stay.content_blocks)) {
+                const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
+                if (idxImgBlock && idxImgBlock.image) indexImage = idxImgBlock.image;
+              }
+              const img = indexImage || "/assets/img/sejour-camargue.jpg";
+              const pos = (homePositionsState.stays && homePositionsState.stays[stay.id]?.index) || { x: 50, y: 50 };
+
+              return `
+                <div style="background:#faf5dc; border:1px solid rgba(0,0,0,0.1); border-radius:6px; padding:10px;">
+                  <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${stay.title || 'Séjour ' + (idx + 1)}
+                  </div>
+                  <div id="gridCardBox_${stay.id}" style="position:relative; width:100%; aspect-ratio:1/1; border-radius:4px; overflow:hidden; cursor:grab; user-select:none; border:1px dashed rgba(0,0,0,0.3);">
+                    <div id="gridCardMedia_${stay.id}" style="position:absolute; inset:0; background-image:url('${img}'); background-size:cover; background-position:${pos.x}% ${pos.y}%;"></div>
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.15); pointer-events:none;"></div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                    <span id="gridCardBadge_${stay.id}" style="font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:600; background:#1e1f22; color:#fff; padding:2px 6px; border-radius:3px;">
+                      X: ${Math.round(pos.x)}% | Y: ${Math.round(pos.y)}%
+                    </span>
+                  </div>
+                </div>
+              `;
+            }).join("");
+
+            // Attacher le drag engine sur chaque vignette de la grille
+            currentHighlightStays.forEach(stay => {
+              const container = document.getElementById(`gridCardBox_${stay.id}`);
+              const media = document.getElementById(`gridCardMedia_${stay.id}`);
+              const badge = document.getElementById(`gridCardBadge_${stay.id}`);
+              const pos = (homePositionsState.stays && homePositionsState.stays[stay.id]?.index) || { x: 50, y: 50 };
+
+              if (container && media) {
+                bindDraggableImage(container, media, badge, pos.x, pos.y, (newX, newY) => {
+                  if (!homePositionsState.stays) homePositionsState.stays = {};
+                  if (!homePositionsState.stays[stay.id]) homePositionsState.stays[stay.id] = {};
+                  homePositionsState.stays[stay.id].index = { x: newX, y: newY };
+                });
+              }
+            });
+          }
+
+          if (msgEl) msgEl.textContent = "";
+        } catch (err) {
+          console.error("Erreur chargement preview home:", err);
+          if (msgEl) {
+            msgEl.style.color = "#c00";
+            msgEl.textContent = "Erreur de chargement : " + (err.message || err);
+          }
+        }
+      }
+
+      function bindDraggableImage(containerEl, mediaEl, badgeEl, startPosX, startPosY, onPosChange) {
+        let isDragging = false;
+        let startMouseX = 0, startMouseY = 0;
+        let currX = startPosX !== undefined ? Number(startPosX) : 50;
+        let currY = startPosY !== undefined ? Number(startPosY) : 50;
+
+        const setPosition = (x, y) => {
+          currX = Math.min(100, Math.max(0, x));
+          currY = Math.min(100, Math.max(0, y));
+          mediaEl.style.backgroundPosition = `${currX.toFixed(1)}% ${currY.toFixed(1)}%`;
+          if (badgeEl) badgeEl.textContent = `X: ${Math.round(currX)}% | Y: ${Math.round(currY)}%`;
+          onPosChange(currX, currY);
+        };
+
+        setPosition(currX, currY);
+
+        const onStart = (e) => {
+          isDragging = true;
+          containerEl.style.cursor = "grabbing";
+          const evt = e.touches ? e.touches[0] : e;
+          startMouseX = evt.clientX;
+          startMouseY = evt.clientY;
+          e.preventDefault();
+        };
+
+        const onMove = (e) => {
+          if (!isDragging) return;
+          const evt = e.touches ? e.touches[0] : e;
+          const rect = containerEl.getBoundingClientRect();
+          const deltaX = evt.clientX - startMouseX;
+          const deltaY = evt.clientY - startMouseY;
+
+          const pctX = (deltaX / rect.width) * 100;
+          const pctY = (deltaY / rect.height) * 100;
+
+          const nextX = currX - pctX;
+          const nextY = currY - pctY;
+
+          startMouseX = evt.clientX;
+          startMouseY = evt.clientY;
+
+          setPosition(nextX, nextY);
+        };
+
+        const onEnd = () => {
+          if (isDragging) {
+            isDragging = false;
+            containerEl.style.cursor = "grab";
+          }
+        };
+
+        containerEl.onmousedown = onStart;
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onEnd);
+
+        containerEl.ontouchstart = onStart;
+        window.addEventListener("touchmove", onMove, { passive: false });
+        window.addEventListener("touchend", onEnd);
+      }
+
+      btnSave?.addEventListener("click", async () => {
+        if (msgEl) msgEl.textContent = "Enregistrement des positionnements…";
+        const { error } = await supabase
+          .from("site_settings")
+          .upsert({
+            key: "homepage_image_positions",
+            value: homePositionsState,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "key" });
+
+        if (error) {
+          console.error("Erreur enregistrement positions:", error);
+          if (msgEl) {
+            msgEl.style.color = "#c00";
+            msgEl.textContent = "Erreur : " + error.message;
+          }
+        } else {
+          if (msgEl) {
+            msgEl.style.color = "#81c784";
+            msgEl.textContent = "✨ Positionnements des images enregistrés avec succès !";
+          }
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

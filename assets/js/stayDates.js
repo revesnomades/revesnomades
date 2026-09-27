@@ -15,10 +15,18 @@ function formatFRDate(dateStr){
 }
 
 function formatRangeFR(startStr, endStr){
-  if(!startStr || !endStr) return "Dates à annoncer";
+  if(!startStr && !endStr) return "Dates à annoncer";
+  if(startStr && (!endStr || startStr === endStr)){
+    const s = formatFRDate(startStr);
+    return `Le ${s.day} ${s.month} ${s.year}`;
+  }
 
   const s = formatFRDate(startStr);
   const e = formatFRDate(endStr);
+
+  if(startStr === endStr){
+    return `Le ${s.day} ${s.month} ${s.year}`;
+  }
 
   // Même mois + même année => "du 13 au 17 Mars 2026"
   if(s.month === e.month && s.year === e.year){

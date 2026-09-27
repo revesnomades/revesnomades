@@ -95,6 +95,28 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
+    .btn.btn-loading, button.btn-loading, a.btn-loading, .btn-loading {
+      position: relative !important;
+      pointer-events: none !important;
+      opacity: 0.85 !important;
+      cursor: wait !important;
+    }
+    .btn.btn-loading::after, button.btn-loading::after, a.btn-loading::after, .btn-loading::after {
+      content: "" !important;
+      display: inline-block !important;
+      width: 13px !important;
+      height: 13px !important;
+      margin-left: 8px !important;
+      border: 2px solid currentColor !important;
+      border-right-color: transparent !important;
+      border-radius: 50% !important;
+      animation: btnSpin 0.6s linear infinite !important;
+      vertical-align: -2px !important;
+    }
+    @keyframes btnSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
@@ -191,49 +213,18 @@
         <div style="margin-bottom:16px;">
           <h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">03. Programme</h3>
         </div>
+        <p class="small muted" id="programNote" style="margin-top:10px;">
+          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
+        </p>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
           <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
             <div class="kicker">Chargement…</div>
             <p class="sub" style="margin-top:8px;">Le programme s’affichera ici.</p>
           </div>
         </div>
-        <p class="small muted" id="programNote" style="margin-top:10px;">
-          * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
-        </p>
       </section>
 
-      <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
-        <div class="gift-pack-grid">
-          <div class="gift-pack-text">
-            <h2 class="sejour-section-title" id="giftTitle">Le sac cadeau Âmes Nomades</h2>
-
-            <p class="sub" style="margin-top:10px;" id="giftIntro">
-              À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.
-            </p>
-
-            <ul class="gift-pack-list" id="giftList">
-              <li>Tee-shirt Âmes Nomades</li>
-              <li>Sac en tissu</li>
-              <li>Gourde réutilisable</li>
-              <li>Carnet & stylo</li>
-              <li>Un soin bien-être</li>
-            </ul>
-
-            <p class="small muted" style="margin-top:10px;" id="giftOutro">
-              Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.
-            </p>
-          </div>
-
-          <div class="gift-pack-image">
-            <img
-              id="giftImage"
-              src="/assets/img/sac-cadeau-reves-nomades.jpg"
-              alt="Sac cadeau Âmes Nomades"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </section>
+      
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="includedSection">
         <h2 class="sejour-section-title">Ce qui est inclus</h2>
@@ -248,7 +239,21 @@
       </section>
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="optionsSection">
-        <h2 class="sejour-section-title" id="optionsTitle">Options</h2>
+        <h2 class="sejour-section-title" id="optionsTitle">Options & Tarifs</h2>
+
+        <!-- Single Day Quantity Control -->
+        <div id="singleDayQtyBox" style="display:none; margin-top:14px; margin-bottom:14px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.85); justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text);">Nombre de personnes / places</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations à réserver</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
+            <span id="stayQtyVal" style="font-family:'IBM Plex Mono', monospace; font-size:16px; font-weight:700; min-width:24px; text-align:center;">1</span>
+            <button type="button" id="btnQtyPlus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">+</button>
+          </div>
+        </div>
+
         <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
           <div>Chargement…</div>
         </div>
@@ -260,7 +265,7 @@
         <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
       </p>
 
-      <div class="booking-box reveal" style="display:none;">
+      <div class="booking-box reveal" id="mainBookingBox" style="display:none;">
         <h3>Réserver</h3>
 
         <div class="actions" style="margin-top:16px;">
@@ -364,7 +369,15 @@
     import { supabase } from "/assets/js/supabaseClient.js";
 
     const params = new URLSearchParams(window.location.search);
-    const slug   = params.get("slug") || null;
+    let rawSlug = params.get("slug");
+    if (!rawSlug) {
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const lastPart = pathParts[pathParts.length - 1] || "";
+      if (lastPart && lastPart !== "sejour.html" && lastPart !== "sejour") {
+        rawSlug = decodeURIComponent(lastPart.replace(/\.html$/, ""));
+      }
+    }
+    const slug   = rawSlug || null;
     const isPreview = params.get("preview") === "1";
 
     const previewBanner = document.getElementById("previewBanner");
@@ -544,7 +557,7 @@
       `;
     }
 
-    function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl){
+    function renderOptionsList(container, options, defaultUrl, bookingBtnEl, bookingMsgEl, isSingleDay = false){
       if(!container) return;
       const optionsTitleEl = document.getElementById("optionsTitle");
 
@@ -558,14 +571,19 @@
         if(optionsTitleEl) optionsTitleEl.style.display = "none";
         const opt = options[0];
         const label = typeof opt === "string" ? opt : (opt.label || "");
-        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
-        const url   = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        const rawPrice = typeof opt === "object" && opt.price ? opt.price : 0;
+        const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
+        const url   = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "#stripe-checkout");
         const btnText = price ? `${label} — ${price}` : label;
-        container.innerHTML = url ? `
+
+        container.innerHTML = `
           <div style="margin-top:8px;">
-            <a
-              href="${escapeHtml(url)}"
-              class="btn on-light"
+            <button
+              type="button"
+              class="btn on-light btn-opt-single-checkout"
+              data-url="${escapeHtml(url)}"
+              data-label="${escapeHtml(label)}"
+              data-price="${escapeHtml(String(rawPrice))}"
               style="
                 display:inline-flex;
                 font-family:'IBM Plex Mono', monospace;
@@ -576,11 +594,24 @@
                 background:var(--text);
                 color:#fff;
                 border:none;
-                text-decoration:none;
+                cursor:pointer;
               "
-            >${escapeHtml(btnText)} →</a>
+            >${escapeHtml(btnText)} →</button>
           </div>
-        ` : `<div style="color:var(--muted);">${escapeHtml(label)}</div>`;
+        `;
+
+        const singleBtn = container.querySelector(".btn-opt-single-checkout");
+        if (singleBtn && bookingBtnEl) {
+          singleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (singleBtn.classList.contains("btn-loading")) return;
+            singleBtn.classList.add("btn-loading");
+            if (bookingBtnEl) bookingBtnEl.classList.add("btn-loading");
+            bookingBtnEl.setAttribute("data-price", String(rawPrice));
+            bookingBtnEl.setAttribute("data-label", label);
+            bookingBtnEl.click();
+          });
+        }
         return;
       }
 
@@ -588,19 +619,20 @@
       if(optionsTitleEl) optionsTitleEl.style.display = "";
       container.innerHTML = options.map((opt, idx) => {
         const label = typeof opt === "string" ? opt : (opt.label || "");
+        const rawPrice = typeof opt === "object" && opt.price ? opt.price : 0;
         const price = typeof opt === "string" ? "" : (opt.price ? `${opt.price} €` : "");
-        const url = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "");
+        const url = typeof opt === "string" ? "" : (opt.stripe_url || defaultUrl || "#stripe-checkout");
         return `
           <label class="option-card-label" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.75); cursor:pointer; transition:all 0.2s; gap:12px;">
             <div style="display:flex; align-items:center; gap:12px;">
-              <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(price)}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
+              <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
               <div>
                 <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.04em; color:var(--text);">${escapeHtml(label)}</div>
-                ${price ? `<div style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
+                ${price ? `<div class="opt-price-val" data-unit-price="${rawPrice}" style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
               </div>
             </div>
             <div>
-              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>` : ""}
+              <button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>
             </div>
           </label>
         `;
@@ -613,22 +645,41 @@
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (btn.classList.contains("btn-loading")) return;
+          btn.classList.add("btn-loading");
           const targetUrl = btn.getAttribute("data-url");
-          if(targetUrl) window.location.href = targetUrl;
+          const optPrice = btn.getAttribute("data-price");
+          const optLabel = btn.getAttribute("data-label");
+          if (bookingBtnEl) {
+            bookingBtnEl.setAttribute("data-price", optPrice);
+            bookingBtnEl.setAttribute("data-label", optLabel);
+            bookingBtnEl.classList.add("btn-loading");
+            bookingBtnEl.click();
+          } else if (targetUrl && targetUrl !== "#stripe-checkout") {
+            setTimeout(() => {
+              window.location.href = targetUrl;
+            }, 50);
+          }
         });
       });
 
       function updateMainBookingBtn(){
         const selected = container.querySelector("input[type='radio']:checked");
         if(selected && bookingBtnEl){
-          const url = selected.getAttribute("data-url") || defaultUrl;
-          const label = selected.getAttribute("data-label");
-          const price = selected.getAttribute("data-price");
-          if(url){
+          const url = selected.getAttribute("data-url") || defaultUrl || "#stripe-checkout";
+          const label = selected.getAttribute("data-label") || "";
+          const price = selected.getAttribute("data-price") || "";
+          const priceDisplay = price ? `${price} €` : "";
+          bookingBtnEl.setAttribute("data-price", price);
+          bookingBtnEl.setAttribute("data-label", label);
+
+          if (url && url !== "#stripe-checkout") {
             bookingBtnEl.href = url;
-            bookingBtnEl.textContent = `Réserver — ${label}${price ? ' ' + price : ''}`;
-            if(bookingMsgEl) bookingMsgEl.textContent = "";
+          } else {
+            bookingBtnEl.href = "#";
           }
+          bookingBtnEl.textContent = `Réserver — ${label}${priceDisplay ? ' ' + priceDisplay : ''}`;
+          if(bookingMsgEl) bookingMsgEl.textContent = "";
         }
       }
 
@@ -644,6 +695,9 @@
             parent.style.background = "#ffffff";
           }
           updateMainBookingBtn();
+          if (typeof window.updateSingleDayQtyUI === "function") {
+            window.updateSingleDayQtyUI();
+          }
         });
       });
 
@@ -748,37 +802,39 @@
     function renderSpeakers(speakers) {
       if (!speakers || !speakers.length) return "";
       return speakers.map((sp, i) => {
-        const num = String(i + 1).padStart(2, "0");
+        const name = escapeHtml(sp.title || sp.name || "");
+        const bio = escapeHtml(sp.text || sp.bio || "").replace(/\n/g, "<br>");
         const photo = sp.image || sp.photo || "";
-        const name  = escapeHtml(sp.title || sp.name || "");
-        const bio   = escapeHtml(sp.text  || sp.bio  || "");
-        const bioParagraphs = bio.split(/\n|<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
-          <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
-        `).join("");
+        const layoutRight = sp.layout === "image_right" || sp.image_position === "right";
+
+        const photoHtml = photo ? `
+          <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
+            <img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300" style="width:100%; height:auto; display:block; object-fit:cover; border-radius:3px;">
+          </div>
+        ` : "";
+
+        const textHtml = `
+          <div class="speaker-bio speaker-text-container" style="flex:1;">
+            ${bio.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}
+          </div>
+        `;
 
         return `
           <div class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
-            <!-- Grille à 2 colonnes (titre, biographie + portrait) -->
-            <div class="speaker-row">
-              <!-- Titre -->
-              <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px;">
-                <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted);">${num}</span>
-                <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
-              </div>
-              <!-- Biographie -->
-              <div class="speaker-bio speaker-text-container">
-                ${bioParagraphs}
-              </div>
-              <!-- Photo -->
-              <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
-                ${photo ? `<img src="${escapeHtml(photo)}" alt="${name}" width="200" height="300">` : ""}
+            <div class="speaker-row" style="display:flex; gap:32px; align-items:start; flex-wrap:wrap; ${layoutRight ? 'flex-direction:row-reverse;' : ''}">
+              ${photoHtml}
+              <div style="flex:1; min-width:260px;">
+                <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px; margin-bottom:12px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:500;">0${i + 1}</span>
+                  <h4 style="font-family:'Seasons',serif; font-size:22px; font-weight:400; color:var(--text); margin:0;">${name}</h4>
+                </div>
+                ${textHtml}
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
       }).join("");
     }
-
-    // ── CUISINIER/CHEF ──
     function renderChef(block) {
       const photo = block.image || "";
       const name  = escapeHtml(block.title || "Notre Cuisinière");
@@ -820,15 +876,26 @@
       
       const accomBlocks = blocks.filter(b => 
         (b.type === "image_text" || b.type === "text_image") && 
-        ((b.title || "").toLowerCase().includes("héberg") || b.layout === "image_right")
+        (b.title || "").toLowerCase().includes("héberg")
       );
       
-      const speakers = blocks.filter(b => 
+      const rawSpeakers = blocks.filter(b => 
         (b.type === "speaker" || 
          ((b.type === "image_text" || b.type === "text_image") && 
           ((b.title || "").toLowerCase().includes("intervenant") || (b.title || "").toLowerCase().includes("avec ")))) &&
         (b.title || "").toLowerCase().trim() !== "les intervenants"
       );
+      const speakers = [];
+      const seenTitles = new Set();
+      rawSpeakers.forEach(sp => {
+        const titleKey = (sp.title || "").trim().toLowerCase();
+        if (titleKey && !seenTitles.has(titleKey)) {
+          seenTitles.add(titleKey);
+          speakers.push(sp);
+        } else if (!titleKey) {
+          speakers.push(sp);
+        }
+      });
 
       // Le reste (excluant galleries, accom, speakers, chef, et le bloc technique index_image)
       const others = blocks.filter(b => 
@@ -849,25 +916,36 @@
         }
       });
 
-      // 2. Hébergements (sous la galerie, SANS image)
+      // 2. Hébergements (avec image si présente)
       accomBlocks.forEach(block => {
-        const safeTitle   = escapeHtml(block.title);
-        const safeText    = escapeHtml(block.text).replace(/\n/g, "<br>");
+        const safeTitle   = escapeHtml(block.title || "Hébergement");
+        const safeText    = escapeHtml(block.text || "").replace(/\n/g, "<br>");
+        const photo       = block.image || "";
         
         const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
-        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. Hébergement</h3>`;
+        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. ${safeTitle}</h3>`;
+
+        const photoHtml = photo ? `
+          <div class="accom-photo-wrapper" style="width:320px; max-width:100%; flex-shrink:0; border-radius:4px; overflow:hidden;">
+            <img src="${escapeHtml(photo)}" alt="${safeTitle}" style="width:100%; height:auto; display:block; object-fit:cover; border-radius:4px;">
+          </div>
+        ` : "";
 
         html += `
           <article class="accom-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0; margin:0;">
             <div style="margin-bottom:16px;">
               ${titleHtml}
             </div>
-            ${textPanel}
+            <div style="display:flex; gap:32px; align-items:start; flex-wrap:wrap;">
+              <div style="flex:1; min-width:280px;">
+                ${textPanel}
+              </div>
+              ${photoHtml}
+            </div>
           </article>
         `;
       });
-
       // 3. Intervenants (après hébergement)
       if(speakers.length){
         const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">02. Intervenant</h3>`;
@@ -1030,18 +1108,42 @@
       return fromSiteFaq.length ? fromSiteFaq : fallbackStayFaqItems;
     }
 
-    function formatDateRange(start, end){
+    function parseIsoDateStr(str) {
+      if (!str) return null;
+      const clean = String(str).substring(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+      return clean;
+    }
+
+    function formatDateRange(startRaw, endRaw, isSingleDay) {
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
       if (!start && !end) return "Dates à annoncer";
-      if (start && !end) {
-        const s = new Date(start + "T00:00:00");
-        return s.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      
+      const s = start ? new Date(start + "T00:00:00") : null;
+      const e = end ? new Date(end + "T00:00:00") : null;
+
+      if (isSingleDay || (s && (!e || start === end))) {
+        const targetDate = s || e;
+        if (!targetDate) return "Dates à annoncer";
+        const day = targetDate.getDate();
+        const month = targetDate.toLocaleDateString("fr-FR", { month: "long" });
+        const year = targetDate.getFullYear();
+        return `Le ${day} ${month} ${year}`;
       }
-      if (!start && end) {
-        const e = new Date(end + "T00:00:00");
-        return e.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      if (!s && e) {
+        const day = e.getDate();
+        const month = e.toLocaleDateString("fr-FR", { month: "long" });
+        const year = e.getFullYear();
+        return `Le ${day} ${month} ${year}`;
       }
-      const s = new Date(start + "T00:00:00");
-      const e = new Date(end + "T00:00:00");
+      if (s.getTime() === e.getTime()) {
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
       const sDay = s.getDate();
       const eDay = e.getDate();
       const sMonth = s.toLocaleDateString("fr-FR", { month: "long" });
@@ -1058,17 +1160,23 @@
       return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
     }
 
-    function getDurationLabel(start, end){
-      if(!start || !end) return "Durée à annoncer";
+    function getDurationLabel(startRaw, endRaw, isSingleDay) {
+      if (isSingleDay) return "1 jour";
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
+      if (!start) return "Durée à annoncer";
+      if (!end || start === end) return "1 jour";
 
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
       const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
 
-      if(days <= 0) return "Durée à annoncer";
+      if (days <= 0) return "Durée à annoncer";
+      if (days === 1) return "1 jour";
 
       const nights = Math.max(0, days - 1);
-      return `${days} jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
+      return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function buildStayMetaDescription(stay){
@@ -1145,207 +1253,276 @@
       updatePosition();
     }
 
+        function slugify(text) {
+      if (!text) return "";
+      return text.toString().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\-\----+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+    }
+
     async function loadStay(){
-      if(!slug){
-        stayTitle.textContent = "Séjour introuvable";
-        stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
-        return;
-      }
-
-      if (isPreview) {
-        const { data: authData } = await supabase.auth.getUser();
-        const user = authData?.user;
-
-        if (!user) {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
-          return;
-        }
-
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-
-        const userEmail = (user.email || "").toLowerCase();
-        const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
-        if (isEmailAdmin && profile?.role !== "admin") {
-          await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
-        }
-
-        if (!isEmailAdmin && profile?.role !== "admin") {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
-          return;
-        }
-      }
-
-      let stayQuery = supabase
-        .from("stays")
-        .select("*")
-        .eq("slug", slug);
-
-      if (!isPreview) {
-        stayQuery = stayQuery.eq("published", true);
-      }
-
-      const { data: stay, error } = await stayQuery.maybeSingle();
-
-      if(error || !stay){
-        if(error) console.error(error);
-
-        const heroSection = document.querySelector(".sejour-hero");
-        if(heroSection) heroSection.style.display = "none";
-
-        stayTitle.textContent = "";
-        stayText.innerHTML = `
-          <div style="text-align:center; padding:60px 20px;">
-            <div style="font-size:48px; margin-bottom:16px;">🌿</div>
-            <h1 style="font-family:'SegoCustom'; font-weight:500; font-size:clamp(28px,4vw,48px); margin:0;">
-              Ce séjour n'est plus disponible
-            </h1>
-            <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
-              Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
-            </p>
-            <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-              <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
-              <a class="btn on-light" href="/index.html">Retour à l'accueil</a>
-            </div>
-          </div>
-        `;
-        if(stayMeta)  stayMeta.style.display  = "none";
-        if(stayDates) stayDates.parentElement.style.display = "none";
-        return;
-      }
-
-      if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
-      if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
-      if (giftSection) giftSection.style.display = stay.show_gift_section === false ? "none" : "";
-      if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
-      if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
-      if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
-
-      const [{ data: dates }, { data: bookingsPaid }, { data: otherPublishedStays, error: otherStaysError }] = await Promise.all([
-        supabase
-          .from("stay_dates")
-          .select("*")
-          .eq("stay_id", stay.id)
-          .order("start_date", { ascending: true })
-          .limit(1),
-        supabase
-          .from("bookings")
-          .select("id")
-          .eq("stay_id", stay.id)
-          .in("status", ["paid", "confirmed"]),
-        supabase
-          .from("stays")
-          .select("title, slug, hero_image, location, published")
-          .eq("published", true)
-          .neq("slug", stay.slug)
-          .order("created_at", { ascending: false })
-          .limit(12)
-      ]);
-
-      const firstDate = dates?.[0] || null;
-
-      stayTitle.textContent = stay.title || "Séjour";
-
-      // Lieu au-dessus du titre
-      const stayLocationEl = document.getElementById("stayLocation");
-      if (stayLocationEl) {
-        stayLocationEl.textContent = stay.location ? stay.location.toUpperCase() : "";
-        stayLocationEl.style.display = stay.location ? "" : "none";
-      }
-      pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
-      const metaDesc = buildStayMetaDescription(stay);
-      if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
-      const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
-      const canonicalEl = document.getElementById("stayCanonical");
-      if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
-      const ogTitleEl = document.getElementById("ogTitle");
-      if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
-      const ogDescEl = document.getElementById("ogDescription");
-      if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
-      if (stay.hero_image) {
-        const ogImgEl = document.getElementById("ogImage");
-        if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
-      }
-
-      const existingSchema = document.getElementById("staySchema");
-      if (existingSchema) existingSchema.remove();
-      const schemaScript = document.createElement("script");
-      schemaScript.type = "application/ld+json";
-      schemaScript.id = "staySchema";
-      schemaScript.textContent = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "TouristTrip",
-        "name": stay.title || "Séjour Âmes Nomades",
-        "description": metaDesc,
-        "url": stayUrl,
-        "image": stay.hero_image || "",
-        "provider": {
-          "@type": "Organization",
-          "name": "Âmes Nomades",
-          "url": "https://amesnomades.com"
-        }
-      });
-      document.head.appendChild(schemaScript);
-
-      const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date);
-      stayMeta.textContent = durationText;
-
-      stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date);
-
-      // Meta Pixel ViewContent event tracking
-      if (window.MetaPixel) {
-        let basePrice = 0;
-        if (stay.extra_options && Array.isArray(stay.extra_options)) {
-          const prices = stay.extra_options
-            .map(opt => Number(opt.price))
-            .filter(p => !isNaN(p) && p > 0);
-          if (prices.length > 0) {
-            basePrice = Math.min(...prices);
+      try {
+        let currentSlug = slug;
+        if (!currentSlug) {
+          const pathParts = window.location.pathname.split('/').filter(Boolean);
+          const lastPart = pathParts[pathParts.length - 1] || "";
+          if (lastPart && lastPart !== "sejour.html" && lastPart !== "sejour") {
+            currentSlug = decodeURIComponent(lastPart.replace(/\.html$/, ""));
           }
         }
-        window.MetaPixel.trackViewContent(stay.title || 'Séjour', 'Séjour', stay.id, basePrice);
-      }
 
-      if(stay.hero_image){
-        stayHeroBg.src = stay.hero_image;
-        
-        // Préchargement dynamique à haute priorité pour l'image LCP
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = stay.hero_image;
-        link.fetchPriority = "high";
-        document.head.appendChild(link);
-      } else {
-        stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
-      }
+        if(!currentSlug){
+          if (stayTitle) stayTitle.textContent = "Séjour introuvable";
+          if (stayText) stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
+          return;
+        }
 
-      const blocks = normalizeContentBlocks(stay.content_blocks);
-      const hasBlocks = blocks.length > 0;
+        const rawSlugClean = currentSlug.trim();
+        const slugified = slugify(currentSlug);
 
-      if(stayText) {
-        stayText.style.display = "";
-        renderRichText(stayText, stay.description || stay.short_description || "");
-      }
+        if (isPreview) {
+          const { data: authData } = await supabase.auth.getUser();
+          const user = authData?.user;
 
-      if(hasBlocks){
-        renderContentBlocks(contentBlocksContainer, blocks);
-        if(contentBlocksSection) contentBlocksSection.style.display = "";
-      } else {
-        if(contentBlocksSection) contentBlocksSection.style.display = "none";
-      }
+          if (!user) {
+            stayTitle.textContent = "Accès refusé";
+            stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+            return;
+          }
 
-      if(stay.highlights && stay.highlights.length > 0){
-        if(highlightsSection) highlightsSection.style.display = "";
-        renderSimpleList(highlightsList, stay.highlights);
-      } else {
-        if(highlightsSection) highlightsSection.style.display = "none";
-      }
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          const userEmail = (user.email || "").toLowerCase();
+          const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
+          if (isEmailAdmin && profile?.role !== "admin") {
+            await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+          }
+
+          if (!isEmailAdmin && profile?.role !== "admin") {
+            stayTitle.textContent = "Accès refusé";
+            stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
+            return;
+          }
+        }
+
+        let stay = null;
+        let error = null;
+
+        // 1. Cherche par slugifié (ex: yoga-et-brunch-flow-and-care-octobre-rose)
+        if (slugified) {
+          let q1 = supabase.from("stays").select("*").ilike("slug", slugified);
+          if (!isPreview) q1 = q1.eq("published", true);
+          const r1 = await q1.maybeSingle();
+          if (r1.data) stay = r1.data;
+          if (r1.error) error = r1.error;
+        }
+
+        // 2. Si pas trouvé, cherche par slug brut (ex: avec espaces)
+        if (!stay && rawSlugClean) {
+          let q2 = supabase.from("stays").select("*").ilike("slug", rawSlugClean);
+          if (!isPreview) q2 = q2.eq("published", true);
+          const r2 = await q2.maybeSingle();
+          if (r2.data) stay = r2.data;
+        }
+
+        // 3. Si pas trouvé et pas en mode preview, retente sans filtre published strict au cas où l'utilisateur accède directement au séjour
+        if (!stay && !isPreview && slugified) {
+          const r3 = await supabase.from("stays").select("*").ilike("slug", slugified).maybeSingle();
+          if (r3.data) stay = r3.data;
+        }
+
+        // 4. Si toujours pas trouvé, essai par ID
+        const isValidUUID = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+        if (!stay && currentSlug && isValidUUID(currentSlug)) {
+          const fallbackRes = await supabase.from("stays").select("*").eq("id", currentSlug).maybeSingle();
+          if (fallbackRes.data) stay = fallbackRes.data;
+        }
+
+        if(error || !stay){
+          if(error) console.error(error);
+
+          const heroSection = document.querySelector(".sejour-hero");
+          if(heroSection) heroSection.style.display = "none";
+
+          if (stayTitle) stayTitle.textContent = "";
+          if (stayText) {
+            stayText.innerHTML = `
+              <div style="text-align:center; padding:60px 20px;">
+                <div style="font-size:48px; margin-bottom:16px;">🌿</div>
+                <h1 style="font-family:'SegoCustom'; font-weight:500; font-size:clamp(28px,4vw,48px); margin:0;">
+                  Ce séjour n'est plus disponible
+                </h1>
+                <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
+                  Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
+                </p>
+                <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                  <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
+                  <a class="btn on-light" href="/index.html">Retour à l'accueil</a>
+                </div>
+              </div>
+            `;
+          }
+          if(stayMeta)  stayMeta.style.display  = "none";
+          if(stayDates) stayDates.parentElement.style.display = "none";
+          return;
+        }
+
+        if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
+        if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
+        if (giftSection) giftSection.style.display = "none";
+        if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
+        if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
+        if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
+        const otherStaysSection = document.getElementById("otherStaysSection");
+        if (otherStaysSection) otherStaysSection.style.display = stay.show_other_stays_section === false ? "none" : "";
+
+        let dates = null;
+        try {
+          const res = await supabase.from("stay_dates").select("*").eq("stay_id", stay.id).order("start_date", { ascending: true }).limit(1);
+          dates = res.data;
+        } catch(e) { console.warn("stay_dates query issue:", e); }
+
+        let bookingsPaid = null;
+        try {
+          const res = await supabase.from("bookings").select("id").eq("stay_id", stay.id).in("status", ["paid", "confirmed"]);
+          bookingsPaid = res.data;
+        } catch(e) { console.warn("bookings query issue:", e); }
+
+        let otherPublishedStays = null;
+        let otherStaysError = null;
+        try {
+          const res = await supabase.from("stays").select("title, slug, hero_image, location, published").eq("published", true).neq("slug", stay.slug).order("created_at", { ascending: false }).limit(12);
+          otherPublishedStays = res.data;
+          otherStaysError = res.error;
+        } catch(e) { console.warn("otherPublishedStays query issue:", e); }
+
+        const firstDate = dates?.[0] || null;
+
+        stayTitle.textContent = stay.title || "Séjour";
+
+        // Lieu au-dessus du titre
+        const stayLocationEl = document.getElementById("stayLocation");
+        const fullLocationStr = [stay.location, stay.country].filter(Boolean).join(', ');
+        if (stayLocationEl && fullLocationStr) {
+          const parts = fullLocationStr.split(',').map(p => p.trim().toUpperCase());
+          const uniqueParts = [];
+          parts.forEach(p => { if (!uniqueParts.includes(p)) uniqueParts.push(p); });
+          stayLocationEl.textContent = uniqueParts.join(' — ');
+          stayLocationEl.style.display = "";
+        } else if (stayLocationEl) {
+          stayLocationEl.style.display = "none";
+        }
+
+        pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
+        const metaDesc = buildStayMetaDescription(stay);
+        if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
+        const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
+        const canonicalEl = document.getElementById("stayCanonical");
+        if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
+        const ogTitleEl = document.getElementById("ogTitle");
+        if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
+        const ogDescEl = document.getElementById("ogDescription");
+        if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
+        if (stay.hero_image) {
+          const ogImgEl = document.getElementById("ogImage");
+          if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
+        }
+
+        const existingSchema = document.getElementById("staySchema");
+        if (existingSchema) existingSchema.remove();
+        const schemaScript = document.createElement("script");
+        schemaScript.type = "application/ld+json";
+        schemaScript.id = "staySchema";
+        schemaScript.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "TouristTrip",
+          "name": stay.title || "Séjour Âmes Nomades",
+          "description": metaDesc,
+          "url": stayUrl,
+          "image": stay.hero_image || "",
+          "provider": {
+            "@type": "Organization",
+            "name": "Âmes Nomades",
+            "url": "https://amesnomades.com"
+          }
+        });
+        document.head.appendChild(schemaScript);
+
+        const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date, stay?.is_single_day);
+        stayMeta.textContent = durationText;
+
+        stayDates.textContent = formatDateRange(firstDate?.start_date, firstDate?.end_date, stay?.is_single_day);
+
+        // Meta Pixel ViewContent event tracking
+        if (window.MetaPixel) {
+          let basePrice = 0;
+          if (stay.extra_options && Array.isArray(stay.extra_options)) {
+            const prices = stay.extra_options
+              .map(opt => Number(opt.price))
+              .filter(p => !isNaN(p) && p > 0);
+            if (prices.length > 0) {
+              basePrice = Math.min(...prices);
+            }
+          }
+          window.MetaPixel.trackViewContent(stay.title || 'Séjour', 'Séjour', stay.id, basePrice);
+        }
+
+        if(stay.hero_image){
+          stayHeroBg.src = stay.hero_image;
+          
+          // Préchargement dynamique à haute priorité pour l'image LCP
+          const link = document.createElement("link");
+          link.rel = "preload";
+          link.as = "image";
+          link.href = stay.hero_image;
+          link.fetchPriority = "high";
+          document.head.appendChild(link);
+        } else {
+          stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
+        }
+
+        let blocks = normalizeContentBlocks(stay.content_blocks);
+        // Merge top-level speakers column into blocks if not already present
+        if (Array.isArray(stay.speakers) && stay.speakers.length > 0) {
+          const existingSpkTitles = new Set(
+            blocks.filter(b => b.type === "speaker").map(b => (b.title||"").toLowerCase().trim())
+          );
+          stay.speakers.forEach(sp => {
+            const titleKey = (sp.title||"").toLowerCase().trim();
+            if (!existingSpkTitles.has(titleKey)) {
+              blocks.push({ type: "speaker", title: sp.title||"", text: sp.text||"", image: sp.image||"", layout: sp.layout||"image_left" });
+              if (titleKey) existingSpkTitles.add(titleKey);
+            }
+          });
+        }
+        const hasBlocks = blocks.length > 0;
+
+        if(stayText) {
+          stayText.style.display = "";
+          renderRichText(stayText, stay.description || stay.short_description || "");
+        }
+
+        if(hasBlocks){
+          renderContentBlocks(contentBlocksContainer, blocks);
+          if(contentBlocksSection) contentBlocksSection.style.display = "";
+        } else {
+          if(contentBlocksSection) contentBlocksSection.style.display = "none";
+        }
+
+        if(stay.highlights && stay.highlights.length > 0){
+          if(highlightsSection) highlightsSection.style.display = "";
+          renderSimpleList(highlightsList, stay.highlights);
+        } else {
+          if(highlightsSection) highlightsSection.style.display = "none";
+        }
 
       // Toujours afficher le programme, les inclusions et les options s'ils ont du contenu
       const progData = stay.program || [];
@@ -1360,9 +1537,9 @@
         programNote.textContent = "";
       }
 
-      giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
-      giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
-      giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
+      if (giftTitle) giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
+      if (giftIntro) giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
+      if (giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
 
       const giftItemsData = stay.gift_items || [
         "Tee-shirt Âmes Nomades",
@@ -1372,43 +1549,203 @@
         "Un soin bien-être (surprise)"
       ];
 
-      giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      if (giftList) giftList.innerHTML = giftItemsData.map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
       if(stay.gift_image){
-        giftImage.src = stay.gift_image;
+        if (giftImage) giftImage.src = stay.gift_image;
       }
-      if(giftSection) giftSection.style.display = giftItemsData.length ? "" : "none";
+      if(giftSection) giftSection.style.display = "none";
 
-      const incData = stay.included_items || arrayFromField(stay.included);
-      const notIncData = stay.not_included_items || [];
+      const incData = arrayFromField(stay.included_items || stay.included);
+      const notIncData = arrayFromField(stay.not_included_items || stay.not_included);
       renderSimpleList(includedList, incData);
       renderSimpleList(notIncludedList, notIncData);
       if(includedSection) {
         includedSection.style.display = (incData.length || notIncData.length) ? "" : "none";
       }
 
+      const isSingleDay = stay.is_single_day === true;
+
       const optData = stay.extra_options || [];
       const bookingUrl = stay.booking_url || stay.reservation_url || "";
-      renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg);
+      renderOptionsList(optionsList, optData, bookingUrl, bookingBtn, bookingMsg, isSingleDay);
       if(optionsSection) {
-        optionsSection.style.display = optData.length ? "" : "none";
+        optionsSection.style.display = (optData.length || isSingleDay) ? "" : "none";
       }
 
       const stayFaqItems = Array.isArray(stay.faq) ? stay.faq : [];
       const defaultStayFaq = stayFaqItems.length ? [] : await getSiteStayDefaultFaq();
       renderFaq(faqList, stayFaqItems.length ? stayFaqItems : defaultStayFaq);
 
-      if(bookingUrl && (!optData || !optData.length)){
+      if(isSingleDay) {
+        const singleDayQtyBox = document.getElementById("singleDayQtyBox");
+        const btnQtyMinus = document.getElementById("btnQtyMinus");
+        const btnQtyPlus = document.getElementById("btnQtyPlus");
+        const stayQtyVal = document.getElementById("stayQtyVal");
+
+        if (singleDayQtyBox) singleDayQtyBox.style.display = "flex";
+
+        let currentQty = 1;
+        const maxQty = Number(firstDate?.seats_remaining) || 10;
+
+        const updateQtyUI = () => {
+          if (stayQtyVal) stayQtyVal.textContent = String(currentQty);
+
+          // 1. Bouton unique (single option)
+          const singleBtn = optionsList ? optionsList.querySelector(".btn-opt-single-checkout") : null;
+          if (singleBtn) {
+            const unitPrice = Number(singleBtn.getAttribute("data-price") || 0);
+            const label = singleBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
+            const totalPrice = unitPrice * currentQty;
+            if (unitPrice > 0) {
+              singleBtn.textContent = `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
+            } else {
+              singleBtn.textContent = `${label} →`;
+            }
+          }
+
+          // 2. Cartes d'options multiples (multi options)
+          if (optionsList) {
+            const cards = optionsList.querySelectorAll(".option-card-label");
+            cards.forEach(card => {
+              const priceValEl = card.querySelector(".opt-price-val");
+              const btnStripe = card.querySelector(".btn-opt-stripe");
+              const radioInput = card.querySelector("input[type='radio']");
+
+              const unitPrice = Number(priceValEl?.getAttribute("data-unit-price") || radioInput?.getAttribute("data-price") || btnStripe?.getAttribute("data-price") || 0);
+              const totalPrice = unitPrice * currentQty;
+
+              if (priceValEl && unitPrice > 0) {
+                if (currentQty > 1) {
+                  priceValEl.textContent = `${totalPrice} € (${currentQty} x ${unitPrice} €)`;
+                } else {
+                  priceValEl.textContent = `${unitPrice} €`;
+                }
+              }
+
+              if (btnStripe) {
+                if (totalPrice > 0) {
+                  btnStripe.textContent = `Réserver — ${totalPrice} € →`;
+                } else {
+                  btnStripe.textContent = `Réserver →`;
+                }
+              }
+            });
+          }
+
+          // 3. Bouton de réservation principal
+          let selectedRadio = optionsList ? optionsList.querySelector("input[type='radio']:checked") : null;
+          let unitPrice = Number(selectedRadio?.getAttribute("data-price") || bookingBtn.getAttribute("data-price") || 0);
+          if (!unitPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
+            unitPrice = Number(stay.extra_options[0].price || 0);
+          }
+          let optionLabel = selectedRadio?.getAttribute("data-label") || bookingBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
+          bookingBtn.setAttribute("data-price", String(unitPrice));
+          bookingBtn.setAttribute("data-label", optionLabel);
+
+          const totalPrice = unitPrice * currentQty;
+          if (totalPrice > 0) {
+            bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €)`;
+          } else {
+            bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
+          }
+        };
+
+        window.updateSingleDayQtyUI = updateQtyUI;
+
+        btnQtyMinus?.addEventListener("click", () => {
+          if (currentQty > 1) {
+            currentQty--;
+            updateQtyUI();
+          }
+        });
+
+        btnQtyPlus?.addEventListener("click", () => {
+          if (currentQty < maxQty) {
+            currentQty++;
+            updateQtyUI();
+          }
+        });
+
+        setTimeout(updateQtyUI, 50);
+
+        bookingBtn.href = "#";
+        bookingMsg.textContent = "Réservation directe avec création de compte obligatoire.";
+
+        bookingBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          bookingBtn.classList.add("btn-loading");
+          bookingMsg.style.color = "var(--text)";
+          bookingMsg.textContent = "Vérification du compte…";
+
+          const { data: { user } } = await supabase.auth.getUser();
+          if(!user) {
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour.");
+            window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+            return;
+          }
+
+          bookingMsg.textContent = "Redirection vers le paiement sécurisé Stripe…";
+          
+          let stayPrice = Number(bookingBtn.getAttribute("data-price") || 0);
+          if (!stayPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
+            stayPrice = Number(stay.extra_options[0].price || 0);
+          }
+          let optionLabel = bookingBtn.getAttribute("data-label") || "";
+          let itemTitle = stay.title || 'Séjour';
+          const cleanOptLabel = optionLabel.trim().toLowerCase();
+          if (optionLabel && optionLabel !== stay.title && !["tarif", "option", "default", "standard"].includes(cleanOptLabel)) {
+            itemTitle += ` (${optionLabel})`;
+          }
+
+          const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
+            body: {
+              items: [{
+                id: stay.id,
+                title: itemTitle,
+                price: stayPrice,
+                quantity: currentQty,
+                type: 'stay'
+              }],
+              userId: user.id,
+              userEmail: user.email,
+              stayDate: firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "",
+              returnUrl: window.location.href,
+              cancelUrl: window.location.href
+            }
+          });
+
+          if(sessionErr || !sessionData?.url) {
+            console.error("Erreur Checkout:", sessionErr);
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            bookingMsg.style.color = "#c00";
+            bookingMsg.textContent = "Erreur lors de la création de la session de paiement.";
+            return;
+          }
+
+          if (window.MetaPixel) {
+            window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, stayPrice * currentQty);
+          }
+
+          window.location.href = sessionData.url;
+        });
+      } else if(bookingUrl && (!optData || !optData.length)){
         bookingBtn.href = bookingUrl;
-        bookingMsg.textContent = "Tu peux réserver directement via ce lien.";
+        bookingMsg.textContent = "Tu peux réserver directement via notre partenaire.";
       } else if (!bookingUrl && (!optData || !optData.length)) {
         bookingBtn.removeAttribute("href");
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
 
-      // Meta Pixel AddToCart event tracking
-      if (bookingBtn) {
+      // Meta Pixel AddToCart event tracking & loading spinner (si non single day)
+      if (bookingBtn && !isSingleDay) {
         bookingBtn.addEventListener("click", () => {
+          if (bookingBtn.hasAttribute("href") && bookingBtn.getAttribute("href") !== "#") {
+            bookingBtn.classList.add("btn-loading");
+          }
           if (window.MetaPixel) {
             let basePrice = 0;
             if (stay.extra_options && Array.isArray(stay.extra_options)) {
@@ -1449,10 +1786,22 @@
       } else {
         renderOtherStays(otherPublishedStays || []);
       }
+    } catch (err) {
+      console.error("Erreur lors du chargement du séjour :", err);
     }
+  }
 
     // Le header reste toujours visible sans masquage au scroll
     loadStay();
+
+    window.addEventListener("pageshow", () => {
+      document.querySelectorAll(".btn-loading").forEach(btn => btn.classList.remove("btn-loading"));
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        document.querySelectorAll(".btn-loading").forEach(btn => btn.classList.remove("btn-loading"));
+      }
+    });
   </script>
 
 </body>

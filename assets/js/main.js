@@ -241,4 +241,19 @@
       e.preventDefault();
     }
   }, { passive: false });
+
+  /* ===============================
+     7) Reset des boutons de chargement (Retour navigateur / BFCache)
+  ================================ */
+  const resetLoadingButtons = () => {
+    document.querySelectorAll(".btn-loading").forEach((btn) => {
+      btn.classList.remove("btn-loading");
+    });
+  };
+  window.addEventListener("pageshow", resetLoadingButtons);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      resetLoadingButtons();
+    }
+  });
 })();

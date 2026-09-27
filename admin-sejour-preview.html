@@ -116,7 +116,7 @@
         </p>
       </section>
 
-      <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
+      <!-- <section class="reveal gift-pack sejour-section sejour-divider" style="display:none;" id="giftSection">
         <div class="gift-pack-grid">
           <div class="gift-pack-text">
             <h2 class="sejour-section-title" id="giftTitle">Le sac cadeau Âmes Nomades</h2>
@@ -483,7 +483,7 @@
               </div>
             </div>
             <div>
-              ${url ? `<button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:4px; cursor:pointer; white-space:nowrap;">Réserver cette option →</button>` : ""}
+              <button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" style="background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:4px; cursor:pointer; white-space:nowrap;">Réserver cette option →</button>
             </div>
           </label>
         `;
@@ -588,6 +588,144 @@
         .replace(/"/g, "&quot;");
     }
 
+    
+    // ── VISIONNEUSE GALERIE (gallery_2) ──
+    function renderGalleryViewer(images, containerId) {
+      if (!images || !images.length) return "";
+      const id = containerId || ("gv_" + Date.now());
+      const showArrows = images.length > 5;
+      const thumbs = images.map((url, i) => `
+        <div class="gv-thumb${i === 0 ? " active" : ""}" data-src="${escapeHtml(url)}" data-viewer="${id}" data-idx="${i}"
+          style="cursor:pointer; aspect-ratio:3/2; overflow:hidden; border-radius:3px; border:2px solid ${i === 0 ? "var(--text)" : "transparent"}; transition:border-color 0.2s; flex-shrink:0;">
+          <img src="${escapeHtml(url)}" alt="Aperçu ${i+1}" loading="lazy" width="180" height="120"
+            style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s;">
+        </div>`).join("");
+      return `
+        <div id="${id}" class="gv-container" data-total="${images.length}" style="display:grid; grid-template-columns:180px 1fr; gap:20px; align-items:start;">
+          <div class="gv-left-col" style="position:relative; display:flex; flex-direction:column; overflow:hidden; width:180px; flex-shrink:0;">
+            ${showArrows ? `
+              <button type="button" class="gv-arrow gv-prev" data-viewer="${id}" aria-label="Précédent"
+                style="position:absolute; top:0; left:0; width:100%; height:32px; background:linear-gradient(to bottom, rgba(250,245,220,0.95), rgba(250,245,220,0)); border:none; color:var(--text); font-size:14px; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; opacity:0.5;">
+                ▲
+              </button>
+            ` : ""}
+            <div class="gv-thumbs-viewport" style="overflow:hidden; width:100%; position:relative;">
+              <div class="gv-thumbs-track" style="display:flex; flex-direction:column; gap:8px; transition:transform 0.3s ease;">
+                ${thumbs}
+              </div>
+            </div>
+            ${showArrows ? `
+              <button type="button" class="gv-arrow gv-next" data-viewer="${id}" aria-label="Suivant"
+                style="position:absolute; bottom:0; left:0; width:100%; height:32px; background:linear-gradient(to top, rgba(250,245,220,0.95), rgba(250,245,220,0)); border:none; color:var(--text); font-size:14px; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s;">
+                ▼
+              </button>
+            ` : ""}
+          </div>
+          <div class="gv-main" style="border-radius:4px; overflow:hidden; background:#f0ebde; position:relative;">
+            <img id="${id}_main" src="${escapeHtml(images[0])}" alt="Photo séjour" width="900" height="600"
+              style="width:100%; height:100%; object-fit:cover; display:block; transition:opacity 0.3s ease;">
+          </div>
+        </div>`;
+    }
+
+    function setupGalleryViewers(container) {
+      if (!container) return;
+      const viewers = container.querySelectorAll(".gv-container");
+      viewers.forEach(viewer => {
+        const id = viewer.id;
+        const total = parseInt(viewer.getAttribute("data-total"), 10);
+        const viewport = viewer.querySelector(".gv-thumbs-viewport");
+        const track = viewer.querySelector(".gv-thumbs-track");
+        const main = viewer.querySelector(".gv-main");
+        const mainImg = document.getElementById(id + "_main");
+        const prevBtn = viewer.querySelector(".gv-prev");
+        const nextBtn = viewer.querySelector(".gv-next");
+        let currentIndex = 0;
+
+        function getThumbHeight() {
+          const thumbs = track ? track.querySelectorAll(".gv-thumb") : [];
+          if (!thumbs.length) return 0;
+          return thumbs[0].getBoundingClientRect().height;
+        }
+
+        function updateLayout() {
+          const thumbH = getThumbHeight();
+          if (thumbH <= 0) {
+            setTimeout(updateLayout, 100);
+            return;
+          }
+          const count = Math.max(5, Math.min(total, 5));
+          const gap = 8;
+          const viewportH = count * thumbH + (count - 1) * gap;
+          if (viewport) viewport.style.height = `${viewportH}px`;
+          if (main) main.style.height = `${viewportH}px`;
+          updateSliderPosition();
+        }
+
+        function updateSliderPosition() {
+          const thumbH = getThumbHeight();
+          const gap = 8;
+          const offset = currentIndex * (thumbH + gap);
+          if (track) {
+            track.style.transform = `translateY(-${offset}px)`;
+          }
+          if (prevBtn) {
+            prevBtn.style.opacity = currentIndex === 0 ? "0.2" : "0.8";
+            prevBtn.style.pointerEvents = currentIndex === 0 ? "none" : "auto";
+          }
+          if (nextBtn) {
+            nextBtn.style.opacity = currentIndex >= (total - 5) ? "0.2" : "0.8";
+            nextBtn.style.pointerEvents = currentIndex >= (total - 5) ? "none" : "auto";
+          }
+        }
+
+        if (prevBtn) {
+          prevBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (currentIndex > 0) {
+              currentIndex--;
+              updateSliderPosition();
+            }
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (currentIndex < total - 5) {
+              currentIndex++;
+              updateSliderPosition();
+            }
+          });
+        }
+
+        if (track) {
+          track.querySelectorAll(".gv-thumb").forEach(thumb => {
+            thumb.addEventListener("click", () => {
+              const src = thumb.getAttribute("data-src");
+              if (mainImg && src) {
+                mainImg.style.opacity = "0";
+                setTimeout(() => {
+                  mainImg.src = src;
+                  mainImg.style.opacity = "1";
+                }, 200);
+              }
+              track.querySelectorAll(".gv-thumb").forEach(t => {
+                t.style.borderColor = "transparent";
+                t.classList.remove("active");
+              });
+              thumb.style.borderColor = "var(--text)";
+              thumb.classList.add("active");
+            });
+          });
+        }
+
+        updateLayout();
+        window.addEventListener("resize", updateLayout);
+        setTimeout(updateLayout, 300);
+      });
+    }
+
     function renderContentBlocks(container, blocks){
       if(!container) return;
       if(!blocks.length){
@@ -620,16 +758,60 @@
         }
 
         if(block.type === "gallery_2"){
-          const galleryImages = (block.images || []).map(url => `
-            <div style="border:1px solid var(--line); background:rgba(255,255,255,.55);">
-              <img src="${escapeHtml(url)}" alt="${escapeHtml(block.image_alt || "Image galerie")}" style="width:100%; height:auto; display:block;">
-            </div>
-          `).join("");
-          return `<article style="display:grid; gap:10px;">${safeTitle ? `<h3 style="margin:0;">${safeTitle}</h3>` : ""}<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">${galleryImages}</div></article>`;
+          const imgs = (block.images || []);
+          if (!imgs.length) return "";
+          const vid = "preview_gv_" + Math.random().toString(36).substr(2, 9);
+          return `<article style="margin-bottom:0;">${renderGalleryViewer(imgs, vid)}</article>`;
         }
 
         if(block.type === "quote"){
           return `<blockquote style="margin:0; border-left:2px solid var(--line); padding-left:14px;"><p style="margin:0; font-style:italic;">${safeQuote || safeText}</p>${safeCaption ? `<footer class="small muted" style="margin-top:8px;">${safeCaption}</footer>` : ""}</blockquote>`;
+        }
+
+        if(block.type === "speaker"){
+          const layoutRight = block.layout === "image_right" || block.image_position === "image_right";
+          const bioParagraphs = safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+          `).join("");
+
+          return `
+            <article class="speaker-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+              <div class="speaker-row" style="display:flex; gap:32px; align-items:start; flex-wrap:wrap; ${layoutRight ? 'flex-direction:row-reverse;' : ''}">
+                <div class="speaker-photo-wrapper" style="width:200px; flex-shrink:0;">
+                  ${block.image ? `<img src="${escapeHtml(block.image)}" alt="${safeTitle}" style="width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:4px; display:block;">` : ""}
+                </div>
+                <div class="speaker-bio speaker-text-container" style="flex:1;">
+                  <div class="speaker-title-block" style="display:flex; align-items:baseline; gap:16px; margin-bottom:12px;">
+                    <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Intervenante"}</h3>
+                  </div>
+                  ${bioParagraphs}
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
+        if(block.type === "chef"){
+          const bioParagraphs = safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
+            <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+          `).join("");
+
+          return `
+            <article class="chef-item" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0;">
+              <div class="chef-row">
+                <div class="chef-title-block">
+                  <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
+                  <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${safeTitle || "Notre Cuisinière"}</h3>
+                </div>
+                <div class="chef-bio speaker-text-container">
+                  ${bioParagraphs}
+                </div>
+                <div class="chef-photo-wrapper" style="width:200px; flex-shrink:0;">
+                  ${block.image ? `<img src="${escapeHtml(block.image)}" alt="${safeTitle}" style="width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:4px; display:block;">` : ""}
+                </div>
+              </div>
+            </article>
+          `;
         }
 
         return `<article>${safeTitle ? `<h3 style="margin:0 0 10px;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;">${safeText}</p></article>`;
@@ -637,6 +819,7 @@
 
       container.querySelectorAll("p.sub, h3, blockquote p, article p").forEach(el => el.classList.add("text-reveal"));
       if(window.ScrollTextReveal) window.ScrollTextReveal.init(container.querySelectorAll(".text-reveal"));
+      setupGalleryViewers(container);
     }
 
     async function getSiteStayDefaultFaq(){
@@ -652,25 +835,72 @@
       return fromSiteFaq.length ? fromSiteFaq : fallbackStayFaqItems;
     }
 
-    function formatDateRange(start, end){
-      if(!start && !end) return "Dates à annoncer";
-      const startText = start ? new Date(start).toLocaleDateString("fr-FR") : "";
-      const endText = end ? new Date(end).toLocaleDateString("fr-FR") : "";
-      if(startText && endText) return `${startText} au ${endText}`;
-      return startText || endText || "Dates à annoncer";
+    function parseIsoDateStr(str) {
+      if (!str) return null;
+      const clean = String(str).substring(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+      return clean;
     }
 
-    function getDurationLabel(start, end){
-      if(!start || !end) return "Durée à annoncer";
+    function formatDateRange(startRaw, endRaw) {
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
+      if (!start && !end) return "Dates à annoncer";
+      
+      const s = start ? new Date(start + "T00:00:00") : null;
+      const e = end ? new Date(end + "T00:00:00") : null;
+
+      if (s && (!e || start === end)) {
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      if (!s && e) {
+        const day = e.getDate();
+        const month = e.toLocaleDateString("fr-FR", { month: "long" });
+        const year = e.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      if (s.getTime() === e.getTime()) {
+        const day = s.getDate();
+        const month = s.toLocaleDateString("fr-FR", { month: "long" });
+        const year = s.getFullYear();
+        return `Le ${day} ${month} ${year}`;
+      }
+      const sDay = s.getDate();
+      const eDay = e.getDate();
+      const sMonth = s.toLocaleDateString("fr-FR", { month: "long" });
+      const eMonth = e.toLocaleDateString("fr-FR", { month: "long" });
+      const sYear = s.getFullYear();
+      const eYear = e.getFullYear();
+
+      if (sMonth === eMonth && sYear === eYear) {
+        return `Du ${sDay} au ${eDay} ${sMonth} ${sYear}`;
+      }
+      if (sYear === eYear) {
+        return `Du ${sDay} ${sMonth} au ${eDay} ${eMonth} ${sYear}`;
+      }
+      return `Du ${sDay} ${sMonth} ${sYear} au ${eDay} ${eMonth} ${eYear}`;
+    }
+
+    function getDurationLabel(startRaw, endRaw) {
+      const start = parseIsoDateStr(startRaw);
+      const end = parseIsoDateStr(endRaw);
+
+      if (!start) return "Durée à annoncer";
+      if (!end || start === end) return "1 jour";
 
       const s = new Date(start + "T00:00:00");
       const e = new Date(end + "T00:00:00");
       const days = Math.floor((e.getTime() - s.getTime()) / 86400000) + 1;
 
-      if(days <= 0) return "Durée à annoncer";
+      if (days <= 0) return "Durée à annoncer";
+      if (days === 1) return "1 jour";
 
       const nights = Math.max(0, days - 1);
-      return `${days} jour${days > 1 ? "s" : ""} · ${nights} nuit${nights > 1 ? "s" : ""}`;
+      return `${days} jours · ${nights} nuit${nights > 1 ? "s" : ""}`;
     }
 
     function buildStayMetaDescription(stay){
@@ -747,52 +977,60 @@
       updatePosition();
     }
 
+        function slugify(text) {
+      if (!text) return "";
+      return text.toString().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\-\----+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+    }
+
     async function loadStay(){
-      if(!slug){
-        stayTitle.textContent = "Séjour introuvable";
-        stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
-        return;
-      }
+      try {
+        let currentSlug = slug;
+        if (!currentSlug) {
+          const pathParts = window.location.pathname.split('/').filter(Boolean);
+          const lastPart = pathParts[pathParts.length - 1] || "";
+          if (lastPart && lastPart !== "admin-sejour-preview.html" && lastPart !== "sejour") {
+            currentSlug = decodeURIComponent(lastPart.replace(/\.html$/, ""));
+          }
+        }
 
-      if (isPreview) {
-        const { data: authData } = await supabase.auth.getUser();
-        const user = authData?.user;
-
-        if (!user) {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Connecte-toi avec un compte administrateur pour voir cet aperçu.</p>";
+        if(!currentSlug){
+          if (stayTitle) stayTitle.textContent = "Séjour introuvable";
+          if (stayText) stayText.innerHTML = "<p>Aucun séjour sélectionné.</p>";
           return;
         }
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+        const rawSlugClean = currentSlug.trim();
+        const slugified = slugify(currentSlug);
 
-        const userEmail = (user.email || "").toLowerCase();
-        const isEmailAdmin = userEmail === "contact@amesnomades.com" || userEmail === "sarnelli.ap@gmail.com" || userEmail === "revesnomades@gmail.com";
-        if (isEmailAdmin && profile?.role !== "admin") {
-          await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id);
+        let stay = null;
+        let error = null;
+
+        if (slugified) {
+          let q1 = supabase.from("stays").select("*").ilike("slug", slugified);
+          if (!isPreview) q1 = q1.eq("published", true);
+          const r1 = await q1.maybeSingle();
+          if (r1.data) stay = r1.data;
+          if (r1.error) error = r1.error;
         }
 
-        if (!isEmailAdmin && profile?.role !== "admin") {
-          stayTitle.textContent = "Accès refusé";
-          stayText.innerHTML = "<p>Seul un administrateur peut prévisualiser un séjour non publié.</p>";
-          return;
+        if (!stay && rawSlugClean) {
+          let q2 = supabase.from("stays").select("*").ilike("slug", rawSlugClean);
+          if (!isPreview) q2 = q2.eq("published", true);
+          const r2 = await q2.maybeSingle();
+          if (r2.data) stay = r2.data;
         }
-      }
 
-      let stayQuery = supabase
-        .from("stays")
-        .select("*")
-        .eq("slug", slug);
-
-      if (!isPreview) {
-        stayQuery = stayQuery.eq("published", true);
-      }
-
-      const { data: stay, error } = await stayQuery.maybeSingle();
+        const isValidUUID = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+        if (!stay && currentSlug && isValidUUID(currentSlug)) {
+          const fallbackRes = await supabase.from("stays").select("*").eq("id", currentSlug).maybeSingle();
+          if (fallbackRes.data) stay = fallbackRes.data;
+        }
 
       if(error || !stay){
         if(error) console.error(error);
@@ -823,10 +1061,12 @@
 
       if (highlightsSection) highlightsSection.style.display = stay.show_highlights_section === false ? "none" : "";
       if (programSection) programSection.style.display = stay.show_program_section === false ? "none" : "";
-      if (giftSection) giftSection.style.display = stay.show_gift_section === false ? "none" : "";
+      if (giftSection) giftSection.style.display = "none";
       if (includedSection) includedSection.style.display = stay.show_included_section === false ? "none" : "";
       if (optionsSection) optionsSection.style.display = stay.show_options_section === false ? "none" : "";
       if (faqSection) faqSection.style.display = stay.show_faq_section === false ? "none" : "";
+      const otherStaysSection = document.getElementById("otherStaysSection");
+      if (otherStaysSection) otherStaysSection.style.display = stay.show_other_stays_section === false ? "none" : "";
 
       const [{ data: dates }, { data: bookingsPaid }, { data: otherPublishedStays, error: otherStaysError }] = await Promise.all([
         supabase
@@ -898,7 +1138,20 @@
         stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
       }
 
-      const blocks = normalizeContentBlocks(stay.content_blocks);
+      let blocks = normalizeContentBlocks(stay.content_blocks);
+      // Merge top-level speakers column into blocks if not already present
+      if (Array.isArray(stay.speakers) && stay.speakers.length > 0) {
+        const existingSpkTitles = new Set(
+          blocks.filter(b => b.type === "speaker").map(b => (b.title||"").toLowerCase().trim())
+        );
+        stay.speakers.forEach(sp => {
+          const titleKey = (sp.title||"").toLowerCase().trim();
+          if (!existingSpkTitles.has(titleKey)) {
+            blocks.push({ type: "speaker", title: sp.title||"", text: sp.text||"", image: sp.image||"", layout: sp.layout||"image_left" });
+            if (titleKey) existingSpkTitles.add(titleKey);
+          }
+        });
+      }
       const hasBlocks = blocks.length > 0;
 
       if(stayText) {
@@ -950,10 +1203,10 @@
       if(stay.gift_image){
         giftImage.src = stay.gift_image;
       }
-      if(giftSection) giftSection.style.display = giftItemsData.length ? "" : "none";
+      if(giftSection) giftSection.style.display = "none";
 
-      const incData = stay.included_items || arrayFromField(stay.included);
-      const notIncData = stay.not_included_items || [];
+      const incData = arrayFromField(stay.included_items || stay.included);
+      const notIncData = arrayFromField(stay.not_included_items || stay.not_included);
       renderSimpleList(includedList, incData);
       renderSimpleList(notIncludedList, notIncData);
       if(includedSection) {
@@ -1004,7 +1257,10 @@
       } else {
         renderOtherStays(otherPublishedStays || []);
       }
+    } catch (err) {
+      console.error("Erreur lors du chargement de l'aperçu du séjour :", err);
     }
+  }
 
     // ── NOUVELLES ANIMATIONS (HEADER + SCROLL 5S) ──
     const navHeader = document.getElementById("top");
