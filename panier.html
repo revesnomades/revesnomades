@@ -18,9 +18,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="ÂmesNomades">
   <link rel="manifest" href="/assets/img/site.webmanifest">
-
+  <meta name="robots" content="noindex, nofollow">
 
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js" defer></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
@@ -35,163 +36,412 @@
 
   <header class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="index.html" aria-label="Accueil">
-        <img src="assets/img/logo-ames-nomades.png" alt="Âmes Nomades" width="594" height="420" style="display: none;">
+      <nav class="nav-left nav-links-desktop" aria-label="Navigation gauche">
+        <a href="/index.html">Accueil</a>
+        <a href="/index.html#sejours">Séjours</a>
+        <a href="/boutique.html">Shop</a>
+      </nav>
+
+      <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" width="594" height="420" style="display: none;" />
         <span>ÂmesNomades</span>
       </a>
 
-      <div class="nav-links">
-        <a href="faq.html">FAQ</a>
-        <a href="boutique.html">Shop</a><a href="compte.html">Compte</a>
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
+        <a href="/index.html#apropos" data-scroll>À propos</a>
+        <a href="/faq.html">FAQ</a>
+
+        <a class="icon-btn cart-icon-btn cart-nav-link active" href="/panier.html" aria-label="Panier (0 article)">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-badge"></span>
+        </a>
+
+        <a class="icon-btn" href="/compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="mobile-drawer" aria-hidden="true">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
+          <a href="/index.html">Accueil</a>
+          <a href="/index.html#sejours">Séjours</a>
+          <a href="/boutique.html">Shop</a>
+          <a href="/index.html#apropos">À propos</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/panier.html" class="active">Panier</a>
+          <a href="/compte.html">Compte</a>
+        </nav>
       </div>
     </div>
   </header>
 
-  <main class="band cream">
-    <div class="container" style="padding: calc(var(--navH) + 40px) 0 80px;">
+  <main class="band cream" style="min-height:80vh;">
+    <div class="container" style="padding: calc(var(--navH) + 48px) 0 80px; max-width:960px;">
 
-      <div class="center">
-        <h2>Votre panier</h2>
-        <p>Finalisez votre réservation en sélectionnant vos options.</p>
-      </div>
+      <h1 style="font-family:'SegoCustom'; font-size:36px; margin:0 0 32px;">Votre panier</h1>
 
-      <div style="margin-top: 28px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 20px;">
+      <!-- Layout: 2 colonnes sur desktop -->
+      <div id="cartLayout" style="display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;">
 
-        <!-- GAUCHE -->
-        <section style="border:1px solid var(--line); padding:20px; background:rgba(255,255,255,.55);">
-
-          <h3 id="cartStayTitle" style="font-family:'SegoCustom'; font-size:24px;">Séjour</h3>
-          <p id="cartBasePrice" style="color:var(--muted); margin-top:6px;">—</p>
-
-          <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <strong>Quantité</strong>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <button type="button" class="btn tiny on-light" id="qtyMinus">−</button>
-                <span id="cartQty" style="min-width:20px; text-align:center;">1</span>
-                <button type="button" class="btn tiny on-light" id="qtyPlus">+</button>
-              </div>
-            </div>
+        <!-- COLONNE GAUCHE : liste des articles -->
+        <div>
+          <div id="cartItems">
+            <!-- rempli par JS -->
           </div>
 
-          <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:20px;">
-            <strong>Type de chambre</strong>
-            <select id="cartRoom" style="margin-top:10px; width:100%; padding:12px; border-radius:0; border:1px solid var(--line); background:rgba(255,255,255,.85); font-family:inherit;">
-              <option value="double_partagee">Chambre double partagée</option>
-              <option value="individuelle">Chambre individuelle (+120€)</option>
-            </select>
+          <!-- CROSS-SELL -->
+          <div id="crossSellSection" style="display:none; margin-top:40px;">
+            <h3 style="font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;" id="crossSellTitle">Vous pourriez aussi aimer</h3>
+            <div class="crosssell-grid" id="crossSellGrid"></div>
+          </div>
+        </div>
+
+        <!-- COLONNE DROITE : récapitulatif -->
+        <aside style="border:1px solid var(--line); padding:24px; background:rgba(255,255,255,.6); position:sticky; top:calc(var(--navH) + 20px);">
+          <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 18px;">Récapitulatif</h3>
+
+          <div id="summaryLines" style="font-size:13.5px; color:var(--muted);"></div>
+
+          <div style="border-top:1px solid var(--line); margin:16px 0; padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:15px;">Total</strong>
+            <strong id="cartTotalDisplay" style="font-size:18px;">—</strong>
           </div>
 
-          <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <strong>Total</strong>
-              <strong id="cartTotal">—</strong>
-            </div>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">L'adresse de livraison sera demandée lors du paiement.</p>
 
-            <!-- ✅ remplace "Confirmer" par Auth -->
-            <button
-              id="btnAuth"
-              class="btn on-light block"
-              style="margin-top:16px;"
-              type="button"
-            >
-              Créer un compte / Se connecter
-            </button>
+          <button id="btnCheckout" class="btn on-light block" type="button">
+            Procéder au paiement
+          </button>
+          <p id="checkoutMsg" style="margin-top:10px; font-size:12.5px; color:var(--muted);"></p>
 
-            <p id="cartMsg" style="margin-top:10px; font-size:12.5px; color:var(--muted);"></p>
+          <div style="margin-top:16px; text-align:center;">
+            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">← Continuer mes achats</a>
           </div>
-
-        </section>
-
-        <!-- DROITE -->
-        <aside style="border:1px solid var(--line); padding:20px; background:rgba(255,255,255,.55);">
-
-          <h3 style="font-family:'SegoCustom'; font-size:20px;">Validation du séjour</h3>
-          <p id="cartMissing" style="margin-top:12px; color:var(--muted);"></p>
-
-          <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:20px;">
-            <strong>Paiement</strong>
-
-            <p style="margin-top:10px; color:var(--muted); font-size:14px;">
-              Choisissez votre méthode :
-            </p>
-
-            <div style="margin-top:10px; display:grid; gap:10px; color:var(--muted); font-size:14px;">
-              <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
-                <input type="radio" name="payMethod" value="card" checked>
-                <div><b style="color:var(--text);">Carte bancaire</b><br><span>Paiement sécurisé (Stripe)</span></div>
-              </label>
-
-              <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
-                <input type="radio" name="payMethod" value="paypal">
-                <div><b style="color:var(--text);">PayPal</b><br><span>Redirection PayPal</span></div>
-              </label>
-
-              <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
-                <input type="radio" name="payMethod" value="installments">
-                <div><b style="color:var(--text);">Plusieurs fois</b><br><span>Selon disponibilité</span></div>
-              </label>
-            </div>
-
-            <button id="btnPay" class="btn on-light block" style="margin-top:16px;" type="button">
-              Procéder au paiement
-            </button>
-
-            <p id="payMsg" style="margin-top:10px; font-size:12.5px; color:var(--muted);"></p>
-          </div>
-
         </aside>
 
       </div>
     </div>
   </main>
 
-  <!-- FOOTER (sur toutes les pages) -->
+  <!-- MODALE CHECKOUT STRIPE -->
+  <div class="modal" id="checkoutModal">
+    <div class="checkout-modal-inner" style="background:#fff; border-radius:12px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,.2); animation:modalPop .25s cubic-bezier(.16,1,.3,1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px 14px;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;">Paiement sécurisé</div>
+          <h3 style="margin:0; font-size:17px;">Finaliser ma commande</h3>
+        </div>
+        <button type="button" id="btnCancelCheckout" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; padding:4px 8px;">✕</button>
+      </div>
+      <div id="checkoutLoading" style="text-align:center; padding:40px 24px; color:var(--muted); font-size:14px;">Chargement du formulaire de paiement…</div>
+      <div id="checkoutError" style="display:none; padding:16px 24px; color:#c00; font-size:13.5px; background:#fff5f5; border-top:1px solid #fcc;"></div>
+      <div id="checkout" style="padding:0 24px 24px;"></div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes modalPop {
+      from { transform:scale(.92); opacity:0; }
+      to   { transform:scale(1);   opacity:1; }
+    }
+    .modal { display:none!important; position:fixed!important; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(6px); z-index:10000; align-items:center; justify-content:center; padding:20px; }
+    .modal.active { display:flex!important; }
+    @media(max-width:720px){
+      #cartLayout { grid-template-columns:1fr!important; }
+    }
+  </style>
+
+  <!-- FOOTER -->
   <footer class="band cream">
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand">
           <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
         </div>
-
         <div class="footer-social">
-                    <a class="icon-btn light" href="https://instagram.com/amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <a class="icon-btn light" href="https://instagram.com/amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
             </svg>
           </a>
-
           <a class="icon-btn light" href="https://www.facebook.com/share/1bLsFzNTCz/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <svg class="icon" viewBox="0 0 24 24" fill="none">
               <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
             </svg>
           </a>
-
           <a class="icon-btn light" href="https://www.tiktok.com/@amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
             <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.5 3v13.1c0 1.4-1.2 2.6-2.6 2.6s-2.6-1.2-2.6-2.6 1.2-2.6 2.6-2.6v-2.6a5.2 5.2 0 1 0 5.2 5.2V7.1a7.3 7.3 0 0 0 3.8 1.1V5.5A4.6 4.6 0 0 1 15 3h-2.5z"/>
             </svg>
           </a>
-
-          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
         </div>
       </div>
-
       <div class="legal">
         <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div> <a href="/faq.html">FAQ</a> · <a href="/mentions-legales.html">Mentions légales</a> ·
-            <a href="/politique-confidentialite.html">Politique de confidentialité</a>
-          </div>
+          <div><a href="/faq.html">FAQ</a> · <a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></div>
         </div>
       </div>
     </div>
   </footer>
 
   <script src="assets/js/main.js"></script>
-  <script type="module" src="assets/js/cart.js"></script>
-  <script type="module" src="assets/js/cartPay.js"></script>
+  <script type="module">
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+    import { getCart, removeFromCart, setQuantity, getCartTotal, getCartCount, initCartBadge, clearCart } from "./assets/js/cart.js";
+
+    // TODO: remplacer par votre clé publique Stripe
+    const STRIPE_PUBLISHABLE_KEY = "pk_live_VOTRE_CLE_PUBLIQUE_STRIPE";
+
+    const cartItemsEl = document.getElementById("cartItems");
+    const summaryLinesEl = document.getElementById("summaryLines");
+    const cartTotalDisplayEl = document.getElementById("cartTotalDisplay");
+    const btnCheckout = document.getElementById("btnCheckout");
+    const checkoutMsg = document.getElementById("checkoutMsg");
+    const checkoutModal = document.getElementById("checkoutModal");
+    const checkoutLoading = document.getElementById("checkoutLoading");
+    const checkoutError = document.getElementById("checkoutError");
+    const checkoutContainer = document.getElementById("checkout");
+    const btnCancelCheckout = document.getElementById("btnCancelCheckout");
+    const crossSellSection = document.getElementById("crossSellSection");
+    const crossSellGrid = document.getElementById("crossSellGrid");
+    const crossSellTitle = document.getElementById("crossSellTitle");
+
+    let stripeInstance = null;
+    let embeddedCheckout = null;
+
+    function renderCart() {
+      const cart = getCart();
+
+      if (!cart.length) {
+        cartItemsEl.innerHTML = `
+          <div class="cart-empty">
+            <svg viewBox="0 0 24 24" fill="none" width="48" height="48" style="margin:0 auto 16px; display:block; opacity:.35;">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <p style="font-size:16px; font-weight:500; margin-bottom:8px;">Votre panier est vide</p>
+            <a href="/boutique.html" class="btn on-light" style="display:inline-block; margin-top:8px;">Découvrir la boutique</a>
+          </div>
+        `;
+        summaryLinesEl.innerHTML = "";
+        cartTotalDisplayEl.textContent = "0,00 €";
+        btnCheckout.style.display = "none";
+        crossSellSection.style.display = "none";
+        return;
+      }
+
+      btnCheckout.style.display = "";
+
+      cartItemsEl.innerHTML = cart.map((item, idx) => {
+        const img = item.image || "/assets/img/placeholder.jpg";
+        const price = (Number(item.price) || 0).toFixed(2);
+        const lineTotal = ((Number(item.price) || 0) * item.quantity).toFixed(2);
+        const isMax = item.quantity >= (item.maxStock ?? 99);
+        return `
+          <div class="cart-item" data-idx="${idx}">
+            <img class="cart-item-img" src="${img}" alt="${item.name}" loading="lazy">
+            <div>
+              <div style="font-weight:600; font-size:14px; color:var(--text);">${item.name}</div>
+              <div style="font-size:12.5px; color:var(--muted); margin-top:2px;">${price} € / unité</div>
+              ${item.type === 'product' && item.deliveryDays ? `<div style="font-size:11.5px; color:var(--muted); margin-top:4px;">📦 Livraison estimée : ${deliveryLabel(item.deliveryDays)}</div>` : ''}
+              <div class="cart-item-qty">
+                <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
+                <span class="cart-qty-val">${item.quantity}</span>
+                <button class="cart-qty-btn" data-action="inc" data-id="${item.id}" data-type="${item.type}" ${isMax ? 'disabled style="opacity:.4;"' : ''}>+</button>
+                ${item.maxStock && item.maxStock < 99 ? `<span style="font-size:11px; color:var(--muted);">(stock : ${item.maxStock})</span>` : ''}
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:600; font-size:14px;">${lineTotal} €</div>
+              <button class="cart-remove-btn" data-id="${item.id}" data-type="${item.type}" title="Retirer" aria-label="Retirer cet article">×</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      summaryLinesEl.innerHTML = cart.map(item =>
+        `<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>${item.name} × ${item.quantity}</span>
+          <span>${((Number(item.price) || 0) * item.quantity).toFixed(2)} €</span>
+        </div>`
+      ).join("") + `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">Calculée à l'étape suivante</span></div>`;
+
+      const total = getCartTotal();
+      cartTotalDisplayEl.textContent = total.toFixed(2).replace(".", ",") + " €";
+
+      loadCrossSell(cart);
+    }
+
+    function deliveryLabel(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + (Number(days) || 7));
+      return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+    }
+
+    async function loadCrossSell(cart) {
+      const hasProducts = cart.some(i => i.type === "product");
+      const hasSejourType = cart.some(i => i.type === "sejour");
+
+      if (hasProducts && !hasSejourType) {
+        crossSellTitle.textContent = "Complétez votre expérience — Nos séjours";
+        crossSellSection.style.display = "";
+        crossSellGrid.innerHTML = `
+          <a class="crosssell-card" href="/index.html#sejours">
+            <div style="background:var(--line); aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="32" height="32" style="opacity:.4;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <div class="crosssell-card-body">
+              <div class="crosssell-card-name">Nos séjours</div>
+              <div class="crosssell-card-price">Retraites bien-être</div>
+            </div>
+          </a>
+          <a class="crosssell-card" href="/index.html#sejours">
+            <div style="background:var(--line); aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#f4ede6,#e8d8cc);">
+              <svg viewBox="0 0 24 24" fill="none" width="32" height="32" style="opacity:.5;"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <div class="crosssell-card-body">
+              <div class="crosssell-card-name">Découvrir</div>
+              <div class="crosssell-card-price">Toutes nos destinations</div>
+            </div>
+          </a>
+        `;
+        return;
+      }
+
+      if (hasSejourType && !hasProducts) {
+        crossSellTitle.textContent = "Préparez votre séjour — Boutique";
+        crossSellSection.style.display = "";
+        try {
+          const { data } = await supabase
+            .from("products")
+            .select("id, name, price, image_urls, image_url")
+            .gt("stock", 0)
+            .limit(4);
+          if (data && data.length) {
+            crossSellGrid.innerHTML = data.map(p => {
+              const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
+              return `
+                <a class="crosssell-card" href="/boutique.html">
+                  <img src="${img}" alt="${p.name}" loading="lazy">
+                  <div class="crosssell-card-body">
+                    <div class="crosssell-card-name">${p.name}</div>
+                    <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
+                  </div>
+                </a>
+              `;
+            }).join("");
+          } else {
+            crossSellSection.style.display = "none";
+          }
+        } catch { crossSellSection.style.display = "none"; }
+        return;
+      }
+
+      crossSellSection.style.display = "none";
+    }
+
+    cartItemsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+
+      if (btn.dataset.action === "inc") {
+        const item = getCart().find(i => i.id === id && i.type === type);
+        if (item) setQuantity(id, type, item.quantity + 1);
+      } else if (btn.dataset.action === "dec") {
+        const item = getCart().find(i => i.id === id && i.type === type);
+        if (item) setQuantity(id, type, item.quantity - 1);
+      } else if (btn.classList.contains("cart-remove-btn")) {
+        removeFromCart(id, type);
+      }
+    });
+
+    btnCancelCheckout?.addEventListener("click", async () => {
+      if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
+      checkoutContainer.innerHTML = "";
+      checkoutModal.classList.remove("active");
+    });
+
+    btnCheckout?.addEventListener("click", async () => {
+      checkoutMsg.textContent = "";
+
+      const cart = getCart();
+      if (!cart.length) {
+        checkoutMsg.textContent = "Votre panier est vide.";
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = `/signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+      }
+
+      checkoutLoading.style.display = "block";
+      checkoutError.style.display = "none";
+      checkoutContainer.innerHTML = "";
+      if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
+      checkoutModal.classList.add("active");
+
+      try {
+        if (!stripeInstance) stripeInstance = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+        const items = cart.map(i => ({
+          id: i.id,
+          type: i.type,
+          name: i.name,
+          price: Number(i.price) || 0,
+          quantity: i.quantity,
+          image: i.image || null,
+        }));
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            items,
+            userId: user.id,
+            userEmail: user.email,
+            return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || "Erreur création paiement");
+
+        checkoutLoading.style.display = "none";
+        embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.client_secret });
+        embeddedCheckout.mount("#checkout");
+      } catch (err) {
+        checkoutLoading.style.display = "none";
+        checkoutError.style.display = "block";
+        checkoutError.textContent = err.message || "Impossible de charger le formulaire de paiement.";
+      }
+    });
+
+    window.addEventListener("cart:updated", renderCart);
+    initCartBadge();
+    renderCart();
+  </script>
 </body>
 </html>

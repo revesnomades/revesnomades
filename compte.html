@@ -1508,7 +1508,13 @@
           product_name,
           amount,
           status,
-          created_at
+          created_at,
+          shipping_name,
+          shipping_line1,
+          shipping_line2,
+          shipping_city,
+          shipping_postal_code,
+          shipping_country
         `)
         .eq("email", user.email)
         .order("created_at", { ascending: false });
@@ -1527,14 +1533,31 @@
       purchasesBox.style.display = "block";
       purchasesList.innerHTML = data.map(item => {
         const title = item.product_name || "Produit";
-        const amount = item.amount ? `${item.amount} €` : "—";
+        const amount = item.amount ? `${Number(item.amount).toFixed(2)} €` : "—";
         const status = item.status === "paid" ? "Payé" : (item.status || "—");
         const date = item.created_at
           ? new Date(item.created_at).toLocaleDateString("fr-FR")
           : "";
 
+        // Adresse de livraison
+        let addressHtml = "";
+        if (item.shipping_line1) {
+          const parts = [item.shipping_line1, item.shipping_line2].filter(Boolean).join(", ");
+          const cityLine = [item.shipping_postal_code, item.shipping_city, item.shipping_country].filter(Boolean).join(" ");
+          addressHtml = `<div style="font-size:12px; color:var(--muted); margin-top:4px;">📦 ${parts}, ${cityLine}</div>`;
+        }
+
+        // Date de livraison estimée (7 jours après achat)
+        let deliveryHtml = "";
+        if (item.created_at && item.shipping_line1) {
+          const d = new Date(item.created_at);
+          d.setDate(d.getDate() + 7);
+          const deliveryDate = d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+          deliveryHtml = `<div style="font-size:12px; color:var(--muted); margin-top:2px;">🚚 Livraison estimée : ${deliveryDate}</div>`;
+        }
+
         return `
-          <div style="padding:12px 0; border-bottom:1px solid var(--line);">
+          <div style="padding:14px 0; border-bottom:1px solid var(--line);">
             <div style="font-weight:500; color:var(--text);">${title}</div>
             <div style="font-size:13px; color:var(--muted); margin-top:4px;">
               ${amount} · ${status}
@@ -1542,6 +1565,8 @@
             <div style="font-size:12px; color:var(--muted); margin-top:4px;">
               Achat du ${date}
             </div>
+            ${addressHtml}
+            ${deliveryHtml}
           </div>
         `;
       }).join("");
