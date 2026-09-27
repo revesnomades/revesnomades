@@ -253,6 +253,14 @@
         <a href="/faq.html">FAQ</a>
         <a href="/index.html#contact" data-scroll>Contact</a>
 
+        <a class="icon-btn cart-icon-btn cart-nav-link" href="/panier.html" aria-label="Panier (0 article)">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-badge"></span>
+        </a>
+
         <a class="icon-btn" href="/compte.html" aria-label="Compte">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
             <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
@@ -273,6 +281,7 @@
           <a href="/index.html#apropos">À propos</a>
           <a href="/faq.html">FAQ</a>
           <a href="/index.html#contact">Contact</a>
+          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
           <a href="/compte.html">Compte</a>
         </nav>
       </div>
@@ -393,6 +402,7 @@
   <script src="assets/js/main.js?v=2.6"></script>
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+    import { addToCart, initCartBadge } from "./assets/js/cart.js";
 
     // ─── Clé publique Stripe ────────────────────────────────────────────────
     // TODO : remplacer par votre clé publique Stripe (commence par pk_live_ ou pk_test_)
@@ -538,7 +548,7 @@
               <div style="margin-top:12px;">
                 ${isSoldOut
                   ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
-                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openCheckout({id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0}})">Acheter</button>`
+                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:7})">Ajouter au panier</button>`
                 }
               </div>
             </div>
@@ -554,7 +564,10 @@
             ${p.description.length > 70 ? `<button type="button" class="btn-toggle-desc" style="background:none; border:none; padding:0; margin-top:2px; margin-bottom:6px; font-size:11.5px; font-weight:600; color:var(--text); text-decoration:underline; cursor:pointer;" onclick="window.toggleProductDesc('${p.id}', this)">Voir plus +</button>` : ''}
           ` : ''}
           ${p.delivery_info ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
-          ${isSoldOut ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>` : ''}
+          ${isSoldOut
+            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>`
+            : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:7})">+ Ajouter au panier</button>`
+          }
         </div>
         `;
       }).join('');
@@ -658,6 +671,22 @@
       }, 2500);
     });
 
+    window.addToCart = (item) => {
+      addToCart(item);
+      let toast = document.getElementById("cartToast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "cartToast";
+        toast.className = "cart-toast";
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `✓ <strong>${item.name}</strong> ajouté au panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`;
+      toast.classList.add("show");
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
+    };
+
+    initCartBadge();
     loadCategories();
     loadShop();
   </script>

@@ -47,6 +47,17 @@ serve(async (req) => {
         lastName = parts.slice(1).join(" ");
       }
 
+      // Shipping address
+      const shipping = session.shipping_details;
+      const shippingAddress = shipping ? {
+        shipping_name: shipping.name || customerName,
+        shipping_line1: shipping.address?.line1 || "",
+        shipping_line2: shipping.address?.line2 || "",
+        shipping_city: shipping.address?.city || "",
+        shipping_postal_code: shipping.address?.postal_code || "",
+        shipping_country: shipping.address?.country || "",
+      } : {};
+
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       const supabase = supabaseUrl && serviceRoleKey
@@ -54,11 +65,54 @@ serve(async (req) => {
         : null;
 
       if (customerEmail && supabase) {
-        if (session.metadata?.type === "product") {
-          const productName = session.metadata?.product_name || "Produit Inconnu";
+        const metaType = session.metadata?.type || "product";
+
+        if (metaType === "cart") {
+          // Nouveau format panier multi-articles
+          let cartItems: Array<{ id: string; type: string; name: string; qty: number }> = [];
+          try {
+            cartItems = JSON.parse(session.metadata?.cart_items || "[]");
+          } catch { cartItems = []; }
+
+          const productNames = cartItems.map(i => `${i.name} ×${i.qty}`).join(", ");
+
+          // Enregistrer l'achat global
+          const { error: purchaseError } = await supabase.from("purchases").insert({
+            email: customerEmail,
+            firstname: firstName,
+            lastname: lastName,
+            product_name: productNames || "Commande",
+            amount,
+            status: "paid",
+            ...shippingAddress,
+          });
+          if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
+
+          // Décrémenter le stock pour chaque produit
+          for (const item of cartItems) {
+            if (item.type === "product" && item.id) {
+              const { data: prod } = await supabase
+                .from("products")
+                .select("stock")
+                .eq("id", item.id)
+                .single();
+
+              if (prod && prod.stock !== null && prod.stock > 0) {
+                const newStock = Math.max(0, prod.stock - item.qty);
+                await supabase
+                  .from("products")
+                  .update({ stock: newStock })
+                  .eq("id", item.id);
+                console.log(`Stock produit ${item.id} : ${prod.stock} → ${newStock}`);
+              }
+            }
+          }
+
+        } else if (metaType === "product") {
+          // Ancien format produit unique (rétrocompatibilité)
+          const productName = session.metadata?.product_name || "Produit";
           const productId = session.metadata?.product_id;
 
-          // 1. Enregistrer l'achat
           const { error: purchaseError } = await supabase.from("purchases").insert({
             email: customerEmail,
             firstname: firstName,
@@ -66,26 +120,22 @@ serve(async (req) => {
             product_name: productName,
             amount,
             status: "paid",
+            ...shippingAddress,
           });
           if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
 
-          // 2. Décrémenter le stock
           if (productId) {
             const { data: prod } = await supabase
               .from("products")
               .select("stock")
               .eq("id", productId)
               .single();
-
             if (prod && prod.stock !== null && prod.stock > 0) {
               const newStock = prod.stock - 1;
-              await supabase
-                .from("products")
-                .update({ stock: newStock })
-                .eq("id", productId);
-              console.log(`Stock produit ${productId} : ${prod.stock} → ${newStock}`);
+              await supabase.from("products").update({ stock: newStock }).eq("id", productId);
             }
           }
+
         } else {
           // Réservation séjour
           const eventName = session.metadata?.event_name || "Séjour Âmes Nomades";
@@ -100,7 +150,7 @@ serve(async (req) => {
           if (error) console.error("Erreur insertion séjour:", error);
         }
 
-        // 3. Ajouter le contact sur Brevo (liste 13)
+        // Ajouter le contact sur Brevo (liste 13)
         const brevoApiKey = Deno.env.get("BREVO_API_KEY");
         if (brevoApiKey) {
           const payloads = [
@@ -118,10 +168,14 @@ serve(async (req) => {
             if (res.ok) { console.log(`Contact Brevo ajouté : ${customerEmail}`); break; }
           }
 
-          // 4. Email d'alerte admin
-          const subject = session.metadata?.type === "product"
-            ? `🛍️ Nouvel achat boutique — ${firstName} ${lastName} (${amount} €)`
-            : `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`;
+          // Email d'alerte admin
+          const subject = metaType === "sejour"
+            ? `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`
+            : `🛍️ Nouvel achat boutique — ${firstName} ${lastName} (${amount} €)`;
+
+          const shippingHtml = shipping
+            ? `<li><strong>Adresse de livraison :</strong> ${shippingAddress.shipping_line1}, ${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}, ${shippingAddress.shipping_country}</li>`
+            : "";
 
           await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
@@ -136,8 +190,9 @@ serve(async (req) => {
                   <ul>
                     <li><strong>Nom :</strong> ${customerName}</li>
                     <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
-                    <li><strong>Produit :</strong> ${session.metadata?.product_name || session.metadata?.event_name || "—"}</li>
+                    <li><strong>Articles :</strong> ${session.metadata?.cart_items ? JSON.parse(session.metadata.cart_items).map((i: { name: string; qty: number }) => `${i.name} ×${i.qty}`).join(", ") : (session.metadata?.product_name || session.metadata?.event_name || "—")}</li>
                     <li><strong>Montant :</strong> ${amount} €</li>
+                    ${shippingHtml}
                   </ul>
                 </div>
               `,
