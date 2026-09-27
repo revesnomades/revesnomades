@@ -2244,3 +2244,45 @@ footer.band.cream{
   border: 0;
 }
 
+
+/* ── Social OAuth buttons ─────────────────────────────── */
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.7);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+  letter-spacing: .01em;
+}
+.btn-social:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.btn-social svg { flex-shrink: 0; }
+
+.social-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin: 2px 0;
+}
+.social-divider::before,
+.social-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}

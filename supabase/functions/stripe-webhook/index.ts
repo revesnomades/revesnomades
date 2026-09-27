@@ -34,248 +34,113 @@ serve(async (req) => {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const customerEmail = session.customer_details?.email || session.customer_email;
+
+      const customerEmail = session.customer_details?.email;
       const customerName = session.customer_details?.name || "";
-      const amountTotal = session.amount_total ? session.amount_total / 100 : 0;
-      const userId = session.metadata?.user_id || null;
-      const stayDate = session.metadata?.stay_date || null;
-      
-      let items: any[] = [];
-      try {
-        if (session.metadata?.items_json) {
-          items = JSON.parse(session.metadata.items_json);
-        }
-      } catch (e) {
-        console.error("Erreur parsing items_json:", e);
-      }
+      const amount = session.amount_total ? session.amount_total / 100 : 0;
 
-      // Si items_json est absent (ex: lien de paiement direct Stripe), récupérer les line_items auprès de Stripe API
-      if (!items || !items.length) {
-        try {
-          const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-          if (lineItems && lineItems.data && lineItems.data.length > 0) {
-            items = lineItems.data.map((li: any) => ({
-              id: null,
-              title: li.description || session.description || "Séjour",
-              price: li.amount_total ? li.amount_total / 100 : amountTotal,
-              quantity: li.quantity || 1,
-              type: "stay"
-            }));
-          }
-        } catch (err) {
-          console.error("Erreur récupération line_items de Stripe:", err);
-        }
-      }
-
-      // Fallback de sécurité si items toujours vide
-      if (!items || !items.length) {
-        items = [{
-          id: null,
-          title: session.description || "Séjour",
-          price: amountTotal,
-          quantity: 1,
-          type: "stay"
-        }];
+      let firstName = "";
+      let lastName = "";
+      if (customerName) {
+        const parts = customerName.split(" ");
+        firstName = parts[0];
+        lastName = parts.slice(1).join(" ");
       }
 
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const supabase = supabaseUrl && serviceRoleKey
+        ? createClient(supabaseUrl, serviceRoleKey)
+        : null;
 
-      if (supabaseUrl && serviceRoleKey) {
-        const supabase = createClient(supabaseUrl, serviceRoleKey);
+      if (customerEmail && supabase) {
+        if (session.metadata?.type === "product") {
+          const productName = session.metadata?.product_name || "Produit Inconnu";
+          const productId = session.metadata?.product_id;
 
-        // 1. Inscrire la commande principale dans 'orders'
-        const { data: orderData, error: orderErr } = await supabase
-          .from("orders")
-          .insert({
-            user_id: userId || null,
-            customer_email: customerEmail,
-            customer_name: customerName,
-            stripe_session_id: session.id,
-            stripe_customer_id: typeof session.customer === "string" ? session.customer : null,
-            total_amount: amountTotal,
+          // 1. Enregistrer l'achat
+          const { error: purchaseError } = await supabase.from("purchases").insert({
+            email: customerEmail,
+            firstname: firstName,
+            lastname: lastName,
+            product_name: productName,
+            amount,
             status: "paid",
-          })
-          .select()
-          .single();
-
-        if (orderErr) {
-          console.error("Erreur insertion order:", orderErr);
-        }
-
-        const orderId = orderData?.id || null;
-
-        // Récupérer la liste des séjours pour faire un matching automatique du stay_id si manquant
-        let allDbStays: any[] = [];
-        try {
-          const { data: dbStays } = await supabase.from("stays").select("id, title");
-          if (dbStays) allDbStays = dbStays;
-        } catch (e) {
-          console.warn("Impossible de pré-charger les séjours pour matching:", e);
-        }
-
-        // 2. Traiter chaque article (Séjour vs Produit Boutique)
-        let isStayOrder = false;
-        let stayItem: any = null;
-
-        for (const item of items) {
-          if (item.type === "stay" || !item.type) {
-            isStayOrder = true;
-            stayItem = item;
-
-            // Déterminer le stay_id par correspondance de titre si non fourni
-            let resolvedStayId = item.id && item.id.length === 36 ? item.id : null;
-            if (!resolvedStayId && item.title && allDbStays.length > 0) {
-              const cleanStr = (s: string) => s.toLowerCase().replace(/&/g, "").replace(/\band\b/g, "").replace(/[^a-z0-9]/g, "");
-              const targetTitle = cleanStr(item.title);
-              const matched = allDbStays.find(s => {
-                const sTitle = cleanStr(s.title);
-                return sTitle && (targetTitle.includes(sTitle) || sTitle.includes(targetTitle));
-              });
-              if (matched) resolvedStayId = matched.id;
-            }
-
-            const bookingAmount = item.price * (item.quantity || 1);
-
-            // Insérer dans 'bookings'
-            const { error: bookingErr } = await supabase
-              .from("bookings")
-              .insert({
-                user_id: userId || null,
-                stay_id: resolvedStayId,
-                stay_title: item.title,
-                customer_email: customerEmail,
-                customer_name: customerName,
-                booking_date: stayDate || new Date().toISOString().split("T")[0],
-                amount_paid: bookingAmount,
-                amount: bookingAmount,
-                price_label: item.title,
-                status: "confirmed",
-                stripe_session_id: session.id,
-              });
-
-            if (bookingErr) console.error("Erreur insertion booking:", bookingErr);
-          } else {
-            // Produit boutique -> 'order_items'
-            if (orderId) {
-              const { error: itemErr } = await supabase
-                .from("order_items")
-                .insert({
-                  order_id: orderId,
-                  product_id: item.id && item.id.length === 36 ? item.id : null,
-                  product_name: item.title,
-                  unit_price: item.price,
-                  quantity: item.quantity || 1,
-                });
-              if (itemErr) console.error("Erreur insertion order_item:", itemErr);
-            }
-          }
-        }
-
-        // 3. Ajouter / Mettre à jour le contact dans Brevo
-        const brevoApiKey = Deno.env.get("BREVO_API_KEY");
-        if (brevoApiKey && customerEmail) {
-          let firstName = customerName.split(" ")[0] || "";
-          let lastName = customerName.split(" ").slice(1).join(" ") || "";
-
-          // Ajout Contact Liste 13 (Acheteurs)
-          await fetch("https://api.brevo.com/v3/contacts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
-            body: JSON.stringify({
-              email: customerEmail,
-              listIds: [13],
-              updateEnabled: true,
-              attributes: { PRENOM: firstName, NOM: lastName }
-            }),
           });
+          if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
 
-          // 4. Envoi de l'Email de Confirmation Transactionnel via Brevo API
-          if (isStayOrder && stayItem) {
-            // Nettoyage du titre pour retirer les labels génériques type "(tarif)"
-            let cleanStayTitle = (stayItem.title || "Séjour 1 jour")
-              .replace(/\s*\((tarif|Tarif|option|Option|default|standard)\)\s*/gi, "")
-              .trim();
-
-            // Email Séjour 1 jour (Personnalisé depuis template Supabase)
-            let emailSubject = `Confirmation de votre séjour : ${cleanStayTitle}`;
-            let emailBody = `
-              <p>Bonjour ${firstName || customerEmail},</p>
-              <p>Nous avons bien confirmé votre réservation pour le séjour <strong>${cleanStayTitle}</strong>.</p>
-              <p><strong>Date retenue :</strong> ${stayDate || "À déterminer ensemble"}</p>
-              <p><strong>Montant réglé :</strong> ${stayItem.price} €</p>
-              <p>Nous avons hâte de vous accueillir !</p>
-              <p>L'équipe Âmes Nomades</p>
-            `;
-
-            // Recherche d'un template sur mesure dans 'email_templates'
-            const { data: templateData } = await supabase
-              .from("email_templates")
-              .select("*")
-              .eq("template_key", "stay_confirmation_single_day")
+          // 2. Décrémenter le stock
+          if (productId) {
+            const { data: prod } = await supabase
+              .from("products")
+              .select("stock")
+              .eq("id", productId)
               .single();
 
-            if (templateData && templateData.content) {
-              emailSubject = (templateData.subject || emailSubject).replaceAll("{{params.TITRE_SEJOUR}}", cleanStayTitle);
-              emailBody = templateData.content
-                .replaceAll("{{params.PRENOM}}", firstName || customerEmail)
-                .replaceAll("{{params.NOM}}", lastName)
-                .replaceAll("{{params.TITRE_SEJOUR}}", cleanStayTitle)
-                .replaceAll("{{params.DATE_SEJOUR}}", stayDate || "À convenir")
-                .replaceAll("{{params.PRIX}}", `${stayItem.price} €`);
+            if (prod && prod.stock !== null && prod.stock > 0) {
+              const newStock = prod.stock - 1;
+              await supabase
+                .from("products")
+                .update({ stock: newStock })
+                .eq("id", productId);
+              console.log(`Stock produit ${productId} : ${prod.stock} → ${newStock}`);
             }
+          }
+        } else {
+          // Réservation séjour
+          const eventName = session.metadata?.event_name || "Séjour Âmes Nomades";
+          const { error } = await supabase.from("event_registrations").insert({
+            email: customerEmail,
+            firstname: firstName,
+            lastname: lastName,
+            event_name: eventName,
+            amount,
+            status: "paid",
+          });
+          if (error) console.error("Erreur insertion séjour:", error);
+        }
 
-            await fetch("https://api.brevo.com/v3/smtp/email", {
+        // 3. Ajouter le contact sur Brevo (liste 13)
+        const brevoApiKey = Deno.env.get("BREVO_API_KEY");
+        if (brevoApiKey) {
+          const payloads = [
+            { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { PRENOM: firstName, NOM: lastName } },
+            { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { FIRSTNAME: firstName, LASTNAME: lastName } },
+            { email: customerEmail, listIds: [13], updateEnabled: true },
+          ];
+
+          for (const payload of payloads) {
+            const res = await fetch("https://api.brevo.com/v3/contacts", {
               method: "POST",
               headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
-              body: JSON.stringify({
-                sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
-                replyTo: { email: "contact@amesnomades.com", name: "Âmes Nomades" },
-                to: [{ email: customerEmail, name: customerName }],
-                subject: emailSubject,
-                htmlContent: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6;">${emailBody}<hr style="border:none; border-top:1px solid #eee; margin:24px 0 16px 0;"><p style="font-size:12px; color:#666;">Une question ? Contactez-nous à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a></p></div>`,
-              }),
+              body: JSON.stringify(payload),
             });
-          } else {
-            // Email Produits Boutique
-            const itemsListHtml = items
-              .map((i: any) => `<li><strong>${i.title}</strong> (x${i.quantity || 1}) - ${i.price} €</li>`)
-              .join("");
-
-            await fetch("https://api.brevo.com/v3/smtp/email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
-              body: JSON.stringify({
-                sender: { name: "Boutique Âmes Nomades", email: "contact@amesnomades.com" },
-                replyTo: { email: "contact@amesnomades.com", name: "Âmes Nomades" },
-                to: [{ email: customerEmail, name: customerName }],
-                subject: "Confirmation de votre commande Âmes Nomades",
-                htmlContent: `
-                  <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6;">
-                    <h2>Merci pour votre commande !</h2>
-                    <p>Bonjour ${firstName || customerEmail},</p>
-                    <p>Nous avons bien reçu votre commande et préparons vos articles avec soin.</p>
-                    <h3>Récapitulatif :</h3>
-                    <ul>${itemsListHtml}</ul>
-                    <p><strong>Total payé :</strong> ${amountTotal} €</p>
-                    <p>À très bientôt,<br>L'équipe Âmes Nomades</p>
-                    <hr style="border:none; border-top:1px solid #eee; margin:24px 0 16px 0;">
-                    <p style="font-size:12px; color:#666;">Une question concernant votre commande ? Contactez-nous à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a></p>
-                  </div>
-                `,
-              }),
-            });
+            if (res.ok) { console.log(`Contact Brevo ajouté : ${customerEmail}`); break; }
           }
 
-          // 5. Notification Admin
+          // 4. Email d'alerte admin
+          const subject = session.metadata?.type === "product"
+            ? `🛍️ Nouvel achat boutique — ${firstName} ${lastName} (${amount} €)`
+            : `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`;
+
           await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
             headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
             body: JSON.stringify({
-              sender: { name: "Système Âmes Nomades", email: "contact@amesnomades.com" },
+              sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
               to: [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
-              subject: `🎉 Nouvelle vente (${amountTotal} €) par ${customerName || customerEmail}`,
-              htmlContent: `<p>Une nouvelle commande de ${amountTotal} € a été payée avec succès par ${customerEmail}.</p>`,
+              subject,
+              htmlContent: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px;">
+                  <h2 style="color: #2e7d32;">Nouveau paiement validé !</h2>
+                  <ul>
+                    <li><strong>Nom :</strong> ${customerName}</li>
+                    <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
+                    <li><strong>Produit :</strong> ${session.metadata?.product_name || session.metadata?.event_name || "—"}</li>
+                    <li><strong>Montant :</strong> ${amount} €</li>
+                  </ul>
+                </div>
+              `,
             }),
           });
         }

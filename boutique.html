@@ -170,12 +170,26 @@
       right: 12px;
       background: #c00;
       color: #fff;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 2px;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
       z-index: 10;
+      max-width: 140px;
+      text-align: center;
+      line-height: 1.3;
+    }
+    /* Modale checkout Stripe */
+    .checkout-modal-inner {
+      background: var(--white, #fff);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     /* Modale Restock Pop-up */
     .modal {
@@ -207,6 +221,8 @@
       to { transform: scale(1); opacity: 1; }
     }
   </style>
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js" defer></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
@@ -299,6 +315,22 @@
     </div>
   </main>
 
+  <!-- MODALE CHECKOUT STRIPE -->
+  <div class="modal" id="checkoutModal">
+    <div class="checkout-modal-inner">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px 14px;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:4px;">Paiement sécurisé</div>
+          <h3 style="margin:0; font-size:17px;" id="checkoutProductName"></h3>
+        </div>
+        <button type="button" id="btnCancelCheckout" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; padding:4px 8px;">✕</button>
+      </div>
+      <div id="checkoutLoading" style="text-align:center; padding:40px 24px; color:var(--muted); font-size:14px;">Chargement du formulaire de paiement…</div>
+      <div id="checkoutError" style="display:none; padding:16px 24px; color:#c00; font-size:13.5px; background:#fff5f5; border-top:1px solid #fcc;"></div>
+      <div id="checkout" style="padding:0 24px 24px;"></div>
+    </div>
+  </div>
+
   <!-- MODALE ALERTE RESTOCK -->
   <div class="modal" id="restockModal">
     <div class="modal-content">
@@ -360,7 +392,67 @@
 
   <script src="assets/js/main.js?v=2.6"></script>
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+
+    // ─── Clé publique Stripe ────────────────────────────────────────────────
+    // TODO : remplacer par votre clé publique Stripe (commence par pk_live_ ou pk_test_)
+    const STRIPE_PUBLISHABLE_KEY = "pk_live_VOTRE_CLE_PUBLIQUE_STRIPE";
+    // ────────────────────────────────────────────────────────────────────────
+
+    const checkoutModal = document.getElementById("checkoutModal");
+    const btnCancelCheckout = document.getElementById("btnCancelCheckout");
+    const checkoutContainer = document.getElementById("checkout");
+    const checkoutLoading = document.getElementById("checkoutLoading");
+    const checkoutError = document.getElementById("checkoutError");
+    const checkoutProductName = document.getElementById("checkoutProductName");
+
+    let stripeInstance = null;
+    let embeddedCheckout = null;
+
+    btnCancelCheckout?.addEventListener("click", async () => {
+      if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
+      checkoutContainer.innerHTML = "";
+      checkoutModal.classList.remove("active");
+    });
+
+    window.openCheckout = async (product) => {
+      if (window.MetaPixel) window.MetaPixel.trackAddToCart(product.name, product.id, product.price);
+
+      checkoutProductName.textContent = product.name;
+      checkoutLoading.style.display = "block";
+      checkoutError.style.display = "none";
+      checkoutContainer.innerHTML = "";
+      if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
+      checkoutModal.classList.add("active");
+
+      try {
+        if (!stripeInstance) stripeInstance = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            product_id: product.id,
+            return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=product`,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || "Erreur création paiement");
+
+        checkoutLoading.style.display = "none";
+        embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.client_secret });
+        embeddedCheckout.mount("#checkout");
+      } catch (err) {
+        checkoutLoading.style.display = "none";
+        checkoutError.style.display = "block";
+        checkoutError.textContent = err.message || "Impossible de charger le formulaire de paiement.";
+      }
+    };
 
     const shopGrid = document.getElementById("publicShopGrid");
     const filterCategory = document.getElementById("filterCategory");
@@ -434,7 +526,7 @@
         return `
         <div class="shop-card">
           <div class="shop-image-wrapper" style="background-image:url('${imgSrc}');">
-            ${isSoldOut ? `<div class="sold-out-badge">SOLD OUT</div>` : ''}
+            ${isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
             <div class="shop-image-overlay"></div>
 
             <div class="shop-image-hover">
@@ -446,7 +538,7 @@
               <div style="margin-top:12px;">
                 ${isSoldOut
                   ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
-                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; border:none; background:rgba(255,255,255,0.15); color:#fff;" onclick="window.buyProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price || 0}, '${p.stripe_url || ''}')">Acheter</button>`
+                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openCheckout({id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0}})">Acheter</button>`
                 }
               </div>
             </div>

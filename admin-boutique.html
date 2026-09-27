@@ -169,10 +169,6 @@
           <button type="button" class="btn tiny on-light" id="btnAddImageField">+ Ajouter une photo</button>
         </div>
 
-        <div>
-          <label class="muted-small" style="display:block; margin-bottom:6px;">Lien Stripe (Lien de paiement)</label>
-          <input id="productStripeUrl" class="input" placeholder="https://buy.stripe.com/...">
-        </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
           <button type="button" class="btn" id="btnCancel" style="background:transparent; border:1px solid var(--line);">Annuler</button>
@@ -183,7 +179,7 @@
   </div>
 
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
 
     const adminStatus = document.getElementById("adminStatus");
     const productsList = document.getElementById("productsList");
@@ -201,7 +197,7 @@
     const fCategory = document.getElementById("productCategory");
     const fStock = document.getElementById("productStock");
     const fDelivery = document.getElementById("productDelivery");
-    const fStripe = document.getElementById("productStripeUrl");
+
     const imagesContainer = document.getElementById("imagesContainer");
     const btnAddImageField = document.getElementById("btnAddImageField");
 
@@ -291,7 +287,7 @@
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
-        const stockLabel = p.stock === 0 ? " · <strong style='color:#c00;'>SOLD OUT</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
+        const stockLabel = p.stock === 0 ? " · <strong style='color:#c00;'>Victime de son succès</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         return `
         <div class="product-card">
@@ -483,8 +479,6 @@
       fCategory.value = product.category_id || "";
       fStock.value = product.stock != null ? product.stock : "";
       fDelivery.value = product.delivery_info || "";
-      fStripe.value = product.stripe_url || "";
-      
       const imgs = product.image_urls && product.image_urls.length ? product.image_urls : (product.image_url ? [product.image_url] : ['']);
       renderImageFields(imgs);
 
@@ -546,16 +540,34 @@
         delivery_info: fDelivery.value.trim() || null,
         image_urls: urls.length ? urls : null,
         image_url: urls[0] || null,
-        stripe_url: fStripe.value.trim() || null
       };
 
+      // Check if stock is being restored from 0
+      let wasOutOfStock = false;
+      const editingId = fId.value;
+      if (editingId && payload.stock !== null && payload.stock > 0) {
+        const { data: existing } = await supabase.from("products").select("stock").eq("id", editingId).single();
+        if (existing && existing.stock === 0) wasOutOfStock = true;
+      }
+
       let resError = null;
-      if (fId.value) {
-        const { error } = await supabase.from("products").update(payload).eq("id", fId.value);
+      if (editingId) {
+        const { error } = await supabase.from("products").update(payload).eq("id", editingId);
         resError = error;
       } else {
         const { error } = await supabase.from("products").insert([payload]);
         resError = error;
+      }
+
+      // Trigger restock alerts if stock was restored
+      if (!resError && wasOutOfStock && editingId) {
+        try {
+          await fetch(`${SUPABASE_URL}/functions/v1/send-restock-alerts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+            body: JSON.stringify({ product_id: editingId }),
+          });
+        } catch(e) { console.error("Erreur envoi alertes restock:", e); }
       }
       
       if (resError) {

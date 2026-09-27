@@ -1,15 +1,11 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.4.0?target=deno";
-
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2022-11-15",
-  httpClient: Stripe.createFetchHttpClient(),
-});
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
 };
 
 serve(async (req) => {
@@ -18,79 +14,80 @@ serve(async (req) => {
   }
 
   try {
-    const { items, userId, userEmail, stayDate, returnUrl, cancelUrl } = await req.json();
+    const { product_id, return_url } = await req.json();
 
-    if (!items || !items.length) {
-      return new Response(JSON.stringify({ error: "Aucun article fourni" }), {
+    if (!product_id || !return_url) {
+      return new Response(JSON.stringify({ error: "product_id et return_url requis" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Line items dynamiques pour Stripe Checkout
-    const line_items = items.map((item: any) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.title,
-          description: item.description || (item.type === "stay" ? `Séjour 1 jour (${stayDate || "date à définir"})` : "Article Boutique"),
-          images: item.image ? [item.image] : [],
-        },
-        unit_amount: Math.round(item.price * 100), // En centimes
-      },
-      quantity: item.quantity || 1,
-    }));
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
-    // Recherche ou création du client Stripe via l'email
-    let customerId: string | undefined;
-    if (userEmail) {
-      const existingCustomers = await stripe.customers.list({ email: userEmail, limit: 1 });
-      if (existingCustomers.data.length > 0) {
-        customerId = existingCustomers.data[0].id;
-      } else {
-        const newCustomer = await stripe.customers.create({
-          email: userEmail,
-          metadata: { supabase_user_id: userId || "" },
-        });
-        customerId = newCustomer.id;
-      }
+    const { data: product, error } = await supabase
+      .from("products")
+      .select("id, name, price, stock, image_urls, image_url")
+      .eq("id", product_id)
+      .single();
+
+    if (error || !product) {
+      return new Response(JSON.stringify({ error: "Produit introuvable" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    let origin = "https://amesnomades.com";
-    if (returnUrl) {
-      try {
-        origin = new URL(returnUrl).origin;
-      } catch (e) {
-        origin = "https://amesnomades.com";
-      }
+    if (product.stock === 0) {
+      return new Response(JSON.stringify({ error: "Ce produit est victime de son succès — plus de stock disponible." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const cancelDestination = cancelUrl || returnUrl || `${origin}/index.html`;
-    const successDestination = `${origin}/merci.html?session_id={CHECKOUT_SESSION_ID}`;
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+      apiVersion: "2022-11-15",
+      httpClient: Stripe.createFetchHttpClient(),
+    });
+
+    const imgUrl = (product.image_urls && product.image_urls[0]) || product.image_url;
 
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : userEmail,
+      ui_mode: "embedded",
       payment_method_types: ["card"],
-      line_items: line_items,
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: product.name,
+              ...(imgUrl ? { images: [imgUrl] } : {}),
+            },
+            unit_amount: Math.round(product.price * 100),
+          },
+          quantity: 1,
+        },
+      ],
       mode: "payment",
-      success_url: successDestination,
-      cancel_url: cancelDestination,
+      return_url,
       metadata: {
-        user_id: userId || "",
-        stay_date: stayDate || "",
-        items_json: JSON.stringify(items.map((i: any) => ({ id: i.id, title: i.title, price: i.price, quantity: i.quantity, type: i.type }))),
+        type: "product",
+        product_id: product.id,
+        product_name: product.name,
       },
     });
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ client_secret: session.client_secret }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : "Erreur serveur";
-    console.error("Checkout Error:", errorMsg);
-    return new Response(JSON.stringify({ error: errorMsg }), {
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
+    console.error("create-checkout-session error:", msg);
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
