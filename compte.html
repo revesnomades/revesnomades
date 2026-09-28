@@ -1766,7 +1766,7 @@
           const d = dateMap.get(stay.id);
           const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
           const promo = getStayPromoBadge(stay.id);
-          const promoBadgeBar = promo ? `<div style="display:flex; justify-content:flex-end; padding:5px 6px 2px;"><span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px;">${promo.badge_text}</span></div>` : '';
+          const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; flex-shrink:0; align-self:center;">${promo.badge_text}</span>` : '';
           return `
             <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
               <div class="stay-card-media" style="background-image:url('${img}'); background-position:center; position:relative;">
@@ -1776,9 +1776,11 @@
                   ${dateStr ? `<div class="stay-card-line">${dateStr}</div>` : ""}
                 </div>
               </div>
-              ${promoBadgeBar}
               <div class="stay-card-body">
-                <div class="stay-card-title">${stay.title || "Séjour"}</div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <div class="stay-card-title" style="margin:0;">${stay.title || "Séjour"}</div>
+                  ${promoBadge}
+                </div>
                 <div class="stay-card-loc">${stay.location || ""}</div>
                 ${dateStr ? `<div class="stay-card-date">${dateStr}</div>` : ""}
               </div>
