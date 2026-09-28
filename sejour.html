@@ -384,6 +384,21 @@
     initCartBadge();
 
     let activePromos = [];
+    let currentStayPromo = null;
+
+    function computeDiscountedPrice(unitPrice) {
+      if (!currentStayPromo || !unitPrice) return { finalPrice: unitPrice, saved: 0 };
+      const p = currentStayPromo;
+      const isEuro = p.value_unit === 'euro';
+      let saved = 0;
+      if (p.type === 'percent' || p.type === 'early_bird') {
+        saved = isEuro ? Math.min(Number(p.value), unitPrice) : unitPrice * Number(p.value) / 100;
+      } else if (p.type === 'fixed') {
+        saved = Math.min(Number(p.value), unitPrice);
+      }
+      return { finalPrice: Math.max(0, unitPrice - saved), saved };
+    }
+
     async function loadPromos() {
       const now = new Date().toISOString();
       const { data } = await supabase.from("promotions").select("*")
@@ -395,6 +410,15 @@
     function applySejourPromos(stayId) {
       const bannerEl = document.getElementById("sejourPromoBanner");
       const badgeEl = document.getElementById("stayHeroBadge");
+      // Promo applicable à ce séjour (pour le bouton réserver)
+      currentStayPromo = activePromos.find(pr => {
+        if (!pr.active) return false;
+        if (pr.type === 'promo_code') return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+        return false;
+      }) || null;
+
       if (bannerEl) {
         const banner = activePromos.find(pr => {
           if (!pr.display_banner || !pr.banner_text) return false;
@@ -739,7 +763,6 @@
           const url = selected.getAttribute("data-url") || defaultUrl || "#stripe-checkout";
           const label = selected.getAttribute("data-label") || "";
           const price = selected.getAttribute("data-price") || "";
-          const priceDisplay = price ? `${price} €` : "";
           bookingBtnEl.setAttribute("data-price", price);
           bookingBtnEl.setAttribute("data-label", label);
 
@@ -748,7 +771,16 @@
           } else {
             bookingBtnEl.href = "#";
           }
-          bookingBtnEl.textContent = `Réserver — ${label}${priceDisplay ? ' ' + priceDisplay : ''}`;
+          if (price) {
+            const { finalPrice, saved } = computeDiscountedPrice(Number(price));
+            if (saved > 0) {
+              bookingBtnEl.textContent = `Réserver — ${label} ${finalPrice.toFixed(2)} € (−${saved.toFixed(2)} €)`;
+            } else {
+              bookingBtnEl.textContent = `Réserver — ${label} ${price} €`;
+            }
+          } else {
+            bookingBtnEl.textContent = `Réserver — ${label}`;
+          }
           if(bookingMsgEl) bookingMsgEl.textContent = "";
         }
       }
@@ -1669,7 +1701,10 @@
             const label = singleBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
             const totalPrice = unitPrice * currentQty;
             if (unitPrice > 0) {
-              singleBtn.textContent = `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
+              const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice);
+              singleBtn.textContent = sv > 0
+                ? `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${fp.toFixed(2)} €, −${sv.toFixed(2)} €) →`
+                : `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
             } else {
               singleBtn.textContent = `${label} →`;
             }
@@ -1696,7 +1731,8 @@
 
               if (btnStripe) {
                 if (totalPrice > 0) {
-                  btnStripe.textContent = `Réserver — ${totalPrice} € →`;
+                  const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice);
+                  btnStripe.textContent = sv > 0 ? `Réserver — ${fp.toFixed(2)} € (−${sv.toFixed(2)} €) →` : `Réserver — ${totalPrice} € →`;
                 } else {
                   btnStripe.textContent = `Réserver →`;
                 }
@@ -1716,7 +1752,12 @@
 
           const totalPrice = unitPrice * currentQty;
           if (totalPrice > 0) {
-            bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €)`;
+            const { finalPrice, saved } = computeDiscountedPrice(totalPrice);
+            if (saved > 0) {
+              bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${finalPrice.toFixed(2)} €, −${saved.toFixed(2)} €)`;
+            } else {
+              bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €)`;
+            }
           } else {
             bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
           }
