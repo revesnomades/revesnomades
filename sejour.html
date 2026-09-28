@@ -1740,24 +1740,69 @@
         bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
       }
 
-      // Meta Pixel AddToCart event tracking & loading spinner (si non single day)
+      // Booking multi-jours : appel edge function OU lien direct
       if (bookingBtn && !isSingleDay) {
-        bookingBtn.addEventListener("click", () => {
-          if (bookingBtn.hasAttribute("href") && bookingBtn.getAttribute("href") !== "#") {
+        bookingBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+
+          const href = bookingBtn.getAttribute("href") || "";
+          // Si c'est une vraie URL externe → navigation directe
+          if (href && href !== "#" && !href.includes("#stripe-checkout") && (href.startsWith("http") || href.startsWith("/"))) {
             bookingBtn.classList.add("btn-loading");
+            if (window.MetaPixel) window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, 0);
+            window.location.href = href;
+            return;
           }
-          if (window.MetaPixel) {
-            let basePrice = 0;
-            if (stay.extra_options && Array.isArray(stay.extra_options)) {
-              const prices = stay.extra_options
-                .map(opt => Number(opt.price))
-                .filter(p => !isNaN(p) && p > 0);
-              if (prices.length > 0) {
-                basePrice = Math.min(...prices);
-              }
+
+          if (bookingBtn.classList.contains("btn-loading")) return;
+          bookingBtn.classList.add("btn-loading");
+          bookingMsg.style.color = "var(--text)";
+          bookingMsg.textContent = "Vérification du compte…";
+
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour.");
+            window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+            return;
+          }
+
+          bookingMsg.textContent = "Redirection vers le paiement sécurisé Stripe…";
+
+          let stayPrice = Number(bookingBtn.getAttribute("data-price") || 0);
+          if (!stayPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
+            stayPrice = Number(stay.extra_options[0].price || 0);
+          }
+          let optionLabel = bookingBtn.getAttribute("data-label") || "";
+          let itemTitle = stay.title || "Séjour";
+          const cleanOptLabel = optionLabel.trim().toLowerCase();
+          if (optionLabel && optionLabel !== stay.title && !["tarif", "option", "default", "standard"].includes(cleanOptLabel)) {
+            itemTitle += ` (${optionLabel})`;
+          }
+
+          const { data: sessionData, error: sessionErr } = await supabase.functions.invoke("create-checkout-session", {
+            body: {
+              ui_mode: "redirect",
+              items: [{ id: stay.id, type: "sejour", name: itemTitle, price: stayPrice, quantity: 1 }],
+              userId: user.id,
+              userEmail: user.email,
+              return_url: `${window.location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=sejour`,
+              cancel_url: window.location.href,
             }
-            window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, basePrice);
+          });
+
+          if (sessionErr || !sessionData?.url) {
+            console.error("Erreur Checkout:", sessionErr, sessionData);
+            bookingBtn.classList.remove("btn-loading");
+            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            bookingMsg.style.color = "#c00";
+            bookingMsg.textContent = "Erreur lors de la création de la session de paiement.";
+            return;
           }
+
+          if (window.MetaPixel) window.MetaPixel.trackAddToCart(stay.title || "Séjour", stay.id, stayPrice);
+          window.location.href = sessionData.url;
         });
       }
 
