@@ -98,12 +98,6 @@
           <div id="cartItems">
             <!-- rempli par JS -->
           </div>
-
-          <!-- CROSS-SELL -->
-          <div id="crossSellSection" style="display:none; margin-top:40px;">
-            <h3 style="font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;" id="crossSellTitle">Vous pourriez aussi aimer</h3>
-            <div class="crosssell-grid" id="crossSellGrid"></div>
-          </div>
         </div>
 
         <!-- COLONNE DROITE : récapitulatif -->
@@ -130,6 +124,34 @@
         </aside>
 
       </div>
+
+      <!-- SUGGESTIONS TOUJOURS VISIBLES -->
+      <div style="margin-top:64px; border-top:1px solid var(--line); padding-top:48px;">
+
+        <!-- Séjours -->
+        <div style="margin-bottom:48px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Nos prochains séjours</h2>
+            <a href="/index.html#sejours" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir tous les séjours</a>
+          </div>
+          <div class="crosssell-grid" id="staysSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+            <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
+          </div>
+        </div>
+
+        <!-- Produits -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Articles de la boutique</h2>
+            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir toute la boutique</a>
+          </div>
+          <div class="crosssell-grid" id="productsSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+            <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </main>
 
@@ -216,9 +238,8 @@
     const checkoutError = document.getElementById("checkoutError");
     const checkoutContainer = document.getElementById("checkout");
     const btnCancelCheckout = document.getElementById("btnCancelCheckout");
-    const crossSellSection = document.getElementById("crossSellSection");
-    const crossSellGrid = document.getElementById("crossSellGrid");
-    const crossSellTitle = document.getElementById("crossSellTitle");
+    const staysSuggestGrid = document.getElementById("staysSuggestGrid");
+    const productsSuggestGrid = document.getElementById("productsSuggestGrid");
 
     let stripeInstance = null;
     let embeddedCheckout = null;
@@ -240,7 +261,6 @@
         summaryLinesEl.innerHTML = "";
         cartTotalDisplayEl.textContent = "0,00 €";
         btnCheckout.style.display = "none";
-        crossSellSection.style.display = "none";
         return;
       }
 
@@ -282,8 +302,6 @@
 
       const total = getCartTotal();
       cartTotalDisplayEl.textContent = total.toFixed(2).replace(".", ",") + " €";
-
-      loadCrossSell(cart);
     }
 
     function deliveryLabel(days) {
@@ -292,66 +310,70 @@
       return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
     }
 
-    async function loadCrossSell(cart) {
-      const hasProducts = cart.some(i => i.type === "product");
-      const hasSejourType = cart.some(i => i.type === "sejour");
+    async function loadSuggestions() {
+      // Séjours
+      try {
+        const { data: stays } = await supabase
+          .from("stays")
+          .select("id, title, slug, hero_image, location")
+          .eq("published", true)
+          .order("created_at", { ascending: false })
+          .limit(4);
 
-      if (hasProducts && !hasSejourType) {
-        crossSellTitle.textContent = "Complétez votre expérience — Nos séjours";
-        crossSellSection.style.display = "";
-        crossSellGrid.innerHTML = `
-          <a class="crosssell-card" href="/index.html#sejours">
-            <div style="background:var(--line); aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;">
-              <svg viewBox="0 0 24 24" fill="none" width="32" height="32" style="opacity:.4;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg>
-            </div>
-            <div class="crosssell-card-body">
-              <div class="crosssell-card-name">Nos séjours</div>
-              <div class="crosssell-card-price">Retraites bien-être</div>
-            </div>
-          </a>
-          <a class="crosssell-card" href="/index.html#sejours">
-            <div style="background:var(--line); aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#f4ede6,#e8d8cc);">
-              <svg viewBox="0 0 24 24" fill="none" width="32" height="32" style="opacity:.5;"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
-            </div>
-            <div class="crosssell-card-body">
-              <div class="crosssell-card-name">Découvrir</div>
-              <div class="crosssell-card-price">Toutes nos destinations</div>
-            </div>
-          </a>
-        `;
-        return;
+        if (stays && stays.length) {
+          staysSuggestGrid.innerHTML = stays.map(s => {
+            const img = s.hero_image || "/assets/img/placeholder.jpg";
+            const href = s.slug ? `/sejour.html?s=${s.slug}` : "/index.html#sejours";
+            return `
+              <a class="crosssell-card" href="${href}">
+                <img src="${img}" alt="${s.title}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
+                <div class="crosssell-card-body">
+                  <div class="crosssell-card-name">${s.title}</div>
+                  ${s.location ? `<div class="crosssell-card-price">${s.location}</div>` : ''}
+                </div>
+              </a>
+            `;
+          }).join("");
+        } else {
+          staysSuggestGrid.innerHTML = `
+            <a class="crosssell-card" href="/index.html#sejours" style="grid-column:1/-1;">
+              <div style="padding:24px; text-align:center; color:var(--muted); font-size:13.5px;">
+                Découvrez toutes nos retraites bien-être →
+              </div>
+            </a>`;
+        }
+      } catch {
+        staysSuggestGrid.innerHTML = `<a class="crosssell-card" href="/index.html#sejours" style="grid-column:1/-1; padding:20px; text-align:center; color:var(--muted); font-size:13px;">Voir nos séjours →</a>`;
       }
 
-      if (hasSejourType && !hasProducts) {
-        crossSellTitle.textContent = "Préparez votre séjour — Boutique";
-        crossSellSection.style.display = "";
-        try {
-          const { data } = await supabase
-            .from("products")
-            .select("id, name, price, image_urls, image_url")
-            .gt("stock", 0)
-            .limit(4);
-          if (data && data.length) {
-            crossSellGrid.innerHTML = data.map(p => {
-              const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
-              return `
-                <a class="crosssell-card" href="/boutique.html">
-                  <img src="${img}" alt="${p.name}" loading="lazy">
-                  <div class="crosssell-card-body">
-                    <div class="crosssell-card-name">${p.name}</div>
-                    <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
-                  </div>
-                </a>
-              `;
-            }).join("");
-          } else {
-            crossSellSection.style.display = "none";
-          }
-        } catch { crossSellSection.style.display = "none"; }
-        return;
-      }
+      // Produits
+      try {
+        const { data: products } = await supabase
+          .from("products")
+          .select("id, name, price, image_urls, image_url")
+          .gt("stock", 0)
+          .order("created_at", { ascending: false })
+          .limit(4);
 
-      crossSellSection.style.display = "none";
+        if (products && products.length) {
+          productsSuggestGrid.innerHTML = products.map(p => {
+            const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
+            return `
+              <a class="crosssell-card" href="/boutique.html">
+                <img src="${img}" alt="${p.name}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
+                <div class="crosssell-card-body">
+                  <div class="crosssell-card-name">${p.name}</div>
+                  <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
+                </div>
+              </a>
+            `;
+          }).join("");
+        } else {
+          productsSuggestGrid.innerHTML = `<a class="crosssell-card" href="/boutique.html" style="grid-column:1/-1; padding:20px; text-align:center; color:var(--muted); font-size:13px;">Voir la boutique →</a>`;
+        }
+      } catch {
+        productsSuggestGrid.innerHTML = `<a class="crosssell-card" href="/boutique.html" style="grid-column:1/-1; padding:20px; text-align:center; color:var(--muted); font-size:13px;">Voir la boutique →</a>`;
+      }
     }
 
     cartItemsEl.addEventListener("click", (e) => {
@@ -442,6 +464,7 @@
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
     renderCart();
+    loadSuggestions();
   </script>
 </body>
 </html>
