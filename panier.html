@@ -317,9 +317,14 @@
       cartTotalDisplayEl.textContent = total.toFixed(2).replace(".", ",") + " €";
     }
 
-    function deliveryLabel(days) {
+    function deliveryLabel(businessDays) {
       const d = new Date();
-      d.setDate(d.getDate() + (Number(days) || 7));
+      let remaining = Number(businessDays) || 5;
+      while (remaining > 0) {
+        d.setDate(d.getDate() + 1);
+        const day = d.getDay();
+        if (day !== 0 && day !== 6) remaining--;
+      }
       return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
     }
 
@@ -386,7 +391,7 @@
                     style="width:100%; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; background:var(--text); color:#fff; border:none; cursor:pointer; transition:opacity 0.2s;"
                     onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'"
                     onclick="(function(btn){
-                      window._addToCartFromPanier({type:'product',id:'${p.id}',name:'${safeName}',price:${Number(p.price)||0},maxStock:${p.stock ?? 99},image:'${img}',deliveryDays:7});
+                      window._addToCartFromPanier({type:'product',id:'${p.id}',name:'${safeName}',price:${Number(p.price)||0},maxStock:${p.stock ?? 99},image:'${img}',deliveryDays:5});
                       btn.textContent='✓ Ajouté';
                       setTimeout(()=>btn.textContent='+ Ajouter au panier',1500);
                     })(this)">+ Ajouter au panier</button>
