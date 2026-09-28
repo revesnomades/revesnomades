@@ -223,7 +223,7 @@
   <script src="assets/js/main.js"></script>
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
-    import { getCart, removeFromCart, setQuantity, getCartTotal, getCartCount, initCartBadge, clearCart } from "./assets/js/cart.js";
+    import { getCart, removeFromCart, setQuantity, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart } from "./assets/js/cart.js";
 
     // TODO: remplacer par votre clé publique Stripe
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51SnOSB55WblsnY7Y9C0dRSx8r8H3JqpmSmvUsOYscigEPRyWNFDiSVxpkOny9D1YOt4u6va4XwciBM6moGDwiRX100nZDtd7Rq";
@@ -364,7 +364,7 @@
       try {
         const { data: products } = await supabase
           .from("products")
-          .select("id, name, price, image_urls, image_url")
+          .select("id, name, price, stock, image_urls, image_url")
           .gt("stock", 0)
           .order("created_at", { ascending: false })
           .limit(4);
@@ -372,14 +372,27 @@
         if (products && products.length) {
           productsSuggestGrid.innerHTML = products.map(p => {
             const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
+            const safeName = p.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             return `
-              <a class="crosssell-card" href="/boutique.html">
-                <img src="${img}" alt="${p.name}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
-                <div class="crosssell-card-body">
-                  <div class="crosssell-card-name">${p.name}</div>
-                  <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
+              <div class="crosssell-card" style="cursor:default;">
+                <a href="/boutique.html" style="display:block; text-decoration:none; color:inherit;">
+                  <img src="${img}" alt="${p.name}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
+                  <div class="crosssell-card-body">
+                    <div class="crosssell-card-name">${p.name}</div>
+                    <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
+                  </div>
+                </a>
+                <div style="padding:0 12px 12px;">
+                  <button type="button"
+                    style="width:100%; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; background:var(--text); color:#fff; border:none; cursor:pointer; transition:opacity 0.2s;"
+                    onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'"
+                    onclick="(function(btn){
+                      window._addToCartFromPanier({type:'product',id:'${p.id}',name:'${safeName}',price:${Number(p.price)||0},maxStock:${p.stock ?? 99},image:'${img}',deliveryDays:7});
+                      btn.textContent='✓ Ajouté';
+                      setTimeout(()=>btn.textContent='+ Ajouter au panier',1500);
+                    })(this)">+ Ajouter au panier</button>
                 </div>
-              </a>
+              </div>
             `;
           }).join("");
         } else {
@@ -474,6 +487,8 @@
         checkoutError.textContent = err.message || "Impossible de charger le formulaire de paiement.";
       }
     });
+
+    window._addToCartFromPanier = (item) => { addToCart(item); renderCart(); };
 
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
