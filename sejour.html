@@ -1807,7 +1807,8 @@
           let optionLabel = bookingBtn.getAttribute("data-label") || "";
           let itemTitle = stay.title || 'Séjour';
           const cleanOptLabel = optionLabel.trim().toLowerCase();
-          if (optionLabel && optionLabel !== stay.title && !["tarif", "option", "default", "standard"].includes(cleanOptLabel)) {
+          const genericLabels = ["tarif", "option", "default", "standard", "réserver", "reserver", "réservation", "reservation", "payer", "paiement", "checkout"];
+          if (optionLabel && optionLabel !== stay.title && !genericLabels.includes(cleanOptLabel) && !cleanOptLabel.startsWith("réserver") && !cleanOptLabel.startsWith("reserver")) {
             itemTitle += ` (${optionLabel})`;
           }
 
