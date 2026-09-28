@@ -1,4 +1,6 @@
 -- À exécuter dans Supabase → SQL Editor
+-- Si la table existe déjà, ajouter seulement la colonne value_unit :
+-- ALTER TABLE promotions ADD COLUMN IF NOT EXISTS value_unit text DEFAULT 'percent';
 
 CREATE TABLE IF NOT EXISTS promotions (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -7,6 +9,7 @@ CREATE TABLE IF NOT EXISTS promotions (
   description text,
   type text NOT NULL DEFAULT 'percent' CHECK (type IN ('percent', 'fixed', 'duo', 'promo_code', 'early_bird')),
   value numeric NOT NULL DEFAULT 0,
+  value_unit text NOT NULL DEFAULT 'percent' CHECK (value_unit IN ('percent', 'euro')),
   code text,
   eligible_product_ids uuid[] DEFAULT '{}',
   eligible_stay_ids uuid[] DEFAULT '{}',
