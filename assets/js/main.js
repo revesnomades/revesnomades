@@ -27,6 +27,72 @@
   }
   initUniformHeader();
 
+  // ── Icône panier + menu mobile sur toutes les pages ───────────────────
+  function initMobileNav() {
+    const navInner = document.querySelector(".nav-inner");
+    if (!navInner) return;
+
+    // 1. Injecter icône panier visible sur mobile (avant le hamburger)
+    if (!navInner.querySelector(".mobile-cart-btn")) {
+      const cartBtn = document.createElement("a");
+      cartBtn.className = "icon-btn mobile-cart-btn cart-nav-link";
+      cartBtn.href = "/panier.html";
+      cartBtn.setAttribute("aria-label", "Panier");
+      cartBtn.style.cssText = "display:none; position:relative;";
+      cartBtn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cart-badge"></span>`;
+      const hamburger = navInner.querySelector(".hamburger");
+      if (hamburger) {
+        navInner.insertBefore(cartBtn, hamburger);
+      } else {
+        navInner.appendChild(cartBtn);
+      }
+      // Visible seulement sur mobile
+      const showCartMobile = () => {
+        cartBtn.style.display = window.innerWidth <= 900 ? "inline-flex" : "none";
+      };
+      showCartMobile();
+      window.addEventListener("resize", showCartMobile);
+    }
+
+    // 2. Injecter hamburger + drawer si absent (ex: compte.html)
+    if (!navInner.querySelector(".hamburger")) {
+      const hamburger = document.createElement("button");
+      hamburger.className = "hamburger";
+      hamburger.type = "button";
+      hamburger.setAttribute("aria-label", "Ouvrir le menu");
+      hamburger.setAttribute("aria-expanded", "false");
+      hamburger.innerHTML = "<span></span><span></span><span></span>";
+      navInner.appendChild(hamburger);
+
+      const drawer = document.createElement("div");
+      drawer.className = "mobile-drawer";
+      drawer.setAttribute("aria-hidden", "true");
+      const currentPath = window.location.pathname;
+      drawer.innerHTML = `<nav class="mobile-menu" aria-label="Navigation mobile">
+        <a href="/index.html#sejours">Séjours</a>
+        <a href="/boutique.html">Shop</a>
+        <a href="/index.html#apropos">À propos</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/index.html#contact">Contact</a>
+        <a href="/panier.html">Panier <span class="cart-badge" style="position:static;display:inline-flex;margin-left:4px;"></span></a>
+        <a href="/compte.html">Compte</a>
+      </nav>`;
+      navInner.appendChild(drawer);
+    }
+
+    // 3. S'assurer que le lien Panier est dans TOUS les menus mobiles existants
+    const mobileMenu = navInner.querySelector(".mobile-menu");
+    if (mobileMenu && !mobileMenu.querySelector("a[href*='panier']")) {
+      const panierLink = document.createElement("a");
+      panierLink.href = "/panier.html";
+      panierLink.innerHTML = `Panier <span class="cart-badge" style="position:static;display:inline-flex;margin-left:4px;"></span>`;
+      const compteLink = mobileMenu.querySelector("a[href*='compte']");
+      if (compteLink) mobileMenu.insertBefore(panierLink, compteLink);
+      else mobileMenu.appendChild(panierLink);
+    }
+  }
+  initMobileNav();
+
   // ✅ Indique que JS est actif (sert au CSS pour animer sans cacher si JS plante)
   document.documentElement.classList.add("js");
 
