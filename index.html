@@ -784,6 +784,10 @@
           featIndexImage = idxImgBlock.image;
         }
       }
+      const isMobileViewport = window.matchMedia("(max-width: 900px)").matches;
+      if (isMobileViewport && stay.index_image_mobile) {
+        featIndexImage = stay.index_image_mobile;
+      }
       if (featuredStayMedia && featIndexImage) {
         featuredStayMedia.style.backgroundImage = `url('${featIndexImage}')`;
         let featPos = homepageImagePositions?.featured || {};
@@ -792,7 +796,7 @@
         }
         const posX = featPos.x !== undefined ? featPos.x : 50;
         const posY = featPos.y !== undefined ? featPos.y : 50;
-        featuredStayMedia.style.backgroundPosition = `${posX}% ${posY}%`;
+        featuredStayMedia.style.backgroundPosition = isMobileViewport && stay.index_image_mobile ? "center" : `${posX}% ${posY}%`;
       }
 
       if (featuredStayMissing) featuredStayMissing.textContent = "";
@@ -853,15 +857,18 @@
         indexImage = idxImgBlock.image;
       }
     }
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+    if (isMobile && stay.index_image_mobile) indexImage = stay.index_image_mobile;
     const image = indexImage || "assets/img/sejour-camargue.jpg";
     const pos = (homepageImagePositions?.stays && homepageImagePositions.stays[stay.id]?.index) || { x: 50, y: 50 };
     const posX = pos.x !== undefined ? pos.x : 50;
     const posY = pos.y !== undefined ? pos.y : 50;
+    const bgPos = (isMobile && stay.index_image_mobile) ? "center" : `${posX}% ${posY}%`;
 
     return `
       <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
-        
-        <div class="stay-card-media" style="background-image:url('${image}'); background-position:${posX}% ${posY}%;">
+
+        <div class="stay-card-media" style="background-image:url('${image}'); background-position:${bgPos};">
 
           <div class="stay-card-overlay"></div>
 

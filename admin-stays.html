@@ -1026,6 +1026,15 @@
             </div>
             <div id="wizIndexMsg" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
           </div>
+          <div style="margin-top:12px;">
+            <label class="muted-small" style="display:block; margin-bottom:4px;">Photo mobile (page d'accueil sur téléphone) <span style="color:var(--muted);">— optionnel, remplace la photo index sur mobile</span></label>
+            <div style="display:flex; gap:8px;">
+              <input id="wizIndexImageMobile" class="input" placeholder="URL ou importer ->" style="flex:1;">
+              <input type="file" id="wizIndexFileMobile" accept="image/*" style="display:none;">
+              <button type="button" class="btn tiny on-light" id="btnUploadWizIndexMobile" style="padding:6px 12px; white-space:nowrap;">Importer un fichier</button>
+            </div>
+            <div id="wizIndexMsgMobile" style="font-size:12px; color:var(--muted); margin-top:4px;"></div>
+          </div>
           <div style="margin-top:16px; border-top:1px dashed var(--line); padding-top:16px;">
             <label class="muted-small" style="display:block; font-weight:600; margin-bottom:6px;">Images de la galerie</label>
             <p class="muted-small" style="margin:0 0 10px 0;">Ajoutez et réordonnez les photos de la galerie (glisser-déposer ⠿ ou flèches ◀ ▶).</p>
@@ -2466,6 +2475,8 @@
         }
         const elIdx = document.getElementById("wizIndexImage");
         if (elIdx) elIdx.value = indexImage || stay.hero_image || "";
+        const elIdxMobile = document.getElementById("wizIndexImageMobile");
+        if (elIdxMobile) elIdxMobile.value = stay.index_image_mobile || "";
 
         let rawGal = stay.gallery_images;
         if (typeof rawGal === 'string') { try { rawGal = JSON.parse(rawGal); } catch(e){} }
@@ -3084,6 +3095,17 @@ function renderWizGal() {
       }
     });
 
+    document.getElementById("btnUploadWizIndexMobile")?.addEventListener("click", async () => {
+      const fileInput = document.getElementById("wizIndexFileMobile");
+      if (fileInput) {
+        fileInput.click();
+        fileInput.onchange = async () => {
+          const url = await uploadWizFile(fileInput, document.getElementById("wizIndexMsgMobile"));
+          if (url) document.getElementById("wizIndexImageMobile").value = url;
+        };
+      }
+    });
+
     document.getElementById("btnUploadWizGalFile")?.addEventListener("click", () => {
       const fileInput = document.getElementById("wizGalFile");
       if (fileInput) {
@@ -3494,6 +3516,7 @@ function renderWizGal() {
       const slug = customSlug || slugify(title);
       const heroImage = document.getElementById("wizHeroImage")?.value?.trim() || "";
       const indexImage = document.getElementById("wizIndexImage")?.value?.trim() || "";
+      const indexImageMobile = document.getElementById("wizIndexImageMobile")?.value?.trim() || "";
       const seatsTotal = Number(document.getElementById("wizSeats")?.value || 10);
       const includedItems = linesToArray(document.getElementById("wizIncluded")?.value || "");
       const notIncludedItems = linesToArray(document.getElementById("wizNotIncluded")?.value || "");
@@ -3546,6 +3569,7 @@ function renderWizGal() {
         description: fullDesc,
         hero_image: heroImage,
         index_image: indexImage,
+        index_image_mobile: indexImageMobile,
         gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
         speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
         chef_name: chefName,
@@ -3721,6 +3745,7 @@ function renderWizGal() {
       const contentBlocksValue = serializeContentBlocks();
 
       const idxImg = document.getElementById("wizIndexImage")?.value?.trim() || stayHeroImage.value.trim();
+      const idxImgMobile = document.getElementById("wizIndexImageMobile")?.value?.trim() || "";
       const accomD = document.getElementById("wizAccomDesc")?.value?.trim() || "";
       const accomP = document.getElementById("wizAccomPhoto")?.value?.trim() || "";
       const cName = document.getElementById("wizChefName")?.value?.trim() || "";
@@ -3758,6 +3783,7 @@ function renderWizGal() {
         description: stayDescription.value.trim(),
         hero_image: stayHeroImage.value.trim(),
         index_image: idxImg,
+        index_image_mobile: idxImgMobile,
         gallery_images: typeof wizGalList !== "undefined" ? wizGalList : [],
         speakers: typeof wizSpeakerList !== "undefined" ? wizSpeakerList : [],
         chef_name: cName,
