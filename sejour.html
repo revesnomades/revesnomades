@@ -180,11 +180,11 @@
     </div>
   </header>
 
-  <!-- Bannière promotionnelle (masquée par défaut) -->
-  <div id="sejourPromoBanner" style="display:none; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; position:relative; z-index:200;"></div>
+  <!-- Bannière promotionnelle sous le header -->
+  <div id="sejourPromoBanner" style="display:none; position:fixed; top:var(--navH); left:0; right:0; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; z-index:199; transition:opacity .25s, transform .25s;"></div>
 
   <main>
-  <div style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
+  <div id="sejourMainTop" style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
         <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="/assets/img/sejour-camargue.jpg" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
@@ -397,8 +397,23 @@
       const badgeEl = document.getElementById("stayHeroBadge");
       const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
       if (bannerEl) {
-        if (banner) { bannerEl.textContent = banner.banner_text; bannerEl.style.display = ''; }
-        else bannerEl.style.display = 'none';
+        if (banner) {
+          bannerEl.textContent = banner.banner_text;
+          bannerEl.style.display = '';
+          const mainTop = document.getElementById("sejourMainTop");
+          requestAnimationFrame(() => {
+            const bh = bannerEl.offsetHeight;
+            if (mainTop) mainTop.style.marginTop = `calc(var(--navH) + ${bh}px)`;
+          });
+          window.addEventListener("scroll", () => {
+            const hidden = window.scrollY > 60;
+            bannerEl.style.opacity = hidden ? '0' : '1';
+            bannerEl.style.transform = hidden ? 'translateY(-100%)' : 'translateY(0)';
+            bannerEl.style.pointerEvents = hidden ? 'none' : '';
+          }, { passive: true });
+        } else {
+          bannerEl.style.display = 'none';
+        }
       }
       if (badgeEl) {
         const badge = activePromos.find(pr => {

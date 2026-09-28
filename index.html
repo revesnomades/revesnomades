@@ -221,8 +221,8 @@
     </div>
   </header>
 
-  <!-- Bannière promotionnelle (masquée par défaut) -->
-  <div id="indexPromoBanner" style="display:none; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; position:relative; z-index:200;"></div>
+  <!-- Bannière promotionnelle sous le header -->
+  <div id="indexPromoBanner" style="display:none; position:fixed; top:var(--navH); left:0; right:0; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; z-index:199; transition:opacity .25s, transform .25s;"></div>
 
   <main>
   <section class="hero hero-left" style="position: relative; height: 100vh; min-height: 100vh; overflow: hidden; background: #0e0f11;">
@@ -588,8 +588,18 @@
       const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
       const el = document.getElementById("indexPromoBanner");
       if (!el) return;
-      if (banner) { el.textContent = banner.banner_text; el.style.display = ''; }
-      else el.style.display = 'none';
+      if (banner) {
+        el.textContent = banner.banner_text;
+        el.style.display = '';
+        window.addEventListener("scroll", () => {
+          const hidden = window.scrollY > 60;
+          el.style.opacity = hidden ? '0' : '1';
+          el.style.transform = hidden ? 'translateY(-100%)' : 'translateY(0)';
+          el.style.pointerEvents = hidden ? 'none' : '';
+        }, { passive: true });
+      } else {
+        el.style.display = 'none';
+      }
     }
     function getStayPromo(stayId) {
       return activePromos.find(pr => {
