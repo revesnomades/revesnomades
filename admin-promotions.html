@@ -258,6 +258,14 @@
         </div>
 
         <hr class="section-sep">
+
+        <div class="form-group">
+          <label for="fMaxUses">Nombre maximum d'utilisations (optionnel)</label>
+          <input id="fMaxUses" class="input" type="number" min="1" placeholder="Illimité" style="max-width:180px;">
+          <small style="color:var(--muted); font-size:11.5px;">Laissez vide pour une utilisation illimitée.</small>
+        </div>
+
+        <hr class="section-sep">
         <p style="font-size:13px; font-weight:600; margin:0 0 12px;">Affichage</p>
 
         <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
@@ -383,6 +391,7 @@
     const fBadgeColor = document.getElementById("fBadgeColor");
     const fBannerText = document.getElementById("fBannerText");
     const fBannerColor = document.getElementById("fBannerColor");
+    const fMaxUses = document.getElementById("fMaxUses");
     const fActive = document.getElementById("fActive");
     const badgePreview = document.getElementById("badgePreview");
     const badgeCardPreview = document.getElementById("badgeCardPreview");
@@ -509,6 +518,7 @@
       bannerFullPreview.style.background = '#1a1a1a';
       bannerFullPreview.textContent = fBannerText.placeholder;
       fMinQty.value = 2;
+      fMaxUses.value = '';
       setUnit('percent');
       updateTypeUI(true);
       updateApplyToUI();
@@ -537,6 +547,7 @@
       fBadgeText.value = p.badge_text || '';
       fBadgeColor.value = p.badge_color || '#cc4444';
       fBannerText.value = p.banner_text || '';
+      fMaxUses.value = p.max_uses || '';
       fActive.checked = !!p.active;
       badgePreview.textContent = p.badge_text || '';
       badgePreview.style.background = p.badge_color || '#cc4444';
@@ -675,6 +686,7 @@
         display_banner: fDisplayBanner.checked,
         banner_text: fDisplayBanner.checked ? (fBannerText.value.trim() || null) : null,
         banner_color: fDisplayBanner.checked ? (fBannerColor.value || '#1a1a1a') : null,
+        max_uses: fMaxUses.value ? parseInt(fMaxUses.value) : null,
       };
 
       let error;

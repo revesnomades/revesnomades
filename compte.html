@@ -1375,7 +1375,7 @@
               <div>
                 <strong style="font-size:14px; color:var(--text); font-weight:700; font-family:inherit;">${title}</strong>
                 <div style="font-size:13px; color:var(--muted); margin-top:4px;">
-                  ${label ? `${label} · ` : ""}${amountStr} · <span style="color:#155724; font-weight:600;">✓ ${statusLabel}</span>
+                  ${label ? `${label} · ` : ""}${amountStr} · <span style="color:${item.status === 'cancelled' ? '#c00' : '#155724'}; font-weight:600;">${item.status === 'cancelled' ? '✗' : '✓'} ${statusLabel}</span>
                 </div>
                 <div style="font-size:12px; color:var(--muted); font-family:'IBM Plex Mono', monospace; margin-top:4px;">
                   📅 Réservé le ${date}
