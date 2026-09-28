@@ -110,12 +110,14 @@ serve(async (req) => {
       }
     }
 
-    const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded",
+    // ui_mode "redirect" → checkout Stripe hébergé (retourne url)
+    // ui_mode "embedded" (défaut) → checkout embarqué (retourne client_secret)
+    const isRedirect = body.ui_mode === "redirect";
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      return_url,
       shipping_address_collection: {
         allowed_countries: ["FR", "BE", "CH", "LU", "MC"],
       },
@@ -125,10 +127,26 @@ serve(async (req) => {
         user_id: body.userId || "",
         user_email: body.userEmail || "",
       },
-    });
+    };
+
+    if (isRedirect) {
+      sessionParams.success_url = return_url.includes("{CHECKOUT_SESSION_ID}")
+        ? return_url
+        : `${return_url}${return_url.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
+      sessionParams.cancel_url = body.cancel_url || return_url;
+    } else {
+      sessionParams.ui_mode = "embedded";
+      sessionParams.return_url = return_url;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
+    const responseBody = isRedirect
+      ? { url: session.url }
+      : { client_secret: session.client_secret };
 
     return new Response(
-      JSON.stringify({ client_secret: session.client_secret }),
+      JSON.stringify(responseBody),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

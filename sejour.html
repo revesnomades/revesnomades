@@ -1702,23 +1702,23 @@
 
           const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
             body: {
+              ui_mode: "redirect",
               items: [{
                 id: stay.id,
-                title: itemTitle,
+                type: 'sejour',
+                name: itemTitle,
                 price: stayPrice,
                 quantity: currentQty,
-                type: 'stay'
               }],
               userId: user.id,
               userEmail: user.email,
-              stayDate: firstDate?.start_date ? String(firstDate.start_date).substring(0, 10) : "",
-              returnUrl: window.location.href,
-              cancelUrl: window.location.href
+              return_url: `${window.location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=sejour`,
+              cancel_url: window.location.href,
             }
           });
 
-          if(sessionErr || !sessionData?.url) {
-            console.error("Erreur Checkout:", sessionErr);
+          if (sessionErr || !sessionData?.url) {
+            console.error("Erreur Checkout:", sessionErr, sessionData);
             bookingBtn.classList.remove("btn-loading");
             document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
             bookingMsg.style.color = "#c00";
