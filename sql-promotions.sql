@@ -1,6 +1,7 @@
 -- À exécuter dans Supabase → SQL Editor
--- Si la table existe déjà, ajouter seulement la colonne value_unit :
+-- Si la table existe déjà, ajouter seulement les colonnes manquantes :
 -- ALTER TABLE promotions ADD COLUMN IF NOT EXISTS value_unit text DEFAULT 'percent';
+-- ALTER TABLE promotions ADD COLUMN IF NOT EXISTS banner_color text DEFAULT '#1a1a1a';
 
 CREATE TABLE IF NOT EXISTS promotions (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -22,7 +23,8 @@ CREATE TABLE IF NOT EXISTS promotions (
   badge_text text,
   badge_color text DEFAULT '#cc4444',
   display_banner boolean DEFAULT false,
-  banner_text text
+  banner_text text,
+  banner_color text DEFAULT '#1a1a1a'
 );
 
 -- Autoriser la lecture publique (pour panier + boutique)

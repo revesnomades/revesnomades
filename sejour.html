@@ -395,10 +395,16 @@
     function applySejourPromos(stayId) {
       const bannerEl = document.getElementById("sejourPromoBanner");
       const badgeEl = document.getElementById("stayHeroBadge");
-      const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
       if (bannerEl) {
+        const banner = activePromos.find(pr => {
+          if (!pr.display_banner || !pr.banner_text) return false;
+          if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+          if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+          return false;
+        });
         if (banner) {
           bannerEl.textContent = banner.banner_text;
+          bannerEl.style.background = banner.banner_color || '#1a1a1a';
           bannerEl.style.display = '';
           const mainTop = document.getElementById("sejourMainTop");
           requestAnimationFrame(() => {

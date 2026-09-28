@@ -307,6 +307,13 @@
             <label for="fBannerText">Texte de la bannière</label>
             <input id="fBannerText" class="input" placeholder="🎉 Soldes d'été : -10% sur tout le shop avec le code ÉTÉ10">
           </div>
+          <div class="form-group">
+            <label for="fBannerColor">Couleur de la bannière</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input id="fBannerColor" class="input" type="color" value="#1a1a1a" style="width:50px; height:38px; padding:2px; cursor:pointer;">
+              <span style="font-size:12px; color:var(--muted);">Texte toujours en blanc</span>
+            </div>
+          </div>
           <!-- Banner preview -->
           <div style="margin-top:10px;">
             <p style="font-size:11px; color:var(--muted); margin:0 0 8px; text-transform:uppercase; letter-spacing:.05em;">Aperçu de la bannière</p>
@@ -375,6 +382,7 @@
     const fBadgeText = document.getElementById("fBadgeText");
     const fBadgeColor = document.getElementById("fBadgeColor");
     const fBannerText = document.getElementById("fBannerText");
+    const fBannerColor = document.getElementById("fBannerColor");
     const fActive = document.getElementById("fActive");
     const badgePreview = document.getElementById("badgePreview");
     const badgeCardPreview = document.getElementById("badgeCardPreview");
@@ -497,6 +505,8 @@
       badgePreview.style.background = '#cc4444';
       badgeCardPreview.style.background = '#cc4444';
       badgeCardPreview.textContent = fBadgeText.placeholder;
+      fBannerColor.value = '#1a1a1a';
+      bannerFullPreview.style.background = '#1a1a1a';
       bannerFullPreview.textContent = fBannerText.placeholder;
       fMinQty.value = 2;
       setUnit('percent');
@@ -532,6 +542,8 @@
       badgePreview.style.background = p.badge_color || '#cc4444';
       badgeCardPreview.textContent = p.badge_text || fBadgeText.placeholder;
       badgeCardPreview.style.background = p.badge_color || '#cc4444';
+      fBannerColor.value = p.banner_color || '#1a1a1a';
+      bannerFullPreview.style.background = p.banner_color || '#1a1a1a';
       bannerFullPreview.textContent = p.banner_text || fBannerText.placeholder;
       modalTitle.textContent = 'Modifier la promotion';
       btnDeletePromo.style.display = '';
@@ -615,6 +627,9 @@
     fBannerText.addEventListener("input", () => {
       bannerFullPreview.textContent = fBannerText.value || fBannerText.placeholder;
     });
+    fBannerColor.addEventListener("input", () => {
+      bannerFullPreview.style.background = fBannerColor.value;
+    });
 
     document.getElementById("btnCreate").addEventListener("click", openCreate);
     document.getElementById("btnCloseModal").addEventListener("click", () => promoModal.classList.remove('active'));
@@ -659,6 +674,7 @@
         badge_color: fDisplayBadge.checked ? (fBadgeColor.value || '#cc4444') : null,
         display_banner: fDisplayBanner.checked,
         banner_text: fDisplayBanner.checked ? (fBannerText.value.trim() || null) : null,
+        banner_color: fDisplayBanner.checked ? (fBannerColor.value || '#1a1a1a') : null,
       };
 
       let error;

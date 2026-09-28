@@ -264,11 +264,8 @@
     </div>
   </header>
 
-  <!-- Bannière promotionnelle sous le header -->
-  <div id="shopPromoBanner" style="display:none; position:fixed; top:var(--navH); left:0; right:0; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; z-index:199; transition:opacity .25s, transform .25s;"></div>
-
   <main class="band cream" style="min-height: 80vh;">
-    <div id="shopMainTop" class="container" style="padding: calc(var(--navH) + 60px) 0 80px;">
+    <div class="container" style="padding: calc(var(--navH) + 60px) 0 80px;">
 
       <div style="text-align:center; max-width:600px; margin:0 auto;">
         <h1 style="font-family:'SegoCustom'; font-size:42px; margin:0;">Shop</h1>
@@ -506,28 +503,7 @@
       renderProducts();
     }
 
-    function renderBanner() {
-      const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
-      const bannerEl = document.getElementById("shopPromoBanner");
-      if (!bannerEl) return;
-      if (banner) {
-        bannerEl.textContent = banner.banner_text;
-        bannerEl.style.display = '';
-        const mainTop = document.getElementById("shopMainTop");
-        requestAnimationFrame(() => {
-          const bh = bannerEl.offsetHeight;
-          if (mainTop) mainTop.style.paddingTop = `calc(var(--navH) + ${bh}px + 60px)`;
-        });
-        window.addEventListener("scroll", () => {
-          const hidden = window.scrollY > 60;
-          bannerEl.style.opacity = hidden ? '0' : '1';
-          bannerEl.style.transform = hidden ? 'translateY(-100%)' : 'translateY(0)';
-          bannerEl.style.pointerEvents = hidden ? 'none' : '';
-        }, { passive: true });
-      } else {
-        bannerEl.style.display = 'none';
-      }
-    }
+    function renderBanner() { /* banners are stay-specific, shown only on sejour.html */ }
 
     function renderProducts() {
       let filtered = [...allProducts];
