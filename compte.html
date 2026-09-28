@@ -441,6 +441,24 @@
     import { initCartBadge } from "/assets/js/cart.js";
     initCartBadge();
 
+    let activePromos = [];
+    async function loadPromos() {
+      const now = new Date().toISOString();
+      const { data } = await supabase.from("promotions").select("*")
+        .eq("active", true)
+        .or(`starts_at.is.null,starts_at.lte.${now}`)
+        .or(`ends_at.is.null,ends_at.gte.${now}`);
+      activePromos = data || [];
+    }
+    function getStayPromoBadge(stayId) {
+      return activePromos.find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+        return false;
+      }) || null;
+    }
+
     // Passer à false quand le site est ouvert au public
     const MAINTENANCE_MODE = false;
 
@@ -1712,6 +1730,7 @@
     (async () => {
       const grid = document.getElementById("compteSejours");
       if (!grid) return;
+      await loadPromos();
       try {
         const { data: stays } = await supabase
           .from("stays")
@@ -1746,9 +1765,12 @@
           if (isMobile && stay.index_image_mobile) img = stay.index_image_mobile;
           const d = dateMap.get(stay.id);
           const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
+          const promo = getStayPromoBadge(stay.id);
+          const promoBadge = promo ? `<div style="position:absolute; top:10px; left:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
           return `
             <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
-              <div class="stay-card-media" style="background-image:url('${img}'); background-position:center;">
+              <div class="stay-card-media" style="background-image:url('${img}'); background-position:center; position:relative;">
+                ${promoBadge}
                 <div class="stay-card-overlay"></div>
                 <div class="stay-card-hover">
                   <div class="stay-card-line">${stay.title || "Séjour"}</div>

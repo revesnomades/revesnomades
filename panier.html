@@ -425,6 +425,27 @@
       return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
     }
 
+    function getProductPromoBadge(productId) {
+      return activePromos.find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'products') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_product_ids || []).includes(productId);
+        return false;
+      }) || null;
+    }
+    function getStayPromoBadge(stayId) {
+      return activePromos.find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+        return false;
+      }) || null;
+    }
+    function badgeHtml(promo) {
+      if (!promo) return '';
+      return `<div style="position:absolute; top:8px; left:8px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; z-index:2;">${promo.badge_text}</div>`;
+    }
+
     async function loadSuggestions() {
       // Séjours
       try {
@@ -439,9 +460,13 @@
           staysSuggestGrid.innerHTML = stays.map(s => {
             const img = s.hero_image || "/assets/img/placeholder.jpg";
             const href = s.slug ? `/sejour.html?s=${s.slug}` : "/index.html#sejours";
+            const promo = getStayPromoBadge(s.id);
             return `
               <a class="crosssell-card" href="${href}">
-                <img src="${img}" alt="${s.title}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
+                <div style="position:relative;">
+                  <img src="${img}" alt="${s.title}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;">
+                  ${badgeHtml(promo)}
+                </div>
                 <div class="crosssell-card-body">
                   <div class="crosssell-card-name">${s.title}</div>
                   ${s.location ? `<div class="crosssell-card-price">${s.location}</div>` : ''}
@@ -474,10 +499,14 @@
           productsSuggestGrid.innerHTML = products.map(p => {
             const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
             const safeName = p.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            const promo = getProductPromoBadge(p.id);
             return `
               <div class="crosssell-card" style="cursor:default;">
                 <a href="/boutique.html" style="display:block; text-decoration:none; color:inherit;">
-                  <img src="${img}" alt="${p.name}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover;">
+                  <div style="position:relative;">
+                    <img src="${img}" alt="${p.name}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;">
+                    ${badgeHtml(promo)}
+                  </div>
                   <div class="crosssell-card-body">
                     <div class="crosssell-card-name">${p.name}</div>
                     <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
@@ -624,8 +653,7 @@
 
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
-    loadPromos();
-    loadSuggestions();
+    loadPromos().then(() => loadSuggestions());
   </script>
 </body>
 </html>
