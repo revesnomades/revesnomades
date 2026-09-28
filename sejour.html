@@ -386,17 +386,19 @@
     let activePromos = [];
     let currentStayPromo = null;
 
-    function computeDiscountedPrice(unitPrice) {
-      if (!currentStayPromo || !unitPrice) return { finalPrice: unitPrice, saved: 0 };
+    function computeDiscountedPrice(totalPrice, qty = 1) {
+      if (!currentStayPromo || !totalPrice) return { finalPrice: totalPrice, saved: 0 };
       const p = currentStayPromo;
       const isEuro = p.value_unit === 'euro';
       let saved = 0;
       if (p.type === 'percent' || p.type === 'early_bird') {
-        saved = isEuro ? Math.min(Number(p.value), unitPrice) : unitPrice * Number(p.value) / 100;
+        saved = isEuro ? Math.min(Number(p.value), totalPrice) : totalPrice * Number(p.value) / 100;
       } else if (p.type === 'fixed') {
-        saved = Math.min(Number(p.value), unitPrice);
+        saved = Math.min(Number(p.value), totalPrice);
+      } else if (p.type === 'duo' && qty >= (p.min_qty || 2)) {
+        saved = isEuro ? Math.min(Number(p.value), totalPrice) : totalPrice * Number(p.value) / 100;
       }
-      return { finalPrice: Math.max(0, unitPrice - saved), saved };
+      return { finalPrice: Math.max(0, totalPrice - saved), saved };
     }
 
     async function loadPromos() {
@@ -1701,7 +1703,7 @@
             const label = singleBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
             const totalPrice = unitPrice * currentQty;
             if (unitPrice > 0) {
-              const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice);
+              const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice, currentQty);
               singleBtn.textContent = sv > 0
                 ? `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${fp.toFixed(2)} €, −${sv.toFixed(2)} €) →`
                 : `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
@@ -1731,7 +1733,7 @@
 
               if (btnStripe) {
                 if (totalPrice > 0) {
-                  const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice);
+                  const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice, currentQty);
                   btnStripe.textContent = sv > 0 ? `Réserver — ${fp.toFixed(2)} € (−${sv.toFixed(2)} €) →` : `Réserver — ${totalPrice} € →`;
                 } else {
                   btnStripe.textContent = `Réserver →`;
@@ -1752,7 +1754,7 @@
 
           const totalPrice = unitPrice * currentQty;
           if (totalPrice > 0) {
-            const { finalPrice, saved } = computeDiscountedPrice(totalPrice);
+            const { finalPrice, saved } = computeDiscountedPrice(totalPrice, currentQty);
             if (saved > 0) {
               bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${finalPrice.toFixed(2)} €, −${saved.toFixed(2)} €)`;
             } else {
