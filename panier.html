@@ -282,7 +282,6 @@
                 <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
                 <span class="cart-qty-val">${item.quantity}</span>
                 <button class="cart-qty-btn" data-action="inc" data-id="${item.id}" data-type="${item.type}" ${isMax ? 'disabled style="opacity:.4;"' : ''}>+</button>
-                ${item.maxStock && item.maxStock < 99 ? `<span style="font-size:11px; color:var(--muted);">(stock : ${item.maxStock})</span>` : ''}
               </div>
             </div>
             <div style="text-align:right;">
