@@ -180,11 +180,15 @@
     </div>
   </header>
 
+  <!-- Bannière promotionnelle (masquée par défaut) -->
+  <div id="sejourPromoBanner" style="display:none; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; position:relative; z-index:200;"></div>
+
   <main>
   <div style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
         <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="/assets/img/sejour-camargue.jpg" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
+        <div id="stayHeroBadge" style="display:none; position:absolute; top:16px; left:16px; font-size:13px; font-weight:700; letter-spacing:0.06em; padding:5px 12px; border-radius:4px; color:#fff; z-index:3;"></div>
       </section>
     </div>
   </div>
@@ -378,6 +382,40 @@
     import { supabase } from "/assets/js/supabaseClient.js";
     import { initCartBadge, addToCart } from "/assets/js/cart.js";
     initCartBadge();
+
+    let activePromos = [];
+    async function loadPromos() {
+      const now = new Date().toISOString();
+      const { data } = await supabase.from("promotions").select("*")
+        .eq("active", true)
+        .or(`starts_at.is.null,starts_at.lte.${now}`)
+        .or(`ends_at.is.null,ends_at.gte.${now}`);
+      activePromos = data || [];
+    }
+    function applySejourPromos(stayId) {
+      const bannerEl = document.getElementById("sejourPromoBanner");
+      const badgeEl = document.getElementById("stayHeroBadge");
+      const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
+      if (bannerEl) {
+        if (banner) { bannerEl.textContent = banner.banner_text; bannerEl.style.display = ''; }
+        else bannerEl.style.display = 'none';
+      }
+      if (badgeEl) {
+        const badge = activePromos.find(pr => {
+          if (!pr.display_badge || !pr.badge_text) return false;
+          if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+          if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+          return false;
+        });
+        if (badge) {
+          badgeEl.textContent = badge.badge_text;
+          badgeEl.style.background = badge.badge_color || '#cc4444';
+          badgeEl.style.display = '';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+    }
 
     const params = new URLSearchParams(window.location.search);
     let rawSlug = params.get("slug");
@@ -1418,6 +1456,7 @@
         const firstDate = dates?.[0] || null;
 
         stayTitle.textContent = stay.title || "Séjour";
+        applySejourPromos(stay.id);
 
         // Lieu au-dessus du titre
         const stayLocationEl = document.getElementById("stayLocation");
@@ -1773,6 +1812,7 @@
   }
 
     // Le header reste toujours visible sans masquage au scroll
+    await loadPromos();
     loadStay();
 
     window.addEventListener("pageshow", () => {

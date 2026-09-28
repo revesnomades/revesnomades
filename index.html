@@ -221,6 +221,9 @@
     </div>
   </header>
 
+  <!-- Bannière promotionnelle (masquée par défaut) -->
+  <div id="indexPromoBanner" style="display:none; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; position:relative; z-index:200;"></div>
+
   <main>
   <section class="hero hero-left" style="position: relative; height: 100vh; min-height: 100vh; overflow: hidden; background: #0e0f11;">
     <div class="hero-bg parallax-bg" id="homeHeroBg" style="background-image:url('assets/img/hero-1.webp'); position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
@@ -571,6 +574,32 @@
     import { initCartBadge } from "/assets/js/cart.js";
     initCartBadge();
 
+    let activePromos = [];
+    async function loadPromos() {
+      const now = new Date().toISOString();
+      const { data } = await supabase.from("promotions").select("*")
+        .eq("active", true)
+        .or(`starts_at.is.null,starts_at.lte.${now}`)
+        .or(`ends_at.is.null,ends_at.gte.${now}`);
+      activePromos = data || [];
+      renderIndexBanner();
+    }
+    function renderIndexBanner() {
+      const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
+      const el = document.getElementById("indexPromoBanner");
+      if (!el) return;
+      if (banner) { el.textContent = banner.banner_text; el.style.display = ''; }
+      else el.style.display = 'none';
+    }
+    function getStayPromo(stayId) {
+      return activePromos.find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'stays') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_stay_ids || []).includes(stayId);
+        return false;
+      }) || null;
+    }
+
     const featuredStayTitle = document.getElementById("featuredStayTitle");
     const featuredStayKicker = document.getElementById("featuredStayKicker");
     const featuredStayDuration = document.getElementById("featuredStayDuration");
@@ -876,11 +905,14 @@
     const posY = pos.y !== undefined ? pos.y : 50;
     const bgPos = (isMobile && stay.index_image_mobile) ? "center" : `${posX}% ${posY}%`;
 
+    const stayPromo = getStayPromo(stay.id);
+    const stayBadge = stayPromo ? `<div style="position:absolute; top:10px; left:10px; background:${stayPromo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${stayPromo.badge_text}</div>` : '';
     return `
       <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
 
-        <div class="stay-card-media" style="background-image:url('${image}'); background-position:${bgPos};">
+        <div class="stay-card-media" style="background-image:url('${image}'); background-position:${bgPos}; position:relative;">
 
+          ${stayBadge}
           <div class="stay-card-overlay"></div>
 
           <div class="stay-card-hover">
@@ -1230,6 +1262,7 @@
     }
 
     await loadHomepageImagePositions();
+    await loadPromos();
     await loadFeaturedStay();
     await loadHighlightStays();
     await loadBoutiqueVedette();
