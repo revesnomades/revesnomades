@@ -597,6 +597,12 @@
       siteFaqItems = normalizeSiteFaqItems(data || []);
       initialSiteFaqIds = siteFaqItems.map(item => item.id).filter(Boolean);
       if(!siteFaqItems.length && siteFaqMsg) siteFaqMsg.textContent = "FAQ vide. Ajoutez des questions ci-dessous.";
+      const siteFaqWrapper2 = document.getElementById("siteFaqWrapper");
+      const btnToggle = document.getElementById("btnToggleFaqList");
+      if (siteFaqItems.length && siteFaqWrapper2) {
+        siteFaqWrapper2.style.display = "block";
+        if (btnToggle) btnToggle.textContent = "Masquer les questions";
+      }
       renderSiteFaqEditor();
     }
 
@@ -653,6 +659,7 @@
       adminStatus.textContent = "Connecté en administrateur.";
       await loadCounts();
       await loadAdminGalleryPhotos();
+      await loadSiteFaqItems();
     } catch(err){
       console.warn(err);
     }

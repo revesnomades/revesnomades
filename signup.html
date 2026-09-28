@@ -105,7 +105,8 @@
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
 
-    const REDIRECT = `${location.origin}/compte.html`;
+    const redirectParam = new URLSearchParams(location.search).get("redirect");
+    const REDIRECT = redirectParam || `${location.origin}/compte.html`;
     document.getElementById("btnGoogle")?.addEventListener("click", () =>
       supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: REDIRECT } })
     );
@@ -184,7 +185,7 @@
         email,
         password,
         options: {
-          emailRedirectTo: `${location.origin}/compte.html`,
+          emailRedirectTo: `${location.origin}${redirectParam ? new URL(redirectParam).pathname + new URL(redirectParam).search : '/compte.html'}`,
           data: {
             firstname
           }
@@ -229,7 +230,13 @@
         }
       }
 
-      setMsg("✅ Votre compte a été créé avec succès ! Un e-mail de confirmation vient de vous être envoyé.");
+      if (data?.session) {
+        // Email confirmation disabled — logged in immediately
+        setMsg("✅ Compte créé ! Redirection en cours…");
+        setTimeout(() => { window.location.href = REDIRECT; }, 800);
+      } else {
+        setMsg("✅ Votre compte a été créé avec succès ! Un e-mail de confirmation vient de vous être envoyé.");
+      }
     });
   </script>
 
