@@ -111,7 +111,7 @@
             <strong id="cartTotalDisplay" style="font-size:18px;">—</strong>
           </div>
 
-          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">L'adresse de livraison sera demandée lors du paiement.</p>
+          <p id="cartShippingNote" style="font-size:12px; color:var(--muted); margin-bottom:16px;"></p>
 
           <button id="btnCheckout" class="btn on-light block" type="button">
             Procéder au paiement
@@ -298,7 +298,21 @@
           <span>${item.name} × ${item.quantity}</span>
           <span>${((Number(item.price) || 0) * item.quantity).toFixed(2)} €</span>
         </div>`
-      ).join("") + `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">Calculée à l'étape suivante</span></div>`;
+      ).join("");
+
+      const hasProducts = cart.some(i => i.type === "product");
+      const hasSejoursOnly = !hasProducts;
+
+      if (hasProducts) {
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">Calculée à l'étape suivante</span></div>`;
+      }
+
+      const noteEl = document.getElementById("cartShippingNote");
+      if (noteEl) {
+        noteEl.textContent = hasSejoursOnly
+          ? "Toutes les informations concernant votre séjour vous seront envoyées par e-mail après le paiement."
+          : "L'adresse de livraison sera demandée lors du paiement.";
+      }
 
       const total = getCartTotal();
       cartTotalDisplayEl.textContent = total.toFixed(2).replace(".", ",") + " €";
