@@ -716,7 +716,7 @@ html.js .text-reveal.reveal {
 
 /* ---------------- Compte ---------------- */
 .account-section{
-  padding: calc(var(--navH) + 44px) 0 28px;
+  padding: calc(var(--navH) + 44px) 0 8px;
 }
 .account-grid{
   display:grid;
