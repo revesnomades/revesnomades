@@ -253,7 +253,9 @@
   <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
     <div class="stay-band stay-band-compact" id="featuredStayBand" style="cursor:pointer;" onclick="if(!event.target.closest('a')) window.location.href='/sejour.html';">
-      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg');"></a>
+      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg'); position:relative;">
+        <div id="featuredStayBadge" style="display:none; position:absolute; top:14px; left:14px; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:4px 10px; border-radius:3px; color:#fff; z-index:3;"></div>
+      </a>
 
       <div class="stay-copy">
         <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px; margin-bottom:2px;">— &nbsp; —</div>
@@ -832,6 +834,18 @@
       }
 
       if (featuredStayMissing) featuredStayMissing.textContent = "";
+
+      const featBadgeEl = document.getElementById("featuredStayBadge");
+      if (featBadgeEl) {
+        const promo = getStayPromo(stay.id);
+        if (promo) {
+          featBadgeEl.textContent = promo.badge_text;
+          featBadgeEl.style.background = promo.badge_color || '#cc4444';
+          featBadgeEl.style.display = '';
+        } else {
+          featBadgeEl.style.display = 'none';
+        }
+      }
     }
 
     async function loadHighlightStays() {
