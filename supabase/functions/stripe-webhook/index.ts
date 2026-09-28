@@ -181,54 +181,86 @@ serve(async (req) => {
           if (error) console.error("Erreur insertion séjour:", error);
         }
 
+        // Résumé des articles pour les emails
+        const articlesLabel = session.metadata?.cart_items
+          ? JSON.parse(session.metadata.cart_items).map((i: { name: string; qty: number }) => `${i.name} ×${i.qty}`).join(", ")
+          : (session.metadata?.product_name || session.metadata?.event_name || "—");
+
+        const shippingHtml = shipping
+          ? `<li><strong>Adresse de livraison :</strong> ${shippingAddress.shipping_line1}, ${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}, ${shippingAddress.shipping_country}</li>`
+          : "";
+
         // Ajouter le contact sur Brevo (liste 13)
         const brevoApiKey = Deno.env.get("BREVO_API_KEY");
         if (brevoApiKey) {
-          const payloads = [
+          // Ajout contact liste
+          for (const payload of [
             { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { PRENOM: firstName, NOM: lastName } },
-            { email: customerEmail, listIds: [13], updateEnabled: true, attributes: { FIRSTNAME: firstName, LASTNAME: lastName } },
             { email: customerEmail, listIds: [13], updateEnabled: true },
-          ];
-
-          for (const payload of payloads) {
+          ]) {
             const res = await fetch("https://api.brevo.com/v3/contacts", {
               method: "POST",
               headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
               body: JSON.stringify(payload),
             });
+            const resText = await res.text();
             if (res.ok) { console.log(`Contact Brevo ajouté : ${customerEmail}`); break; }
+            else console.warn(`Brevo contact erreur (${res.status}):`, resText);
           }
 
-          // Email d'alerte admin
-          const subject = metaType === "sejour"
-            ? `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`
-            : `🛍️ Nouvel achat boutique — ${firstName} ${lastName} (${amount} €)`;
+          const sendEmail = async (to: { email: string; name: string }[], subject: string, htmlContent: string) => {
+            const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
+              body: JSON.stringify({
+                sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
+                to,
+                subject,
+                htmlContent,
+              }),
+            });
+            const txt = await res.text();
+            if (!res.ok) console.error(`Brevo email erreur (${res.status}):`, txt);
+            else console.log(`Email envoyé à ${to.map(t => t.email).join(", ")}`);
+          };
 
-          const shippingHtml = shipping
-            ? `<li><strong>Adresse de livraison :</strong> ${shippingAddress.shipping_line1}, ${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}, ${shippingAddress.shipping_country}</li>`
-            : "";
+          // Email alerte admin
+          await sendEmail(
+            [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
+            metaType === "sejour"
+              ? `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`
+              : `🛍️ Nouvel achat — ${firstName} ${lastName} (${amount} €)`,
+            `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px">
+              <h2 style="color:#2e7d32">Nouveau paiement validé !</h2>
+              <ul>
+                <li><strong>Nom :</strong> ${customerName}</li>
+                <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
+                <li><strong>Articles :</strong> ${articlesLabel}</li>
+                <li><strong>Montant :</strong> ${amount} €</li>
+                ${shippingHtml}
+              </ul>
+            </div>`
+          );
 
-          await fetch("https://api.brevo.com/v3/smtp/email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
-            body: JSON.stringify({
-              sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
-              to: [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
-              subject,
-              htmlContent: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px;">
-                  <h2 style="color: #2e7d32;">Nouveau paiement validé !</h2>
-                  <ul>
-                    <li><strong>Nom :</strong> ${customerName}</li>
-                    <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
-                    <li><strong>Articles :</strong> ${session.metadata?.cart_items ? JSON.parse(session.metadata.cart_items).map((i: { name: string; qty: number }) => `${i.name} ×${i.qty}`).join(", ") : (session.metadata?.product_name || session.metadata?.event_name || "—")}</li>
-                    <li><strong>Montant :</strong> ${amount} €</li>
-                    ${shippingHtml}
-                  </ul>
-                </div>
-              `,
-            }),
-          });
+          // Email confirmation client
+          await sendEmail(
+            [{ email: customerEmail, name: firstName || customerName }],
+            `Votre commande Âmes Nomades est confirmée`,
+            `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;color:#222">
+              <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci pour votre commande, ${firstName} !</h2>
+              <p>Nous avons bien reçu votre paiement et votre réservation est confirmée.</p>
+              <table style="width:100%;border-collapse:collapse;margin:20px 0">
+                <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Articles</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${articlesLabel}</td></tr>
+                <tr><td style="padding:8px 0;font-weight:600">Total payé</td><td style="padding:8px 0;text-align:right;font-weight:600">${amount} €</td></tr>
+              </table>
+              <p style="color:#666;font-size:14px">Vous recevrez prochainement toutes les informations nécessaires concernant votre séjour par email.</p>
+              <p style="margin-top:24px">À très bientôt,<br><strong>L'équipe Âmes Nomades</strong></p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+              <p style="font-size:12px;color:#999">Des questions ? Contactez-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
+            </div>`
+          );
+        } else {
+          console.warn("BREVO_API_KEY manquante — aucun email envoyé");
         }
       }
     }
