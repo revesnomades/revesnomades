@@ -2430,3 +2430,65 @@ footer.band.cream{
   color: var(--muted);
   margin-top: 4px;
 }
+
+/* ── Carrousel mobile : séjours & crosssell ─────────────────────────── */
+@media (max-width: 780px) {
+  /* Wrapper carrousel */
+  .mobile-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 14px;
+    padding-bottom: 12px;
+    /* masquer la scrollbar visuellement */
+    scrollbar-width: none;
+  }
+  .mobile-carousel::-webkit-scrollbar { display: none; }
+
+  /* stay-grid en carrousel */
+  #compteSejours.mobile-carousel,
+  .stay-grid.mobile-carousel {
+    display: flex;
+    grid-template-columns: unset;
+    max-width: unset;
+    margin-top: 0;
+  }
+  #compteSejours.mobile-carousel .stay-card,
+  .stay-grid.mobile-carousel .stay-card {
+    flex: 0 0 78vw;
+    max-width: 320px;
+    scroll-snap-align: start;
+  }
+
+  /* crosssell-grid en carrousel */
+  .crosssell-grid.mobile-carousel {
+    display: flex;
+    grid-template-columns: unset;
+  }
+  .crosssell-grid.mobile-carousel .crosssell-card {
+    flex: 0 0 64vw;
+    max-width: 240px;
+    scroll-snap-align: start;
+  }
+
+  /* Dots indicateurs */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .carousel-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background .2s, transform .2s;
+  }
+  .carousel-dots span.active {
+    background: var(--text);
+    transform: scale(1.3);
+  }
+}
+/* Desktop : dots masqués */
+.carousel-dots { display: none; }

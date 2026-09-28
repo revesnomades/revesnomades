@@ -144,9 +144,10 @@
             <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Nos prochains séjours</h2>
             <a href="/index.html#sejours" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir tous les séjours</a>
           </div>
-          <div class="crosssell-grid" id="staysSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+          <div class="crosssell-grid mobile-carousel" id="staysSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
             <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
           </div>
+          <div class="carousel-dots" id="staysSuggestDots"></div>
         </div>
 
         <!-- Produits -->
@@ -155,9 +156,10 @@
             <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Articles de la boutique</h2>
             <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir toute la boutique</a>
           </div>
-          <div class="crosssell-grid" id="productsSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+          <div class="crosssell-grid mobile-carousel" id="productsSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
             <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
           </div>
+          <div class="carousel-dots" id="productsSuggestDots"></div>
         </div>
 
       </div>
@@ -654,6 +656,36 @@
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
     loadPromos().then(() => loadSuggestions());
+
+    // Carrousel dots
+    function initCarouselDots(gridId, dotsId) {
+      const grid = document.getElementById(gridId);
+      const dotsWrap = document.getElementById(dotsId);
+      if (!grid || !dotsWrap) return;
+      function buildDots() {
+        if (window.innerWidth > 780) { dotsWrap.innerHTML = ""; return; }
+        const cards = grid.querySelectorAll(".stay-card, .crosssell-card");
+        if (cards.length < 2) { dotsWrap.innerHTML = ""; return; }
+        dotsWrap.innerHTML = Array.from(cards).map((_, i) => `<span${i===0?' class="active"':''}></span>`).join("");
+      }
+      function updateDots() {
+        const dots = dotsWrap.querySelectorAll("span");
+        if (!dots.length) return;
+        const cards = grid.querySelectorAll(".stay-card, .crosssell-card");
+        let closest = 0, minDist = Infinity;
+        cards.forEach((c, i) => {
+          const dist = Math.abs(c.getBoundingClientRect().left - grid.getBoundingClientRect().left);
+          if (dist < minDist) { minDist = dist; closest = i; }
+        });
+        dots.forEach((d, i) => d.classList.toggle("active", i === closest));
+      }
+      new MutationObserver(buildDots).observe(grid, { childList: true });
+      grid.addEventListener("scroll", updateDots, { passive: true });
+      window.addEventListener("resize", buildDots);
+      buildDots();
+    }
+    initCarouselDots("staysSuggestGrid", "staysSuggestDots");
+    initCarouselDots("productsSuggestGrid", "productsSuggestDots");
   </script>
 </body>
 </html>

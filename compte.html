@@ -384,9 +384,10 @@
     <div class="container" style="padding: 12px 0 40px;">
       <h2 style="font-family:'SegoCustom', serif; font-weight:300; font-size: clamp(18px, 2vw, 24px); margin:0 0 4px 0;">Prochains séjours</h2>
       <p style="color:var(--muted); margin:0 0 20px 0; font-size:13px;">Retrouvez nos prochaines retraites bien-être.</p>
-      <div id="compteSejours" class="stay-grid" style="margin-top:0;">
+      <div id="compteSejours" class="stay-grid mobile-carousel" style="margin-top:0;">
         <div style="color:var(--muted); font-size:14px;">Chargement…</div>
       </div>
+      <div class="carousel-dots" id="compteSejoursDots"></div>
     </div>
   </section>
 
@@ -1790,6 +1791,36 @@
         console.warn("Erreur chargement séjours compte:", e);
       }
     })();
+
+    // Carrousel dots
+    function initCarouselDots(gridId, dotsId) {
+      const grid = document.getElementById(gridId);
+      const dotsWrap = document.getElementById(dotsId);
+      if (!grid || !dotsWrap) return;
+      function buildDots() {
+        if (window.innerWidth > 780) { dotsWrap.innerHTML = ""; return; }
+        const cards = grid.querySelectorAll(".stay-card, .crosssell-card");
+        if (cards.length < 2) { dotsWrap.innerHTML = ""; return; }
+        dotsWrap.innerHTML = Array.from(cards).map((_, i) => `<span${i===0?' class="active"':''}></span>`).join("");
+      }
+      function updateDots() {
+        const dots = dotsWrap.querySelectorAll("span");
+        if (!dots.length) return;
+        const cards = grid.querySelectorAll(".stay-card, .crosssell-card");
+        let closest = 0, minDist = Infinity;
+        cards.forEach((c, i) => {
+          const dist = Math.abs(c.getBoundingClientRect().left - grid.getBoundingClientRect().left);
+          if (dist < minDist) { minDist = dist; closest = i; }
+        });
+        dots.forEach((d, i) => d.classList.toggle("active", i === closest));
+      }
+      // Observer pour reconstruire après chargement async
+      new MutationObserver(buildDots).observe(grid, { childList: true });
+      grid.addEventListener("scroll", updateDots, { passive: true });
+      window.addEventListener("resize", buildDots);
+      buildDots();
+    }
+    initCarouselDots("compteSejours", "compteSejoursDots");
   </script>
 
 </body>
