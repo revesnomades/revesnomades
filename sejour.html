@@ -281,7 +281,9 @@
       <div class="booking-box reveal" id="mainBookingBox" style="display:none;">
         <h3>Réserver</h3>
 
-        <div class="actions" style="margin-top:16px;">
+        <div id="promoDetail" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-top:12px;"></div>
+
+        <div class="actions" style="margin-top:10px;">
           <a id="bookingBtn" class="btn on-light" target="_blank" rel="noopener noreferrer">
             Réserver
           </a>
@@ -385,6 +387,21 @@
 
     let activePromos = [];
     let currentStayPromo = null;
+
+    function setBookingBtnPrice(btn, label, totalPrice, qty) {
+      const { finalPrice, saved } = computeDiscountedPrice(totalPrice, qty);
+      const detail = document.getElementById("promoDetail");
+      if (saved > 0) {
+        btn.textContent = label ? `${label} — ${finalPrice.toFixed(2)} €` : `${finalPrice.toFixed(2)} €`;
+        if (detail) {
+          detail.textContent = `${totalPrice.toFixed(2)} € − ${saved.toFixed(2)} € (${currentStayPromo?.name || 'Promo'})`;
+          detail.style.display = '';
+        }
+      } else {
+        btn.textContent = label ? `${label} — ${totalPrice % 1 === 0 ? totalPrice : totalPrice.toFixed(2)} €` : `${totalPrice % 1 === 0 ? totalPrice : totalPrice.toFixed(2)} €`;
+        if (detail) detail.style.display = 'none';
+      }
+    }
 
     function computeDiscountedPrice(totalPrice, qty = 1) {
       if (!currentStayPromo || !totalPrice) return { finalPrice: totalPrice, saved: 0 };
@@ -774,14 +791,11 @@
             bookingBtnEl.href = "#";
           }
           if (price) {
-            const { finalPrice, saved } = computeDiscountedPrice(Number(price));
-            if (saved > 0) {
-              bookingBtnEl.textContent = `Réserver — ${label} ${finalPrice.toFixed(2)} € (−${saved.toFixed(2)} €)`;
-            } else {
-              bookingBtnEl.textContent = `Réserver — ${label} ${price} €`;
-            }
+            setBookingBtnPrice(bookingBtnEl, `Réserver — ${label}`, Number(price), 1);
           } else {
             bookingBtnEl.textContent = `Réserver — ${label}`;
+            const detail = document.getElementById("promoDetail");
+            if (detail) detail.style.display = 'none';
           }
           if(bookingMsgEl) bookingMsgEl.textContent = "";
         }
@@ -1703,10 +1717,8 @@
             const label = singleBtn.getAttribute("data-label") || stay.title || "Séjour 1 jour";
             const totalPrice = unitPrice * currentQty;
             if (unitPrice > 0) {
-              const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice, currentQty);
-              singleBtn.textContent = sv > 0
-                ? `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${fp.toFixed(2)} €, −${sv.toFixed(2)} €) →`
-                : `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €) →`;
+              const placeLabel = `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'}`;
+              setBookingBtnPrice(singleBtn, placeLabel, totalPrice, currentQty);
             } else {
               singleBtn.textContent = `${label} →`;
             }
@@ -1733,8 +1745,7 @@
 
               if (btnStripe) {
                 if (totalPrice > 0) {
-                  const { finalPrice: fp, saved: sv } = computeDiscountedPrice(totalPrice, currentQty);
-                  btnStripe.textContent = sv > 0 ? `Réserver — ${fp.toFixed(2)} € (−${sv.toFixed(2)} €) →` : `Réserver — ${totalPrice} € →`;
+                  setBookingBtnPrice(btnStripe, 'Réserver', totalPrice, currentQty);
                 } else {
                   btnStripe.textContent = `Réserver →`;
                 }
@@ -1754,14 +1765,12 @@
 
           const totalPrice = unitPrice * currentQty;
           if (totalPrice > 0) {
-            const { finalPrice, saved } = computeDiscountedPrice(totalPrice, currentQty);
-            if (saved > 0) {
-              bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${finalPrice.toFixed(2)} €, −${saved.toFixed(2)} €)`;
-            } else {
-              bookingBtn.textContent = `Réserver — ${currentQty} ${currentQty > 1 ? 'places' : 'place'} (${totalPrice} €)`;
-            }
+            const placeLabel = `${currentQty} ${currentQty > 1 ? 'places' : 'place'}`;
+            setBookingBtnPrice(bookingBtn, placeLabel, totalPrice, currentQty);
           } else {
             bookingBtn.textContent = "Réserver mon séjour (Paiement sécurisé)";
+            const detail = document.getElementById("promoDetail");
+            if (detail) detail.style.display = 'none';
           }
         };
 
