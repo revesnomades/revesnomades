@@ -482,7 +482,7 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    let rawSlug = params.get("slug");
+    let rawSlug = params.get("slug") || params.get("s");
     if (!rawSlug) {
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const lastPart = pathParts[pathParts.length - 1] || "";
