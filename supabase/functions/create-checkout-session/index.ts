@@ -114,6 +114,21 @@ serve(async (req) => {
     // ui_mode "embedded" (défaut) → checkout embarqué (retourne client_secret)
     const isRedirect = body.ui_mode === "redirect";
 
+    // Remise promotionnelle transmise en centimes
+    const discountCents = Math.round(Number(body.discountAmount) || 0);
+    let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
+
+    if (discountCents > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountCents,
+        currency: "eur",
+        duration: "once",
+        name: "Promotion",
+        max_redemptions: 1,
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -121,6 +136,7 @@ serve(async (req) => {
       shipping_address_collection: {
         allowed_countries: ["FR", "BE", "CH", "LU", "MC"],
       },
+      ...(discounts ? { discounts } : {}),
       metadata: {
         type: "cart",
         cart_items: JSON.stringify(cartMeta),

@@ -113,6 +113,16 @@
 
           <p id="cartShippingNote" style="font-size:12px; color:var(--muted); margin-bottom:16px;"></p>
 
+          <!-- Code promo -->
+          <div id="promoCodeZone" style="display:none; margin-bottom:16px;">
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--text);">Code promo</div>
+            <div style="display:flex; gap:8px;">
+              <input id="promoCodeInput" class="input" placeholder="Entrer un code" style="flex:1; font-size:13px; text-transform:uppercase;" maxlength="30">
+              <button type="button" id="btnApplyPromo" class="btn tiny on-light">Appliquer</button>
+            </div>
+            <div id="promoCodeMsg" style="font-size:12px; margin-top:5px; display:none;"></div>
+          </div>
+
           <button id="btnCheckout" class="btn on-light block" type="button">
             Procéder au paiement
           </button>
@@ -243,6 +253,73 @@
 
     let stripeInstance = null;
     let embeddedCheckout = null;
+    let activePromos = [];
+    let appliedPromoCode = null;
+
+    async function loadPromos() {
+      const now = new Date().toISOString();
+      try {
+        const { data } = await supabase
+          .from("promotions")
+          .select("*")
+          .eq("active", true)
+          .or(`starts_at.is.null,starts_at.lte.${now}`)
+          .or(`ends_at.is.null,ends_at.gte.${now}`);
+        activePromos = data || [];
+      } catch { activePromos = []; }
+      renderCart();
+    }
+
+    function getAutoDiscounts(cart) {
+      const discounts = [];
+      for (const promo of activePromos) {
+        if (promo.type === 'promo_code') continue;
+        const applicable = getApplicableCartItems(cart, promo);
+        if (!applicable.length) continue;
+
+        if (promo.type === 'percent' || promo.type === 'early_bird') {
+          const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+          const amount = base * promo.value / 100;
+          if (amount > 0) discounts.push({ promo, amount, label: promo.name });
+        } else if (promo.type === 'fixed') {
+          const amount = Math.min(Number(promo.value), applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0));
+          if (amount > 0) discounts.push({ promo, amount, label: promo.name });
+        } else if (promo.type === 'duo') {
+          for (const item of applicable) {
+            if (item.quantity >= (promo.min_qty || 2)) {
+              const base = Number(item.price) * item.quantity;
+              const amount = base * promo.value / 100;
+              if (amount > 0) discounts.push({ promo, amount, label: `${promo.name} (${item.name})` });
+            }
+          }
+        }
+      }
+      return discounts;
+    }
+
+    function getPromoCodeDiscount(cart) {
+      if (!appliedPromoCode) return null;
+      const promo = activePromos.find(p => p.type === 'promo_code' && p.code === appliedPromoCode);
+      if (!promo) return null;
+      const applicable = getApplicableCartItems(cart, promo);
+      if (!applicable.length) return null;
+      const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+      const amount = base * promo.value / 100;
+      return amount > 0 ? { promo, amount, label: `Code "${promo.code}"` } : null;
+    }
+
+    function getApplicableCartItems(cart, promo) {
+      return cart.filter(item => {
+        if (promo.apply_to === 'all') return true;
+        if (promo.apply_to === 'products') return item.type === 'product';
+        if (promo.apply_to === 'stays') return item.type === 'sejour';
+        if (promo.apply_to === 'specific') {
+          if (item.type === 'product') return (promo.eligible_product_ids || []).includes(item.id);
+          if (item.type === 'sejour') return (promo.eligible_stay_ids || []).includes(item.id);
+        }
+        return false;
+      });
+    }
 
     function renderCart() {
       const cart = getCart();
@@ -306,6 +383,16 @@
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">Calculée à l'étape suivante</span></div>`;
       }
 
+      // Promotions automatiques
+      const autoDiscounts = getAutoDiscounts(cart);
+      const codeDiscount = getPromoCodeDiscount(cart);
+      const allDiscounts = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])];
+      let totalDiscount = 0;
+      for (const d of allDiscounts) {
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>🎁 ${d.label}</span><span>−${d.amount.toFixed(2).replace('.', ',')} €</span></div>`;
+        totalDiscount += d.amount;
+      }
+
       const noteEl = document.getElementById("cartShippingNote");
       if (noteEl) {
         noteEl.textContent = hasSejoursOnly
@@ -313,8 +400,16 @@
           : "L'adresse de livraison sera demandée lors du paiement.";
       }
 
-      const total = getCartTotal();
-      cartTotalDisplayEl.textContent = total.toFixed(2).replace(".", ",") + " €";
+      const rawTotal = getCartTotal();
+      const finalTotal = Math.max(0, rawTotal - totalDiscount);
+      cartTotalDisplayEl.textContent = finalTotal.toFixed(2).replace(".", ",") + " €";
+
+      // Promo code UI
+      const promoZone = document.getElementById("promoCodeZone");
+      if (promoZone) {
+        const hasCodePromos = activePromos.some(p => p.type === 'promo_code');
+        promoZone.style.display = hasCodePromos ? '' : 'none';
+      }
     }
 
     function deliveryLabel(businessDays) {
@@ -464,6 +559,10 @@
           image: i.image || null,
         }));
 
+        const autoDiscounts = getAutoDiscounts(cart);
+        const codeDiscount = getPromoCodeDiscount(cart);
+        const totalDiscountAmount = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])].reduce((s, d) => s + d.amount, 0);
+
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
           method: "POST",
           headers: {
@@ -475,6 +574,7 @@
             items,
             userId: user.id,
             userEmail: user.email,
+            discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
         });
@@ -494,9 +594,35 @@
 
     window._addToCartFromPanier = (item) => { addToCart(item); renderCart(); };
 
+    document.getElementById("btnApplyPromo")?.addEventListener("click", () => {
+      const input = document.getElementById("promoCodeInput");
+      const msg = document.getElementById("promoCodeMsg");
+      const code = (input?.value || "").trim().toUpperCase();
+      if (!code) return;
+
+      const promo = activePromos.find(p => p.type === 'promo_code' && p.code === code);
+      if (!promo) {
+        appliedPromoCode = null;
+        msg.textContent = "Code invalide ou expiré.";
+        msg.style.color = '#c00';
+        msg.style.display = '';
+        renderCart();
+        return;
+      }
+      appliedPromoCode = code;
+      msg.textContent = `✓ Code appliqué : −${promo.value}%`;
+      msg.style.color = '#1a7a40';
+      msg.style.display = '';
+      renderCart();
+    });
+
+    document.getElementById("promoCodeInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnApplyPromo")?.click();
+    });
+
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
-    renderCart();
+    loadPromos();
     loadSuggestions();
   </script>
 </body>
