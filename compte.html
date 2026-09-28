@@ -220,29 +220,13 @@
             </div>
 
             <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+
+            <div id="adminAccessBtn" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+              <a href="/admin-dashboard.html" class="btn on-light" style="width:100%; text-align:center; display:block;">Accès page Admin</a>
+            </div>
           </div>
         </div>
 
-        <!-- ADMIN FAQ PANEL -->
-          <div id="adminFaqPanel" class="account-card" style="display:none; margin-top:20px; background:#fff;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <div>
-                <h4 style="margin:0; font-size:16px;">❓ FAQ du site</h4>
-                <p style="margin:6px 0 0; color:var(--muted); font-size:13px;">
-                  FAQ globale affichée sur faq.html + modèle FAQ séjour (max 5).
-                </p>
-              </div>
-              <div class="account-actions">
-                <button class="btn tiny on-light" id="btnToggleFaqList" type="button">Voir les questions / réponses</button>
-                <button class="btn tiny on-light" id="btnAddSiteFaq" type="button">+ Ajouter une question</button>
-                <button class="btn tiny on-light" id="btnSaveSiteFaq" type="button">Enregistrer FAQ site</button>
-              </div>
-            </div>
-            <div id="siteFaqMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-            <div id="siteFaqWrapper" style="display:none; margin-top:14px;">
-              <div id="siteFaqList" class="admin-faq-list"></div>
-            </div>
-          </div>
         </div>
 
         <!-- COLONNE DROITE -->
@@ -270,85 +254,6 @@
             <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de vos achats...</div>
           </div>
 
-          <!-- ADMIN PANEL (remplace la rubrique réservations pour l'admin) -->
-          <div id="adminPanel" style="display:none;">
-            <div class="account-card" style="margin-top:0;">
-              <h3 style="margin:0;">Espace admin</h3>
-
-              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;">
-                <div class="account-card" style="padding:16px; background:rgba(0,0,0,0.02);">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits newsletter</div>
-                  <div id="newsletterCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
-
-                <div class="account-card" style="padding:16px; background:rgba(0,0,0,0.02);">
-                  <div style="font-size:13px; color:var(--muted);">Inscrits prioritaires</div>
-                  <div id="priorityCount" style="font-size:30px; font-weight:600; margin-top:6px;">—</div>
-                </div>
-              </div>
-
-              <div class="account-actions" style="margin-top:16px; flex-wrap:wrap;">
-                <button class="btn on-light" id="btnManageStays" type="button">⚙️ Gérer les séjours</button>
-                <button class="btn on-light" id="btnAdminBoutique" type="button">🛍️ Gérer le Shop</button>
-                <button class="btn on-light" id="btnAdminBookings" type="button">📊 Réservations</button>
-                <button class="btn on-light" id="btnPriorityList" type="button">⭐ Inscrits prioritaires</button>
-                <button class="btn on-light" id="btnNewsletterList" type="button">✉️ Newsletter</button>
-              </div>
-
-              <div id="adminMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
-            </div>
-
-            <div class="account-card" style="margin-top:16px; padding:16px; background:rgba(0,0,0,0.02);">
-              <h4 style="margin:0; font-size:16px;">🏠 Bandeaux de la page d'accueil (index.html)</h4>
-              <p style="margin:6px 0 12px; color:var(--muted); font-size:13px;">
-                Gérez l'affichage des rubriques sous le séjour principal. Au lancement (1 seul séjour), désactivez "5 séjours" et activez "Shop Vedette".
-              </p>
-              <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
-                  <input type="checkbox" id="chkShowStaysBand" style="width:18px; height:18px;">
-                  Afficher "Prochains séjours" (Bandeau 5 séjours)
-                </label>
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
-                  <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
-                  Afficher "Shop — Sélection Vedette"
-                </label>
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:500;">
-                  <input type="checkbox" id="chkShowGalleryBand" checked style="width:18px; height:18px;">
-                  Afficher "Galerie — Retour en images"
-                </label>
-                <button class="btn tiny on-light" id="btnSaveHomepageBands" type="button" style="margin-left:auto;">Enregistrer l'affichage</button>
-              </div>
-              <div id="homepageBandsMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
-            </div>
-
-            <!-- GESTION DES PHOTOS DE LA GALERIE -->
-            <div style="background:#fff; border:1px solid var(--line); border-radius:4px; padding:20px; margin-top:20px;">
-              <h3 style="margin:0; font-size:16px;">Photos du bandeau "Retour en images"</h3>
-              <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
-                Ajoutez, supprimez, ou glissez-déposez les cartes pour changer l'ordre des photos sur la page d'accueil.
-              </p>
-
-              <div id="adminGalleryPhotosList" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
-                <div style="color:var(--muted); font-size:13px;">Chargement des photos…</div>
-              </div>
-
-              <div style="border-top:1px dashed var(--line); padding-top:16px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-                <div style="flex:1; min-width:200px;">
-                  <label class="label" style="font-size:12px;">Fichier image ou URL</label>
-                  <div style="display:flex; gap:8px;">
-                    <input type="file" id="galNewPhotoFile" accept="image/*" class="input" style="padding:6px; font-size:12px; flex:1;">
-                    <input type="text" id="galNewPhotoUrl" placeholder="Ou URL (ex: assets/img/...)" class="input" style="font-size:13px; flex:1;">
-                  </div>
-                </div>
-                <div style="flex:1; min-width:180px;">
-                  <label class="label" style="font-size:12px;">Description (Alt)</label>
-                  <input type="text" id="galNewPhotoAlt" placeholder="Ex : Retraite Yoga Camargue" class="input" style="font-size:13px;">
-                </div>
-                <button class="btn tiny on-light" id="btnAdminAddGalPhoto" type="button" style="padding:8px 16px;">Ajouter la photo</button>
-              </div>
-              <div id="adminGalPhotoMsg" style="margin-top:8px; color:var(--muted); font-size:12.5px;"></div>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -1617,30 +1522,19 @@
 
       applyWelcomeName(metaFirstname || profileFirstname);
 
-      if (isAdmin) {
-        // Mode Admin : seulement mon compte et FAQ à gauche, et uniquement l'espace admin à droite
-        if (perksBox) perksBox.style.display = "none";
-        if (bookingsBox) bookingsBox.style.display = "none";
-        if (purchasesBox) purchasesBox.style.display = "none";
-        if (adminPanel) adminPanel.style.display = "block";
-        if (adminFaqPanel) adminFaqPanel.style.display = "block";
+      // Afficher le bouton admin si nécessaire
+      const adminAccessBtn = document.getElementById("adminAccessBtn");
+      if (adminAccessBtn) adminAccessBtn.style.display = isAdmin ? "block" : "none";
 
-        await Promise.all([
-          loadAdminStats(),
-          loadSiteFaqItems()
-        ]);
-      } else {
-        // Mode Utilisateur standard
-        if (adminPanel) adminPanel.style.display = "none";
-        if (adminFaqPanel) adminFaqPanel.style.display = "none";
-        if (bookingsBox) bookingsBox.style.display = "block";
+      // Même affichage pour tous : réservations + achats + newsletter
+      if (perksBox) perksBox.style.display = "none";
+      if (bookingsBox) bookingsBox.style.display = "block";
 
-        await Promise.all([
-          loadMyBookings(user),
-          loadMyPurchases(user),
-          loadNewsletterStatus(user)
-        ]);
-      }
+      await Promise.all([
+        loadMyBookings(user),
+        loadMyPurchases(user),
+        loadNewsletterStatus(user)
+      ]);
     }
 
     const btnStripePortal = document.getElementById("btnStripePortal");
@@ -1796,53 +1690,6 @@
       await unsubscribeCurrentUserFromNewsletter();
     });
 
-    // Admin
-    btnManageStays?.addEventListener("click", () => {
-      window.location.href = "/admin-stays.html";
-    });
-
-    btnAdminBoutique?.addEventListener("click", () => {
-      window.location.href = "/admin-boutique.html";
-    });
-
-    btnAdminBookings?.addEventListener("click", () => {
-      window.location.href = "/admin-bookings.html";
-    });
-
-    btnPriorityList?.addEventListener("click", () => {
-      window.location.href = "/admin-priority.html";
-    });
-
-    btnNewsletterList?.addEventListener("click", () => {
-      window.location.href = "/admin-newsletter.html";
-    });
-
-    const btnToggleFaqList = document.getElementById("btnToggleFaqList");
-    const siteFaqWrapper   = document.getElementById("siteFaqWrapper");
-
-    btnToggleFaqList?.addEventListener("click", () => {
-      const isVisible = siteFaqWrapper.style.display !== "none";
-      siteFaqWrapper.style.display = isVisible ? "none" : "block";
-      btnToggleFaqList.textContent = isVisible
-        ? "Voir les questions / réponses"
-        : "Ne plus afficher les questions / réponses";
-    });
-
-    btnAddSiteFaq?.addEventListener("click", () => {
-      siteFaqItems.push({
-        id: null,
-        question: "",
-        answer: "",
-        sort_order: siteFaqItems.length + 1,
-        is_active: true,
-        use_for_stay_default: false
-      });
-      renderSiteFaqEditor();
-    });
-
-    btnSaveSiteFaq?.addEventListener("click", async () => {
-      await saveSiteFaqItems();
-    });
 
     // Sync UI
     supabase.auth.onAuthStateChange(async (_evt, newSession) => {
