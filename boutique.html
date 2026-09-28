@@ -541,8 +541,8 @@
           ` : ''}
           ${p.delivery_info ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
           ${isSoldOut
-            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>`
-            : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); background:#fff;" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">+ Ajouter au panier</button>`
+            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>`
+            : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">+ Ajouter au panier</button>`
           }
         </div>
         `;
