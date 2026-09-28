@@ -69,7 +69,7 @@ serve(async (req) => {
 
         if (metaType === "cart") {
           // Nouveau format panier multi-articles
-          let cartItems: Array<{ id: string; type: string; name: string; qty: number }> = [];
+          let cartItems: Array<{ id: string; type: string; name: string; qty: number; price?: number }> = [];
           try {
             cartItems = JSON.parse(session.metadata?.cart_items || "[]");
           } catch { cartItems = []; }
@@ -87,6 +87,25 @@ serve(async (req) => {
             ...shippingAddress,
           });
           if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
+
+          // Insérer une réservation dans bookings pour chaque séjour du panier
+          const stayItems = cartItems.filter(i => i.type === "sejour");
+          for (const item of stayItems) {
+            const itemAmount = item.price ? item.price * item.qty : amount;
+            const { error: bookingErr } = await supabase.from("bookings").insert({
+              stay_id: item.id || null,
+              stay_title: item.name || "Séjour",
+              customer_name: customerName,
+              customer_email: customerEmail,
+              price_label: item.name || "Standard",
+              amount: itemAmount,
+              amount_paid: itemAmount,
+              status: "paid",
+              stripe_session_id: session.id,
+              booking_date: new Date().toISOString().split("T")[0],
+            });
+            if (bookingErr) console.error("Erreur insertion booking séjour:", bookingErr);
+          }
 
           // Décrémenter le stock pour chaque produit
           for (const item of cartItems) {

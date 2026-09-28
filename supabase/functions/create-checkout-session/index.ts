@@ -89,7 +89,7 @@ serve(async (req) => {
           },
           quantity: qty,
         });
-        cartMeta.push({ id: product.id, type: "product", name: product.name, qty });
+        cartMeta.push({ id: product.id, type: "product", name: product.name, qty, price: Number(product.price) || 0 });
 
       } else {
         // Séjour ou article sans DB lookup — utilise les infos fournies
@@ -106,7 +106,7 @@ serve(async (req) => {
           },
           quantity: qty,
         });
-        cartMeta.push({ id: item.id, type: item.type || "sejour", name, qty });
+        cartMeta.push({ id: item.id, type: item.type || "sejour", name, qty, price });
       }
     }
 
