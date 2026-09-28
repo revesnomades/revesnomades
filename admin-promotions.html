@@ -197,8 +197,12 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="fValue" id="fValueLabel">Valeur (%) *</label>
-            <input id="fValue" class="input" type="number" min="0" step="0.01" placeholder="10">
+            <label for="fValue" id="fValueLabel">Valeur *</label>
+            <div style="display:flex; gap:0; align-items:stretch;">
+              <input id="fValue" class="input" type="number" min="0" step="0.01" placeholder="10" style="border-radius:6px 0 0 6px !important; flex:1;">
+              <button type="button" id="fUnitPercent" data-unit="percent" style="padding:0 12px; border:1px solid var(--line); border-left:none; background:var(--text); color:#fff; font-size:13px; font-weight:700; cursor:pointer; border-radius:0; min-width:38px;">%</button>
+              <button type="button" id="fUnitEuro" data-unit="euro" style="padding:0 12px; border:1px solid var(--line); border-left:none; background:#fff; color:var(--text); font-size:13px; font-weight:700; cursor:pointer; border-radius:0 6px 6px 0 !important; min-width:38px;">€</button>
+            </div>
           </div>
         </div>
 
@@ -327,6 +331,20 @@
     const fType = document.getElementById("fType");
     const fValue = document.getElementById("fValue");
     const fValueLabel = document.getElementById("fValueLabel");
+    const fUnitPercent = document.getElementById("fUnitPercent");
+    const fUnitEuro = document.getElementById("fUnitEuro");
+    let selectedUnit = 'percent';
+
+    function setUnit(unit) {
+      selectedUnit = unit;
+      fUnitPercent.style.background = unit === 'percent' ? 'var(--text)' : '#fff';
+      fUnitPercent.style.color = unit === 'percent' ? '#fff' : 'var(--text)';
+      fUnitEuro.style.background = unit === 'euro' ? 'var(--text)' : '#fff';
+      fUnitEuro.style.color = unit === 'euro' ? '#fff' : 'var(--text)';
+    }
+
+    fUnitPercent.addEventListener("click", () => setUnit('percent'));
+    fUnitEuro.addEventListener("click", () => setUnit('euro'));
     const fCode = document.getElementById("fCode");
     const fMinQty = document.getElementById("fMinQty");
     const fApplyTo = document.getElementById("fApplyTo");
@@ -386,9 +404,11 @@
     }
 
     function formatValue(promo) {
-      if (promo.type === 'percent' || promo.type === 'early_bird') return `−${promo.value}%`;
+      const unit = promo.value_unit || (promo.type === 'fixed' ? 'euro' : 'percent');
+      const isEuro = unit === 'euro';
+      if (promo.type === 'percent' || promo.type === 'early_bird') return isEuro ? `−${Number(promo.value).toFixed(2)} €` : `−${promo.value}%`;
       if (promo.type === 'fixed') return `−${Number(promo.value).toFixed(2)} €`;
-      if (promo.type === 'duo') return `Duo : −${promo.value}${promo.value <= 100 && !String(promo.value).includes('.') ? '%' : ' €'}`;
+      if (promo.type === 'duo') return isEuro ? `Duo : −${Number(promo.value).toFixed(2)} €` : `Duo : −${promo.value}%`;
       if (promo.type === 'promo_code') return `Code : "${promo.code}" → −${promo.value}%`;
       return `${promo.value}`;
     }
@@ -454,7 +474,8 @@
       fBadgeColor.value = '#cc4444';
       badgePreview.style.background = '#cc4444';
       fMinQty.value = 2;
-      updateTypeUI();
+      setUnit('percent');
+      updateTypeUI(true);
       updateApplyToUI();
       updateDisplayUI();
       formMsg.style.display = 'none';
@@ -472,6 +493,7 @@
       fValue.value = p.value;
       fCode.value = p.code || '';
       fMinQty.value = p.min_qty || 2;
+      setUnit(p.value_unit || (p.type === 'fixed' ? 'euro' : 'percent'));
       fApplyTo.value = p.apply_to || 'all';
       fStartsAt.value = p.starts_at ? p.starts_at.slice(0, 16) : '';
       fEndsAt.value = p.ends_at ? p.ends_at.slice(0, 16) : '';
@@ -498,22 +520,26 @@
       await loadData();
     };
 
-    function updateTypeUI() {
+    function updateTypeUI(keepUnit = false) {
       const type = fType.value;
       codeGroup.style.display = type === 'promo_code' ? '' : 'none';
       minQtyGroup.style.display = type === 'duo' ? '' : 'none';
-      if (type === 'percent' || type === 'early_bird') {
-        fValueLabel.textContent = 'Remise (%) *';
-        fValue.placeholder = '10';
-      } else if (type === 'fixed') {
-        fValueLabel.textContent = 'Montant fixe (€) *';
+
+      // For percent/early_bird: default to %, for fixed: default to €
+      if (!keepUnit) {
+        if (type === 'fixed') setUnit('euro');
+        else setUnit('percent');
+      }
+
+      const isEuro = selectedUnit === 'euro';
+      const descPrefix = type === 'duo' ? 'Remise par place' : 'Remise';
+
+      if (type === 'fixed') {
+        fValueLabel.textContent = 'Montant fixe *';
         fValue.placeholder = '5.00';
-      } else if (type === 'duo') {
-        fValueLabel.textContent = 'Remise par place (%) *';
-        fValue.placeholder = '10';
-      } else if (type === 'promo_code') {
-        fValueLabel.textContent = 'Remise (%) *';
-        fValue.placeholder = '10';
+      } else {
+        fValueLabel.textContent = `${descPrefix} *`;
+        fValue.placeholder = isEuro ? '5.00' : '10';
       }
     }
 
@@ -544,7 +570,7 @@
       bannerOptions.style.display = fDisplayBanner.checked ? '' : 'none';
     }
 
-    fType.addEventListener("change", updateTypeUI);
+    fType.addEventListener("change", () => updateTypeUI(false));
     fApplyTo.addEventListener("change", () => updateApplyToUI());
     fDisplayBadge.addEventListener("change", updateDisplayUI);
     fDisplayBanner.addEventListener("change", updateDisplayUI);
@@ -585,6 +611,7 @@
         description: fDesc.value.trim() || null,
         type: fType.value,
         value: parseFloat(fValue.value) || 0,
+        value_unit: selectedUnit,
         code: fType.value === 'promo_code' ? fCode.value.trim().toUpperCase() || null : null,
         min_qty: fType.value === 'duo' ? parseInt(fMinQty.value) || 2 : 1,
         apply_to: fApplyTo.value,

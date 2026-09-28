@@ -277,9 +277,10 @@
         const applicable = getApplicableCartItems(cart, promo);
         if (!applicable.length) continue;
 
+        const isEuro = promo.value_unit === 'euro';
         if (promo.type === 'percent' || promo.type === 'early_bird') {
           const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
-          const amount = base * promo.value / 100;
+          const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
           if (amount > 0) discounts.push({ promo, amount, label: promo.name });
         } else if (promo.type === 'fixed') {
           const amount = Math.min(Number(promo.value), applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0));
@@ -288,7 +289,7 @@
           for (const item of applicable) {
             if (item.quantity >= (promo.min_qty || 2)) {
               const base = Number(item.price) * item.quantity;
-              const amount = base * promo.value / 100;
+              const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
               if (amount > 0) discounts.push({ promo, amount, label: `${promo.name} (${item.name})` });
             }
           }
@@ -304,7 +305,8 @@
       const applicable = getApplicableCartItems(cart, promo);
       if (!applicable.length) return null;
       const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
-      const amount = base * promo.value / 100;
+      const isEuro = promo.value_unit === 'euro';
+      const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
       return amount > 0 ? { promo, amount, label: `Code "${promo.code}"` } : null;
     }
 
@@ -610,7 +612,7 @@
         return;
       }
       appliedPromoCode = code;
-      msg.textContent = `✓ Code appliqué : −${promo.value}%`;
+      msg.textContent = promo.value_unit === 'euro' ? `✓ Code appliqué : −${Number(promo.value).toFixed(2)} €` : `✓ Code appliqué : −${promo.value}%`;
       msg.style.color = '#1a7a40';
       msg.style.display = '';
       renderCart();
