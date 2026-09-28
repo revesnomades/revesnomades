@@ -36,7 +36,8 @@ serve(async (req) => {
       const session = event.data.object as Stripe.Checkout.Session;
 
       const customerEmail = session.customer_details?.email;
-      const customerName = session.customer_details?.name || "";
+      // Prioritize shipping name (typed in form) over Stripe profile name (may be outdated)
+      const customerName = session.shipping_details?.name || session.customer_details?.name || "";
       const amount = session.amount_total ? session.amount_total / 100 : 0;
 
       let firstName = "";
