@@ -376,7 +376,7 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
-    import { initCartBadge } from "/assets/js/cart.js";
+    import { initCartBadge, addToCart } from "/assets/js/cart.js";
     initCartBadge();
 
     const params = new URLSearchParams(window.location.search);
@@ -1681,25 +1681,12 @@
         setTimeout(updateQtyUI, 50);
 
         bookingBtn.href = "#";
-        bookingMsg.textContent = "Réservation directe avec création de compte obligatoire.";
+        bookingMsg.textContent = "";
 
         bookingBtn.addEventListener("click", async (e) => {
           e.preventDefault();
           bookingBtn.classList.add("btn-loading");
-          bookingMsg.style.color = "var(--text)";
-          bookingMsg.textContent = "Vérification du compte…";
 
-          const { data: { user } } = await supabase.auth.getUser();
-          if(!user) {
-            bookingBtn.classList.remove("btn-loading");
-            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
-            alert("Veuillez vous connecter ou créer un compte pour réserver ce séjour.");
-            window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
-            return;
-          }
-
-          bookingMsg.textContent = "Redirection vers le paiement sécurisé Stripe…";
-          
           let stayPrice = Number(bookingBtn.getAttribute("data-price") || 0);
           if (!stayPrice && stay.extra_options && Array.isArray(stay.extra_options) && stay.extra_options.length > 0) {
             stayPrice = Number(stay.extra_options[0].price || 0);
@@ -1711,41 +1698,23 @@
             itemTitle += ` (${optionLabel})`;
           }
 
-          const { data: sessionData, error: sessionErr } = await supabase.functions.invoke('create-checkout-session', {
-            body: {
-              ui_mode: "redirect",
-              items: [{
-                id: stay.id,
-                type: 'sejour',
-                name: itemTitle,
-                price: stayPrice,
-                quantity: currentQty,
-              }],
-              userId: user.id,
-              userEmail: user.email,
-              return_url: `${window.location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=sejour`,
-              cancel_url: window.location.href,
-            }
-          });
+          const stayImg = stay.index_image || stay.hero_image || "";
 
-          if (sessionErr || !sessionData?.url) {
-            console.error("Erreur Checkout:", sessionErr, sessionData);
-            bookingBtn.classList.remove("btn-loading");
-            document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
-            const errDetail = sessionData?.error || sessionErr?.message || "Erreur inconnue";
-            bookingMsg.style.color = "#c00";
-            bookingMsg.style.fontWeight = "600";
-            bookingMsg.style.fontSize = "13.5px";
-            bookingMsg.textContent = `⚠️ ${errDetail}`;
-            bookingMsg.scrollIntoView({ behavior: "smooth", block: "center" });
-            return;
-          }
+          addToCart({
+            type: 'sejour',
+            id: stay.id,
+            name: itemTitle,
+            price: stayPrice,
+            quantity: currentQty,
+            maxStock: maxQty,
+            image: stayImg,
+          });
 
           if (window.MetaPixel) {
             window.MetaPixel.trackAddToCart(stay.title || 'Séjour', stay.id, stayPrice * currentQty);
           }
 
-          window.location.href = sessionData.url;
+          window.location.href = '/panier.html';
         });
       } else if(bookingUrl && (!optData || !optData.length)){
         bookingBtn.href = bookingUrl;
