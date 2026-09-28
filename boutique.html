@@ -535,7 +535,7 @@
         const isSoldOut = p.stock === 0;
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         const promo = getProductPromo(p.id);
-        const promoBadge = promo ? `<div style="position:absolute; top:10px; left:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
+        const promoBadge = promo ? `<div style="position:absolute; top:10px; right:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
         return `
         <div class="shop-card">
           <div class="shop-image-wrapper" style="background-image:url('${imgSrc}');">

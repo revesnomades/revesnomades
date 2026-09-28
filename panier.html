@@ -443,7 +443,7 @@
     }
     function badgeHtml(promo) {
       if (!promo) return '';
-      return `<div style="position:absolute; top:8px; left:8px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; z-index:2;">${promo.badge_text}</div>`;
+      return `<div style="position:absolute; top:8px; right:8px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; z-index:2;">${promo.badge_text}</div>`;
     }
 
     async function loadSuggestions() {

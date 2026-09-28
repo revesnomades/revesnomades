@@ -1766,7 +1766,7 @@
           const d = dateMap.get(stay.id);
           const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
           const promo = getStayPromoBadge(stay.id);
-          const promoBadge = promo ? `<div style="position:absolute; top:10px; left:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
+          const promoBadge = promo ? `<div style="position:absolute; top:10px; right:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
           return `
             <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
               <div class="stay-card-media" style="background-image:url('${img}'); background-position:center; position:relative;">
