@@ -92,19 +92,31 @@ serve(async (req) => {
           const stayItems = cartItems.filter(i => i.type === "sejour");
           for (const item of stayItems) {
             const itemAmount = item.price ? item.price * item.qty : amount;
-            const { error: bookingErr } = await supabase.from("bookings").insert({
+            const bookingRow: Record<string, unknown> = {
               stay_id: item.id || null,
               stay_title: item.name || "Séjour",
               customer_name: customerName,
               customer_email: customerEmail,
               price_label: item.name || "Standard",
               amount: itemAmount,
-              amount_paid: itemAmount,
               status: "paid",
-              stripe_session_id: session.id,
-              booking_date: new Date().toISOString().split("T")[0],
-            });
-            if (bookingErr) console.error("Erreur insertion booking séjour:", bookingErr);
+            };
+            // Colonnes optionnelles — insérées seulement si elles existent dans la table
+            try {
+              const { error: bookingErr } = await supabase.from("bookings").insert({
+                ...bookingRow,
+                amount_paid: itemAmount,
+                stripe_session_id: session.id,
+                booking_date: new Date().toISOString().split("T")[0],
+              });
+              if (bookingErr) {
+                console.warn("Insert complet échoué, retry sans colonnes optionnelles:", bookingErr.message);
+                const { error: retryErr } = await supabase.from("bookings").insert(bookingRow);
+                if (retryErr) console.error("Erreur insertion booking séjour:", retryErr);
+              }
+            } catch (e) {
+              console.error("Exception insertion booking:", e);
+            }
           }
 
           // Décrémenter le stock pour chaque produit
