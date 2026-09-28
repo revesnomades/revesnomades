@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Promotions — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
+      border-radius: 6px !important;
+    }
+    .promo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .promo-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-radius: 6px;
+    }
+    .promo-card.inactive {
+      opacity: 0.55;
+    }
+    .promo-badge-preview {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #fff;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--white);
+      padding: 28px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: auto;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .eligible-list {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      padding: 8px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .eligible-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 400;
+      cursor: pointer;
+    }
+    .type-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .type-percent { background: #e8f4fd; color: #1a6fa8; }
+    .type-fixed { background: #e8f8f0; color: #1a7a40; }
+    .type-duo { background: #fdf0e8; color: #b05a10; }
+    .type-promo_code { background: #f0e8fd; color: #6a1aaa; }
+    .type-early_bird { background: #fdf5e8; color: #8a6010; }
+    .section-sep {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 18px 0;
+    }
+  </style>
+</head>
+
+<body class="on-light">
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/faq.html">FAQ</a>
+        <a href="/boutique.html">Shop</a>
+        <a href="/compte.html">Compte</a>
+        <a href="/admin-dashboard.html">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h1 style="margin:0;">Promotions</h1>
+          <p style="color:var(--muted); margin-top:8px; margin-bottom:0;">Créez et gérez vos offres promotionnelles sur les produits et séjours.</p>
+        </div>
+        <button class="btn on-light" id="btnCreate">+ Nouvelle promotion</button>
+      </div>
+
+      <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+      <!-- Légende types -->
+      <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12px; color:var(--muted);">
+        <span>Types :</span>
+        <span class="type-badge type-percent">% Remise</span>
+        <span class="type-badge type-fixed">€ Fixe</span>
+        <span class="type-badge type-duo">Duo</span>
+        <span class="type-badge type-promo_code">Code promo</span>
+        <span class="type-badge type-early_bird">Early bird</span>
+      </div>
+
+      <div id="promoGrid" class="promo-grid">
+        <div style="color:var(--muted); font-size:13px; padding:20px 0; grid-column:1/-1;">Chargement…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL CRÉATION / ÉDITION -->
+  <div class="modal" id="promoModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 id="modalTitle" style="margin:0; font-size:18px;">Nouvelle promotion</h2>
+        <button type="button" id="btnCloseModal" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; padding:4px 8px;">✕</button>
+      </div>
+
+      <form id="promoForm" autocomplete="off">
+        <input type="hidden" id="fId">
+
+        <div class="form-group">
+          <label for="fName">Nom interne *</label>
+          <input id="fName" class="input" placeholder="Ex: Soldes été 2026" required>
+        </div>
+
+        <div class="form-group">
+          <label for="fDesc">Description (optionnel)</label>
+          <textarea id="fDesc" class="input" rows="2" placeholder="Note interne ou message affiché aux clients"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fType">Type de promotion *</label>
+            <select id="fType" class="input">
+              <option value="percent">% Remise (pourcentage)</option>
+              <option value="fixed">€ Fixe (montant)</option>
+              <option value="duo">Offre duo (2 places = remise)</option>
+              <option value="promo_code">Code promo</option>
+              <option value="early_bird">Early bird (réservation anticipée)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fValue" id="fValueLabel">Valeur (%) *</label>
+            <input id="fValue" class="input" type="number" min="0" step="0.01" placeholder="10">
+          </div>
+        </div>
+
+        <div class="form-group" id="codeGroup" style="display:none;">
+          <label for="fCode">Code promo *</label>
+          <input id="fCode" class="input" placeholder="BIENVENUE10" style="text-transform:uppercase;">
+          <small style="color:var(--muted); font-size:11.5px;">Les clients devront saisir ce code dans leur panier.</small>
+        </div>
+
+        <div class="form-group" id="minQtyGroup" style="display:none;">
+          <label for="fMinQty">Quantité minimum pour déclencher la remise</label>
+          <input id="fMinQty" class="input" type="number" min="1" value="2" placeholder="2">
+        </div>
+
+        <hr class="section-sep">
+
+        <div class="form-group">
+          <label for="fApplyTo">Applicable sur</label>
+          <select id="fApplyTo" class="input">
+            <option value="all">Tout (produits + séjours)</option>
+            <option value="products">Produits du shop uniquement</option>
+            <option value="stays">Séjours uniquement</option>
+            <option value="specific">Sélection spécifique</option>
+          </select>
+        </div>
+
+        <div id="specificGroup" style="display:none;">
+          <div class="form-group">
+            <label>Produits éligibles</label>
+            <div id="eligibleProductsList" class="eligible-list">
+              <span style="color:var(--muted); font-size:12px;">Chargement…</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Séjours éligibles</label>
+            <div id="eligibleStaysList" class="eligible-list">
+              <span style="color:var(--muted); font-size:12px;">Chargement…</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="section-sep">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fStartsAt">Début (optionnel)</label>
+            <input id="fStartsAt" class="input" type="datetime-local">
+          </div>
+          <div class="form-group">
+            <label for="fEndsAt">Fin (optionnel)</label>
+            <input id="fEndsAt" class="input" type="datetime-local">
+          </div>
+        </div>
+
+        <hr class="section-sep">
+        <p style="font-size:13px; font-weight:600; margin:0 0 12px;">Affichage</p>
+
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
+          <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="fDisplayBadge" checked>
+            Badge sur les cartes produit/séjour
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="fDisplayBanner">
+            Bannière en haut de page
+          </label>
+        </div>
+
+        <div id="badgeOptions">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fBadgeText">Texte du badge</label>
+              <input id="fBadgeText" class="input" placeholder="-10%" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label for="fBadgeColor">Couleur du badge</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="fBadgeColor" class="input" type="color" value="#cc4444" style="width:50px; height:38px; padding:2px; cursor:pointer;">
+                <span id="badgePreview" class="promo-badge-preview" style="background:#cc4444;">-10%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="bannerOptions" style="display:none;">
+          <div class="form-group">
+            <label for="fBannerText">Texte de la bannière</label>
+            <input id="fBannerText" class="input" placeholder="🎉 Soldes d'été : -10% sur tout le shop avec le code ÉTÉ10">
+          </div>
+        </div>
+
+        <hr class="section-sep">
+
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
+          <input type="checkbox" id="fActive" checked style="width:16px; height:16px;">
+          <label for="fActive" style="font-size:13px; cursor:pointer;">Promotion active</label>
+        </div>
+
+        <div id="formMsg" style="font-size:13px; margin-bottom:12px; display:none;"></div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="btn on-light" id="btnDeletePromo" style="display:none; margin-right:auto; color:#c00; border-color:#c00;">Supprimer</button>
+          <button type="button" class="btn on-light" id="btnCancelModal">Annuler</button>
+          <button type="submit" class="btn on-light" id="btnSave">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/main.js"></script>
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js";
+
+    const promoGrid = document.getElementById("promoGrid");
+    const adminStatus = document.getElementById("adminStatus");
+    const promoModal = document.getElementById("promoModal");
+    const promoForm = document.getElementById("promoForm");
+    const modalTitle = document.getElementById("modalTitle");
+    const formMsg = document.getElementById("formMsg");
+    const btnDeletePromo = document.getElementById("btnDeletePromo");
+
+    // Form fields
+    const fId = document.getElementById("fId");
+    const fName = document.getElementById("fName");
+    const fDesc = document.getElementById("fDesc");
+    const fType = document.getElementById("fType");
+    const fValue = document.getElementById("fValue");
+    const fValueLabel = document.getElementById("fValueLabel");
+    const fCode = document.getElementById("fCode");
+    const fMinQty = document.getElementById("fMinQty");
+    const fApplyTo = document.getElementById("fApplyTo");
+    const fStartsAt = document.getElementById("fStartsAt");
+    const fEndsAt = document.getElementById("fEndsAt");
+    const fDisplayBadge = document.getElementById("fDisplayBadge");
+    const fDisplayBanner = document.getElementById("fDisplayBanner");
+    const fBadgeText = document.getElementById("fBadgeText");
+    const fBadgeColor = document.getElementById("fBadgeColor");
+    const fBannerText = document.getElementById("fBannerText");
+    const fActive = document.getElementById("fActive");
+    const badgePreview = document.getElementById("badgePreview");
+    const codeGroup = document.getElementById("codeGroup");
+    const minQtyGroup = document.getElementById("minQtyGroup");
+    const specificGroup = document.getElementById("specificGroup");
+    const badgeOptions = document.getElementById("badgeOptions");
+    const bannerOptions = document.getElementById("bannerOptions");
+    const eligibleProductsList = document.getElementById("eligibleProductsList");
+    const eligibleStaysList = document.getElementById("eligibleStaysList");
+
+    let allPromotions = [];
+    let allProducts = [];
+    let allStays = [];
+
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { window.location.href = "/compte.html"; return null; }
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      const email = (user.email || "").toLowerCase();
+      const isEmailAdmin = email === "contact@amesnomades.com" || email === "sarnelli.ap@gmail.com" || email === "revesnomades@gmail.com";
+      if (!isEmailAdmin && data?.role !== "admin") {
+        adminStatus.textContent = "Accès refusé.";
+        throw new Error("Not admin");
+      }
+      return user;
+    }
+
+    async function loadData() {
+      await checkAdmin();
+
+      const [promoRes, productRes, stayRes] = await Promise.all([
+        supabase.from("promotions").select("*").order("created_at", { ascending: false }),
+        supabase.from("products").select("id, name").order("name"),
+        supabase.from("stays").select("id, title").eq("published", true).order("title"),
+      ]);
+
+      allPromotions = promoRes.data || [];
+      allProducts = productRes.data || [];
+      allStays = stayRes.data || [];
+
+      renderGrid();
+    }
+
+    function typeLabel(type) {
+      const map = { percent: '% Remise', fixed: '€ Fixe', duo: 'Duo', promo_code: 'Code promo', early_bird: 'Early bird' };
+      return map[type] || type;
+    }
+
+    function formatValue(promo) {
+      if (promo.type === 'percent' || promo.type === 'early_bird') return `−${promo.value}%`;
+      if (promo.type === 'fixed') return `−${Number(promo.value).toFixed(2)} €`;
+      if (promo.type === 'duo') return `Duo : −${promo.value}${promo.value <= 100 && !String(promo.value).includes('.') ? '%' : ' €'}`;
+      if (promo.type === 'promo_code') return `Code : "${promo.code}" → −${promo.value}%`;
+      return `${promo.value}`;
+    }
+
+    function applyToLabel(applyTo) {
+      const map = { all: 'Tout', products: 'Produits', stays: 'Séjours', specific: 'Sélection' };
+      return map[applyTo] || applyTo;
+    }
+
+    function renderGrid() {
+      if (!allPromotions.length) {
+        promoGrid.innerHTML = `<div style="grid-column:1/-1; color:var(--muted); font-size:13.5px; padding:20px 0;">Aucune promotion pour le moment. <button class="btn tiny on-light" id="btnCreateEmpty" style="margin-left:8px;">Créer la première</button></div>`;
+        document.getElementById("btnCreateEmpty")?.addEventListener("click", openCreate);
+        return;
+      }
+
+      promoGrid.innerHTML = allPromotions.map(p => {
+        const badgeColor = p.badge_color || '#cc4444';
+        const badgeText = p.badge_text || '';
+        const isActive = p.active && (!p.ends_at || new Date(p.ends_at) > new Date()) && (!p.starts_at || new Date(p.starts_at) <= new Date());
+        const dateRange = [
+          p.starts_at ? `Dès le ${new Date(p.starts_at).toLocaleDateString('fr-FR')}` : '',
+          p.ends_at ? `Jusqu'au ${new Date(p.ends_at).toLocaleDateString('fr-FR')}` : '',
+        ].filter(Boolean).join(' · ');
+
+        return `
+          <div class="promo-card ${p.active ? '' : 'inactive'}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+              <div>
+                <div style="font-weight:600; font-size:14px;">${p.name}</div>
+                <div style="margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                  <span class="type-badge type-${p.type}">${typeLabel(p.type)}</span>
+                  <span style="font-size:12.5px; color:var(--muted);">${formatValue(p)}</span>
+                </div>
+              </div>
+              <div style="text-align:right; flex-shrink:0;">
+                ${badgeText ? `<span class="promo-badge-preview" style="background:${badgeColor};">${badgeText}</span>` : ''}
+                <div style="font-size:11px; margin-top:4px; color:${isActive ? '#1a7a40' : '#c00'}; font-weight:600;">${isActive ? '● Actif' : p.active ? '● En attente' : '● Inactif'}</div>
+              </div>
+            </div>
+            ${p.description ? `<div style="font-size:12.5px; color:var(--muted);">${p.description}</div>` : ''}
+            <div style="font-size:12px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap;">
+              <span>Sur : ${applyToLabel(p.apply_to)}</span>
+              ${p.apply_to === 'specific' ? `<span>Produits : ${(p.eligible_product_ids||[]).length} · Séjours : ${(p.eligible_stay_ids||[]).length}</span>` : ''}
+            </div>
+            ${dateRange ? `<div style="font-size:11.5px; color:var(--muted);">${dateRange}</div>` : ''}
+            <div style="margin-top:4px;">
+              <button class="btn tiny on-light" onclick="window.editPromo('${p.id}')">Modifier</button>
+              <button class="btn tiny on-light" style="margin-left:6px; color:${p.active ? '#c00' : 'inherit'};" onclick="window.togglePromo('${p.id}', ${!p.active})">${p.active ? 'Désactiver' : 'Activer'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openCreate() {
+      promoForm.reset();
+      fId.value = '';
+      modalTitle.textContent = 'Nouvelle promotion';
+      btnDeletePromo.style.display = 'none';
+      fActive.checked = true;
+      fDisplayBadge.checked = true;
+      fBadgeColor.value = '#cc4444';
+      badgePreview.style.background = '#cc4444';
+      fMinQty.value = 2;
+      updateTypeUI();
+      updateApplyToUI();
+      updateDisplayUI();
+      formMsg.style.display = 'none';
+      promoModal.classList.add('active');
+    }
+
+    window.editPromo = (id) => {
+      const p = allPromotions.find(x => x.id === id);
+      if (!p) return;
+      promoForm.reset();
+      fId.value = p.id;
+      fName.value = p.name;
+      fDesc.value = p.description || '';
+      fType.value = p.type;
+      fValue.value = p.value;
+      fCode.value = p.code || '';
+      fMinQty.value = p.min_qty || 2;
+      fApplyTo.value = p.apply_to || 'all';
+      fStartsAt.value = p.starts_at ? p.starts_at.slice(0, 16) : '';
+      fEndsAt.value = p.ends_at ? p.ends_at.slice(0, 16) : '';
+      fDisplayBadge.checked = !!p.display_badge;
+      fDisplayBanner.checked = !!p.display_banner;
+      fBadgeText.value = p.badge_text || '';
+      fBadgeColor.value = p.badge_color || '#cc4444';
+      fBannerText.value = p.banner_text || '';
+      fActive.checked = !!p.active;
+      badgePreview.textContent = p.badge_text || '';
+      badgePreview.style.background = p.badge_color || '#cc4444';
+      modalTitle.textContent = 'Modifier la promotion';
+      btnDeletePromo.style.display = '';
+
+      updateTypeUI();
+      updateApplyToUI(p.eligible_product_ids || [], p.eligible_stay_ids || []);
+      updateDisplayUI();
+      formMsg.style.display = 'none';
+      promoModal.classList.add('active');
+    };
+
+    window.togglePromo = async (id, active) => {
+      await supabase.from("promotions").update({ active }).eq("id", id);
+      await loadData();
+    };
+
+    function updateTypeUI() {
+      const type = fType.value;
+      codeGroup.style.display = type === 'promo_code' ? '' : 'none';
+      minQtyGroup.style.display = type === 'duo' ? '' : 'none';
+      if (type === 'percent' || type === 'early_bird') {
+        fValueLabel.textContent = 'Remise (%) *';
+        fValue.placeholder = '10';
+      } else if (type === 'fixed') {
+        fValueLabel.textContent = 'Montant fixe (€) *';
+        fValue.placeholder = '5.00';
+      } else if (type === 'duo') {
+        fValueLabel.textContent = 'Remise par place (%) *';
+        fValue.placeholder = '10';
+      } else if (type === 'promo_code') {
+        fValueLabel.textContent = 'Remise (%) *';
+        fValue.placeholder = '10';
+      }
+    }
+
+    function updateApplyToUI(selectedProductIds = [], selectedStayIds = []) {
+      const applyTo = fApplyTo.value;
+      specificGroup.style.display = applyTo === 'specific' ? '' : 'none';
+      if (applyTo === 'specific') {
+        eligibleProductsList.innerHTML = allProducts.length
+          ? allProducts.map(p => `
+              <label>
+                <input type="checkbox" name="eligibleProduct" value="${p.id}" ${selectedProductIds.includes(p.id) ? 'checked' : ''}>
+                ${p.name}
+              </label>`).join('')
+          : '<span style="color:var(--muted); font-size:12px;">Aucun produit disponible</span>';
+
+        eligibleStaysList.innerHTML = allStays.length
+          ? allStays.map(s => `
+              <label>
+                <input type="checkbox" name="eligibleStay" value="${s.id}" ${selectedStayIds.includes(s.id) ? 'checked' : ''}>
+                ${s.title}
+              </label>`).join('')
+          : '<span style="color:var(--muted); font-size:12px;">Aucun séjour disponible</span>';
+      }
+    }
+
+    function updateDisplayUI() {
+      badgeOptions.style.display = fDisplayBadge.checked ? '' : 'none';
+      bannerOptions.style.display = fDisplayBanner.checked ? '' : 'none';
+    }
+
+    fType.addEventListener("change", updateTypeUI);
+    fApplyTo.addEventListener("change", () => updateApplyToUI());
+    fDisplayBadge.addEventListener("change", updateDisplayUI);
+    fDisplayBanner.addEventListener("change", updateDisplayUI);
+
+    fBadgeColor.addEventListener("input", () => {
+      badgePreview.style.background = fBadgeColor.value;
+    });
+    fBadgeText.addEventListener("input", () => {
+      badgePreview.textContent = fBadgeText.value;
+    });
+
+    document.getElementById("btnCreate").addEventListener("click", openCreate);
+    document.getElementById("btnCloseModal").addEventListener("click", () => promoModal.classList.remove('active'));
+    document.getElementById("btnCancelModal").addEventListener("click", () => promoModal.classList.remove('active'));
+
+    btnDeletePromo.addEventListener("click", async () => {
+      const id = fId.value;
+      if (!id) return;
+      if (!confirm("Supprimer cette promotion définitivement ?")) return;
+      const { error } = await supabase.from("promotions").delete().eq("id", id);
+      if (error) { showFormMsg("Erreur : " + error.message, true); return; }
+      promoModal.classList.remove('active');
+      await loadData();
+    });
+
+    promoForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btnSave = document.getElementById("btnSave");
+      btnSave.disabled = true;
+      btnSave.textContent = "Enregistrement…";
+
+      const id = fId.value;
+      const eligibleProductIds = [...document.querySelectorAll('input[name="eligibleProduct"]:checked')].map(el => el.value);
+      const eligibleStayIds = [...document.querySelectorAll('input[name="eligibleStay"]:checked')].map(el => el.value);
+
+      const payload = {
+        name: fName.value.trim(),
+        description: fDesc.value.trim() || null,
+        type: fType.value,
+        value: parseFloat(fValue.value) || 0,
+        code: fType.value === 'promo_code' ? fCode.value.trim().toUpperCase() || null : null,
+        min_qty: fType.value === 'duo' ? parseInt(fMinQty.value) || 2 : 1,
+        apply_to: fApplyTo.value,
+        eligible_product_ids: fApplyTo.value === 'specific' ? eligibleProductIds : [],
+        eligible_stay_ids: fApplyTo.value === 'specific' ? eligibleStayIds : [],
+        starts_at: fStartsAt.value ? new Date(fStartsAt.value).toISOString() : null,
+        ends_at: fEndsAt.value ? new Date(fEndsAt.value).toISOString() : null,
+        active: fActive.checked,
+        display_badge: fDisplayBadge.checked,
+        badge_text: fDisplayBadge.checked ? (fBadgeText.value.trim() || null) : null,
+        badge_color: fDisplayBadge.checked ? (fBadgeColor.value || '#cc4444') : null,
+        display_banner: fDisplayBanner.checked,
+        banner_text: fDisplayBanner.checked ? (fBannerText.value.trim() || null) : null,
+      };
+
+      let error;
+      if (id) {
+        ({ error } = await supabase.from("promotions").update(payload).eq("id", id));
+      } else {
+        ({ error } = await supabase.from("promotions").insert([payload]));
+      }
+
+      btnSave.disabled = false;
+      btnSave.textContent = "Enregistrer";
+
+      if (error) {
+        showFormMsg("Erreur : " + error.message, true);
+        return;
+      }
+
+      promoModal.classList.remove('active');
+      await loadData();
+    });
+
+    function showFormMsg(msg, isError = false) {
+      formMsg.textContent = msg;
+      formMsg.style.color = isError ? '#c00' : 'var(--text)';
+      formMsg.style.display = '';
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -267,6 +267,8 @@
   <main class="band cream" style="min-height: 80vh;">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 80px;">
       
+      <div id="shopPromoBanner" style="display:none; margin-bottom:20px; padding:12px 20px; border-radius:6px; text-align:center; font-size:14px; font-weight:500;"></div>
+
       <div style="text-align:center; max-width:600px; margin:0 auto;">
         <h1 style="font-family:'SegoCustom'; font-size:42px; margin:0;">Shop</h1>
         <p style="color:var(--muted); margin-top:16px; font-size:16px; line-height:1.6;">
@@ -452,6 +454,27 @@
     const restockTitle = document.getElementById("restockTitle");
 
     let allProducts = [];
+    let activePromos = [];
+
+    async function loadPromos() {
+      const now = new Date().toISOString();
+      const { data } = await supabase
+        .from("promotions")
+        .select("*")
+        .eq("active", true)
+        .or(`starts_at.is.null,starts_at.lte.${now}`)
+        .or(`ends_at.is.null,ends_at.gte.${now}`);
+      activePromos = data || [];
+    }
+
+    function getProductPromo(productId) {
+      return activePromos.find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === 'all' || pr.apply_to === 'products') return true;
+        if (pr.apply_to === 'specific') return (pr.eligible_product_ids || []).includes(productId);
+        return false;
+      });
+    }
 
     async function loadCategories() {
       const { data } = await supabase.from("product_categories").select("*").order("name");
@@ -477,7 +500,24 @@
       }
 
       allProducts = data;
+      await loadPromos();
+      renderBanner();
       renderProducts();
+    }
+
+    function renderBanner() {
+      const banner = activePromos.find(pr => pr.display_banner && pr.banner_text);
+      const bannerEl = document.getElementById("shopPromoBanner");
+      if (!bannerEl) return;
+      if (banner) {
+        bannerEl.textContent = banner.banner_text;
+        bannerEl.style.display = '';
+        bannerEl.style.background = (banner.badge_color || '#cc4444') + '22';
+        bannerEl.style.color = banner.badge_color || '#cc4444';
+        bannerEl.style.border = `1px solid ${banner.badge_color || '#cc4444'}55`;
+      } else {
+        bannerEl.style.display = 'none';
+      }
     }
 
     function renderProducts() {
@@ -509,10 +549,13 @@
       shopGrid.innerHTML = filtered.map(p => {
         const isSoldOut = p.stock === 0;
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
+        const promo = getProductPromo(p.id);
+        const promoBadge = promo ? `<div style="position:absolute; top:10px; left:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
         return `
         <div class="shop-card">
           <div class="shop-image-wrapper" style="background-image:url('${imgSrc}');">
             ${isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
+            ${promoBadge}
             <div class="shop-image-overlay"></div>
 
             <div class="shop-image-hover">
@@ -534,6 +577,8 @@
           </div>
           <div class="shop-price" style="font-size:13.5px; font-weight:500; color:var(--muted); margin-top:4px;">
             ${(Number(p.price) || 0).toFixed(2)} €
+            ${promo && (promo.type === 'percent' || promo.type === 'early_bird') ? `<span style="font-size:11.5px; color:#c44; font-weight:700; margin-left:6px;">−${promo.value}%</span>` : ''}
+            ${promo && promo.type === 'fixed' ? `<span style="font-size:11.5px; color:#c44; font-weight:700; margin-left:6px;">−${Number(promo.value).toFixed(2)} €</span>` : ''}
           </div>
           ${p.description ? `
             <div class="shop-desc" id="desc-${p.id}">${p.description}</div>
