@@ -384,10 +384,8 @@
     <div class="container" style="padding: 12px 0 40px;">
       <h2 style="font-family:'SegoCustom', serif; font-weight:300; font-size: clamp(18px, 2vw, 24px); margin:0 0 4px 0;">Prochains séjours</h2>
       <p style="color:var(--muted); margin:0 0 20px 0; font-size:13px;">Retrouvez nos prochaines retraites bien-être.</p>
-      <div style="overflow-x: hidden;">
-        <div id="compteSejours" class="stay-grid mobile-carousel" style="margin-top:0;">
-          <div style="color:var(--muted); font-size:14px;">Chargement…</div>
-        </div>
+      <div id="compteSejours" class="stay-grid mobile-carousel" style="margin-top:0;">
+        <div style="color:var(--muted); font-size:14px;">Chargement…</div>
       </div>
       <div class="carousel-dots" id="compteSejoursDots"></div>
     </div>
@@ -1794,17 +1792,45 @@
       }
     })();
 
-    // Carrousel dots
-    function initCarouselDots(gridId, dotsId) {
+    // Carrousel mobile (JS inline pour fiabilité iOS)
+    function setupMobileCarousel(gridId, dotsId, cardWidth) {
       const grid = document.getElementById(gridId);
       const dotsWrap = document.getElementById(dotsId);
       if (!grid || !dotsWrap) return;
-      function buildDots() {
-        if (window.innerWidth > 780) { dotsWrap.innerHTML = ""; return; }
+
+      function applyCarousel() {
+        const isMobile = window.innerWidth <= 780;
         const cards = grid.querySelectorAll(".stay-card, .crosssell-card");
-        if (cards.length < 2) { dotsWrap.innerHTML = ""; return; }
-        dotsWrap.innerHTML = Array.from(cards).map((_, i) => `<span${i===0?' class="active"':''}></span>`).join("");
+        if (isMobile && cards.length >= 1) {
+          Object.assign(grid.style, {
+            display: "flex",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            gap: "14px",
+            paddingBottom: "8px",
+            gridTemplateColumns: "unset",
+          });
+          grid.style.setProperty("scrollbar-width", "none");
+          cards.forEach(c => {
+            c.style.flex = `0 0 ${cardWidth}`;
+            c.style.scrollSnapAlign = "start";
+            c.style.minWidth = "0";
+          });
+          if (cards.length >= 2) {
+            dotsWrap.style.display = "flex";
+            dotsWrap.innerHTML = Array.from(cards).map((_, i) => `<span style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--text)':'var(--line)'};transition:background .2s,transform .2s;${i===0?'transform:scale(1.3);':''}"></span>`).join("");
+          } else {
+            dotsWrap.innerHTML = "";
+          }
+        } else {
+          ["display","overflowX","scrollSnapType","WebkitOverflowScrolling","gap","paddingBottom","gridTemplateColumns"].forEach(p => grid.style[p] = "");
+          cards.forEach(c => { c.style.flex = ""; c.style.scrollSnapAlign = ""; c.style.minWidth = ""; });
+          dotsWrap.innerHTML = "";
+          dotsWrap.style.display = "none";
+        }
       }
+
       function updateDots() {
         const dots = dotsWrap.querySelectorAll("span");
         if (!dots.length) return;
@@ -1814,15 +1840,18 @@
           const dist = Math.abs(c.getBoundingClientRect().left - grid.getBoundingClientRect().left);
           if (dist < minDist) { minDist = dist; closest = i; }
         });
-        dots.forEach((d, i) => d.classList.toggle("active", i === closest));
+        dots.forEach((d, i) => {
+          d.style.background = i === closest ? "var(--text)" : "var(--line)";
+          d.style.transform = i === closest ? "scale(1.3)" : "";
+        });
       }
-      // Observer pour reconstruire après chargement async
-      new MutationObserver(buildDots).observe(grid, { childList: true });
+
+      new MutationObserver(applyCarousel).observe(grid, { childList: true });
       grid.addEventListener("scroll", updateDots, { passive: true });
-      window.addEventListener("resize", buildDots);
-      buildDots();
+      window.addEventListener("resize", applyCarousel);
+      applyCarousel();
     }
-    initCarouselDots("compteSejours", "compteSejoursDots");
+    setupMobileCarousel("compteSejours", "compteSejoursDots", "78vw");
   </script>
 
 </body>
