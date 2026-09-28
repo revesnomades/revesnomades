@@ -1721,8 +1721,12 @@
             console.error("Erreur Checkout:", sessionErr, sessionData);
             bookingBtn.classList.remove("btn-loading");
             document.querySelectorAll(".btn-opt-single-checkout, .btn-opt-stripe").forEach(b => b.classList.remove("btn-loading"));
+            const errDetail = sessionData?.error || sessionErr?.message || "Erreur inconnue";
             bookingMsg.style.color = "#c00";
-            bookingMsg.textContent = "Erreur lors de la création de la session de paiement.";
+            bookingMsg.style.fontWeight = "600";
+            bookingMsg.style.fontSize = "13.5px";
+            bookingMsg.textContent = `⚠️ ${errDetail}`;
+            bookingMsg.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
           }
 
