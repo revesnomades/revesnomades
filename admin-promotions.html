@@ -285,12 +285,32 @@
               </div>
             </div>
           </div>
+          <!-- Badge preview on a mock product card -->
+          <div style="margin-top:10px;">
+            <p style="font-size:11px; color:var(--muted); margin:0 0 8px; text-transform:uppercase; letter-spacing:.05em;">Aperçu sur une carte produit</p>
+            <div style="display:inline-block; width:160px; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 1px 6px rgba(0,0,0,.06);">
+              <div style="position:relative; height:100px; background:#f0ede8; display:flex; align-items:center; justify-content:center;">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#c4b99a" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span id="badgeCardPreview" style="position:absolute; top:8px; left:8px; background:#cc4444; color:#fff; font-size:10px; font-weight:700; letter-spacing:.05em; padding:2px 7px; border-radius:3px; line-height:1.4;">-10%</span>
+              </div>
+              <div style="padding:8px 10px;">
+                <div style="height:8px; background:#e8e3dc; border-radius:4px; margin-bottom:6px;"></div>
+                <div style="height:7px; background:#f0ede8; border-radius:4px; width:70%; margin-bottom:8px;"></div>
+                <div style="font-size:12px; font-weight:700; color:#333;">35,00 €</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div id="bannerOptions" style="display:none;">
           <div class="form-group">
             <label for="fBannerText">Texte de la bannière</label>
             <input id="fBannerText" class="input" placeholder="🎉 Soldes d'été : -10% sur tout le shop avec le code ÉTÉ10">
+          </div>
+          <!-- Banner preview -->
+          <div style="margin-top:10px;">
+            <p style="font-size:11px; color:var(--muted); margin:0 0 8px; text-transform:uppercase; letter-spacing:.05em;">Aperçu de la bannière</p>
+            <div id="bannerFullPreview" style="background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; border-radius:6px; letter-spacing:.02em;">🎉 Soldes d'été : -10% sur tout le shop avec le code ÉTÉ10</div>
           </div>
         </div>
 
@@ -357,6 +377,8 @@
     const fBannerText = document.getElementById("fBannerText");
     const fActive = document.getElementById("fActive");
     const badgePreview = document.getElementById("badgePreview");
+    const badgeCardPreview = document.getElementById("badgeCardPreview");
+    const bannerFullPreview = document.getElementById("bannerFullPreview");
     const codeGroup = document.getElementById("codeGroup");
     const minQtyGroup = document.getElementById("minQtyGroup");
     const specificGroup = document.getElementById("specificGroup");
@@ -473,6 +495,9 @@
       fDisplayBadge.checked = true;
       fBadgeColor.value = '#cc4444';
       badgePreview.style.background = '#cc4444';
+      badgeCardPreview.style.background = '#cc4444';
+      badgeCardPreview.textContent = fBadgeText.placeholder;
+      bannerFullPreview.textContent = fBannerText.placeholder;
       fMinQty.value = 2;
       setUnit('percent');
       updateTypeUI(true);
@@ -505,6 +530,9 @@
       fActive.checked = !!p.active;
       badgePreview.textContent = p.badge_text || '';
       badgePreview.style.background = p.badge_color || '#cc4444';
+      badgeCardPreview.textContent = p.badge_text || fBadgeText.placeholder;
+      badgeCardPreview.style.background = p.badge_color || '#cc4444';
+      bannerFullPreview.textContent = p.banner_text || fBannerText.placeholder;
       modalTitle.textContent = 'Modifier la promotion';
       btnDeletePromo.style.display = '';
 
@@ -577,9 +605,15 @@
 
     fBadgeColor.addEventListener("input", () => {
       badgePreview.style.background = fBadgeColor.value;
+      badgeCardPreview.style.background = fBadgeColor.value;
     });
     fBadgeText.addEventListener("input", () => {
+      const txt = fBadgeText.value || fBadgeText.placeholder;
       badgePreview.textContent = fBadgeText.value;
+      badgeCardPreview.textContent = txt;
+    });
+    fBannerText.addEventListener("input", () => {
+      bannerFullPreview.textContent = fBannerText.value || fBannerText.placeholder;
     });
 
     document.getElementById("btnCreate").addEventListener("click", openCreate);
