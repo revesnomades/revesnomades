@@ -241,11 +241,7 @@
           </div>
 
           <div id="bookingsBox" class="account-card" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-              <h3 style="font-weight:500; margin:0;">Mes réservations & factures</h3>
-              <button id="btnStripePortal" class="btn tiny on-light" type="button" style="font-size:12px; background:var(--text); color:#fff; border:none; padding:8px 16px; cursor:pointer;">📄 Mes factures & cartes (Stripe)</button>
-            </div>
-            <div id="portalMsg" style="margin-top:6px; font-size:12px; color:var(--muted);"></div>
+            <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
             <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
           </div>
 
@@ -1293,6 +1289,11 @@
     }
     let userBookingsStore = [];
 
+    function cleanLabel(name) {
+      if (!name) return name;
+      return name.replace(/\s*\((réserver|reserver|réservation|reservation|payer|paiement|checkout)\)/gi, "").trim();
+    }
+
     async function loadMyBookings(user) {
       if (!bookingsList || !user?.email) return;
 
@@ -1358,12 +1359,12 @@
       }
 
       bookingsList.innerHTML = bookings.map(item => {
-        const title = (item.stay_title || item.stays?.title || "Séjour Âmes Nomades").toUpperCase();
+        const title = cleanLabel(item.stay_title || item.stays?.title || "Séjour Âmes Nomades").toUpperCase();
         const amountVal = item.amount || item.amount_paid;
         const amountStr = amountVal ? `${amountVal} €` : "—";
         const statusMap = { confirmed: "Confirmé", paid: "Payé", pending: "En attente", cancelled: "Annulé" };
         const statusLabel = statusMap[item.status] || item.status || "Confirmé";
-        const label = item.price_label || "";
+        const label = cleanLabel(item.price_label || "");
         const date = item.created_at
           ? new Date(item.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
           : (item.booking_date || "");
@@ -1480,7 +1481,7 @@
 
       purchasesBox.style.display = "block";
       purchasesList.innerHTML = data.map(item => {
-        const title = item.product_name || "Produit";
+        const title = cleanLabel(item.product_name || "Produit");
         const amount = item.amount ? `${Number(item.amount).toFixed(2)} €` : "—";
         const status = item.status === "paid" ? "Payé" : (item.status || "—");
         const date = item.created_at
