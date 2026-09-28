@@ -388,9 +388,9 @@
     let activePromos = [];
     let currentStayPromo = null;
 
-    function setBookingBtnPrice(btn, label, totalPrice, qty) {
+    function setBookingBtnPrice(btn, label, totalPrice, qty, detailId) {
       const { finalPrice, saved } = computeDiscountedPrice(totalPrice, qty);
-      const detail = document.getElementById("promoDetail");
+      const detail = document.getElementById(detailId || "promoDetail");
       if (saved > 0) {
         btn.textContent = label ? `${label} — ${finalPrice.toFixed(2)} €` : `${finalPrice.toFixed(2)} €`;
         if (detail) {
@@ -691,6 +691,7 @@
 
         container.innerHTML = `
           <div style="margin-top:8px;">
+            <div id="singleBtnDetail" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-bottom:8px;"></div>
             <button
               type="button"
               class="btn on-light btn-opt-single-checkout"
@@ -1718,7 +1719,7 @@
             const totalPrice = unitPrice * currentQty;
             if (unitPrice > 0) {
               const placeLabel = `${label} — ${currentQty} ${currentQty > 1 ? 'places' : 'place'}`;
-              setBookingBtnPrice(singleBtn, placeLabel, totalPrice, currentQty);
+              setBookingBtnPrice(singleBtn, placeLabel, totalPrice, currentQty, 'singleBtnDetail');
             } else {
               singleBtn.textContent = `${label} →`;
             }
