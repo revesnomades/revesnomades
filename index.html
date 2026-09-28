@@ -253,11 +253,10 @@
   <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
     <div class="stay-band stay-band-compact" id="featuredStayBand" style="cursor:pointer;" onclick="if(!event.target.closest('a')) window.location.href='/sejour.html';">
-      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg'); position:relative;">
-        <div id="featuredStayBadge" style="display:none; position:absolute; top:14px; right:14px; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:4px 10px; border-radius:3px; color:#fff; z-index:3;"></div>
-      </a>
+      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg');"></a>
 
       <div class="stay-copy">
+        <div id="featuredStayBadge" style="display:none; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:4px 10px; border-radius:3px; color:#fff; margin-bottom:14px; align-self:flex-start;"></div>
         <div class="kicker reveal" id="featuredStayKicker" data-delay="0" style="font-family:'IBM Plex Mono', monospace; letter-spacing:0.10em; font-size:11px; margin-bottom:2px;">— &nbsp; —</div>
 
         <h2 class="title reveal" data-delay="1" id="featuredStayTitle" style="font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important; letter-spacing:0.04em; font-size: clamp(32px, 4vw, 56px) !important; margin-top:0 !important;">Chargement…</h2>
@@ -912,13 +911,12 @@
     const bgPos = (isMobile && stay.index_image_mobile) ? "center" : `${posX}% ${posY}%`;
 
     const stayPromo = getStayPromo(stay.id);
-    const stayBadge = stayPromo ? `<div style="position:absolute; top:10px; right:10px; background:${stayPromo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${stayPromo.badge_text}</div>` : '';
+    const stayBadgeBar = stayPromo ? `<div style="display:flex; justify-content:flex-end; padding:5px 6px 2px;"><span style="background:${stayPromo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px;">${stayPromo.badge_text}</span></div>` : '';
     return `
       <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
 
         <div class="stay-card-media" style="background-image:url('${image}'); background-position:${bgPos}; position:relative;">
 
-          ${stayBadge}
           <div class="stay-card-overlay"></div>
 
           <div class="stay-card-hover">
@@ -933,6 +931,7 @@
           </div>
 
         </div>
+        ${stayBadgeBar}
       </a>
     `;
 
