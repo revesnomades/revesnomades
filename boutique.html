@@ -56,32 +56,8 @@
       overflow: hidden;
       border: 1px solid rgba(30,31,34,.14);
     }
-    .shop-image-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0);
-      transition: background .25s ease;
-    }
-    .shop-image-hover {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 14px;
-      gap: 6px;
-      color: rgba(255,255,255,.94);
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    .shop-card:hover .shop-image-overlay {
-      background: rgba(0,0,0,.52);
-    }
-    .shop-card:hover .shop-image-hover {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .shop-image-overlay { display: none; }
+    .shop-image-hover { display: none; }
     .shop-title {
       font-family: inherit;
       font-size: 13.5px;
