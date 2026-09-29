@@ -403,7 +403,6 @@
             <div>
               <div style="font-weight:600; font-size:14px; color:var(--text);">${item.type === 'sejour' && item.slug ? `<a href="/sejour.html?s=${item.slug}" style="color:inherit; text-decoration:underline;">${item.name}</a>` : item.name}</div>
               <div style="font-size:12.5px; color:var(--muted); margin-top:2px;">${price} € / unité</div>
-              ${item.type === 'product' && item.deliveryDays ? `<div style="font-size:11.5px; color:var(--muted); margin-top:4px;">📦 Livraison estimée : ${deliveryLabel(item.deliveryDays)}</div>` : ''}
               <div class="cart-item-qty">
                 <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
                 <span class="cart-qty-val">${item.quantity}</span>
