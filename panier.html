@@ -641,10 +641,12 @@
 
     function getTotalWeightGrams() {
       const cart = getCart();
-      return cart.reduce((sum, item) => {
-        const w = Number(item.weight_grams) || 0;
+      const total = cart.reduce((sum, item) => {
+        if (item.type !== "product") return sum;
+        const w = Number(item.weight_grams) || 500; // 500g par défaut si poids non renseigné
         return sum + w * item.quantity;
-      }, 0) || 200; // fallback 200g si poids non renseigné
+      }, 0);
+      return total || 500;
     }
 
     async function fetchShippingRates() {
@@ -678,7 +680,7 @@
       const list = document.getElementById("shippingMethodsList");
       if (!wrap || !list) return;
       if (!methods.length) {
-        list.innerHTML = `<div style="font-size:12.5px; color:var(--muted);">Aucune méthode disponible pour cette adresse.</div>`;
+        list.innerHTML = `<div style="font-size:12.5px; color:var(--muted);">Aucune méthode de livraison configurée pour cette adresse. Activez et tarifez vos méthodes dans votre compte SendCloud.</div>`;
         wrap.style.display = "block";
         return;
       }

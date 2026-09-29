@@ -55,15 +55,17 @@ serve(async (req) => {
     }
 
     const data = await res.json();
-    const methods = (data.shipping_methods || []).map((m: Record<string, unknown>) => ({
-      id: m.id,
-      name: m.name,
-      carrier: m.carrier,
-      price: Number(m.price) || 0,
-      min_weight: m.min_weight,
-      max_weight: m.max_weight,
-      delivery_time_range: m.service_point_input === "none" ? m.max_delivery_time : null,
-    }));
+    const methods = (data.shipping_methods || [])
+      .map((m: Record<string, unknown>) => ({
+        id: m.id,
+        name: m.name,
+        carrier: m.carrier,
+        price: Number(m.price) || 0,
+        min_weight: Number(m.min_weight) || 0,
+        max_weight: Number(m.max_weight) || 99999,
+      }))
+      // Exclure les méthodes sans prix configuré
+      .filter((m: { price: number }) => m.price > 0);
 
     return new Response(JSON.stringify({ methods }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
