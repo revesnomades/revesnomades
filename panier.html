@@ -660,10 +660,14 @@
       showShippingMsg("Récupération des tarifs…", "info");
       selectedShipping = null;
       try {
+        const productsTotal = getCart()
+          .filter(i => i.type === "product")
+          .reduce((s, i) => s + (Number(i.price) || 0) * i.quantity, 0);
+
         const res = await fetch(`${SUPABASE_URL}/functions/v1/get-shipping-rates`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ to_postal_code: addr.postal_code, to_country: addr.country, weight_grams: getTotalWeightGrams() }),
+          body: JSON.stringify({ to_postal_code: addr.postal_code, to_country: addr.country, weight_grams: getTotalWeightGrams(), products_total: productsTotal }),
         });
         const data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || "Erreur");

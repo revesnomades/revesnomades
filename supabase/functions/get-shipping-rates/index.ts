@@ -89,9 +89,17 @@ serve(async (req) => {
   }
 
   try {
-    const { to_postal_code, to_country, weight_grams } = await req.json();
+    const { to_postal_code, to_country, weight_grams, products_total } = await req.json();
     const weight = Math.max(1, Math.round(Number(weight_grams) || 500));
     const country = (to_country || "FR").toUpperCase();
+
+    // Livraison gratuite dès 100 € d'articles shop (séjours exclus)
+    if (Number(products_total) >= 100) {
+      return new Response(JSON.stringify({
+        methods: [{ id: "free", name: "Livraison offerte", carrier: "", price: 0 }],
+        free_shipping: true,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     const publicKey = Deno.env.get("SENDCLOUD_PUBLIC_KEY");
     const secretKey = Deno.env.get("SENDCLOUD_SECRET_KEY");
