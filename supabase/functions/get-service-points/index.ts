@@ -33,42 +33,59 @@ serve(async (req) => {
     const credentials = btoa(`${publicKey}:${secretKey}`);
     const countryCode = (country || "FR").toUpperCase();
 
-    // Try known Mondial Relay carrier slugs in order, then fallback without carrier filter
-    const carrierSlugs = ["mondial_relay", "mondialrelay", "MR"];
+    // Try without carrier filter first (most reliable), then filter by carrier name
+    const debugLog: string[] = [];
     let raw: Array<Record<string, unknown>> = [];
 
-    for (const slug of carrierSlugs) {
-      const params = new URLSearchParams({
-        country: countryCode,
-        postal_code: postal_code,
-        carrier: slug,
-      });
-      const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
-        headers: { Authorization: `Basic ${credentials}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        raw = data.service_points || [];
-        if (raw.length > 0) break;
-      }
-    }
-
-    // Last resort: fetch all service points and filter by name
-    if (raw.length === 0) {
+    {
       const params = new URLSearchParams({ country: countryCode, postal_code: postal_code });
       const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
         headers: { Authorization: `Basic ${credentials}` },
       });
+      const body = await res.text();
+      debugLog.push(`no-carrier: status=${res.status} body_len=${body.length}`);
       if (res.ok) {
-        const data = await res.json();
-        const all: Array<Record<string, unknown>> = data.service_points || [];
-        raw = all.filter(p =>
-          String(p.carrier || "").toLowerCase().includes("mondial") ||
-          String(p.carrier || "").toLowerCase().includes("mr")
-        );
-        if (raw.length === 0) raw = all; // show all if no MR found
+        try {
+          const data = JSON.parse(body);
+          const all: Array<Record<string, unknown>> = data.service_points || [];
+          debugLog.push(`total_points=${all.length} keys=${all[0] ? Object.keys(all[0]).join(",") : "none"}`);
+          // Try to find Mondial Relay points
+          const mr = all.filter(p =>
+            String(p.carrier || "").toLowerCase().includes("mondial") ||
+            String(p.carrier || "").toLowerCase().includes("mr") ||
+            String(p.name || "").toLowerCase().includes("mondial")
+          );
+          raw = mr.length > 0 ? mr : all;
+          debugLog.push(`mr_points=${mr.length} total_used=${raw.length}`);
+        } catch (e) {
+          debugLog.push(`parse_error=${e}`);
+        }
+      } else {
+        debugLog.push(`body_preview=${body.slice(0, 200)}`);
       }
     }
+
+    // Try with carrier slugs if still empty
+    if (raw.length === 0) {
+      for (const slug of ["mondial_relay", "mondialrelay", "MR"]) {
+        const params = new URLSearchParams({ country: countryCode, postal_code: postal_code, carrier: slug });
+        const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
+          headers: { Authorization: `Basic ${credentials}` },
+        });
+        const body = await res.text();
+        debugLog.push(`carrier=${slug} status=${res.status}`);
+        if (res.ok) {
+          try {
+            const data = JSON.parse(body);
+            raw = data.service_points || [];
+            debugLog.push(`points=${raw.length}`);
+            if (raw.length > 0) break;
+          } catch (_) { /* ignore */ }
+        }
+      }
+    }
+
+    console.log("get-service-points debug:", debugLog.join(" | "));
 
     // Keep only the first 10, return minimal fields
     const points = raw.slice(0, 10).map((p) => ({
@@ -84,7 +101,7 @@ serve(async (req) => {
       formatted_opening_times: p.formatted_opening_times || null,
     }));
 
-    return new Response(JSON.stringify({ points }), {
+    return new Response(JSON.stringify({ points, _debug: debugLog }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
