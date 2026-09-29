@@ -28,20 +28,6 @@ const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; deliver
     ],
   },
   {
-    id: "mondial-relay-fr",
-    name: "Mondial Relay (point relais)",
-    carrier: "Mondial Relay",
-    delivery_time: "3 à 5 jours ouvrés",
-    zone: ["FR", "MC", "BE", "LU", "ES", "PT", "NL", "DE", "AT"],
-    brackets: [
-      { max_g: 500,  price: 3.90 },
-      { max_g: 1000, price: 4.50 },
-      { max_g: 2000, price: 5.50 },
-      { max_g: 5000, price: 7.90 },
-      { max_g: 99999, price: 11.90 },
-    ],
-  },
-  {
     id: "colissimo-eu",
     name: "Colissimo Europe",
     carrier: "Colissimo",
