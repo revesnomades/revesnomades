@@ -163,6 +163,14 @@
               <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez un mode d'expédition :</div>
               <div id="shippingMethodsList"></div>
             </div>
+
+            <!-- Sélecteur point relais Mondial Relay -->
+            <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
+              <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
+              <div id="relayLoading" style="display:none; font-size:12.5px; color:var(--muted);">Recherche en cours…</div>
+              <div id="relayList" style="display:none;"></div>
+              <div id="relayMsg" style="display:none; font-size:12px; color:#c00;"></div>
+            </div>
           </div>
 
           <button id="btnCheckout" class="btn on-light block" type="button">
@@ -300,7 +308,8 @@
     let embeddedCheckout = null;
     let activePromos = [];
     let appliedPromoCode = null;
-    let selectedShipping = null; // { id, name, carrier, price }
+    let selectedShipping = null; // { id, name, carrier, price, is_relay? }
+    let selectedRelayPoint = null; // { id, name, street, house_number, city, postal_code, country }
     let currentUser = null;
 
     async function loadPromos() {
@@ -658,6 +667,8 @@
       if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = "Calcul…"; }
       showShippingMsg("Récupération des tarifs…", "info");
       selectedShipping = null;
+      selectedRelayPoint = null;
+      toggleRelayZone(false);
       try {
         const productsTotal = getCart()
           .filter(i => i.type === "product")
@@ -678,6 +689,19 @@
       if (btnCalc) { btnCalc.disabled = false; btnCalc.textContent = "Calculer la livraison"; }
     }
 
+    function isRelayMethod(m) {
+      return (m.id || "").toLowerCase().includes("mondial") ||
+             (m.carrier || "").toLowerCase().includes("mondial") ||
+             (m.name || "").toLowerCase().includes("relais") ||
+             (m.name || "").toLowerCase().includes("relay");
+    }
+
+    function toggleRelayZone(show) {
+      const zone = document.getElementById("relayZone");
+      if (zone) zone.style.display = show ? "block" : "none";
+      if (!show) { selectedRelayPoint = null; }
+    }
+
     function renderShippingMethods(methods) {
       const wrap = document.getElementById("shippingMethods");
       const list = document.getElementById("shippingMethodsList");
@@ -696,10 +720,76 @@
       wrap.style.display = "block";
       // Auto-select first
       selectedShipping = methods[0];
+      toggleRelayZone(isRelayMethod(methods[0]));
+      if (isRelayMethod(methods[0])) fetchRelayPoints();
       renderCart();
       list.querySelectorAll("input[type=radio]").forEach((radio, i) => {
-        radio.addEventListener("change", () => { selectedShipping = methods[i]; renderCart(); });
+        radio.addEventListener("change", () => {
+          selectedShipping = methods[i];
+          const relay = isRelayMethod(methods[i]);
+          toggleRelayZone(relay);
+          if (relay) fetchRelayPoints();
+          renderCart();
+        });
       });
+    }
+
+    async function fetchRelayPoints() {
+      const postalInput = document.getElementById("shipPostal");
+      const countryInput = document.getElementById("shipCountry");
+      const postal = (postalInput?.value || "").trim();
+      if (!postal) {
+        document.getElementById("relayMsg").style.display = "block";
+        document.getElementById("relayMsg").textContent = "Renseignez votre code postal pour afficher les points relais.";
+        document.getElementById("relayList").style.display = "none";
+        return;
+      }
+      const relayLoading = document.getElementById("relayLoading");
+      const relayList = document.getElementById("relayList");
+      const relayMsg = document.getElementById("relayMsg");
+      relayMsg.style.display = "none";
+      relayList.style.display = "none";
+      relayLoading.style.display = "block";
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-service-points`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ postal_code: postal, country: countryInput?.value || "FR" }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || "Erreur");
+        const points = data.points || [];
+        relayLoading.style.display = "none";
+        if (!points.length) {
+          relayMsg.style.display = "block";
+          relayMsg.style.color = "var(--muted)";
+          relayMsg.textContent = "Aucun point relais trouvé pour ce code postal.";
+          return;
+        }
+        relayList.innerHTML = points.map((p, i) => {
+          const addr = [p.street, p.house_number].filter(Boolean).join(" ");
+          const dist = p.distance != null ? ` · ${(p.distance / 1000).toFixed(1)} km` : "";
+          return `<label style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
+            <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;" ${i === 0 ? "checked" : ""}>
+            <span style="flex:1;">
+              <span style="font-weight:600;">${p.name}</span><span style="color:var(--muted);">${dist}</span><br>
+              <span style="font-size:11.5px; color:var(--muted);">${[addr, p.postal_code, p.city].filter(Boolean).join(", ")}</span>
+            </span>
+          </label>`;
+        }).join("");
+        relayList.style.display = "block";
+        // Auto-select first
+        selectedRelayPoint = points[0];
+        renderCart();
+        relayList.querySelectorAll("input[type=radio]").forEach((radio, i) => {
+          radio.addEventListener("change", () => { selectedRelayPoint = points[i]; renderCart(); });
+        });
+      } catch (e) {
+        relayLoading.style.display = "none";
+        relayMsg.style.display = "block";
+        relayMsg.style.color = "#c00";
+        relayMsg.textContent = "Impossible de récupérer les points relais : " + (e.message || "");
+      }
     }
 
     function showShippingMsg(msg, type) {
@@ -769,6 +859,11 @@
         document.getElementById("shippingZone")?.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
+      if (hasProducts && selectedShipping && isRelayMethod(selectedShipping) && !selectedRelayPoint) {
+        checkoutMsg.textContent = "Veuillez sélectionner un point relais.";
+        document.getElementById("relayZone")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -800,7 +895,23 @@
         const codeDiscount = getPromoCodeDiscount(cart);
         const totalDiscountAmount = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])].reduce((s, d) => s + d.amount, 0);
 
-        const shippingAddr = hasProducts ? { ...getShippingAddress(), name: user.user_metadata?.firstname || user.email } : null;
+        let shippingAddr = null;
+        if (hasProducts) {
+          if (selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint) {
+            // Use relay point address for Stripe
+            const relayStreet = [selectedRelayPoint.street, selectedRelayPoint.house_number].filter(Boolean).join(" ");
+            shippingAddr = {
+              name: selectedRelayPoint.name,
+              line1: relayStreet || selectedRelayPoint.name,
+              line2: "",
+              postal_code: selectedRelayPoint.postal_code,
+              city: selectedRelayPoint.city,
+              country: selectedRelayPoint.country || "FR",
+            };
+          } else {
+            shippingAddr = { ...getShippingAddress(), name: user.user_metadata?.firstname || user.email };
+          }
+        }
 
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
           method: "POST",
