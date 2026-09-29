@@ -127,7 +127,14 @@
           <div id="shippingZone" style="display:none; margin-bottom:16px; border-top:1px solid var(--line); padding-top:16px;">
             <div style="font-size:12.5px; font-weight:600; margin-bottom:10px; color:var(--text);">Adresse de livraison</div>
 
-            <div style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Affichage compact (adresse déjà enregistrée) -->
+            <div id="shippingAddressDisplay" style="display:none; font-size:13px; color:var(--text); margin-bottom:10px;">
+              <div id="shippingAddressText" style="line-height:1.6;"></div>
+              <button type="button" id="btnEditShippingAddress" style="margin-top:6px; font-size:12px; color:var(--muted); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline;">Modifier l'adresse</button>
+            </div>
+
+            <!-- Formulaire complet -->
+            <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
               <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;">
               <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" style="font-size:13px;">
               <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
@@ -148,14 +155,14 @@
                 <option value="US">États-Unis</option>
                 <option value="CA">Canada</option>
               </select>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" id="btnCalcShipping" class="btn tiny on-light">Calculer la livraison</button>
+                <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
+                  <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Enregistrer
+                </label>
+              </div>
             </div>
 
-            <div id="shippingActionsRow" style="display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
-              <button type="button" id="btnCalcShipping" class="btn tiny on-light">Calculer la livraison</button>
-              <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Enregistrer
-              </label>
-            </div>
             <div id="shippingMsg" style="font-size:12px; color:var(--muted); margin-top:6px; display:none;"></div>
 
             <!-- Méthodes de livraison -->
@@ -801,6 +808,29 @@
       el.textContent = msg;
     }
 
+    function showShippingAddressCompact(profile) {
+      const display = document.getElementById("shippingAddressDisplay");
+      const form = document.getElementById("shippingAddressForm");
+      const text = document.getElementById("shippingAddressText");
+      if (!display || !form || !text) return;
+      const lines = [
+        profile.shipping_line1,
+        profile.shipping_line2,
+        [profile.shipping_postal_code, profile.shipping_city].filter(Boolean).join(" "),
+        profile.shipping_country && profile.shipping_country !== "FR" ? profile.shipping_country : null,
+      ].filter(Boolean);
+      text.innerHTML = lines.join("<br>");
+      display.style.display = "block";
+      form.style.display = "none";
+    }
+
+    function showShippingAddressForm() {
+      const display = document.getElementById("shippingAddressDisplay");
+      const form = document.getElementById("shippingAddressForm");
+      if (display) display.style.display = "none";
+      if (form) form.style.display = "flex";
+    }
+
     async function loadSavedAddressAndUser() {
       const { data: { user } } = await supabase.auth.getUser();
       currentUser = user || null;
@@ -815,11 +845,16 @@
         document.getElementById("shipCity").value = profile.shipping_city || "";
         const countryEl = document.getElementById("shipCountry");
         if (countryEl && profile.shipping_country) countryEl.value = profile.shipping_country;
-        // Auto-fetch rates if cart has products
+        showShippingAddressCompact(profile);
+        // Auto-calculate shipping if cart has products
         const cart = getCart();
         if (cart.some(i => i.type === "product")) fetchShippingRates();
       }
     }
+
+    document.getElementById("btnEditShippingAddress")?.addEventListener("click", () => {
+      showShippingAddressForm();
+    });
 
     async function maybeSaveAddress() {
       const saveCheck = document.getElementById("saveAddressCheck");
@@ -834,7 +869,22 @@
       }).eq("id", currentUser.id);
     }
 
-    document.getElementById("btnCalcShipping")?.addEventListener("click", fetchShippingRates);
+    document.getElementById("btnCalcShipping")?.addEventListener("click", async () => {
+      await fetchShippingRates();
+      // Après calcul, repasser en compact si adresse complète
+      const line1 = document.getElementById("shipLine1")?.value.trim();
+      const postal = document.getElementById("shipPostal")?.value.trim();
+      const city = document.getElementById("shipCity")?.value.trim();
+      if (line1 && postal && city) {
+        showShippingAddressCompact({
+          shipping_line1: line1,
+          shipping_line2: document.getElementById("shipLine2")?.value.trim() || "",
+          shipping_postal_code: postal,
+          shipping_city: city,
+          shipping_country: document.getElementById("shipCountry")?.value || "FR",
+        });
+      }
+    });
 
     // ── Fin livraison ─────────────────────────────────────────────────────────
 
