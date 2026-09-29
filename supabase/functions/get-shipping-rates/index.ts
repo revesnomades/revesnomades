@@ -55,19 +55,33 @@ serve(async (req) => {
     }
 
     const data = await res.json();
+
+    // Log pour debug — à retirer une fois les prix vérifiés
+    if (data.shipping_methods?.length) {
+      const sample = data.shipping_methods[0];
+      console.log("SendCloud sample method:", JSON.stringify(sample));
+    }
+
     const methods = (data.shipping_methods || [])
-      .map((m: Record<string, unknown>) => ({
-        id: m.id,
-        name: m.name,
-        carrier: m.carrier,
-        price: Number(m.price) || 0,
-        min_weight: Number(m.min_weight) || 0,
-        max_weight: Number(m.max_weight) || 99999,
-      }))
-      // Exclure les méthodes sans prix configuré
+      .map((m: Record<string, unknown>) => {
+        // SendCloud peut retourner le prix dans price, sendcloud_price ou price_breakdown
+        const price =
+          Number(m.price) ||
+          Number((m as Record<string, unknown>).sendcloud_price) ||
+          Number(((m as Record<string, unknown>).price_breakdown as Record<string, unknown>)?.total) ||
+          0;
+        return {
+          id: m.id,
+          name: m.name,
+          carrier: m.carrier,
+          price,
+          min_weight: Number(m.min_weight) || 0,
+          max_weight: Number(m.max_weight) || 99999,
+        };
+      })
       .filter((m: { price: number }) => m.price > 0);
 
-    return new Response(JSON.stringify({ methods }), {
+    return new Response(JSON.stringify({ methods, _debug_count: data.shipping_methods?.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
