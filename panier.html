@@ -144,7 +144,7 @@
             <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Nos prochains séjours</h2>
             <a href="/index.html#sejours" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir tous les séjours</a>
           </div>
-          <div class="crosssell-grid mobile-carousel" id="staysSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+          <div class="stay-grid mobile-carousel" id="staysSuggestGrid" style="margin-top:0;">
             <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
           </div>
           <div class="carousel-dots" id="staysSuggestDots"></div>
@@ -193,6 +193,7 @@
     @media(max-width:720px){
       #cartLayout { grid-template-columns:1fr!important; }
     }
+    #staysSuggestGrid .stay-card-media { aspect-ratio: 4 / 3; min-height: 0; }
   </style>
 
   <!-- FOOTER -->
@@ -453,39 +454,61 @@
       try {
         const { data: stays } = await supabase
           .from("stays")
-          .select("id, title, slug, hero_image, location")
+          .select("id, title, slug, location, index_image, index_image_mobile, hero_image, content_blocks, is_single_day")
           .eq("published", true)
           .order("created_at", { ascending: false })
           .limit(4);
 
         if (stays && stays.length) {
-          staysSuggestGrid.innerHTML = stays.map(s => {
-            const img = s.hero_image || "/assets/img/placeholder.jpg";
-            const href = s.slug ? `/sejour.html?s=${s.slug}` : "/index.html#sejours";
-            const promo = getStayPromoBadge(s.id);
+          const { data: dates } = await supabase
+            .from("stay_dates")
+            .select("stay_id, start_date, end_date")
+            .in("stay_id", stays.map(s => s.id))
+            .gte("start_date", new Date().toISOString().slice(0, 10))
+            .order("start_date", { ascending: true });
+
+          const dateMap = new Map();
+          (dates || []).forEach(d => { if (!dateMap.has(d.stay_id)) dateMap.set(d.stay_id, d); });
+
+          const isMobile = window.matchMedia("(max-width: 900px)").matches;
+          staysSuggestGrid.className = `stay-grid stay-grid-${stays.length} mobile-carousel`;
+          staysSuggestGrid.innerHTML = stays.map(stay => {
+            let img = stay.index_image || stay.hero_image || "";
+            if (stay.content_blocks) {
+              const b = (Array.isArray(stay.content_blocks) ? stay.content_blocks : []).find(b => b.type === "index_image");
+              if (b?.image) img = b.image;
+            }
+            if (isMobile && stay.index_image_mobile) img = stay.index_image_mobile;
+            const d = dateMap.get(stay.id);
+            const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
+            const promo = getStayPromoBadge(stay.id);
+            const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; white-space:nowrap; flex-shrink:0;">${promo.badge_text}</span>` : '';
+            const href = stay.slug ? `/sejour.html?slug=${encodeURIComponent(stay.slug)}` : "/index.html#sejours";
             return `
-              <a class="crosssell-card" href="${href}">
-                <div style="position:relative;">
-                  <img src="${img}" alt="${s.title}" loading="lazy" style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;">
-                  ${badgeHtml(promo)}
+              <a class="stay-card" href="${href}">
+                <div class="stay-card-media" style="background-image:url('${img}'); background-position:center; position:relative;">
+                  <div class="stay-card-overlay"></div>
+                  <div class="stay-card-hover">
+                    <div class="stay-card-line">${stay.title || "Séjour"}</div>
+                    ${dateStr ? `<div class="stay-card-line">${dateStr}</div>` : ""}
+                  </div>
                 </div>
-                <div class="crosssell-card-body">
-                  <div class="crosssell-card-name">${s.title}</div>
-                  ${s.location ? `<div class="crosssell-card-price">${s.location}</div>` : ''}
+                <div class="stay-card-body">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <div class="stay-card-title" style="margin:0;">${stay.title || "Séjour"}</div>
+                    ${promoBadge}
+                  </div>
+                  <div class="stay-card-loc">${stay.location || ""}</div>
+                  ${dateStr ? `<div class="stay-card-date">${dateStr}</div>` : ""}
                 </div>
-              </a>
-            `;
+              </a>`;
           }).join("");
         } else {
-          staysSuggestGrid.innerHTML = `
-            <a class="crosssell-card" href="/index.html#sejours" style="grid-column:1/-1;">
-              <div style="padding:24px; text-align:center; color:var(--muted); font-size:13.5px;">
-                Découvrez toutes nos retraites bien-être →
-              </div>
-            </a>`;
+          staysSuggestGrid.innerHTML = `<p style="color:var(--muted); font-size:14px; padding:20px 0;">Aucun séjour à venir pour le moment.</p>`;
         }
-      } catch {
-        staysSuggestGrid.innerHTML = `<a class="crosssell-card" href="/index.html#sejours" style="grid-column:1/-1; padding:20px; text-align:center; color:var(--muted); font-size:13px;">Voir nos séjours →</a>`;
+      } catch(e) {
+        console.warn("Erreur chargement séjours panier:", e);
+        staysSuggestGrid.innerHTML = `<a class="stay-card" href="/index.html#sejours" style="grid-column:1/-1; padding:20px; text-align:center; color:var(--muted); font-size:13px;">Voir nos séjours →</a>`;
       }
 
       // Produits
@@ -721,7 +744,7 @@
       window.addEventListener("resize", applyCarousel);
       applyCarousel();
     }
-    setupMobileCarousel("staysSuggestGrid", "staysSuggestDots", "72vw");
+    setupMobileCarousel("staysSuggestGrid", "staysSuggestDots", "78vw");
     setupMobileCarousel("productsSuggestGrid", "productsSuggestDots", "56vw");
   </script>
 </body>
