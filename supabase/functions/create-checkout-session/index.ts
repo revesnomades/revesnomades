@@ -110,6 +110,20 @@ serve(async (req) => {
       }
     }
 
+    // Frais de livraison transmis en centimes
+    const shippingCents = Math.round(Number(body.shippingAmount) || 0);
+    const shippingLabel: string = body.shippingLabel || "Livraison";
+    if (shippingCents > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "eur",
+          product_data: { name: shippingLabel },
+          unit_amount: shippingCents,
+        },
+        quantity: 1,
+      });
+    }
+
     // ui_mode "redirect" → checkout Stripe hébergé (retourne url)
     // ui_mode "embedded" (défaut) → checkout embarqué (retourne client_secret)
     const isRedirect = body.ui_mode === "redirect";
@@ -133,9 +147,21 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      shipping_address_collection: {
-        allowed_countries: ["FR", "BE", "CH", "LU", "MC"],
-      },
+      // Pre-fill shipping address from saved profile if provided
+      ...(body.shippingAddress && body.shippingAddress.line1 ? {
+        payment_intent_data: {
+          shipping: {
+            name: body.shippingAddress.name || body.userEmail || "",
+            address: {
+              line1: body.shippingAddress.line1,
+              line2: body.shippingAddress.line2 || "",
+              city: body.shippingAddress.city || "",
+              postal_code: body.shippingAddress.postal_code || "",
+              country: body.shippingAddress.country || "FR",
+            },
+          },
+        },
+      } : {}),
       ...(discounts ? { discounts } : {}),
       metadata: {
         type: "cart",

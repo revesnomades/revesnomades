@@ -123,6 +123,48 @@
             <div id="promoCodeMsg" style="font-size:12px; margin-top:5px; display:none;"></div>
           </div>
 
+          <!-- Adresse de livraison (affichée si panier contient des produits) -->
+          <div id="shippingZone" style="display:none; margin-bottom:16px; border-top:1px solid var(--line); padding-top:16px;">
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:10px; color:var(--text);">Adresse de livraison</div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;">
+              <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" style="font-size:13px;">
+              <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
+                <input id="shipPostal" class="input" placeholder="Code postal" style="font-size:13px;" maxlength="10">
+                <input id="shipCity" class="input" placeholder="Ville" style="font-size:13px;">
+              </div>
+              <select id="shipCountry" class="input" style="font-size:13px;">
+                <option value="FR">France</option>
+                <option value="BE">Belgique</option>
+                <option value="CH">Suisse</option>
+                <option value="LU">Luxembourg</option>
+                <option value="MC">Monaco</option>
+                <option value="DE">Allemagne</option>
+                <option value="ES">Espagne</option>
+                <option value="IT">Italie</option>
+                <option value="NL">Pays-Bas</option>
+                <option value="GB">Royaume-Uni</option>
+                <option value="US">États-Unis</option>
+                <option value="CA">Canada</option>
+              </select>
+            </div>
+
+            <div id="shippingActionsRow" style="display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
+              <button type="button" id="btnCalcShipping" class="btn tiny on-light">Calculer la livraison</button>
+              <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Enregistrer
+              </label>
+            </div>
+            <div id="shippingMsg" style="font-size:12px; color:var(--muted); margin-top:6px; display:none;"></div>
+
+            <!-- Méthodes de livraison -->
+            <div id="shippingMethods" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
+              <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez un mode d'expédition :</div>
+              <div id="shippingMethodsList"></div>
+            </div>
+          </div>
+
           <button id="btnCheckout" class="btn on-light block" type="button">
             Procéder au paiement
           </button>
@@ -258,6 +300,8 @@
     let embeddedCheckout = null;
     let activePromos = [];
     let appliedPromoCode = null;
+    let selectedShipping = null; // { id, name, carrier, price }
+    let currentUser = null;
 
     async function loadPromos() {
       const now = new Date().toISOString();
@@ -384,8 +428,13 @@
       const hasProducts = cart.some(i => i.type === "product");
       const hasSejoursOnly = !hasProducts;
 
-      if (hasProducts) {
-        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">Calculée à l'étape suivante</span></div>`;
+      const shippingZone = document.getElementById("shippingZone");
+      if (shippingZone) shippingZone.style.display = hasProducts ? "block" : "none";
+
+      if (hasProducts && selectedShipping) {
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${selectedShipping.name}</span><span>${selectedShipping.price.toFixed(2).replace(".", ",")} €</span></div>`;
+      } else if (hasProducts) {
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">À calculer</span></div>`;
       }
 
       // Promotions automatiques
@@ -402,11 +451,14 @@
       if (noteEl) {
         noteEl.textContent = hasSejoursOnly
           ? "Toutes les informations concernant votre séjour vous seront envoyées par e-mail après le paiement."
-          : "L'adresse de livraison sera demandée lors du paiement.";
+          : selectedShipping
+            ? ""
+            : "Renseignez votre adresse pour calculer les frais de livraison.";
       }
 
       const rawTotal = getCartTotal();
-      const finalTotal = Math.max(0, rawTotal - totalDiscount);
+      const shippingTotal = hasProducts && selectedShipping ? selectedShipping.price : 0;
+      const finalTotal = Math.max(0, rawTotal - totalDiscount + shippingTotal);
       cartTotalDisplayEl.textContent = finalTotal.toFixed(2).replace(".", ",") + " €";
 
       // Promo code UI
@@ -576,6 +628,121 @@
       }
     });
 
+    // ── Livraison ─────────────────────────────────────────────────────────────
+    function getShippingAddress() {
+      return {
+        line1: document.getElementById("shipLine1")?.value.trim() || "",
+        line2: document.getElementById("shipLine2")?.value.trim() || "",
+        postal_code: document.getElementById("shipPostal")?.value.trim() || "",
+        city: document.getElementById("shipCity")?.value.trim() || "",
+        country: document.getElementById("shipCountry")?.value || "FR",
+      };
+    }
+
+    function getTotalWeightGrams() {
+      const cart = getCart();
+      return cart.reduce((sum, item) => {
+        const w = Number(item.weight_grams) || 0;
+        return sum + w * item.quantity;
+      }, 0) || 200; // fallback 200g si poids non renseigné
+    }
+
+    async function fetchShippingRates() {
+      const addr = getShippingAddress();
+      if (!addr.postal_code || !addr.city) {
+        showShippingMsg("Renseignez le code postal et la ville.", "error");
+        return;
+      }
+      const btnCalc = document.getElementById("btnCalcShipping");
+      if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = "Calcul…"; }
+      showShippingMsg("Récupération des tarifs…", "info");
+      selectedShipping = null;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-shipping-rates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ to_postal_code: addr.postal_code, to_country: addr.country, weight_grams: getTotalWeightGrams() }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || "Erreur");
+        renderShippingMethods(data.methods || []);
+        showShippingMsg("", "");
+      } catch (e) {
+        showShippingMsg("Impossible de récupérer les tarifs : " + (e.message || ""), "error");
+      }
+      if (btnCalc) { btnCalc.disabled = false; btnCalc.textContent = "Calculer la livraison"; }
+    }
+
+    function renderShippingMethods(methods) {
+      const wrap = document.getElementById("shippingMethods");
+      const list = document.getElementById("shippingMethodsList");
+      if (!wrap || !list) return;
+      if (!methods.length) {
+        list.innerHTML = `<div style="font-size:12.5px; color:var(--muted);">Aucune méthode disponible pour cette adresse.</div>`;
+        wrap.style.display = "block";
+        return;
+      }
+      list.innerHTML = methods.map((m, i) => `
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
+          <input type="radio" name="shippingMethod" value="${i}" style="flex-shrink:0;" ${i === 0 ? "checked" : ""}>
+          <span style="flex:1;">${m.name}<br><span style="font-size:11.5px; color:var(--muted);">${m.carrier || ""}</span></span>
+          <span style="font-weight:600; white-space:nowrap;">${Number(m.price).toFixed(2).replace(".", ",")} €</span>
+        </label>`).join("");
+      wrap.style.display = "block";
+      // Auto-select first
+      selectedShipping = methods[0];
+      renderCart();
+      list.querySelectorAll("input[type=radio]").forEach((radio, i) => {
+        radio.addEventListener("change", () => { selectedShipping = methods[i]; renderCart(); });
+      });
+    }
+
+    function showShippingMsg(msg, type) {
+      const el = document.getElementById("shippingMsg");
+      if (!el) return;
+      if (!msg) { el.style.display = "none"; return; }
+      el.style.display = "block";
+      el.style.color = type === "error" ? "#c00" : "var(--muted)";
+      el.textContent = msg;
+    }
+
+    async function loadSavedAddressAndUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUser = user || null;
+      const saveLabel = document.getElementById("saveAddressLabel");
+      if (saveLabel) saveLabel.style.display = user ? "flex" : "none";
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("shipping_line1, shipping_line2, shipping_postal_code, shipping_city, shipping_country").eq("id", user.id).single();
+      if (profile?.shipping_line1) {
+        document.getElementById("shipLine1").value = profile.shipping_line1 || "";
+        document.getElementById("shipLine2").value = profile.shipping_line2 || "";
+        document.getElementById("shipPostal").value = profile.shipping_postal_code || "";
+        document.getElementById("shipCity").value = profile.shipping_city || "";
+        const countryEl = document.getElementById("shipCountry");
+        if (countryEl && profile.shipping_country) countryEl.value = profile.shipping_country;
+        // Auto-fetch rates if cart has products
+        const cart = getCart();
+        if (cart.some(i => i.type === "product")) fetchShippingRates();
+      }
+    }
+
+    async function maybeSaveAddress() {
+      const saveCheck = document.getElementById("saveAddressCheck");
+      if (!saveCheck?.checked || !currentUser) return;
+      const addr = getShippingAddress();
+      await supabase.from("profiles").update({
+        shipping_line1: addr.line1,
+        shipping_line2: addr.line2 || null,
+        shipping_postal_code: addr.postal_code,
+        shipping_city: addr.city,
+        shipping_country: addr.country,
+      }).eq("id", currentUser.id);
+    }
+
+    document.getElementById("btnCalcShipping")?.addEventListener("click", fetchShippingRates);
+
+    // ── Fin livraison ─────────────────────────────────────────────────────────
+
     btnCancelCheckout?.addEventListener("click", async () => {
       if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
       checkoutContainer.innerHTML = "";
@@ -591,11 +758,20 @@
         return;
       }
 
+      const hasProducts = cart.some(i => i.type === "product");
+      if (hasProducts && !selectedShipping) {
+        checkoutMsg.textContent = "Veuillez calculer et sélectionner un mode de livraison.";
+        document.getElementById("shippingZone")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         window.location.href = `/signup.html?redirect=${encodeURIComponent(window.location.href)}`;
         return;
       }
+
+      await maybeSaveAddress();
 
       checkoutLoading.style.display = "block";
       checkoutError.style.display = "none";
@@ -619,6 +795,8 @@
         const codeDiscount = getPromoCodeDiscount(cart);
         const totalDiscountAmount = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])].reduce((s, d) => s + d.amount, 0);
 
+        const shippingAddr = hasProducts ? { ...getShippingAddress(), name: user.user_metadata?.firstname || user.email } : null;
+
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
           method: "POST",
           headers: {
@@ -631,6 +809,9 @@
             userId: user.id,
             userEmail: user.email,
             discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
+            shippingAmount: hasProducts && selectedShipping ? Math.round(selectedShipping.price * 100) : 0,
+            shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
+            shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
         });
@@ -678,7 +859,7 @@
 
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
-    loadPromos().then(() => loadSuggestions());
+    loadPromos().then(() => { loadSuggestions(); loadSavedAddressAndUser(); });
 
     // Carrousel mobile (JS inline pour fiabilité iOS)
     function setupMobileCarousel(gridId, dotsId, cardWidth) {

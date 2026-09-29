@@ -250,6 +250,43 @@
             <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de vos achats...</div>
           </div>
 
+          <div id="addressBox" class="account-card" style="display:none; margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3 style="font-weight:500; margin:0;">Adresse de livraison</h3>
+              <button type="button" id="btnEditAddress" style="font-size:12.5px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Modifier</button>
+            </div>
+            <div id="addressDisplay" style="font-size:13.5px; color:var(--muted);">Aucune adresse enregistrée.</div>
+            <form id="addressForm" style="display:none; margin-top:12px;" autocomplete="on">
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <input id="addrLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;" autocomplete="address-line1">
+                <input id="addrLine2" class="input" placeholder="Complément d'adresse (optionnel)" style="font-size:13px;" autocomplete="address-line2">
+                <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
+                  <input id="addrPostal" class="input" placeholder="Code postal" style="font-size:13px;" maxlength="10" autocomplete="postal-code">
+                  <input id="addrCity" class="input" placeholder="Ville" style="font-size:13px;" autocomplete="address-level2">
+                </div>
+                <select id="addrCountry" class="input" style="font-size:13px;" autocomplete="country">
+                  <option value="FR">France</option>
+                  <option value="BE">Belgique</option>
+                  <option value="CH">Suisse</option>
+                  <option value="LU">Luxembourg</option>
+                  <option value="MC">Monaco</option>
+                  <option value="DE">Allemagne</option>
+                  <option value="ES">Espagne</option>
+                  <option value="IT">Italie</option>
+                  <option value="NL">Pays-Bas</option>
+                  <option value="GB">Royaume-Uni</option>
+                  <option value="US">États-Unis</option>
+                  <option value="CA">Canada</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:12px;">
+                <button type="submit" id="btnSaveAddress" class="btn on-light" style="font-size:13px;">Enregistrer</button>
+                <button type="button" id="btnCancelAddress" style="font-size:12.5px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Annuler</button>
+              </div>
+              <div id="addressMsg" style="font-size:12px; margin-top:6px; display:none;"></div>
+            </form>
+          </div>
+
         </div>
 
       </div>
@@ -1553,9 +1590,92 @@
       await Promise.all([
         loadMyBookings(user),
         loadMyPurchases(user),
-        loadNewsletterStatus(user)
+        loadNewsletterStatus(user),
+        loadMyAddress(user),
       ]);
     }
+
+    async function loadMyAddress(user) {
+      const box = document.getElementById("addressBox");
+      if (!box) return;
+      box.style.display = "block";
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("shipping_line1, shipping_line2, shipping_postal_code, shipping_city, shipping_country")
+        .eq("id", user.id)
+        .single();
+      renderAddressDisplay(profile);
+    }
+
+    function renderAddressDisplay(profile) {
+      const display = document.getElementById("addressDisplay");
+      if (!display) return;
+      if (profile?.shipping_line1) {
+        const parts = [profile.shipping_line1, profile.shipping_line2].filter(Boolean).join(", ");
+        const city = [profile.shipping_postal_code, profile.shipping_city, profile.shipping_country].filter(Boolean).join(" ");
+        display.innerHTML = `<div>${parts}</div><div>${city}</div>`;
+      } else {
+        display.textContent = "Aucune adresse enregistrée.";
+      }
+    }
+
+    document.getElementById("btnEditAddress")?.addEventListener("click", async () => {
+      const form = document.getElementById("addressForm");
+      const display = document.getElementById("addressDisplay");
+      if (!form) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("shipping_line1, shipping_line2, shipping_postal_code, shipping_city, shipping_country").eq("id", user.id).single();
+      document.getElementById("addrLine1").value = profile?.shipping_line1 || "";
+      document.getElementById("addrLine2").value = profile?.shipping_line2 || "";
+      document.getElementById("addrPostal").value = profile?.shipping_postal_code || "";
+      document.getElementById("addrCity").value = profile?.shipping_city || "";
+      const countryEl = document.getElementById("addrCountry");
+      if (countryEl && profile?.shipping_country) countryEl.value = profile.shipping_country;
+      form.style.display = "block";
+      if (display) display.style.display = "none";
+    });
+
+    document.getElementById("btnCancelAddress")?.addEventListener("click", () => {
+      const form = document.getElementById("addressForm");
+      const display = document.getElementById("addressDisplay");
+      if (form) form.style.display = "none";
+      if (display) display.style.display = "";
+    });
+
+    document.getElementById("addressForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("addressMsg");
+      const btn = document.getElementById("btnSaveAddress");
+      if (btn) { btn.disabled = true; btn.textContent = "Enregistrement…"; }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { error } = await supabase.from("profiles").update({
+        shipping_line1: document.getElementById("addrLine1").value.trim() || null,
+        shipping_line2: document.getElementById("addrLine2").value.trim() || null,
+        shipping_postal_code: document.getElementById("addrPostal").value.trim() || null,
+        shipping_city: document.getElementById("addrCity").value.trim() || null,
+        shipping_country: document.getElementById("addrCountry").value || "FR",
+      }).eq("id", user.id);
+      if (btn) { btn.disabled = false; btn.textContent = "Enregistrer"; }
+      if (error) {
+        if (msg) { msg.style.display = "block"; msg.style.color = "#c00"; msg.textContent = "Erreur : " + error.message; }
+      } else {
+        const form = document.getElementById("addressForm");
+        const display = document.getElementById("addressDisplay");
+        const profile = {
+          shipping_line1: document.getElementById("addrLine1").value.trim(),
+          shipping_line2: document.getElementById("addrLine2").value.trim(),
+          shipping_postal_code: document.getElementById("addrPostal").value.trim(),
+          shipping_city: document.getElementById("addrCity").value.trim(),
+          shipping_country: document.getElementById("addrCountry").value,
+        };
+        renderAddressDisplay(profile);
+        if (form) form.style.display = "none";
+        if (display) display.style.display = "";
+        if (msg) msg.style.display = "none";
+      }
+    });
 
     const btnStripePortal = document.getElementById("btnStripePortal");
     const portalMsg = document.getElementById("portalMsg");
