@@ -11,11 +11,12 @@ const corsHeaders = {
 // Zone FR = France métropolitaine, EU = Europe, WORLD = reste du monde.
 const EU_COUNTRIES = ["BE", "LU", "DE", "ES", "IT", "NL", "PT", "AT", "CH", "GB", "IE", "PL", "SE", "DK", "FI", "NO", "CZ", "HU", "RO", "BG", "HR", "SK", "SI", "EE", "LV", "LT", "CY", "MT", "GR"];
 
-const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; zone: string[]; brackets: Array<{ max_g: number; price: number }> }> = [
+const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; delivery_time: string; zone: string[]; brackets: Array<{ max_g: number; price: number }> }> = [
   {
     id: "colissimo-fr",
     name: "Colissimo domicile",
     carrier: "Colissimo",
+    delivery_time: "2 à 3 jours ouvrés",
     zone: ["FR", "MC"],
     brackets: [
       { max_g: 250,  price: 4.95 },
@@ -30,6 +31,7 @@ const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; zone: s
     id: "mondial-relay-fr",
     name: "Mondial Relay (point relais)",
     carrier: "Mondial Relay",
+    delivery_time: "3 à 5 jours ouvrés",
     zone: ["FR", "MC", "BE", "LU", "ES", "PT", "NL", "DE", "AT"],
     brackets: [
       { max_g: 500,  price: 3.90 },
@@ -43,6 +45,7 @@ const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; zone: s
     id: "colissimo-eu",
     name: "Colissimo Europe",
     carrier: "Colissimo",
+    delivery_time: "4 à 7 jours ouvrés",
     zone: EU_COUNTRIES,
     brackets: [
       { max_g: 500,  price: 11.90 },
@@ -56,6 +59,7 @@ const FALLBACK_RATES: Array<{ id: string; name: string; carrier: string; zone: s
     id: "colissimo-world",
     name: "Colissimo International",
     carrier: "Colissimo",
+    delivery_time: "7 à 14 jours ouvrés",
     zone: [], // catch-all : reste du monde
     brackets: [
       { max_g: 500,  price: 19.90 },
@@ -79,7 +83,7 @@ function getFallbackMethods(toCountry: string, weightGrams: number) {
 
   return [...specificRates, ...worldRates].map(r => {
     const bracket = r.brackets.find(b => weightGrams <= b.max_g) || r.brackets[r.brackets.length - 1];
-    return { id: r.id, name: r.name, carrier: r.carrier, price: bracket.price };
+    return { id: r.id, name: r.name, carrier: r.carrier, delivery_time: r.delivery_time, price: bracket.price };
   });
 }
 

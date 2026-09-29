@@ -158,16 +158,10 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:6px;">Délai de livraison / note</label>
-            <input id="productDelivery" class="input" placeholder="Ex : Expédié sous 3 à 5 jours ouvrés">
-          </div>
-          <div>
-            <label class="muted-small" style="display:block; margin-bottom:6px;">Poids (grammes)</label>
-            <input id="productWeight" type="number" min="0" class="input" placeholder="Ex : 350">
-            <small style="color:var(--muted); font-size:11.5px;">Utilisé pour calculer les frais de livraison.</small>
-          </div>
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Poids (grammes)</label>
+          <input id="productWeight" type="number" min="0" class="input" placeholder="Ex : 350" style="max-width:220px;">
+          <small style="color:var(--muted); font-size:11.5px;">Utilisé pour calculer les frais de livraison.</small>
         </div>
 
         <div>
@@ -203,7 +197,6 @@
     const fType = document.getElementById("productType");
     const fCategory = document.getElementById("productCategory");
     const fStock = document.getElementById("productStock");
-    const fDelivery = document.getElementById("productDelivery");
     const fWeight = document.getElementById("productWeight");
 
     const imagesContainer = document.getElementById("imagesContainer");
@@ -486,7 +479,6 @@
       fType.value = product.type || "physique";
       fCategory.value = product.category_id || "";
       fStock.value = product.stock != null ? product.stock : "";
-      fDelivery.value = product.delivery_info || "";
       fWeight.value = product.weight_grams != null ? product.weight_grams : "";
       const imgs = product.image_urls && product.image_urls.length ? product.image_urls : (product.image_url ? [product.image_url] : ['']);
       renderImageFields(imgs);
@@ -546,7 +538,6 @@
         type: fType.value || "physique",
         category_id: fCategory.value || null,
         stock: fStock.value === "" ? null : parseInt(fStock.value, 10),
-        delivery_info: fDelivery.value.trim() || null,
         weight_grams: fWeight.value !== "" ? parseInt(fWeight.value, 10) : null,
         image_urls: urls.length ? urls : null,
         image_url: urls[0] || null,
