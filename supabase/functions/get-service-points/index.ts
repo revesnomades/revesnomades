@@ -31,23 +31,44 @@ serve(async (req) => {
     }
 
     const credentials = btoa(`${publicKey}:${secretKey}`);
-    const params = new URLSearchParams({
-      country: (country || "FR").toUpperCase(),
-      postal_code: postal_code,
-      carrier: "mondialrelay",
-    });
+    const countryCode = (country || "FR").toUpperCase();
 
-    const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
-      headers: { Authorization: `Basic ${credentials}` },
-    });
+    // Try known Mondial Relay carrier slugs in order, then fallback without carrier filter
+    const carrierSlugs = ["mondial_relay", "mondialrelay", "MR"];
+    let raw: Array<Record<string, unknown>> = [];
 
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`SendCloud service points error ${res.status}: ${txt}`);
+    for (const slug of carrierSlugs) {
+      const params = new URLSearchParams({
+        country: countryCode,
+        postal_code: postal_code,
+        carrier: slug,
+      });
+      const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
+        headers: { Authorization: `Basic ${credentials}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        raw = data.service_points || [];
+        if (raw.length > 0) break;
+      }
     }
 
-    const data = await res.json();
-    const raw: Array<Record<string, unknown>> = data.service_points || [];
+    // Last resort: fetch all service points and filter by name
+    if (raw.length === 0) {
+      const params = new URLSearchParams({ country: countryCode, postal_code: postal_code });
+      const res = await fetch(`https://panel.sendcloud.sc/api/v2/servicepoints?${params}`, {
+        headers: { Authorization: `Basic ${credentials}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const all: Array<Record<string, unknown>> = data.service_points || [];
+        raw = all.filter(p =>
+          String(p.carrier || "").toLowerCase().includes("mondial") ||
+          String(p.carrier || "").toLowerCase().includes("mr")
+        );
+        if (raw.length === 0) raw = all; // show all if no MR found
+      }
+    }
 
     // Keep only the first 10, return minimal fields
     const points = raw.slice(0, 10).map((p) => ({
