@@ -536,7 +536,7 @@
         const promoBadge = promo ? `<div style="position:absolute; top:10px; right:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
         return `
         <div class="shop-card">
-          <div class="shop-image-wrapper" style="background-image:url('${imgSrc}');">
+          <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="background-image:url('${imgSrc}'); display:block; text-decoration:none;">
             ${isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
             ${promoBadge}
             <div class="shop-image-overlay"></div>
@@ -549,15 +549,15 @@
 
               <div style="margin-top:12px;">
                 ${isSoldOut
-                  ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
-                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">Ajouter au panier</button>`
+                  ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
+                  : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">Ajouter au panier</button>`
                 }
               </div>
             </div>
-          </div>
-          <div class="shop-title">
+          </a>
+          <a href="/produit.html?id=${p.id}" class="shop-title" style="text-decoration:none;">
             ${p.name}
-          </div>
+          </a>
           <div class="shop-price" style="font-size:13.5px; font-weight:500; color:var(--muted); margin-top:4px;">
             ${(Number(p.price) || 0).toFixed(2)} €
             ${promo && (promo.type === 'percent' || promo.type === 'early_bird') ? `<span style="font-size:11.5px; color:#c44; font-weight:700; margin-left:6px;">−${promo.value}%</span>` : ''}

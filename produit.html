@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-589D3XDT');</script>
+  <!-- End Google Tag Manager -->
+  <meta charset="utf-8">
+  <title id="pageTitle">Produit — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" id="pageDesc" content="Produit Âmes Nomades">
+  <link rel="canonical" id="pageCanonical" href="https://amesnomades.com/produit.html">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    /* ── Layout produit ── */
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+      padding: calc(var(--navH, 72px) + 48px) 0 80px;
+    }
+    @media (max-width: 800px) {
+      .product-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding-top: calc(var(--navH, 72px) + 32px);
+      }
+    }
+
+    /* ── Galerie images ── */
+    .product-gallery {
+      position: sticky;
+      top: calc(var(--navH, 72px) + 20px);
+    }
+    @media (max-width: 800px) {
+      .product-gallery { position: static; }
+    }
+    .gallery-main {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      background: var(--line);
+      overflow: hidden;
+      border: 1px solid rgba(30,31,34,.1);
+    }
+    .gallery-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.25s ease;
+    }
+    .gallery-thumbs {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .gallery-thumb {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      background: var(--line);
+    }
+    .gallery-thumb.active,
+    .gallery-thumb:hover {
+      border-color: var(--text);
+    }
+    @media (max-width: 800px) {
+      .gallery-thumb { width: 56px; height: 56px; }
+    }
+
+    /* ── Info produit ── */
+    .product-info {
+      padding-top: 4px;
+    }
+    .product-breadcrumb {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .product-breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .product-breadcrumb a:hover { color: var(--text); }
+    .product-name {
+      font-family: 'SegoCustom', serif;
+      font-weight: 400;
+      font-size: 34px;
+      line-height: 1.15;
+      color: var(--text);
+      margin: 0 0 16px;
+    }
+    @media (max-width: 480px) {
+      .product-name { font-size: 26px; }
+    }
+    .product-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .product-price {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .product-price-original {
+      font-size: 15px;
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+    .product-promo-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #fff;
+      background: #c44;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .product-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 20px 0;
+    }
+    .product-desc {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Sélecteur quantité ── */
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .qty-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .qty-ctrl {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .qty-btn {
+      background: none;
+      border: none;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qty-btn:hover { background: var(--line); }
+    .qty-btn:disabled { opacity: 0.3; cursor: default; }
+    .qty-val {
+      width: 40px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      line-height: 36px;
+    }
+
+    /* ── CTA ── */
+    .btn-add-cart {
+      width: 100%;
+      padding: 14px 24px;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.18s;
+      border-radius: 2px;
+      margin-bottom: 12px;
+    }
+    .btn-add-cart:hover { opacity: 0.82; }
+    .btn-add-cart:disabled { opacity: 0.4; cursor: default; }
+    .btn-add-cart.sold-out-btn {
+      background: var(--muted);
+      cursor: default;
+    }
+    .btn-panier-link {
+      display: block;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--muted);
+      text-decoration: underline;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      font-family: inherit;
+    }
+    .btn-panier-link:hover { color: var(--text); }
+
+    /* ── Infos livraison ── */
+    .product-meta {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .product-meta-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .product-meta-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      opacity: 0.6;
+    }
+
+    /* ── Toast ── */
+    #toastAdded {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 13.5px;
+      font-weight: 500;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    #toastAdded.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Loading / Error ── */
+    .product-loading {
+      grid-column: 1 / -1;
+      padding: 80px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .product-error {
+      grid-column: 1 / -1;
+      padding: 80px 0;
+      text-align: center;
+    }
+  </style>
+  <script src="/assets/js/metaPixel.js" defer></script>
+</head>
+<body class="on-light">
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <header class="nav" id="top">
+    <div class="container nav-inner">
+      <nav class="nav-left nav-links-desktop" aria-label="Navigation gauche">
+        <a href="/index.html">Accueil</a>
+        <a href="/index.html#sejours">Séjours</a>
+        <a href="/boutique.html" class="active">Shop</a>
+      </nav>
+
+      <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" width="594" height="420" style="display: none;" />
+        <span>ÂmesNomades</span>
+      </a>
+
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
+        <a href="/index.html#apropos" data-scroll>À propos</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/index.html#contact" data-scroll>Contact</a>
+        <a class="icon-btn cart-icon-btn cart-nav-link" href="/panier.html" aria-label="Panier">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-badge"></span>
+        </a>
+        <a class="icon-btn" href="/compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="mobile-drawer" aria-hidden="true">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
+          <a href="/index.html">Accueil</a>
+          <a href="/index.html#sejours">Séjours</a>
+          <a href="/boutique.html">Shop</a>
+          <a href="/index.html#apropos">À propos</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/index.html#contact">Contact</a>
+          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
+          <a href="/compte.html">Compte</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="band cream">
+    <div class="container">
+      <div class="product-layout" id="productLayout">
+        <div class="product-loading">Chargement du produit…</div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastAdded">Ajouté au panier ✓</div>
+
+  <footer class="band cream footer-dark">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand reveal" data-delay="0">
+          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+        </div>
+        <div class="footer-social reveal" data-delay="1">
+          <a class="icon-btn light" href="https://instagram.com/amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a class="icon-btn light" href="https://www.facebook.com/share/1bLsFzNTCz/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a class="icon-btn light" href="https://www.tiktok.com/@amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.5 3v13.1c0 1.4-1.2 2.6-2.6 2.6s-2.6-1.2-2.6-2.6 1.2-2.6 2.6-2.6v-2.6a5.2 5.2 0 1 0 5.2 5.2V7.1a7.3 7.3 0 0 0 3.8 1.1V5.5A4.6 4.6 0 0 1 15 3h-2.5z"/>
+            </svg>
+          </a>
+          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+        </div>
+      </div>
+      <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Âmes Nomades</div>
+          <div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { supabase } from "/assets/js/supabaseClient.js";
+    import { addToCart, initCartBadge } from "/assets/js/cart.js";
+
+    initCartBadge();
+
+    const layout = document.getElementById("productLayout");
+
+    // ── Récupère l'id depuis l'URL ──
+    const params = new URLSearchParams(location.search);
+    const productId = params.get("id");
+
+    if (!productId) {
+      layout.innerHTML = `<div class="product-error"><p style="color:var(--muted); font-size:15px;">Produit introuvable.</p><a href="/boutique.html" class="btn on-light" style="margin-top:16px; display:inline-block;">← Retour à la boutique</a></div>`;
+    } else {
+      loadProduct(productId);
+    }
+
+    async function loadProduct(id) {
+      const { data: p, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error || !p) {
+        layout.innerHTML = `<div class="product-error"><p style="color:var(--muted); font-size:15px;">Produit introuvable.</p><a href="/boutique.html" class="btn on-light" style="margin-top:16px; display:inline-block;">← Retour à la boutique</a></div>`;
+        return;
+      }
+
+      // Promo active
+      const now = new Date().toISOString();
+      const { data: promos } = await supabase
+        .from("promotions")
+        .select("*")
+        .eq("active", true)
+        .or(`starts_at.is.null,starts_at.lte.${now}`)
+        .or(`ends_at.is.null,ends_at.gte.${now}`);
+
+      const promo = (promos || []).find(pr => {
+        if (!pr.display_badge || !pr.badge_text) return false;
+        if (pr.apply_to === "all" || pr.apply_to === "products") return true;
+        if (pr.apply_to === "specific") return (pr.eligible_product_ids || []).includes(id);
+        return false;
+      });
+
+      // Met à jour les metas
+      document.getElementById("pageTitle").textContent = `${p.name} — Âmes Nomades`;
+      if (p.description) document.getElementById("pageDesc").setAttribute("content", p.description.slice(0, 160));
+      document.getElementById("pageCanonical").setAttribute("href", `https://amesnomades.com/produit.html?id=${id}`);
+
+      // Images
+      const images = (p.image_urls && p.image_urls.length > 0)
+        ? p.image_urls
+        : (p.image_url ? [p.image_url] : []);
+      const placeholder = "/assets/img/placeholder.jpg";
+
+      const isSoldOut = p.stock === 0;
+      const maxQty = p.stock ?? 99;
+
+      // Prix promo
+      let promoPrice = null;
+      let promoBadgeText = "";
+      if (promo) {
+        if (promo.type === "percent" || promo.type === "early_bird") {
+          promoPrice = p.price * (1 - promo.value / 100);
+          promoBadgeText = `−${promo.value}%`;
+        } else if (promo.type === "fixed") {
+          promoPrice = p.price - promo.value;
+          promoBadgeText = `−${Number(promo.value).toFixed(2)} €`;
+        }
+        if (promo.badge_text) promoBadgeText = promo.badge_text;
+      }
+      const displayPrice = promoPrice !== null ? promoPrice : p.price;
+
+      // Rendu galerie
+      const thumbsHtml = images.length > 1
+        ? images.map((src, i) => `<img src="${src}" alt="${p.name} ${i + 1}" class="gallery-thumb${i === 0 ? ' active' : ''}" data-idx="${i}" loading="lazy">`).join("")
+        : "";
+
+      layout.innerHTML = `
+        <!-- Galerie -->
+        <div class="product-gallery">
+          <div class="gallery-main">
+            <img id="mainImg" src="${images[0] || placeholder}" alt="${p.name}">
+          </div>
+          ${thumbsHtml ? `<div class="gallery-thumbs" id="thumbs">${thumbsHtml}</div>` : ""}
+        </div>
+
+        <!-- Info -->
+        <div class="product-info">
+          <div class="product-breadcrumb">
+            <a href="/boutique.html">Shop</a> <span style="margin:0 6px;">›</span> ${p.name}
+          </div>
+
+          <h1 class="product-name">${p.name}</h1>
+
+          <div class="product-price-row">
+            <span class="product-price">${displayPrice.toFixed(2)} €</span>
+            ${promoPrice !== null ? `<span class="product-price-original">${Number(p.price).toFixed(2)} €</span>` : ""}
+            ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
+          </div>
+
+          <div class="product-divider"></div>
+
+          ${p.description ? `<p class="product-desc">${p.description.replace(/\n/g, "<br>")}</p>` : ""}
+
+          ${!isSoldOut ? `
+          <div class="qty-row">
+            <span class="qty-label">Quantité</span>
+            <div class="qty-ctrl">
+              <button type="button" class="qty-btn" id="qtyMinus" aria-label="Diminuer">−</button>
+              <div class="qty-val" id="qtyVal">1</div>
+              <button type="button" class="qty-btn" id="qtyPlus" aria-label="Augmenter">+</button>
+            </div>
+          </div>` : ""}
+
+          <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut ? ' sold-out-btn' : ''}" ${isSoldOut ? 'disabled' : ''}>
+            ${isSoldOut ? "Victime de son succès" : "Ajouter au panier"}
+          </button>
+
+          ${!isSoldOut ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
+
+          <div class="product-divider"></div>
+
+          <div class="product-meta">
+            <div class="product-meta-row">
+              <svg class="product-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+                <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <span>Livraison Colissimo · Suivi inclus</span>
+            </div>
+            ${p.delivery_info ? `
+            <div class="product-meta-row">
+              <svg class="product-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span>${p.delivery_info}</span>
+            </div>` : ""}
+            <div class="product-meta-row">
+              <svg class="product-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <span>Retours gratuits sous 14 jours</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // ── Thumbnails ──
+      document.querySelectorAll(".gallery-thumb").forEach(thumb => {
+        thumb.addEventListener("click", () => {
+          const idx = Number(thumb.dataset.idx);
+          document.getElementById("mainImg").src = images[idx] || placeholder;
+          document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active"));
+          thumb.classList.add("active");
+        });
+      });
+
+      // ── Quantité ──
+      let qty = 1;
+      const qtyMinus = document.getElementById("qtyMinus");
+      const qtyPlus = document.getElementById("qtyPlus");
+      const qtyVal = document.getElementById("qtyVal");
+
+      function updateQtyUI() {
+        if (!qtyVal) return;
+        qtyVal.textContent = qty;
+        if (qtyMinus) qtyMinus.disabled = qty <= 1;
+        if (qtyPlus) qtyPlus.disabled = qty >= maxQty;
+      }
+      if (qtyMinus) qtyMinus.addEventListener("click", () => { if (qty > 1) { qty--; updateQtyUI(); } });
+      if (qtyPlus) qtyPlus.addEventListener("click", () => { if (qty < maxQty) { qty++; updateQtyUI(); } });
+      updateQtyUI();
+
+      // ── Ajouter au panier ──
+      const btnAddCart = document.getElementById("btnAddCart");
+      if (btnAddCart && !isSoldOut) {
+        btnAddCart.addEventListener("click", () => {
+          const imgSrc = images[0] || placeholder;
+          for (let i = 0; i < qty; i++) {
+            addToCart({ type: "product", id: p.id, name: p.name, price: displayPrice, maxStock: maxQty, image: imgSrc, deliveryDays: 5 });
+          }
+          if (window.MetaPixel) window.MetaPixel.trackAddToCart(p.name, p.id, displayPrice);
+          showToast();
+        });
+      }
+
+      // ── Aller au panier ──
+      const btnGoCart = document.getElementById("btnGoCart");
+      if (btnGoCart) {
+        btnGoCart.addEventListener("click", () => { location.href = "/panier.html"; });
+      }
+    }
+
+    // ── Toast ──
+    function showToast() {
+      const toast = document.getElementById("toastAdded");
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+  </script>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
