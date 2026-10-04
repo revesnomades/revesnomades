@@ -55,7 +55,9 @@
       border: 1px solid rgba(30,31,34,.1);
       cursor: zoom-in;
     }
-    .gallery-main img {
+    .gallery-main.is-video { cursor: default; }
+    .gallery-main img,
+    .gallery-main video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -69,13 +71,34 @@
       flex-wrap: wrap;
     }
     .gallery-thumb {
+      position: relative;
       width: 64px;
       height: 64px;
-      object-fit: cover;
+      padding: 0;
+      overflow: hidden;
       border: 2px solid transparent;
       cursor: pointer;
       transition: border-color 0.15s;
       background: var(--line);
+    }
+    .gallery-thumb img,
+    .gallery-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .thumb-play {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.25);
+      color: #fff;
+      font-size: 18px;
+      pointer-events: none;
     }
     .gallery-thumb.active,
     .gallery-thumb:hover {
@@ -338,7 +361,8 @@
       cursor: zoom-out;
     }
     .lightbox.open { display: flex; }
-    .lightbox img {
+    .lightbox img,
+    .lightbox video {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -453,6 +477,7 @@
     <button type="button" class="lightbox-btn lightbox-close" id="lbClose" aria-label="Fermer">×</button>
     <button type="button" class="lightbox-btn lightbox-prev" id="lbPrev" aria-label="Image précédente">‹</button>
     <img id="lbImg" alt="">
+    <video id="lbVideo" controls playsinline style="display:none;"></video>
     <button type="button" class="lightbox-btn lightbox-next" id="lbNext" aria-label="Image suivante">›</button>
   </div>
 
@@ -561,6 +586,11 @@
         ? p.image_urls
         : (p.image_url ? [p.image_url] : []);
       const placeholder = "/assets/img/placeholder.jpg";
+      const isVideo = url => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url || "");
+      const firstPhoto = images.find(u => !isVideo(u)) || placeholder;
+      const mainMediaHtml = src => isVideo(src)
+        ? `<video src="${src}" autoplay muted loop playsinline controls></video>`
+        : `<img src="${src || placeholder}" alt="${p.name}">`;
 
       const isComingSoon = p.coming_soon === true;
       const isSoldOut = !isComingSoon && p.stock === 0;
@@ -583,14 +613,19 @@
 
       // Rendu galerie
       const thumbsHtml = images.length > 1
-        ? images.map((src, i) => `<img src="${src}" alt="${p.name} ${i + 1}" class="gallery-thumb${i === 0 ? ' active' : ''}" data-idx="${i}" loading="lazy">`).join("")
+        ? images.map((src, i) => `
+          <button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="${isVideo(src) ? 'Vidéo' : 'Image'} ${i + 1}">
+            ${isVideo(src)
+              ? `<video src="${src}#t=0.1" muted playsinline preload="metadata"></video><span class="thumb-play">▶</span>`
+              : `<img src="${src}" alt="" loading="lazy">`}
+          </button>`).join("")
         : "";
 
       layout.innerHTML = `
         <!-- Galerie -->
         <div class="product-gallery">
-          <div class="gallery-main">
-            <img id="mainImg" src="${images[0] || placeholder}" alt="${p.name}">
+          <div class="gallery-main${isVideo(images[0]) ? ' is-video' : ''}" id="galleryMain">
+            ${mainMediaHtml(images[0])}
           </div>
           ${thumbsHtml ? `<div class="gallery-thumbs" id="thumbs">${thumbsHtml}</div>` : ""}
         </div>
@@ -697,9 +732,12 @@
 
       // ── Thumbnails ──
       let currentIdx = 0;
+      const galleryMain = document.getElementById("galleryMain");
       function showImage(idx) {
+        if (idx === currentIdx && galleryMain.firstElementChild) return;
         currentIdx = idx;
-        document.getElementById("mainImg").src = images[idx] || placeholder;
+        galleryMain.innerHTML = mainMediaHtml(images[idx]);
+        galleryMain.classList.toggle("is-video", isVideo(images[idx]));
         document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.toggle("active", Number(t.dataset.idx) === idx));
       }
       document.querySelectorAll(".gallery-thumb").forEach(thumb => {
@@ -709,6 +747,7 @@
       // ── Visionneuse ──
       const lightbox = document.getElementById("lightbox");
       const lbImg = document.getElementById("lbImg");
+      const lbVideo = document.getElementById("lbVideo");
       const lbPrev = document.getElementById("lbPrev");
       const lbNext = document.getElementById("lbNext");
       const hasMany = images.length > 1;
@@ -716,23 +755,40 @@
 
       function lbShow(idx) {
         if (hasMany) showImage((idx + images.length) % images.length);
-        lbImg.src = images[currentIdx] || placeholder;
-        lbImg.alt = p.name;
+        const src = images[currentIdx];
+        lbVideo.pause();
+        if (isVideo(src)) {
+          lbImg.style.display = "none";
+          lbVideo.style.display = "";
+          lbVideo.src = src;
+          lbVideo.play().catch(() => {});
+        } else {
+          lbVideo.style.display = "none";
+          lbVideo.removeAttribute("src");
+          lbImg.style.display = "";
+          lbImg.src = src || placeholder;
+          lbImg.alt = p.name;
+        }
       }
       function lbOpen() {
+        galleryMain.querySelector("video")?.pause();
         lbShow(currentIdx);
         lightbox.classList.add("open");
         document.body.style.overflow = "hidden";
       }
       function lbClose() {
+        lbVideo.pause();
         lightbox.classList.remove("open");
         document.body.style.overflow = "";
       }
-      document.querySelector(".gallery-main").addEventListener("click", lbOpen);
+      galleryMain.addEventListener("click", () => {
+        if (!isVideo(images[currentIdx])) lbOpen();
+      });
       document.getElementById("lbClose").addEventListener("click", lbClose);
       lbPrev.addEventListener("click", e => { e.stopPropagation(); lbShow(currentIdx - 1); });
       lbNext.addEventListener("click", e => { e.stopPropagation(); lbShow(currentIdx + 1); });
       lbImg.addEventListener("click", e => e.stopPropagation());
+      lbVideo.addEventListener("click", e => e.stopPropagation());
       lightbox.addEventListener("click", lbClose);
       document.addEventListener("keydown", e => {
         if (!lightbox.classList.contains("open")) return;
@@ -761,7 +817,7 @@
       const btnAddCart = document.getElementById("btnAddCart");
       if (btnAddCart && !isSoldOut) {
         btnAddCart.addEventListener("click", () => {
-          const imgSrc = images[0] || placeholder;
+          const imgSrc = firstPhoto;
           for (let i = 0; i < qty; i++) {
             addToCart({ type: "product", id: p.id, name: p.name, price: displayPrice, maxStock: maxQty, image: imgSrc, deliveryDays: 5 });
           }

@@ -185,9 +185,9 @@
         </div>
 
         <div>
-          <label class="muted-small" style="display:block; margin-bottom:6px;">Photos (sélectionnez la principale avec le bouton 🔘)</label>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Photos et vidéos (sélectionnez la principale avec le bouton 🔘 — ce doit être une photo ; vidéos .mp4/.webm/.mov, 50 Mo max)</label>
           <div id="imagesContainer" style="display:grid; gap:8px; margin-bottom:8px;"></div>
-          <button type="button" class="btn tiny on-light" id="btnAddImageField">+ Ajouter une photo</button>
+          <button type="button" class="btn tiny on-light" id="btnAddImageField">+ Ajouter une photo ou une vidéo</button>
         </div>
 
 
@@ -400,6 +400,9 @@
       });
     }
 
+    const MAX_VIDEO_MB = 50;
+    const isVideoUrl = url => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url || "");
+
     function attachFileInputHandlers() {
       imagesContainer.querySelectorAll(".img-field-row").forEach(row => {
         const fileInput = row.querySelector(".img-file-input");
@@ -415,11 +418,19 @@
             if (!file) return;
 
             try {
-              chooseBtn.textContent = "Comp...";
               chooseBtn.disabled = true;
+              const isVideoFile = file.type.startsWith("video/");
+              let processedFile = file;
 
-              // 1. Compresser et redimensionner l'image à 1000px max (WebP)
-              const processedFile = await resizeAndCompressImage(file, 1000, 0.82);
+              if (isVideoFile) {
+                if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+                  throw new Error(`Vidéo trop lourde (${(file.size / 1048576).toFixed(0)} Mo). Maximum : ${MAX_VIDEO_MB} Mo.`);
+                }
+              } else {
+                // 1. Compresser et redimensionner l'image à 1000px max (WebP)
+                chooseBtn.textContent = "Comp...";
+                processedFile = await resizeAndCompressImage(file, 1000, 0.82);
+              }
 
               chooseBtn.textContent = "Envoi...";
 
@@ -436,6 +447,7 @@
                 .from("stays")
                 .upload(filePath, processedFile, {
                   cacheControl: "31536000",
+                  contentType: processedFile.type || undefined,
                   upsert: false
                 });
 
@@ -453,7 +465,7 @@
 
             } catch (err) {
               console.error("Erreur upload image produit:", err);
-              alert("Erreur lors du traitement ou de l'upload de l'image: " + err.message);
+              alert("Erreur lors de l'envoi du fichier : " + err.message);
               chooseBtn.textContent = "Erreur ✕";
               chooseBtn.disabled = false;
             }
@@ -467,8 +479,8 @@
       imagesContainer.innerHTML = urls.map((url, i) => `
         <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;" class="img-field-row">
           <input type="radio" name="mainImgRadio" value="${i}" ${i === 0 ? 'checked' : ''} title="Choisir comme image principale">
-          <input type="text" class="input img-url-input" value="${url}" placeholder="URL ou téléversement..." style="flex:1;">
-          <input type="file" class="img-file-input" accept="image/*" style="display:none;">
+          <input type="text" class="input img-url-input" value="${url}" placeholder="URL photo/vidéo ou téléversement..." style="flex:1;">
+          <input type="file" class="img-file-input" accept="image/*,video/mp4,video/webm,video/quicktime" style="display:none;">
           <button type="button" class="btn tiny on-light btn-choose-file">Choisir...</button>
           <button type="button" class="btn tiny" onclick="this.parentElement.remove()" style="background:transparent; color:#c00; padding: 0 8px;">✕</button>
         </div>
@@ -483,8 +495,8 @@
       div.className = "img-field-row";
       div.innerHTML = `
         <input type="radio" name="mainImgRadio" value="${idx}" ${idx === 0 ? 'checked' : ''} title="Choisir comme image principale">
-        <input type="text" class="input img-url-input" placeholder="URL ou téléversement..." style="flex:1;">
-        <input type="file" class="img-file-input" accept="image/*" style="display:none;">
+        <input type="text" class="input img-url-input" placeholder="URL photo/vidéo ou téléversement..." style="flex:1;">
+        <input type="file" class="img-file-input" accept="image/*,video/mp4,video/webm,video/quicktime" style="display:none;">
         <button type="button" class="btn tiny on-light btn-choose-file">Choisir...</button>
         <button type="button" class="btn tiny" onclick="this.parentElement.remove()" style="background:transparent; color:#c00; padding: 0 8px;">✕</button>
       `;
@@ -558,6 +570,13 @@
         const mainUrl = urls.splice(mainIdx, 1)[0];
         urls.unshift(mainUrl);
       }
+      // Le premier média sert de vignette (boutique, panier, Stripe) : ce doit être une photo
+      const firstPhotoIdx = urls.findIndex(u => !isVideoUrl(u));
+      if (urls.length && firstPhotoIdx === -1) {
+        alert("Ajoute au moins une photo : elle sert de vignette dans la boutique.");
+        return;
+      }
+      if (firstPhotoIdx > 0) urls.unshift(urls.splice(firstPhotoIdx, 1)[0]);
 
       const payload = {
         name: nameVal,
