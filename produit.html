@@ -592,6 +592,11 @@
         ? `<video src="${src}" autoplay muted loop playsinline controls></video>`
         : `<img src="${src || placeholder}" alt="${p.name}">`;
 
+      const cleanText = v => (v || "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+      const descLongue = cleanText(p.description_longue);
+      const details = cleanText(p.details);
+      const dimensions = cleanText(p.dimensions_poids);
+
       const isComingSoon = p.coming_soon === true;
       const isSoldOut = !isComingSoon && p.stock === 0;
       const maxQty = p.stock ?? 99;
@@ -691,31 +696,31 @@
           </div>
 
           <!-- Accordéon -->
-          ${(p.description_longue || p.details || p.dimensions_poids) ? `
+          ${(descLongue || details || dimensions) ? `
           <div class="accordion" id="productAccordion">
-            ${p.description_longue ? `
+            ${descLongue ? `
             <div class="accordion-item open">
               <button type="button" class="accordion-trigger">
                 Description du produit
                 <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div class="accordion-body">${p.description_longue.replace(/\n/g, "<br>")}</div>
+              <div class="accordion-body">${descLongue.replace(/\n/g, "<br>")}</div>
             </div>` : ""}
-            ${p.dimensions_poids ? `
+            ${dimensions ? `
             <div class="accordion-item">
               <button type="button" class="accordion-trigger">
                 Dimensions et poids
                 <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div class="accordion-body">${p.dimensions_poids.replace(/\n/g, "<br>")}</div>
+              <div class="accordion-body">${dimensions.replace(/\n/g, "<br>")}</div>
             </div>` : ""}
-            ${p.details ? `
+            ${details ? `
             <div class="accordion-item">
               <button type="button" class="accordion-trigger">
                 Détails
                 <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div class="accordion-body">${p.details.replace(/\n/g, "<br>")}</div>
+              <div class="accordion-body">${details.replace(/\n/g, "<br>")}</div>
             </div>` : ""}
           </div>` : ""}
         </div>

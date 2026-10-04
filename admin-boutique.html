@@ -400,6 +400,7 @@
       });
     }
 
+    const cleanText = v => (v || "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
     const MAX_VIDEO_MB = 50;
     const isVideoUrl = url => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url || "");
 
@@ -581,9 +582,9 @@
       const payload = {
         name: nameVal,
         description: fDesc.value.trim() || null,
-        description_longue: fDescLongue.value.trim() || null,
-        details: fDetails.value.trim() || null,
-        dimensions_poids: fDimensions.value.trim() || null,
+        description_longue: cleanText(fDescLongue.value) || null,
+        details: cleanText(fDetails.value) || null,
+        dimensions_poids: cleanText(fDimensions.value) || null,
         coming_soon: fComingSoon.checked,
         price: priceVal,
         type: fType.value || "physique",
