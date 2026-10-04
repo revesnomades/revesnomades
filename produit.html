@@ -255,6 +255,73 @@
       background: transparent;
     }
     .btn-add-cart:disabled { opacity: 0.4; cursor: default; }
+    .product-soon-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #fff;
+      background: #888;
+      padding: 3px 8px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .product-price-row { flex-wrap: wrap; }
+    .product-notify-hint {
+      font-size: 12.5px;
+      color: var(--muted);
+      text-align: center;
+      margin: 0;
+    }
+
+    /* ── Fenêtre « Me prévenir » ── */
+    .restock-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      background: rgba(0,0,0,.6);
+    }
+    .restock-modal.open { display: flex; }
+    .restock-box {
+      background: var(--white, #fff);
+      width: 100%;
+      max-width: 420px;
+      padding: 28px;
+      border-radius: 8px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.2);
+    }
+    .restock-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .restock-head h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+      color: var(--text);
+      text-wrap: balance;
+    }
+    .restock-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text);
+      padding: 0 4px;
+    }
+    .restock-text { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0 0 16px; }
+    #restockForm { display: flex; flex-direction: column; gap: 12px; }
+    #restockEmail { width: 100%; padding: 10px; box-sizing: border-box; }
+    .restock-msg { font-size: 13px; min-height: 1em; }
+    #restockForm .btn-add-cart { margin-bottom: 0; }
+
     .btn-add-cart.sold-out-btn {
       background: var(--muted);
       cursor: default;
@@ -488,6 +555,21 @@
 
   <div id="toastAdded">Ajouté au panier ✓</div>
 
+  <div class="restock-modal" id="restockModal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
+    <div class="restock-box">
+      <div class="restock-head">
+        <h2 id="restockTitle">Me prévenir</h2>
+        <button type="button" class="restock-close" id="restockClose" aria-label="Fermer">×</button>
+      </div>
+      <p class="restock-text">Laissez votre adresse email pour recevoir un message dès que ce produit sera disponible.</p>
+      <form id="restockForm">
+        <input type="email" id="restockEmail" class="input" placeholder="votre@email.com" required autocomplete="email">
+        <div id="restockMsg" class="restock-msg" aria-live="polite"></div>
+        <button type="submit" class="btn-add-cart" id="restockSubmit">🔔 Me prévenir</button>
+      </form>
+    </div>
+  </div>
+
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image du produit">
     <button type="button" class="lightbox-btn lightbox-close" id="lbClose" aria-label="Fermer">×</button>
     <button type="button" class="lightbox-btn lightbox-prev" id="lbPrev" aria-label="Image précédente">‹</button>
@@ -615,6 +697,7 @@
 
       const isComingSoon = p.coming_soon === true;
       const isSoldOut = !isComingSoon && p.stock === 0;
+      const isUnavailable = isComingSoon || isSoldOut;
       const maxQty = p.stock ?? 99;
 
       // Prix promo
@@ -665,13 +748,12 @@
             <span class="product-price">${displayPrice.toFixed(2)} €</span>
             ${promoPrice !== null ? `<span class="product-price-original">${Number(p.price).toFixed(2)} €</span>` : ""}
             ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
+            ${isUnavailable ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
           </div>
 
           <div class="product-divider"></div>
 
-          ${isComingSoon || isSoldOut ? `<p class="product-desc" style="font-style:italic;">Ce produit sera bientôt disponible.</p>` : ""}
-
-          ${!isSoldOut && !isComingSoon ? `
+          ${!isUnavailable ? `
           <div class="qty-row">
             <span class="qty-label">Quantité</span>
             <div class="qty-ctrl">
@@ -682,13 +764,13 @@
           </div>` : ""}
 
           <div class="cta-row">
-            <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut || isComingSoon ? ' sold-out-btn' : ''}" ${isSoldOut || isComingSoon ? 'disabled' : ''}>
-              ${isComingSoon || isSoldOut ? "Bientôt disponible" : "Ajouter au panier"}
-            </button>
+            ${isUnavailable
+              ? `<button type="button" id="btnNotify" class="btn-add-cart">🔔 Me prévenir</button>`
+              : `<button type="button" id="btnAddCart" class="btn-add-cart">Ajouter au panier</button>`}
             ${favButtonHtml(p.id, "on-product")}
           </div>
 
-          ${!isSoldOut && !isComingSoon ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
+          ${!isUnavailable ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : `<p class="product-notify-hint">Recevez un email dès que ce produit est disponible.</p>`}
 
           <div class="product-divider"></div>
 
@@ -839,7 +921,7 @@
 
       // ── Ajouter au panier ──
       const btnAddCart = document.getElementById("btnAddCart");
-      if (btnAddCart && !isSoldOut) {
+      if (btnAddCart) {
         btnAddCart.addEventListener("click", () => {
           const imgSrc = firstPhoto;
           for (let i = 0; i < qty; i++) {
@@ -850,12 +932,67 @@
         });
       }
 
+      // ── Me prévenir ──
+      document.getElementById("btnNotify")?.addEventListener("click", () => openRestockModal(p.id, p.name));
+
       // ── Aller au panier ──
       const btnGoCart = document.getElementById("btnGoCart");
       if (btnGoCart) {
         btnGoCart.addEventListener("click", () => { location.href = "/panier.html"; });
       }
     }
+
+    // ── Alerte disponibilité ──
+    const restockModal = document.getElementById("restockModal");
+    const restockForm = document.getElementById("restockForm");
+    const restockEmail = document.getElementById("restockEmail");
+    const restockMsg = document.getElementById("restockMsg");
+    const restockTitle = document.getElementById("restockTitle");
+    const restockSubmit = document.getElementById("restockSubmit");
+    let restockProductId = null;
+
+    async function openRestockModal(id, name) {
+      restockProductId = id;
+      restockTitle.textContent = `Me prévenir : ${name}`;
+      restockMsg.textContent = "";
+      restockEmail.value = "";
+      restockSubmit.disabled = false;
+      restockModal.classList.add("open");
+      document.body.style.overflow = "hidden";
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email && !restockEmail.value) restockEmail.value = user.email;
+      restockEmail.focus();
+    }
+    function closeRestockModal() {
+      restockModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("restockClose").addEventListener("click", closeRestockModal);
+    restockModal.addEventListener("click", e => { if (e.target === restockModal) closeRestockModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && restockModal.classList.contains("open")) closeRestockModal(); });
+
+    restockForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      restockSubmit.disabled = true;
+      restockMsg.style.color = "var(--muted)";
+      restockMsg.textContent = "Enregistrement en cours…";
+
+      const { error } = await supabase
+        .from("restock_subscriptions")
+        .insert([{ product_id: restockProductId, email: restockEmail.value.trim() }]);
+
+      if (error) {
+        restockSubmit.disabled = false;
+        restockMsg.style.color = "#c00";
+        restockMsg.textContent = error.code === "23505"
+          ? "Vous êtes déjà inscrit pour ce produit."
+          : "Erreur lors de l'inscription : " + error.message;
+        return;
+      }
+      restockMsg.style.color = "#4f8c5b";
+      restockMsg.textContent = "C'est noté ! Vous recevrez un email dès que le produit sera disponible.";
+      setTimeout(closeRestockModal, 2500);
+    });
 
     // ── Toast ──
     function showToast() {
