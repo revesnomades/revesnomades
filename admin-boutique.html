@@ -127,8 +127,23 @@
         </div>
 
         <div>
-          <label class="muted-small" style="display:block; margin-bottom:6px;">Description courte</label>
-          <textarea id="productDescription" class="input" rows="3"></textarea>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Description courte <span style="font-weight:400; opacity:.6;">(affichée sur le shop)</span></label>
+          <textarea id="productDescription" class="input" rows="2"></textarea>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Description du produit <span style="font-weight:400; opacity:.6;">(page produit — onglet)</span></label>
+          <textarea id="productDescLongue" class="input" rows="4" placeholder="Description complète visible sur la page produit…"></textarea>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Détails <span style="font-weight:400; opacity:.6;">(matières, entretien…)</span></label>
+          <textarea id="productDetails" class="input" rows="3" placeholder="Ex : 100% coton bio, lavable à 30°…"></textarea>
+        </div>
+
+        <div>
+          <label class="muted-small" style="display:block; margin-bottom:6px;">Dimensions et poids</label>
+          <textarea id="productDimensions" class="input" rows="2" placeholder="Ex : 185 × 61 cm, épaisseur 4 mm, poids 1,5 kg"></textarea>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -193,6 +208,9 @@
     const fId = document.getElementById("productId");
     const fName = document.getElementById("productName");
     const fDesc = document.getElementById("productDescription");
+    const fDescLongue = document.getElementById("productDescLongue");
+    const fDetails = document.getElementById("productDetails");
+    const fDimensions = document.getElementById("productDimensions");
     const fPrice = document.getElementById("productPrice");
     const fType = document.getElementById("productType");
     const fCategory = document.getElementById("productCategory");
@@ -475,6 +493,9 @@
       fId.value = product.id;
       fName.value = product.name;
       fDesc.value = product.description || "";
+      fDescLongue.value = product.description_longue || "";
+      fDetails.value = product.details || "";
+      fDimensions.value = product.dimensions_poids || "";
       fPrice.value = product.price;
       fType.value = product.type || "physique";
       fCategory.value = product.category_id || "";
@@ -534,6 +555,9 @@
       const payload = {
         name: nameVal,
         description: fDesc.value.trim() || null,
+        description_longue: fDescLongue.value.trim() || null,
+        details: fDetails.value.trim() || null,
+        dimensions_poids: fDimensions.value.trim() || null,
         price: priceVal,
         type: fType.value || "physique",
         category_id: fCategory.value || null,
