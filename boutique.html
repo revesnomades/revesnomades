@@ -330,7 +330,7 @@
           <input type="email" id="restockEmail" class="input" placeholder="votre@email.com" required style="width:100%; padding:10px;">
         </div>
         <div id="restockMsg" style="font-size:13px; margin-bottom:10px;"></div>
-        <button type="submit" class="btn on-light" style="width:100%;">🔔 M'avertir</button>
+        <button type="submit" class="btn on-light" style="width:100%;">🔔 Me prévenir</button>
       </form>
     </div>
   </div>
@@ -554,7 +554,7 @@
                 ${isComingSoon
                   ? `<button type="button" class="stay-mini-btn" style="cursor:default; width:100%; background:rgba(255,255,255,0.1); opacity:.7;">Bientôt disponible</button>`
                   : isSoldOut
-                  ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
+                  ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 Me prévenir</button>`
                   : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">Ajouter au panier</button>`
                 }
               </div>
@@ -576,7 +576,7 @@
           ${isComingSoon
             ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); opacity:.6; cursor:default;" disabled>Bientôt disponible</button>`
             : isSoldOut
-            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>`
+            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 Me prévenir</button>`
             : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">+ Ajouter au panier</button>`
           }
         </div>
