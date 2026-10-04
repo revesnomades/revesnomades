@@ -524,6 +524,17 @@
         return;
       }
 
+      // Catégorie
+      let category = null;
+      if (p.category_id) {
+        const { data: cat } = await supabase
+          .from("product_categories")
+          .select("id, name")
+          .eq("id", p.category_id)
+          .maybeSingle();
+        category = cat;
+      }
+
       // Promo active
       const now = new Date().toISOString();
       const { data: promos } = await supabase
@@ -587,7 +598,9 @@
         <!-- Info -->
         <div class="product-info">
           <div class="product-breadcrumb">
-            <a href="/boutique.html">Shop</a> <span style="margin:0 6px;">›</span> ${p.name}
+            <a href="/boutique.html">Shop</a> <span style="margin:0 6px;">›</span>
+            ${category ? `<a href="/boutique.html?categorie=${encodeURIComponent(category.id)}">${category.name}</a> <span style="margin:0 6px;">›</span>` : ""}
+            ${p.name}
           </div>
 
           <h1 class="product-name">${p.name}</h1>

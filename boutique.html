@@ -477,6 +477,8 @@
       if(data && data.length){
         filterCategory.innerHTML = `<option value="">Toutes les catégories</option>` + 
           data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        const urlCat = new URLSearchParams(location.search).get("categorie");
+        if (urlCat && data.some(c => c.id === urlCat)) filterCategory.value = urlCat;
       }
     }
 
@@ -708,8 +710,7 @@
     };
 
     initCartBadge();
-    loadCategories();
-    loadShop();
+    loadCategories().then(loadShop);
   </script>
 </body>
 </html>
