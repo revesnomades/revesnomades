@@ -28,20 +28,21 @@
       grid-template-columns: 1fr 1fr;
       gap: 56px;
       align-items: start;
-      padding: calc(var(--navH, 72px) + 48px) 0 80px;
+      padding: calc(var(--navH, 110px) + 48px) 0 80px;
     }
     @media (max-width: 800px) {
       .product-layout {
         grid-template-columns: 1fr;
         gap: 32px;
-        padding-top: calc(var(--navH, 72px) + 32px);
+        padding-top: calc(var(--navH, 110px) + 24px);
       }
     }
 
     /* ── Galerie images ── */
     .product-gallery {
       position: sticky;
-      top: calc(var(--navH, 72px) + 20px);
+      top: calc(var(--navH, 110px) + 20px);
+      min-width: 0;
     }
     @media (max-width: 800px) {
       .product-gallery { position: static; }
@@ -86,6 +87,7 @@
     /* ── Info produit ── */
     .product-info {
       padding-top: 4px;
+      min-width: 0;
     }
     .product-breadcrumb {
       font-size: 12px;
@@ -501,7 +503,8 @@
         : (p.image_url ? [p.image_url] : []);
       const placeholder = "/assets/img/placeholder.jpg";
 
-      const isSoldOut = p.stock === 0;
+      const isComingSoon = p.coming_soon === true;
+      const isSoldOut = !isComingSoon && p.stock === 0;
       const maxQty = p.stock ?? 99;
 
       // Prix promo
@@ -549,9 +552,9 @@
 
           <div class="product-divider"></div>
 
-          ${p.description ? `<p class="product-desc">${p.description.replace(/\n/g, "<br>")}</p>` : ""}
+          ${isComingSoon ? `<p class="product-desc" style="font-style:italic;">Ce produit sera bientôt disponible.</p>` : ""}
 
-          ${!isSoldOut ? `
+          ${!isSoldOut && !isComingSoon ? `
           <div class="qty-row">
             <span class="qty-label">Quantité</span>
             <div class="qty-ctrl">
@@ -561,11 +564,11 @@
             </div>
           </div>` : ""}
 
-          <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut ? ' sold-out-btn' : ''}" ${isSoldOut ? 'disabled' : ''}>
-            ${isSoldOut ? "Victime de son succès" : "Ajouter au panier"}
+          <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut || isComingSoon ? ' sold-out-btn' : ''}" ${isSoldOut || isComingSoon ? 'disabled' : ''}>
+            ${isComingSoon ? "Bientôt disponible" : isSoldOut ? "Victime de son succès" : "Ajouter au panier"}
           </button>
 
-          ${!isSoldOut ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
+          ${!isSoldOut && !isComingSoon ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
 
           <div class="product-divider"></div>
 

@@ -530,14 +530,15 @@
       }
 
       shopGrid.innerHTML = filtered.map(p => {
-        const isSoldOut = p.stock === 0;
+        const isComingSoon = p.coming_soon === true;
+        const isSoldOut = !isComingSoon && p.stock === 0;
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         const promo = getProductPromo(p.id);
         const promoBadge = promo ? `<div style="position:absolute; top:10px; right:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
         return `
         <div class="shop-card">
           <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="background-image:url('${imgSrc}'); display:block; text-decoration:none;">
-            ${isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
+            ${isComingSoon ? `<div class="sold-out-badge" style="background:#888;">Bientôt disponible</div>` : isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
             ${promoBadge}
             <div class="shop-image-overlay"></div>
 
@@ -548,7 +549,9 @@
               ${p.delivery_info ? `<div style="font-size:11.5px; margin-top:6px; opacity:0.9;">📦 ${p.delivery_info}</div>` : ''}
 
               <div style="margin-top:12px;">
-                ${isSoldOut
+                ${isComingSoon
+                  ? `<button type="button" class="stay-mini-btn" style="cursor:default; width:100%; background:rgba(255,255,255,0.1); opacity:.7;">Bientôt disponible</button>`
+                  : isSoldOut
                   ? `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir</button>`
                   : `<button type="button" class="stay-mini-btn" style="cursor:pointer; width:100%; background:rgba(255,255,255,0.15);" onclick="event.preventDefault();window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">Ajouter au panier</button>`
                 }
@@ -568,7 +571,9 @@
             <button type="button" class="btn-toggle-desc" id="toggle-${p.id}" style="display:none; background:none; border:none; padding:0; margin-top:2px; margin-bottom:6px; font-size:11.5px; font-weight:600; color:var(--text); text-decoration:underline; cursor:pointer;" onclick="window.toggleProductDesc('${p.id}', this)">Voir plus +</button>
           ` : ''}
           ${p.delivery_info ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
-          ${isSoldOut
+          ${isComingSoon
+            ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line); opacity:.6; cursor:default;" disabled>Bientôt disponible</button>`
+            : isSoldOut
             ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🔔 M'avertir en stock</button>`
             : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">+ Ajouter au panier</button>`
           }

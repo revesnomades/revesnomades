@@ -146,6 +146,11 @@
           <textarea id="productDimensions" class="input" rows="2" placeholder="Ex : 185 × 61 cm, épaisseur 4 mm, poids 1,5 kg"></textarea>
         </div>
 
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 0;">
+          <input id="productComingSoon" type="checkbox" style="width:18px; height:18px; cursor:pointer; accent-color: var(--accent);">
+          <label for="productComingSoon" style="cursor:pointer; font-size:.9rem;">Bientôt disponible <span class="muted-small">(masque le bouton d'achat même si stock = 0)</span></label>
+        </div>
+
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label class="muted-small" style="display:block; margin-bottom:6px;">Prix (€)</label>
@@ -211,6 +216,7 @@
     const fDescLongue = document.getElementById("productDescLongue");
     const fDetails = document.getElementById("productDetails");
     const fDimensions = document.getElementById("productDimensions");
+    const fComingSoon = document.getElementById("productComingSoon");
     const fPrice = document.getElementById("productPrice");
     const fType = document.getElementById("productType");
     const fCategory = document.getElementById("productCategory");
@@ -496,6 +502,7 @@
       fDescLongue.value = product.description_longue || "";
       fDetails.value = product.details || "";
       fDimensions.value = product.dimensions_poids || "";
+      fComingSoon.checked = product.coming_soon === true;
       fPrice.value = product.price;
       fType.value = product.type || "physique";
       fCategory.value = product.category_id || "";
@@ -558,6 +565,7 @@
         description_longue: fDescLongue.value.trim() || null,
         details: fDetails.value.trim() || null,
         dimensions_poids: fDimensions.value.trim() || null,
+        coming_soon: fComingSoon.checked,
         price: priceVal,
         type: fType.value || "physique",
         category_id: fCategory.value || null,
