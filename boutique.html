@@ -521,6 +521,9 @@
       } else {
         filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
       }
+      // Produits disponibles d'abord (tri stable : l'ordre choisi est conservé dans chaque groupe)
+      const isUnavailable = p => p.coming_soon === true || p.stock === 0;
+      filtered.sort((a, b) => isUnavailable(a) - isUnavailable(b));
 
       if (filtered.length === 0) {
         shopGrid.innerHTML = `
