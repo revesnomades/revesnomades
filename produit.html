@@ -280,9 +280,8 @@
 
     /* ── Accordéon ── */
     .accordion {
-      margin-top: 40px;
+      margin-top: 32px;
       border-top: 1px solid var(--line);
-      grid-column: 1 / -1;
     }
     .accordion-item {
       border-bottom: 1px solid var(--line);
@@ -593,36 +592,37 @@
               <span>Retours gratuits sous 14 jours</span>
             </div>
           </div>
+
+          <!-- Accordéon -->
+          ${(p.description_longue || p.details || p.dimensions_poids) ? `
+          <div class="accordion" id="productAccordion">
+            ${p.description_longue ? `
+            <div class="accordion-item open">
+              <button type="button" class="accordion-trigger">
+                Description du produit
+                <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="accordion-body">${p.description_longue.replace(/\n/g, "<br>")}</div>
+            </div>` : ""}
+            ${p.dimensions_poids ? `
+            <div class="accordion-item">
+              <button type="button" class="accordion-trigger">
+                Dimensions et poids
+                <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="accordion-body">${p.dimensions_poids.replace(/\n/g, "<br>")}</div>
+            </div>` : ""}
+            ${p.details ? `
+            <div class="accordion-item">
+              <button type="button" class="accordion-trigger">
+                Détails
+                <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="accordion-body">${p.details.replace(/\n/g, "<br>")}</div>
+            </div>` : ""}
+          </div>` : ""}
         </div>
 
-        <!-- Accordéon — pleine largeur -->
-        ${(p.description_longue || p.details || p.dimensions_poids) ? `
-        <div class="accordion" id="productAccordion">
-          ${p.description_longue ? `
-          <div class="accordion-item open">
-            <button type="button" class="accordion-trigger">
-              Description du produit
-              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">${p.description_longue.replace(/\n/g, "<br>")}</div>
-          </div>` : ""}
-          ${p.dimensions_poids ? `
-          <div class="accordion-item">
-            <button type="button" class="accordion-trigger">
-              Dimensions et poids
-              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">${p.dimensions_poids.replace(/\n/g, "<br>")}</div>
-          </div>` : ""}
-          ${p.details ? `
-          <div class="accordion-item">
-            <button type="button" class="accordion-trigger">
-              Détails
-              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">${p.details.replace(/\n/g, "<br>")}</div>
-          </div>` : ""}
-        </div>` : ""}
       `;
 
       // ── Accordéon ──
