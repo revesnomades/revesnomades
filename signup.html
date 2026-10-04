@@ -20,9 +20,9 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
   <!-- Meta Pixel Code -->
-  <script src="/assets/js/metaPixel.js" defer></script>
+  <script src="/assets/js/metaPixel.js?v=3" defer></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
 </head>
@@ -103,7 +103,7 @@
   </section>
 
   <script type="module">
-    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
 
     const redirectParam = new URLSearchParams(location.search).get("redirect");
     const REDIRECT = redirectParam || `${location.origin}/compte.html`;

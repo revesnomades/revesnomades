@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient.js";
+import { supabase } from "./supabaseClient.js?v=3";
 
 function fmt(d){
   const [y,m,day] = d.split("-");

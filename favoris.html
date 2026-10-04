@@ -21,7 +21,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3">
   <style>
     .fav-page { padding: calc(var(--navH, 110px) + 48px) 0 80px; }
     .fav-title {
@@ -77,7 +77,7 @@
       .fav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
     }
   </style>
-  <script src="/assets/js/metaPixel.js" defer></script>
+  <script src="/assets/js/metaPixel.js?v=3" defer></script>
 </head>
 <body class="on-light">
   <!-- Google Tag Manager (noscript) -->
@@ -183,9 +183,9 @@
   </footer>
 
   <script type="module">
-    import { supabase } from "/assets/js/supabaseClient.js";
-    import { initCartBadge } from "/assets/js/cart.js";
-    import { getFavorites, removeFavoritesLocally, favButtonHtml } from "/assets/js/favorites.js";
+    import { supabase } from "/assets/js/supabaseClient.js?v=3";
+    import { initCartBadge } from "/assets/js/cart.js?v=3";
+    import { getFavorites, removeFavoritesLocally, favButtonHtml } from "/assets/js/favorites.js?v=3";
 
     initCartBadge();
 
@@ -251,6 +251,6 @@
     load();
   </script>
 
-  <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/main.js?v=3" defer></script>
 </body>
 </html>

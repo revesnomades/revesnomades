@@ -18,7 +18,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
   <style>
     .shop-grid {
       display: grid;
@@ -200,7 +200,7 @@
   <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
-  <script src="/assets/js/metaPixel.js" defer></script>
+  <script src="/assets/js/metaPixel.js?v=3" defer></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
 </head>
@@ -373,11 +373,11 @@
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
   </footer>
 
-  <script src="assets/js/main.js?v=2.6"></script>
+  <script src="assets/js/main.js?v=3"></script>
   <script type="module">
-    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
-    import { addToCart, initCartBadge } from "./assets/js/cart.js";
-    import { favButtonHtml } from "./assets/js/favorites.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
+    import { addToCart, initCartBadge } from "./assets/js/cart.js?v=3";
+    import { favButtonHtml } from "./assets/js/favorites.js?v=3";
 
     // ─── Clé publique Stripe ────────────────────────────────────────────────
     // TODO : remplacer par votre clé publique Stripe (commence par pk_live_ ou pk_test_)

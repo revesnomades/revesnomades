@@ -32,8 +32,8 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 
-  <link rel="preload" href="/assets/css/styles.css?v=2.6" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/assets/css/styles.css?v=2.6"></noscript>
+  <link rel="preload" href="/assets/css/styles.css?v=3" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/assets/css/styles.css?v=3"></noscript>
 
   <style>
     /* Styles critiques inlinés pour éviter le FOUC et le CLS */
@@ -376,11 +376,11 @@
     </div>
   </footer>
 
-  <script src="/assets/js/main.js?v=2.6"></script>
+  <script src="/assets/js/main.js?v=3"></script>
 
   <script type="module">
-    import { supabase } from "/assets/js/supabaseClient.js";
-    import { initCartBadge, addToCart } from "/assets/js/cart.js";
+    import { supabase } from "/assets/js/supabaseClient.js?v=3";
+    import { initCartBadge, addToCart } from "/assets/js/cart.js?v=3";
     initCartBadge();
 
     let activePromos = [];

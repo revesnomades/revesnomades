@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
-  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3" />
 
   <style>
     /* Léger arrondi sur tous les boutons admin */
@@ -1217,7 +1217,7 @@
     // le contenu depuis Supabase via le paramètre ?slug=.
     // Quand un séjour est créé avec le slug "camargue", son URL est /sejour.html?slug=camargue
     // Le slug doit être unique dans la table stays de Supabase.
-    import { supabase } from "/assets/js/supabaseClient.js";
+    import { supabase } from "/assets/js/supabaseClient.js?v=3";
     window.supabase = supabase;
 
     const adminStatus = document.getElementById("adminStatus");
@@ -4188,7 +4188,7 @@ function renderWizGal() {
   </div>
 
   <script type="module">
-    import { supabase } from "/assets/js/supabaseClient.js";
+    import { supabase } from "/assets/js/supabaseClient.js?v=3";
 
     // ── GESTIONNAIRE RECADRAGE DES IMAGES D'ACCUEIL ──
     (function initHomeImagePositioningTool() {

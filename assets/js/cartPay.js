@@ -1,5 +1,5 @@
 // assets/js/cartPay.js
-import { supabase } from "./supabaseClient.js";
+import { supabase } from "./supabaseClient.js?v=3";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const btnAuth = document.getElementById("btnAuth");

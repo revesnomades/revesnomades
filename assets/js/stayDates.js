@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient.js";
+import { supabase } from "./supabaseClient.js?v=3";
 
 /** Capitalise juste la 1ère lettre (Mars au lieu de mars) */
 function capFirst(str=""){

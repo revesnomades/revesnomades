@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
   <style>
     /* Léger arrondi sur tous les boutons admin */
     button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
@@ -188,10 +188,10 @@
     </div>
   </section>
 
-  <script src="assets/js/main.js"></script>
+  <script src="assets/js/main.js?v=3"></script>
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js";
-    import { initCartBadge } from "./assets/js/cart.js";
+    import { supabase } from "./assets/js/supabaseClient.js?v=3";
+    import { initCartBadge } from "./assets/js/cart.js?v=3";
     initCartBadge();
 
     const adminStatus = document.getElementById("adminStatus");

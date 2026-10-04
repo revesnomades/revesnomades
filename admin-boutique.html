@@ -12,7 +12,7 @@
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
   <style>
     /* Léger arrondi sur tous les boutons admin */
     button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
@@ -200,7 +200,7 @@
   </div>
 
   <script type="module">
-    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
 
     const adminStatus = document.getElementById("adminStatus");
     const productsList = document.getElementById("productsList");

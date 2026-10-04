@@ -63,4 +63,4 @@ if (document.readyState === "loading") {
 }
 
 // Favoris : synchro compte + boutons cœur (import dynamique pour éviter l'import circulaire)
-import("./favorites.js").then(m => m.initFavorites()).catch(err => console.warn("Favoris indisponibles", err));
+import("./favorites.js?v=3").then(m => m.initFavorites()).catch(err => console.warn("Favoris indisponibles", err));
