@@ -49,10 +49,11 @@
     }
     .gallery-main {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 1 / 1;
       background: var(--line);
       overflow: hidden;
       border: 1px solid rgba(30,31,34,.1);
+      cursor: zoom-in;
     }
     .gallery-main img {
       width: 100%;
@@ -324,6 +325,47 @@
       display: block;
     }
 
+    /* ── Visionneuse ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,20,22,.92);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 16px;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      cursor: default;
+    }
+    .lightbox-btn {
+      position: absolute;
+      background: rgba(255,255,255,.12);
+      border: none;
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      z-index: 1;
+    }
+    .lightbox-btn:hover { background: rgba(255,255,255,.25); }
+    .lightbox-close { top: 12px; right: 12px; }
+    .lightbox-prev { left: 12px; top: 50%; transform: translateY(-50%); }
+    .lightbox-next { right: 12px; top: 50%; transform: translateY(-50%); }
+
     /* ── Loading / Error ── */
     .product-loading {
       grid-column: 1 / -1;
@@ -406,6 +448,13 @@
   </main>
 
   <div id="toastAdded">Ajouté au panier ✓</div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image du produit">
+    <button type="button" class="lightbox-btn lightbox-close" id="lbClose" aria-label="Fermer">×</button>
+    <button type="button" class="lightbox-btn lightbox-prev" id="lbPrev" aria-label="Image précédente">‹</button>
+    <img id="lbImg" alt="">
+    <button type="button" class="lightbox-btn lightbox-next" id="lbNext" aria-label="Image suivante">›</button>
+  </div>
 
   <footer class="band cream footer-dark">
     <div class="container footer">
@@ -634,13 +683,49 @@
       });
 
       // ── Thumbnails ──
+      let currentIdx = 0;
+      function showImage(idx) {
+        currentIdx = idx;
+        document.getElementById("mainImg").src = images[idx] || placeholder;
+        document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.toggle("active", Number(t.dataset.idx) === idx));
+      }
       document.querySelectorAll(".gallery-thumb").forEach(thumb => {
-        thumb.addEventListener("click", () => {
-          const idx = Number(thumb.dataset.idx);
-          document.getElementById("mainImg").src = images[idx] || placeholder;
-          document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active"));
-          thumb.classList.add("active");
-        });
+        thumb.addEventListener("click", () => showImage(Number(thumb.dataset.idx)));
+      });
+
+      // ── Visionneuse ──
+      const lightbox = document.getElementById("lightbox");
+      const lbImg = document.getElementById("lbImg");
+      const lbPrev = document.getElementById("lbPrev");
+      const lbNext = document.getElementById("lbNext");
+      const hasMany = images.length > 1;
+      lbPrev.style.display = lbNext.style.display = hasMany ? "" : "none";
+
+      function lbShow(idx) {
+        if (hasMany) showImage((idx + images.length) % images.length);
+        lbImg.src = images[currentIdx] || placeholder;
+        lbImg.alt = p.name;
+      }
+      function lbOpen() {
+        lbShow(currentIdx);
+        lightbox.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function lbClose() {
+        lightbox.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+      document.querySelector(".gallery-main").addEventListener("click", lbOpen);
+      document.getElementById("lbClose").addEventListener("click", lbClose);
+      lbPrev.addEventListener("click", e => { e.stopPropagation(); lbShow(currentIdx - 1); });
+      lbNext.addEventListener("click", e => { e.stopPropagation(); lbShow(currentIdx + 1); });
+      lbImg.addEventListener("click", e => e.stopPropagation());
+      lightbox.addEventListener("click", lbClose);
+      document.addEventListener("keydown", e => {
+        if (!lightbox.classList.contains("open")) return;
+        if (e.key === "Escape") lbClose();
+        else if (e.key === "ArrowLeft" && hasMany) lbShow(currentIdx - 1);
+        else if (e.key === "ArrowRight" && hasMany) lbShow(currentIdx + 1);
       });
 
       // ── Quantité ──
