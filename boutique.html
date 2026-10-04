@@ -377,6 +377,7 @@
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js";
     import { addToCart, initCartBadge } from "./assets/js/cart.js";
+    import { favButtonHtml } from "./assets/js/favorites.js";
 
     // ─── Clé publique Stripe ────────────────────────────────────────────────
     // TODO : remplacer par votre clé publique Stripe (commence par pk_live_ ou pk_test_)
@@ -545,6 +546,7 @@
           <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="background-image:url('${imgSrc}'); display:block; text-decoration:none;">
             ${isComingSoon || isSoldOut ? `<div class="sold-out-badge" style="background:#888;">Bientôt disponible</div>` : ''}
             ${promoBadge}
+            ${favButtonHtml(p.id, "on-card")}
             <div class="shop-image-overlay"></div>
 
             <div class="shop-image-hover">

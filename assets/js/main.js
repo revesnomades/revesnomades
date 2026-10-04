@@ -93,6 +93,50 @@
   }
   initMobileNav();
 
+  // ── Icône favoris (cœur) dans le menu ─────────────────────────────────
+  function initFavNav() {
+    const navInner = document.querySelector(".nav-inner");
+    if (!navInner || navInner.querySelector(".fav-nav-link")) return;
+
+    const heartSvg = `<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.9 1.3-1.8 2.9-2.9 4.9-2.9 3.5 0 5.7 3.5 4.4 6.8-1.8 4.6-9.3 9.2-9.3 9.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span class="fav-badge"></span>`;
+    const makeLink = extraClass => {
+      const a = document.createElement("a");
+      a.className = `icon-btn fav-nav-link ${extraClass}`;
+      a.href = "/favoris.html";
+      a.setAttribute("aria-label", "Mes favoris");
+      a.innerHTML = heartSvg;
+      return a;
+    };
+
+    const desktopCart = navInner.querySelector(".nav-links .cart-nav-link");
+    if (desktopCart) desktopCart.parentNode.insertBefore(makeLink(""), desktopCart);
+
+    const mobileCart = navInner.querySelector(".mobile-cart-btn");
+    if (mobileCart) {
+      const mobileFav = makeLink("mobile-fav-btn");
+      const syncDisplay = () => { mobileFav.style.display = mobileCart.style.display; };
+      mobileCart.after(mobileFav);
+      syncDisplay();
+      window.addEventListener("resize", syncDisplay);
+    }
+
+    const updateBadge = () => {
+      let count = 0;
+      try { const ids = JSON.parse(localStorage.getItem("rn_favs") || "[]"); count = Array.isArray(ids) ? ids.length : 0; } catch {}
+      document.querySelectorAll(".fav-badge").forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? "flex" : "none";
+      });
+      document.querySelectorAll(".fav-nav-link").forEach(el => {
+        el.setAttribute("aria-label", count ? `Mes favoris (${count})` : "Mes favoris");
+      });
+    };
+    updateBadge();
+    window.addEventListener("favs:updated", updateBadge);
+    window.addEventListener("storage", e => { if (e.key === "rn_favs") updateBadge(); });
+  }
+  initFavNav();
+
   // ✅ Indique que JS est actif (sert au CSS pour animer sans cacher si JS plante)
   document.documentElement.classList.add("js");
 

@@ -2492,3 +2492,61 @@ footer.band.cream{
 }
 /* Desktop : dots masqués */
 .carousel-dots { display: none; }
+
+/* ── Favoris ── */
+.fav-nav-link { position: relative; }
+.fav-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  background: #cc6f53;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0 3px;
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  pointer-events: none;
+  line-height: 1;
+}
+.fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,.92);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .15s ease, color .15s ease;
+}
+.fav-btn:hover { transform: scale(1.08); }
+.fav-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.fav-btn.is-fav { color: #cc6f53; }
+.fav-btn.is-fav svg { fill: currentColor; }
+.fav-btn.on-card {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+@media (max-width: 480px) {
+  .nav-inner { gap: 4px; }
+  .mobile-cart-btn,
+  .mobile-fav-btn { width: 32px; }
+}

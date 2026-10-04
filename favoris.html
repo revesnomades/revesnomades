@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-589D3XDT');</script>
+  <!-- End Google Tag Manager -->
+  <meta charset="utf-8">
+  <title>Mes favoris — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Vos produits favoris Âmes Nomades">
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://amesnomades.com/favoris.html">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    .fav-page { padding: calc(var(--navH, 110px) + 48px) 0 80px; }
+    .fav-title {
+      font-family: 'SegoCustom', serif;
+      font-weight: 400;
+      font-size: 34px;
+      line-height: 1.15;
+      margin: 0 0 8px;
+      text-wrap: balance;
+    }
+    .fav-sub { color: var(--muted); font-size: 14px; margin: 0 0 32px; }
+    .fav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 28px 20px;
+    }
+    .fav-card { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .fav-card-img {
+      position: relative;
+      display: block;
+      aspect-ratio: 1 / 1;
+      max-width: 100%;
+      background: var(--line) center / cover no-repeat;
+      border: 1px solid rgba(30,31,34,.08);
+    }
+    .fav-card-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #888;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 2px;
+      letter-spacing: .03em;
+    }
+    .fav-card-name {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 6px;
+    }
+    .fav-card-name:hover { text-decoration: underline; }
+    .fav-card-price { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .fav-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
+    .fav-empty a { display: inline-block; margin-top: 16px; }
+    @media (max-width: 480px) {
+      .fav-title { font-size: 26px; }
+      .fav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+    }
+  </style>
+  <script src="/assets/js/metaPixel.js" defer></script>
+</head>
+<body class="on-light">
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <header class="nav" id="top">
+    <div class="container nav-inner">
+      <nav class="nav-left nav-links-desktop" aria-label="Navigation gauche">
+        <a href="/index.html">Accueil</a>
+        <a href="/index.html#sejours">Séjours</a>
+        <a href="/boutique.html">Shop</a>
+      </nav>
+
+      <a class="brand" href="/index.html" aria-label="Accueil Âmes Nomades">
+        <img src="/assets/img/logo-ames-nomades.png" alt="Logo Âmes Nomades" width="594" height="420" style="display: none;" />
+        <span>ÂmesNomades</span>
+      </a>
+
+      <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
+        <a href="/index.html#apropos" data-scroll>À propos</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/index.html#contact" data-scroll>Contact</a>
+        <a class="icon-btn cart-icon-btn cart-nav-link" href="/panier.html" aria-label="Panier">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-badge"></span>
+        </a>
+        <a class="icon-btn" href="/compte.html" aria-label="Compte">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </nav>
+
+      <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="mobile-drawer" aria-hidden="true">
+        <nav class="mobile-menu" aria-label="Navigation mobile">
+          <a href="/index.html">Accueil</a>
+          <a href="/index.html#sejours">Séjours</a>
+          <a href="/boutique.html">Shop</a>
+          <a href="/index.html#apropos">À propos</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/index.html#contact">Contact</a>
+          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
+          <a href="/compte.html">Compte</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="band cream">
+    <div class="container fav-page">
+      <h1 class="fav-title">Mes favoris</h1>
+      <p class="fav-sub" id="favSub">Les produits que vous avez gardés de côté.</p>
+      <div id="favContent"><p class="fav-empty">Chargement…</p></div>
+    </div>
+  </main>
+
+  <footer class="band cream footer-dark">
+    <div class="container footer">
+      <div class="footer-row">
+        <div class="footer-brand reveal" data-delay="0">
+          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+        </div>
+        <div class="footer-social reveal" data-delay="1">
+          <a class="icon-btn light" href="https://instagram.com/amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17.6 6.4h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a class="icon-btn light" href="https://www.facebook.com/share/1bLsFzNTCz/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v3H7v3h3v6h3v-6h3l1-3h-4v-3c0-.6.4-1 1-1Z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a class="icon-btn light" href="https://www.tiktok.com/@amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.5 3v13.1c0 1.4-1.2 2.6-2.6 2.6s-2.6-1.2-2.6-2.6 1.2-2.6 2.6-2.6v-2.6a5.2 5.2 0 1 0 5.2 5.2V7.1a7.3 7.3 0 0 0 3.8 1.1V5.5A4.6 4.6 0 0 1 15 3h-2.5z"/>
+            </svg>
+          </a>
+          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+        </div>
+      </div>
+      <div class="legal reveal" data-delay="2">
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>Copyright © 2026 Âmes Nomades</div>
+          <div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { supabase } from "/assets/js/supabaseClient.js";
+    import { initCartBadge } from "/assets/js/cart.js";
+    import { getFavorites, removeFavoritesLocally, favButtonHtml } from "/assets/js/favorites.js";
+
+    initCartBadge();
+
+    const content = document.getElementById("favContent");
+    const sub = document.getElementById("favSub");
+    const isVideo = url => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url || "");
+    const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    let products = [];
+
+    function renderEmpty() {
+      sub.textContent = "";
+      content.innerHTML = `<div class="fav-empty">
+        Vous n'avez pas encore de favoris.<br>Touchez le ♡ d'un produit pour le retrouver ici.
+        <br><a href="/boutique.html" class="btn on-light">Découvrir le shop</a>
+      </div>`;
+    }
+
+    function render() {
+      const ids = getFavorites();
+      const list = products.filter(p => ids.includes(p.id));
+      if (!list.length) return renderEmpty();
+      sub.textContent = `${list.length} produit${list.length > 1 ? "s" : ""} gardé${list.length > 1 ? "s" : ""} de côté.`;
+      content.innerHTML = `<div class="fav-grid">${list.map(p => {
+        const media = (p.image_urls && p.image_urls.length) ? p.image_urls : (p.image_url ? [p.image_url] : []);
+        const img = media.find(u => !isVideo(u)) || "/assets/img/placeholder.jpg";
+        const unavailable = p.coming_soon === true || p.stock === 0;
+        const url = `/produit.html?id=${encodeURIComponent(p.id)}`;
+        return `<div class="fav-card">
+          <a href="${url}" class="fav-card-img" style="background-image:url('${encodeURI(img)}');" aria-label="${escapeHtml(p.name)}">
+            ${unavailable ? `<span class="fav-card-status">Bientôt disponible</span>` : ""}
+            ${favButtonHtml(p.id, "on-card")}
+          </a>
+          <a href="${url}" class="fav-card-name">${escapeHtml(p.name)}</a>
+          <div class="fav-card-price">${(Number(p.price) || 0).toFixed(2)} €</div>
+        </div>`;
+      }).join("")}</div>`;
+    }
+
+    async function load() {
+      const ids = getFavorites();
+      if (!ids.length) { products = []; return renderEmpty(); }
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, price, stock, coming_soon, image_urls, image_url")
+        .in("id", ids);
+      if (error) {
+        content.innerHTML = `<p class="fav-empty">Impossible de charger vos favoris pour le moment.</p>`;
+        return;
+      }
+      products = data || [];
+      const missing = ids.filter(id => !products.some(p => p.id === id));
+      if (missing.length) removeFavoritesLocally(missing);
+      render();
+    }
+
+    // Retrait d'un favori : on retire la carte sans recharger ; ajout (synchro compte) : on recharge
+    window.addEventListener("favs:updated", () => {
+      const ids = getFavorites();
+      if (ids.some(id => !products.some(p => p.id === id))) load();
+      else render();
+    });
+
+    load();
+  </script>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

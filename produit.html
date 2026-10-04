@@ -239,6 +239,21 @@
       margin-bottom: 12px;
     }
     .btn-add-cart:hover { opacity: 0.82; }
+    .cta-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      margin-bottom: 12px;
+    }
+    .cta-row .btn-add-cart { flex: 1; margin-bottom: 0; }
+    .fav-btn.on-product {
+      width: 48px;
+      height: auto;
+      flex-shrink: 0;
+      border-radius: 2px;
+      border: 1px solid var(--line);
+      background: transparent;
+    }
     .btn-add-cart:disabled { opacity: 0.4; cursor: default; }
     .btn-add-cart.sold-out-btn {
       background: var(--muted);
@@ -522,6 +537,7 @@
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js";
     import { addToCart, initCartBadge } from "/assets/js/cart.js";
+    import { favButtonHtml } from "/assets/js/favorites.js";
 
     initCartBadge();
 
@@ -665,9 +681,12 @@
             </div>
           </div>` : ""}
 
-          <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut || isComingSoon ? ' sold-out-btn' : ''}" ${isSoldOut || isComingSoon ? 'disabled' : ''}>
-            ${isComingSoon || isSoldOut ? "Bientôt disponible" : "Ajouter au panier"}
-          </button>
+          <div class="cta-row">
+            <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut || isComingSoon ? ' sold-out-btn' : ''}" ${isSoldOut || isComingSoon ? 'disabled' : ''}>
+              ${isComingSoon || isSoldOut ? "Bientôt disponible" : "Ajouter au panier"}
+            </button>
+            ${favButtonHtml(p.id, "on-product")}
+          </div>
 
           ${!isSoldOut && !isComingSoon ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
 
