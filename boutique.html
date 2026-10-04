@@ -538,7 +538,7 @@
         return `
         <div class="shop-card">
           <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="background-image:url('${imgSrc}'); display:block; text-decoration:none;">
-            ${isComingSoon ? `<div class="sold-out-badge" style="background:#888;">Bientôt disponible</div>` : isSoldOut ? `<div class="sold-out-badge">Victime de son succès</div>` : ''}
+            ${isComingSoon || isSoldOut ? `<div class="sold-out-badge" style="background:#888;">Bientôt disponible</div>` : ''}
             ${promoBadge}
             <div class="shop-image-overlay"></div>
 

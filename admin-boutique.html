@@ -312,7 +312,7 @@
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
-        const stockLabel = p.stock === 0 ? " · <strong style='color:#c00;'>Victime de son succès</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
+        const stockLabel = p.stock === 0 ? " · <strong style='color:#888;'>Bientôt disponible</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         return `
         <div class="product-card">

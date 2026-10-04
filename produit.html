@@ -551,7 +551,7 @@
 
           <div class="product-divider"></div>
 
-          ${isComingSoon ? `<p class="product-desc" style="font-style:italic;">Ce produit sera bientôt disponible.</p>` : ""}
+          ${isComingSoon || isSoldOut ? `<p class="product-desc" style="font-style:italic;">Ce produit sera bientôt disponible.</p>` : ""}
 
           ${!isSoldOut && !isComingSoon ? `
           <div class="qty-row">
@@ -564,7 +564,7 @@
           </div>` : ""}
 
           <button type="button" id="btnAddCart" class="btn-add-cart${isSoldOut || isComingSoon ? ' sold-out-btn' : ''}" ${isSoldOut || isComingSoon ? 'disabled' : ''}>
-            ${isComingSoon ? "Bientôt disponible" : isSoldOut ? "Victime de son succès" : "Ajouter au panier"}
+            ${isComingSoon || isSoldOut ? "Bientôt disponible" : "Ajouter au panier"}
           </button>
 
           ${!isSoldOut && !isComingSoon ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : ""}
