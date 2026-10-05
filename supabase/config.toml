@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.newsletter-unsubscribe]
 verify_jwt = false
+
+[functions.restock-signup]
+verify_jwt = false

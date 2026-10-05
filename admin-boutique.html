@@ -32,6 +32,25 @@
       flex-direction: column;
       gap: 10px;
     }
+    .waiting-box {
+      font-size: 13px;
+      background: rgba(204,111,83,.1);
+      border: 1px solid rgba(204,111,83,.35);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .waiting-box summary { cursor: pointer; }
+    .waiting-box ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      max-height: 160px;
+      overflow-y: auto;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .waiting-none { background: transparent; border-color: var(--line); color: var(--muted); }
+    .waiting-error { background: #fff4f4; border-color: #f1c0c0; color: #a33; }
     .product-image {
       width: 100%;
       height: 180px;
@@ -297,6 +316,20 @@
       }
     });
 
+    const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    function waitingHtml(p, emails, subsError) {
+      const unavailable = p.stock === 0 || p.coming_soon === true;
+      if (!unavailable && !emails.length) return "";
+      if (subsError) return `<div class="waiting-box waiting-error">🔔 Inscriptions « Me prévenir » illisibles (droits Supabase à configurer)</div>`;
+      const n = emails.length;
+      if (!n) return `<div class="waiting-box waiting-none">🔔 Personne en attente pour l'instant</div>`;
+      return `<details class="waiting-box">
+        <summary>🔔 <strong>${n}</strong> personne${n > 1 ? "s" : ""} en attente du retour en stock</summary>
+        <ul>${emails.map(e => `<li>${escapeHtml(e)}</li>`).join("")}</ul>
+      </details>`;
+    }
+
     async function loadProducts() {
       const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
       if (error) {
@@ -309,6 +342,14 @@
         return;
       }
 
+      // Inscriptions « Me prévenir » par produit
+      const waitingByProduct = {};
+      const { data: subs, error: subsError } = await supabase
+        .from("restock_subscriptions")
+        .select("product_id, email");
+      if (subsError) console.warn("Inscriptions « Me prévenir » illisibles :", subsError.message);
+      (subs || []).forEach(s => (waitingByProduct[s.product_id] ||= []).push(s.email));
+
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
@@ -319,6 +360,7 @@
           <img src="${imgSrc}" alt="${p.name}" class="product-image">
           <h3 style="margin:0; font-size:18px;">${p.name}</h3>
           <p style="margin:0; color:var(--muted); font-size:14px;">${p.price} € - ${p.type}${catLabel}${stockLabel}</p>
+          ${waitingHtml(p, waitingByProduct[p.id] || [], subsError)}
           <div style="display:flex; gap:8px; margin-top:auto;">
             <button class="btn tiny on-light" onclick="editProduct('${p.id}')">Modifier</button>
             <button class="btn tiny" style="background:#ffdddd; color:#c00;" onclick="deleteProduct('${p.id}')">Supprimer</button>

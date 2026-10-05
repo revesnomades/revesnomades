@@ -378,6 +378,7 @@
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
     import { addToCart, initCartBadge } from "./assets/js/cart.js?v=3";
     import { favButtonHtml } from "./assets/js/favorites.js?v=3";
+    import { subscribeRestock } from "./assets/js/restock.js?v=3";
 
     // ─── Clé publique Stripe ────────────────────────────────────────────────
     // TODO : remplacer par votre clé publique Stripe (commence par pk_live_ ou pk_test_)
@@ -679,16 +680,13 @@
       const email = restockEmail.value.trim();
       const product_id = restockProductId.value;
 
-      const { error } = await supabase.from("restock_subscriptions").insert([{ product_id, email }]);
+      const result = await subscribeRestock(product_id, email);
 
-      if(error){
-        if(error.code === "23505"){
-          restockMsg.style.color = "#c00";
-          restockMsg.textContent = "Vous êtes déjà inscrit pour recevoir l'alerte sur ce produit !";
-        } else {
-          restockMsg.style.color = "#c00";
-          restockMsg.textContent = "Erreur lors de l'inscription : " + error.message;
-        }
+      if(result.already || result.error){
+        restockMsg.style.color = "#c00";
+        restockMsg.textContent = result.already
+          ? "Vous êtes déjà inscrit pour recevoir l'alerte sur ce produit !"
+          : "Erreur lors de l'inscription : " + result.error;
         return;
       }
 

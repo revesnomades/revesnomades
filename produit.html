@@ -620,6 +620,7 @@
     import { supabase } from "/assets/js/supabaseClient.js?v=3";
     import { addToCart, initCartBadge } from "/assets/js/cart.js?v=3";
     import { favButtonHtml } from "/assets/js/favorites.js?v=3";
+    import { subscribeRestock } from "/assets/js/restock.js?v=3";
 
     initCartBadge();
 
@@ -977,16 +978,14 @@
       restockMsg.style.color = "var(--muted)";
       restockMsg.textContent = "Enregistrement en cours…";
 
-      const { error } = await supabase
-        .from("restock_subscriptions")
-        .insert([{ product_id: restockProductId, email: restockEmail.value.trim() }]);
+      const result = await subscribeRestock(restockProductId, restockEmail.value.trim());
 
-      if (error) {
+      if (result.already || result.error) {
         restockSubmit.disabled = false;
         restockMsg.style.color = "#c00";
-        restockMsg.textContent = error.code === "23505"
+        restockMsg.textContent = result.already
           ? "Vous êtes déjà inscrit pour ce produit."
-          : "Erreur lors de l'inscription : " + error.message;
+          : "Erreur lors de l'inscription : " + result.error;
         return;
       }
       restockMsg.style.color = "#4f8c5b";
