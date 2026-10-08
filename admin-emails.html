@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Emails IA — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
+  <style>
+    button, .btn, input.input, textarea.input { border-radius: 6px !important; }
+    .em-wrap { padding: 120px 0 60px; }
+    .em-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .em-head h1 { margin: 0; }
+    .em-sub { color: var(--muted); margin: 8px 0 0; max-width: 65ch; }
+    .em-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    @media (max-width: 960px) { .em-grid { grid-template-columns: 1fr; } }
+    .em-panel {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+    .em-panel h2 { margin: 0; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+    .em-label { font-size: 12.5px; color: var(--muted); display: block; margin-bottom: 6px; }
+    .em-panel textarea.input { width: 100%; box-sizing: border-box; resize: vertical; min-height: 110px; font-family: inherit; }
+    .em-panel input.input { width: 100%; box-sizing: border-box; }
+    .em-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .em-hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+    .em-status { font-size: 13px; min-height: 1.2em; }
+    .em-status.err { color: #b3261e; }
+    .em-status.ok { color: #2e7d4f; }
+    .em-log { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+    .em-msg { padding: 10px 12px; border-radius: 8px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .em-msg.user { background: #1e1f22; color: #fffdf3; align-self: flex-end; max-width: 90%; }
+    .em-msg.ai { background: rgba(204,111,83,.1); border: 1px solid rgba(204,111,83,.3); align-self: flex-start; max-width: 95%; }
+    .em-msg.ai.current { border-color: #cc6f53; }
+    .em-msg .em-restore {
+      display: inline-block; margin-top: 6px; font-size: 12px; background: none; border: none;
+      padding: 0; color: var(--text); text-decoration: underline; cursor: pointer;
+    }
+    .em-preview { width: 100%; height: 720px; border: 1px solid var(--line); background: #faf5dc; }
+    .em-empty { border: 1px dashed var(--line); padding: 40px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+    .em-aud { display: flex; flex-direction: column; gap: 8px; }
+    .em-aud label { display: flex; gap: 10px; align-items: center; font-size: 14px; cursor: pointer; }
+    .em-aud input { width: 18px; height: 18px; accent-color: #1e1f22; }
+    .em-total { font-size: 14px; font-variant-numeric: tabular-nums; }
+    .btn-danger { background: #cc6f53 !important; color: #fff !important; border-color: #cc6f53 !important; }
+    .is-loading { opacity: .6; pointer-events: none; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body class="on-light">
+
+  <section class="band cream">
+    <div class="container em-wrap">
+      <div class="em-head">
+        <div>
+          <h1>Créer un email avec l'IA</h1>
+          <p class="em-sub">Décrivez l'email, demandez autant de modifications que vous voulez, puis envoyez-le à la newsletter et/ou aux inscrits prioritaires.</p>
+        </div>
+        <a class="btn on-light" href="/admin-dashboard.html">Retour dashboard</a>
+      </div>
+
+      <div class="em-grid">
+        <!-- Colonne gauche : conversation -->
+        <div style="display:flex; flex-direction:column; gap:24px; min-width:0;">
+          <div class="em-panel" id="briefPanel">
+            <h2>1. Rédaction</h2>
+            <div class="em-log" id="log" hidden></div>
+            <div>
+              <label class="em-label" for="prompt" id="promptLabel">Décrivez l'email à rédiger</label>
+              <textarea id="prompt" class="input" placeholder="Ex : Annonce du séjour Pilates & randonnée dans les Cévennes en mai, places limitées, mettre en avant la nature et le repos, avec un bouton vers la page du séjour."></textarea>
+            </div>
+            <div class="em-row">
+              <button type="button" class="btn on-light" id="btnGenerate">Générer l'email</button>
+              <button type="button" class="btn tiny" id="btnReset" hidden style="background:transparent;">Recommencer</button>
+            </div>
+            <p class="em-hint">L'IA connaît vos séjours publiés et les produits du shop (noms, prix, liens, photos). La rédaction prend en général entre 20 secondes et 1 minute.</p>
+            <div class="em-status" id="genStatus" aria-live="polite"></div>
+          </div>
+
+          <div class="em-panel" id="sendPanel">
+            <h2>3. Envoi</h2>
+            <div class="em-aud">
+              <label><input type="checkbox" id="audNewsletter" value="newsletter"> Newsletter <span class="em-hint" id="cntNewsletter">(…)</span></label>
+              <label><input type="checkbox" id="audPriority" value="priority"> Inscrits prioritaires <span class="em-hint" id="cntPriority">(…)</span></label>
+            </div>
+            <div class="em-total" id="audTotal">Aucune liste sélectionnée.</div>
+            <p class="em-hint">Les doublons sont retirés et les personnes désinscrites ne reçoivent rien.</p>
+
+            <div>
+              <label class="em-label" for="testEmail">Envoyer d'abord un test à</label>
+              <div class="em-row">
+                <input id="testEmail" type="email" class="input" style="flex:1; min-width:200px;" placeholder="votre@email.com">
+                <button type="button" class="btn tiny on-light" id="btnTest">Envoyer le test</button>
+              </div>
+            </div>
+
+            <div class="em-row">
+              <button type="button" class="btn on-light" id="btnSend" disabled>Envoyer</button>
+              <button type="button" class="btn btn-danger" id="btnConfirm" hidden>Confirmer l'envoi</button>
+              <button type="button" class="btn tiny" id="btnCancelSend" hidden style="background:transparent;">Annuler</button>
+            </div>
+            <div class="em-status" id="sendStatus" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : aperçu -->
+        <div class="em-panel">
+          <h2>2. Aperçu</h2>
+          <div>
+            <label class="em-label" for="subject">Objet</label>
+            <input id="subject" class="input" maxlength="150" placeholder="L'objet apparaîtra ici">
+          </div>
+          <div>
+            <label class="em-label" for="preheader">Texte d'aperçu (affiché après l'objet dans la boîte mail)</label>
+            <input id="preheader" class="input" maxlength="200" placeholder="—">
+          </div>
+          <div class="em-empty" id="previewEmpty">L'aperçu de l'email apparaîtra ici après la génération.</div>
+          <iframe class="em-preview" id="preview" title="Aperçu de l'email" sandbox="" hidden></iframe>
+          <p class="em-hint">Dans l'aperçu, « Bonjour Marie, » est remplacé à l'envoi par le prénom de chaque destinataire (ou « Bonjour, » si on ne le connaît pas).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
+
+    const ADMIN_EMAILS = ["contact@amesnomades.com", "sarnelli.ap@gmail.com", "revesnomades@gmail.com"];
+    const DRAFT_KEY = "rn_email_draft";
+    const $ = id => document.getElementById(id);
+
+    // turns : historique envoyé à l'IA ; versions[i] = email produit par la réponse i
+    let turns = [];
+    let versions = [];
+    let current = null;
+    let audienceTotal = 0;
+
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      if (ADMIN_EMAILS.includes((user.email || "").toLowerCase())) return user;
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      return data?.role === "admin" ? user : null;
+    }
+
+    async function callApi(payload) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) {
+        if (res.status === 404) throw new Error("La fonction admin-email n'est pas encore déployée sur Supabase.");
+        throw new Error(data?.error || `Erreur ${res.status}`);
+      }
+      return data;
+    }
+
+    function setStatus(el, text, kind = "") {
+      el.textContent = text;
+      el.className = `em-status ${kind}`;
+    }
+
+    // ── Brouillon local ──
+    function saveDraft() {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          turns, versions, subject: $("subject").value, preheader: $("preheader").value,
+        }));
+      } catch {}
+    }
+    function loadDraft() {
+      try {
+        const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+        if (!d?.versions?.length) return;
+        turns = d.turns || [];
+        versions = d.versions;
+        current = versions[versions.length - 1];
+        renderAll();
+        if (d.subject) $("subject").value = d.subject;
+        if (d.preheader) $("preheader").value = d.preheader;
+        setStatus($("genStatus"), "Brouillon précédent restauré.");
+      } catch {}
+    }
+
+    // ── Rendu ──
+    function renderLog() {
+      const log = $("log");
+      log.hidden = !turns.length;
+      let vIdx = 0;
+      log.innerHTML = "";
+      turns.forEach((t, i) => {
+        const div = document.createElement("div");
+        if (t.role === "user") {
+          div.className = "em-msg user";
+          div.textContent = t.display || t.content;
+        } else {
+          const idx = vIdx++;
+          div.className = "em-msg ai" + (versions[idx] === current ? " current" : "");
+          div.textContent = `Version ${idx + 1} — ${versions[idx]?.notes || "Email rédigé."}`;
+          if (versions[idx] !== current) {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "em-restore";
+            b.textContent = "Revenir à cette version";
+            b.addEventListener("click", () => restoreVersion(idx, i));
+            div.appendChild(document.createElement("br"));
+            div.appendChild(b);
+          }
+        }
+        log.appendChild(div);
+      });
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function renderPreview() {
+      const has = !!current;
+      $("preview").hidden = !has;
+      $("previewEmpty").hidden = has;
+      if (has) $("preview").srcdoc = current.preview_html;
+      $("btnReset").hidden = !turns.length;
+      $("promptLabel").textContent = turns.length ? "Demander une modification" : "Décrivez l'email à rédiger";
+      $("btnGenerate").textContent = turns.length ? "Appliquer la modification" : "Générer l'email";
+      $("prompt").placeholder = turns.length
+        ? "Ex : Raccourcis l'introduction, ajoute une photo du séjour et passe au tutoiement."
+        : "Ex : Annonce du séjour Pilates & randonnée dans les Cévennes en mai, places limitées, mettre en avant la nature et le repos, avec un bouton vers la page du séjour.";
+      updateSendButton();
+    }
+
+    function renderAll() {
+      renderLog();
+      renderPreview();
+      if (current) {
+        $("subject").value = current.subject;
+        $("preheader").value = current.preheader;
+      }
+    }
+
+    function restoreVersion(vIdx, turnIdx) {
+      // Revenir en arrière : on coupe l'historique juste après cette version
+      turns = turns.slice(0, turnIdx + 1);
+      versions = versions.slice(0, vIdx + 1);
+      current = versions[vIdx];
+      renderAll();
+      saveDraft();
+      setStatus($("genStatus"), `Retour à la version ${vIdx + 1}. Les modifications suivantes partiront de celle-ci.`);
+    }
+
+    // ── Génération / modification ──
+    $("btnGenerate").addEventListener("click", async () => {
+      const text = $("prompt").value.trim();
+      if (!text) { $("prompt").focus(); return; }
+
+      let content = text;
+      if (current) {
+        const notes = [];
+        if ($("subject").value.trim() !== current.subject) notes.push(`l'objet a été modifié à la main en « ${$("subject").value.trim()} »`);
+        if ($("preheader").value.trim() !== current.preheader) notes.push(`le texte d'aperçu a été modifié à la main en « ${$("preheader").value.trim()} »`);
+        if (notes.length) content = `(À noter : ${notes.join(" et ")} — garde ces versions sauf demande contraire.)\n\n${text}`;
+      }
+
+      const pending = [...turns, { role: "user", content, display: text }];
+      $("btnGenerate").disabled = true;
+      $("briefPanel").classList.add("is-loading");
+      setStatus($("genStatus"), "Rédaction en cours… (jusqu'à une minute)");
+      try {
+        const email = await callApi({ action: "generate", turns: pending.map(({ role, content }) => ({ role, content })) });
+        turns = [...pending, { role: "assistant", content: email.raw }];
+        current = { subject: email.subject, preheader: email.preheader, body_html: email.body_html, notes: email.notes, preview_html: email.preview_html };
+        versions.push(current);
+        $("prompt").value = "";
+        renderAll();
+        saveDraft();
+        setStatus($("genStatus"), "Email prêt. Relisez l'aperçu, puis demandez des modifications si besoin.", "ok");
+      } catch (e) {
+        setStatus($("genStatus"), e.message, "err");
+      } finally {
+        $("btnGenerate").disabled = false;
+        $("briefPanel").classList.remove("is-loading");
+      }
+    });
+
+    $("btnReset").addEventListener("click", () => {
+      if (!confirm("Effacer cet email et recommencer depuis zéro ?")) return;
+      turns = []; versions = []; current = null;
+      $("subject").value = ""; $("preheader").value = "";
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      renderAll();
+      setStatus($("genStatus"), "");
+    });
+
+    ["subject", "preheader"].forEach(id => $(id).addEventListener("input", saveDraft));
+
+    // ── Listes ──
+    const selectedAudiences = () => [$("audNewsletter"), $("audPriority")].filter(c => c.checked).map(c => c.value);
+
+    async function refreshAudience() {
+      const aud = selectedAudiences();
+      resetConfirm();
+      if (!aud.length) { audienceTotal = 0; $("audTotal").textContent = "Aucune liste sélectionnée."; updateSendButton(); return; }
+      $("audTotal").textContent = "Calcul…";
+      try {
+        const r = await callApi({ action: "audience", audiences: aud });
+        audienceTotal = r.total_unique;
+        $("audTotal").textContent = `${audienceTotal} destinataire${audienceTotal > 1 ? "s" : ""} unique${audienceTotal > 1 ? "s" : ""}.`;
+      } catch (e) {
+        audienceTotal = 0;
+        $("audTotal").textContent = e.message;
+      }
+      updateSendButton();
+    }
+    [$("audNewsletter"), $("audPriority")].forEach(c => c.addEventListener("change", refreshAudience));
+
+    function updateSendButton() {
+      const ready = !!current && audienceTotal > 0;
+      $("btnSend").disabled = !ready;
+      $("btnSend").textContent = ready ? `Envoyer à ${audienceTotal} personne${audienceTotal > 1 ? "s" : ""}` : "Envoyer";
+    }
+
+    function emailPayload() {
+      return { subject: $("subject").value.trim(), preheader: $("preheader").value.trim(), body_html: current?.body_html || "" };
+    }
+
+    // ── Test ──
+    $("btnTest").addEventListener("click", async () => {
+      if (!current) { setStatus($("sendStatus"), "Générez d'abord un email.", "err"); return; }
+      const to = $("testEmail").value.trim();
+      $("btnTest").disabled = true;
+      setStatus($("sendStatus"), "Envoi du test…");
+      try {
+        const r = await callApi({ action: "test", test_email: to, ...emailPayload() });
+        setStatus($("sendStatus"), `Test envoyé à ${r.to}. Vérifiez votre boîte mail (et les spams).`, "ok");
+      } catch (e) {
+        setStatus($("sendStatus"), e.message, "err");
+      } finally {
+        $("btnTest").disabled = false;
+      }
+    });
+
+    // ── Envoi groupé (confirmation en deux temps) ──
+    function resetConfirm() {
+      $("btnSend").hidden = false;
+      $("btnConfirm").hidden = true;
+      $("btnCancelSend").hidden = true;
+    }
+    $("btnSend").addEventListener("click", () => {
+      if (!$("subject").value.trim()) { setStatus($("sendStatus"), "L'objet est vide.", "err"); return; }
+      $("btnSend").hidden = true;
+      $("btnConfirm").hidden = false;
+      $("btnCancelSend").hidden = false;
+      $("btnConfirm").textContent = `Confirmer l'envoi à ${audienceTotal} personne${audienceTotal > 1 ? "s" : ""}`;
+      setStatus($("sendStatus"), `Objet : « ${$("subject").value.trim()} ». L'envoi est définitif.`);
+    });
+    $("btnCancelSend").addEventListener("click", () => { resetConfirm(); setStatus($("sendStatus"), ""); });
+
+    $("btnConfirm").addEventListener("click", async () => {
+      $("btnConfirm").disabled = true;
+      $("btnCancelSend").hidden = true;
+      setStatus($("sendStatus"), "Envoi en cours… ne fermez pas la page.");
+      try {
+        const r = await callApi({ action: "send", audiences: selectedAudiences(), ...emailPayload() });
+        const failed = r.failures?.length ? ` Échecs : ${r.failures.join(", ")}.` : "";
+        setStatus($("sendStatus"), `Email envoyé à ${r.sent} personne${r.sent > 1 ? "s" : ""} sur ${r.total}.${failed}`, failed ? "err" : "ok");
+        if (!failed) { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
+      } catch (e) {
+        setStatus($("sendStatus"), e.message, "err");
+      } finally {
+        $("btnConfirm").disabled = false;
+        resetConfirm();
+      }
+    });
+
+    // ── Démarrage ──
+    const user = await checkAdmin();
+    if (!user) {
+      window.location.href = "/compte.html";
+    } else {
+      $("testEmail").value = user.email || "";
+      loadDraft();
+      callApi({ action: "counts" }).then(r => {
+        $("cntNewsletter").textContent = `(${r.counts.newsletter})`;
+        $("cntPriority").textContent = `(${r.counts.priority})`;
+      }).catch(e => {
+        $("cntNewsletter").textContent = $("cntPriority").textContent = "";
+        setStatus($("sendStatus"), e.message, "err");
+      });
+    }
+  </script>
+</body>
+</html>
