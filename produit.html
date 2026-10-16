@@ -265,6 +265,7 @@
       border-radius: 2px;
       white-space: nowrap;
     }
+    .product-soon-badge.is-sold-out { background: #1e1f22; }
     .product-price-row { flex-wrap: wrap; }
     .product-notify-hint {
       font-size: 12.5px;
@@ -749,7 +750,7 @@
             <span class="product-price">${displayPrice.toFixed(2)} €</span>
             ${promoPrice !== null ? `<span class="product-price-original">${Number(p.price).toFixed(2)} €</span>` : ""}
             ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
-            ${isUnavailable ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
+            ${isComingSoon ? `<span class="product-soon-badge is-sold-out">SOLD OUT</span>` : isSoldOut ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
           </div>
 
           <div class="product-divider"></div>
@@ -771,7 +772,7 @@
             ${favButtonHtml(p.id, "on-product")}
           </div>
 
-          ${!isUnavailable ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : `<p class="product-notify-hint">Recevez un email dès que ce produit est disponible.</p>`}
+          ${!isUnavailable ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : `<p class="product-notify-hint">${isComingSoon ? "Ce produit est épuisé. Recevez un email s'il revient en stock." : "Recevez un email dès que ce produit est disponible."}</p>`}
 
           <div class="product-divider"></div>
 

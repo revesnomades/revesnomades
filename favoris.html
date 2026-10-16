@@ -215,7 +215,7 @@
         const url = `/produit.html?id=${encodeURIComponent(p.id)}`;
         return `<div class="fav-card">
           <a href="${url}" class="fav-card-img" style="background-image:url('${encodeURI(img)}');" aria-label="${escapeHtml(p.name)}">
-            ${unavailable ? `<span class="fav-card-status">Bientôt disponible</span>` : ""}
+            ${p.coming_soon === true ? `<span class="fav-card-status" style="background:#1e1f22;">SOLD OUT</span>` : unavailable ? `<span class="fav-card-status">Bientôt disponible</span>` : ""}
             ${favButtonHtml(p.id, "on-card")}
           </a>
           <a href="${url}" class="fav-card-name">${escapeHtml(p.name)}</a>
