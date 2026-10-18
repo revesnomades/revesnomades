@@ -141,6 +141,30 @@
       const password = passwordEl.value || "";
       const strength = getPasswordStrength(password);
 
+      fill.style.width = password ? strength.width : "0%";
+      fill.style.backgroundColor = strength.color;
+      text.textContent = `Sécurité : ${password ? strength.label : "faible"}`;
+    }
+
+    function setupPasswordToggles(){
+      document.querySelectorAll(".password-toggle").forEach((button) => {
+        const targetId = button.getAttribute("data-target");
+        const input = document.getElementById(targetId);
+        if (!input) return;
+
+        button.addEventListener("click", () => {
+          const isHidden = input.type === "password";
+          input.type = isHidden ? "text" : "password";
+          button.textContent = isHidden ? "Masquer" : "Afficher";
+          button.setAttribute("aria-label", isHidden ? "Masquer le mot de passe" : "Afficher le mot de passe");
+        });
+      });
+    }
+
+    passwordEl?.addEventListener("input", updatePasswordStrength);
+    setupPasswordToggles();
+    updatePasswordStrength();
+
     function translateAuthError(message) {
       if (!message) return "Une erreur est survenue. Veuillez réessayer.";
       const msg = String(message).toLowerCase();
