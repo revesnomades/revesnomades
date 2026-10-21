@@ -1125,6 +1125,8 @@
             discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
             shippingAmount: hasProducts && selectedShipping ? Math.round(selectedShipping.price * 100) : 0,
             shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
+            shippingMethodId: hasProducts && selectedShipping ? String(selectedShipping.id ?? selectedShipping.name) : null,
+            promoCode: codeDiscount ? appliedPromoCode : null,
             shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
@@ -1149,6 +1151,9 @@
           checkoutError.textContent = left > 0
             ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté votre panier : vérifiez-le, puis relancez le paiement.`
             : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de votre panier. Vérifiez-le, puis relancez le paiement.`;
+        } else if ((err.data?.code === "shipping" || err.data?.code === "price") && err.data.error) {
+          // Livraison ou tarif séjour refusés par le serveur : son message dit quoi faire
+          checkoutError.textContent = err.data.error;
         } else {
           checkoutError.textContent = "Le formulaire de paiement n'a pas pu s'ouvrir. Réessayez dans un instant ; si le problème continue, écrivez-nous à contact@amesnomades.com.";
         }
