@@ -88,7 +88,7 @@
   <main class="band cream" style="min-height:80vh;">
     <div class="container" style="padding: calc(var(--navH) + 48px) 0 80px;">
 
-      <h1 style="font-family:'SegoCustom'; font-size:36px; margin:0 0 32px;">Votre panier</h1>
+      <h1 style="font-family:'SegoCustom'; font-size:34px; margin:0 0 32px;">Votre panier</h1>
 
       <!-- Layout: 2 colonnes sur desktop -->
       <div id="cartLayout" style="display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;">
@@ -104,10 +104,10 @@
         <aside style="border:1px solid var(--line); padding:24px; background:rgba(255,255,255,.6); position:sticky; top:calc(var(--navH) + 20px);">
           <h2 style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 18px;">Récapitulatif</h2>
 
-          <div id="summaryLines" style="font-size:13.5px; color:var(--muted);"></div>
+          <div id="summaryLines" style="font-size:14px; color:var(--muted);"></div>
 
           <div style="border-top:1px solid var(--line); margin:16px 0; padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
-            <strong style="font-size:15px;">Total</strong>
+            <strong style="font-size:16px;">Total</strong>
             <strong id="cartTotalDisplay" style="font-size:18px;">—</strong>
           </div>
 
@@ -115,7 +115,7 @@
 
           <!-- Code promo -->
           <div id="promoCodeZone" style="display:none; margin-bottom:16px;">
-            <div style="font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--text);">Code promo</div>
+            <div style="font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text);">Code promo</div>
             <div style="display:flex; gap:8px;">
               <input id="promoCodeInput" class="input" placeholder="Entrer un code" style="flex:1; font-size:13px; text-transform:uppercase;" maxlength="30">
               <button type="button" id="btnApplyPromo" class="btn tiny on-light">Appliquer</button>
@@ -125,7 +125,7 @@
 
           <!-- Adresse de livraison (affichée si panier contient des produits) -->
           <div id="shippingZone" style="display:none; margin-bottom:16px; border-top:1px solid var(--line); padding-top:16px;">
-            <div style="font-size:12.5px; font-weight:600; margin-bottom:10px; color:var(--text);">Adresse de livraison</div>
+            <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--text);">Adresse de livraison</div>
 
             <!-- Affichage compact (adresse déjà enregistrée) -->
             <div id="shippingAddressDisplay" style="display:none; font-size:13px; color:var(--text); margin-bottom:10px;">
@@ -174,7 +174,7 @@
             <!-- Sélecteur point relais Mondial Relay -->
             <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
               <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
-              <div id="relayLoading" style="display:none; font-size:12.5px; color:var(--muted);">Recherche en cours…</div>
+              <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
               <div id="relayList" style="display:none;"></div>
               <div id="relayMsg" style="display:none; font-size:12px; color:#c00;"></div>
             </div>
@@ -183,11 +183,11 @@
           <button id="btnCheckout" class="btn on-light block" type="button">
             Procéder au paiement
           </button>
-          <p id="checkoutMsg" style="margin-top:10px; font-size:12.5px; color:var(--muted);"></p>
+          <p id="checkoutMsg" style="margin-top:10px; font-size:13px; color:var(--muted);"></p>
 
           <div style="margin-top:16px; text-align:center;">
-            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline; padding:14px 0;">← Continuer mes achats</a>
-            <p style="margin-top:12px; font-size:11px; color:var(--muted); text-align:center;">En passant commande, vous acceptez nos <a href="/cgv.html" style="text-decoration:underline; color:var(--muted);">CGV</a> et notre <a href="/politique-retours.html" style="text-decoration:underline; color:var(--muted);">politique de retours</a>.</p>
+            <a href="/boutique.html" style="font-size:13px; color:var(--muted); text-decoration:underline; padding:14px 0;">← Continuer mes achats</a>
+            <p style="margin-top:12px; font-size:12px; color:var(--muted); text-align:center;">En passant commande, vous acceptez nos <a href="/cgv.html" style="text-decoration:underline; color:var(--muted);">CGV</a> et notre <a href="/politique-retours.html" style="text-decoration:underline; color:var(--muted);">politique de retours</a>.</p>
           </div>
         </aside>
 
@@ -200,7 +200,7 @@
         <div style="margin-bottom:48px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
             <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Nos prochains séjours</h2>
-            <a href="/index.html#sejours" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir tous les séjours</a>
+            <a href="/index.html#sejours" style="font-size:13px; color:var(--muted); text-decoration:underline;">Voir tous les séjours</a>
           </div>
           <div class="stay-grid mobile-carousel" id="staysSuggestGrid" style="margin-top:0;">
             <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
@@ -212,7 +212,7 @@
         <div>
           <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
             <h2 style="font-family:'SegoCustom'; font-size:26px; margin:0;">Articles de la boutique</h2>
-            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">Voir toute la boutique</a>
+            <a href="/boutique.html" style="font-size:13px; color:var(--muted); text-decoration:underline;">Voir toute la boutique</a>
           </div>
           <div class="crosssell-grid mobile-carousel" id="productsSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
             <div style="color:var(--muted); font-size:13px; padding:20px 0;">Chargement…</div>
@@ -230,13 +230,13 @@
     <div class="checkout-modal-inner" style="background:#fff; border-radius:12px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,.2); animation:modalPop .25s cubic-bezier(.16,1,.3,1);">
       <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px 14px;">
         <div>
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;">Paiement sécurisé</div>
-          <h3 style="margin:0; font-size:17px;">Finaliser ma commande</h3>
+          <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;">Paiement sécurisé</div>
+          <h3 style="margin:0; font-size:18px;">Finaliser ma commande</h3>
         </div>
         <button type="button" id="btnCancelCheckout" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; padding:4px 8px;">✕</button>
       </div>
       <div id="checkoutLoading" style="text-align:center; padding:40px 24px; color:var(--muted); font-size:14px;">Chargement du formulaire de paiement…</div>
-      <div id="checkoutError" style="display:none; padding:16px 24px; color:#c00; font-size:13.5px; background:#fff5f5; border-top:1px solid #fcc;"></div>
+      <div id="checkoutError" style="display:none; padding:16px 24px; color:#c00; font-size:14px; background:#fff5f5; border-top:1px solid #fcc;"></div>
       <div id="checkout" style="padding:0 24px 24px;"></div>
     </div>
   </div>
@@ -419,7 +419,7 @@
             <img class="cart-item-img" src="${img}" alt="${item.name}" loading="lazy">
             <div>
               <div style="font-weight:600; font-size:14px; color:var(--text);">${item.type === 'sejour' && item.slug ? `<a href="/sejour.html?s=${item.slug}" style="color:inherit; text-decoration:underline;">${item.name}</a>` : item.name}</div>
-              <div style="font-size:12.5px; color:var(--muted); margin-top:2px;">${price} € / unité</div>
+              <div style="font-size:13px; color:var(--muted); margin-top:2px;">${price} € / unité</div>
               <div class="cart-item-qty">
                 <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
                 <span class="cart-qty-val">${item.quantity}</span>
@@ -514,7 +514,7 @@
     }
     function badgeHtml(promo) {
       if (!promo) return '';
-      return `<div style="position:absolute; top:8px; right:8px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; z-index:2;">${promo.badge_text}</div>`;
+      return `<div style="position:absolute; top:8px; right:8px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; z-index:2;">${promo.badge_text}</div>`;
     }
 
     async function loadSuggestions() {
@@ -550,7 +550,7 @@
             const d = dateMap.get(stay.id);
             const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
             const promo = getStayPromoBadge(stay.id);
-            const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; white-space:nowrap; flex-shrink:0;">${promo.badge_text}</span>` : '';
+            const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; white-space:nowrap; flex-shrink:0;">${promo.badge_text}</span>` : '';
             const href = stay.slug ? `/sejour.html?slug=${encodeURIComponent(stay.slug)}` : "/index.html#sejours";
             return `
               <a class="stay-card" href="${href}">
@@ -607,7 +607,7 @@
                 </a>
                 <div style="padding:0 12px 12px;">
                   <button type="button"
-                    style="width:100%; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; background:var(--text); color:#fff; border:none; cursor:pointer; transition:opacity 0.2s;"
+                    style="width:100%; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; background:var(--text); color:#fff; border:none; cursor:pointer; transition:opacity 0.2s;"
                     onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'"
                     onclick="(function(btn){
                       window._addToCartFromPanier({type:'product',id:'${p.id}',name:'${safeName}',price:${Number(p.price)||0},maxStock:${p.stock ?? 99},image:'${img}',deliveryDays:5});
@@ -715,14 +715,14 @@
       const list = document.getElementById("shippingMethodsList");
       if (!wrap || !list) return;
       if (!methods.length) {
-        list.innerHTML = `<div style="font-size:12.5px; color:var(--muted);">Aucune méthode de livraison configurée pour cette adresse. Activez et tarifez vos méthodes dans votre compte SendCloud.</div>`;
+        list.innerHTML = `<div style="font-size:13px; color:var(--muted);">Aucune méthode de livraison configurée pour cette adresse. Activez et tarifez vos méthodes dans votre compte SendCloud.</div>`;
         wrap.style.display = "block";
         return;
       }
       list.innerHTML = methods.map((m, i) => `
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
           <input type="radio" name="shippingMethod" value="${i}" style="flex-shrink:0;" ${i === 0 ? "checked" : ""}>
-          <span style="flex:1;">${m.name}<br><span style="font-size:11.5px; color:var(--muted);">${[m.carrier, m.delivery_time].filter(Boolean).join(" · ")}</span></span>
+          <span style="flex:1;">${m.name}<br><span style="font-size:12px; color:var(--muted);">${[m.carrier, m.delivery_time].filter(Boolean).join(" · ")}</span></span>
           <span style="font-weight:600; white-space:nowrap;">${m.price === 0 ? "Offert" : Number(m.price).toFixed(2).replace(".", ",") + " €"}</span>
         </label>`).join("");
       wrap.style.display = "block";
@@ -781,7 +781,7 @@
             <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;" ${i === 0 ? "checked" : ""}>
             <span style="flex:1;">
               <span style="font-weight:600;">${p.name}</span><span style="color:var(--muted);">${dist}</span><br>
-              <span style="font-size:11.5px; color:var(--muted);">${[addr, p.postal_code, p.city].filter(Boolean).join(", ")}</span>
+              <span style="font-size:12px; color:var(--muted);">${[addr, p.postal_code, p.city].filter(Boolean).join(", ")}</span>
             </span>
           </label>`;
         }).join("");

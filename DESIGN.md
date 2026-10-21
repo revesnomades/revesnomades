@@ -16,24 +16,64 @@ colors:
   promo: "#cc4444"
   error: "#cc0000"
   error-bg: "#fff5f5"
+  error-border: "#ffcccc"
+  warning: "#b34400"
+  on-dark: "#ffffff"
+  ink: "#000000"
+  overlay: "rgba(0,0,0,.25)"
+  filter-border: "rgba(0,0,0,.15)"
 typography:
   display:
     fontFamily: "SegoCustom, serif"
+    fontSize: "42px"
     fontWeight: 400
     lineHeight: 1.15
+  heading-1:
+    fontFamily: "SegoCustom, serif"
+    fontSize: "34px"
+    fontWeight: 400
+    lineHeight: 1.15
+  heading-2:
+    fontFamily: "SegoCustom, serif"
+    fontSize: "26px"
+    fontWeight: 400
+    lineHeight: 1.2
+  heading-3:
+    fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
+    fontSize: "22px"
+    fontWeight: 600
+    lineHeight: 1.3
+  lead:
+    fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
+    fontSize: "18px"
+    fontWeight: 300
+    lineHeight: 1.6
   body:
     fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
+    fontSize: "16px"
     fontWeight: 300
     lineHeight: 1.75
     letterSpacing: "0.01em"
+  body-small:
+    fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
+    fontSize: "14px"
+    fontWeight: 300
+    lineHeight: 1.65
+  caption:
+    fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
+    fontSize: "13px"
+    lineHeight: 1.6
   label:
     fontFamily: "IBM Plex Mono, monospace"
-    fontSize: "11px"
+    fontSize: "12px"
     letterSpacing: "0.12em"
 rounded:
   none: "0"
   sm: "2px"
   md: "3px"
+  control: "4px"
+  dialog: "8px"
+  modal: "12px"
   pill: "9999px"
 spacing:
   xs: "8px"
@@ -91,6 +131,7 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Texte courant** : Glacial Indifference 300, interlignage 1,75, léger espacement (0,01em).
 - **Libellés de boutons et filtres** : IBM Plex Mono 11–13px, capitales, espacement 0,08–0,12em.
 - Les prix utilisent des chiffres tabulaires quand ils sont alignés en colonne.
+- **Échelle des tailles (shop)** : 12 · 13 · 14 · 16 · 18 · 22 · 26 · 34 · 42 px. Rien sous 12px ; 12px est réservé aux libellés, badges et mentions.
 
 ## Layout
 

@@ -38,7 +38,7 @@
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 28px 20px;
     }
-    .fav-card { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .fav-card { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .fav-card-img {
       position: relative;
       display: block;
@@ -53,7 +53,7 @@
       right: 10px;
       background: var(--soon);
       color: #fff;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 2px;
@@ -69,8 +69,8 @@
       margin-top: 6px;
     }
     .fav-card-name:hover { text-decoration: underline; }
-    .fav-card-price { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-    .fav-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
+    .fav-card-price { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .fav-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 16px; }
     .fav-empty a { display: inline-block; margin-top: 16px; }
     @media (max-width: 480px) {
       .fav-title { font-size: 26px; }
@@ -214,9 +214,9 @@
         const unavailable = p.coming_soon === true || p.stock === 0;
         const url = `/produit.html?id=${encodeURIComponent(p.id)}`;
         return `<div class="fav-card">
+          ${favButtonHtml(p.id, "on-card")}
           <a href="${url}" class="fav-card-img" style="background-image:url('${encodeURI(img)}');" aria-label="${escapeHtml(p.name)}">
             ${p.coming_soon === true ? `<span class="fav-card-status" style="background:var(--sold-out);">SOLD OUT</span>` : unavailable ? `<span class="fav-card-status">Bientôt disponible</span>` : ""}
-            ${favButtonHtml(p.id, "on-card")}
           </a>
           <a href="${url}" class="fav-card-name">${escapeHtml(p.name)}</a>
           <div class="fav-card-price">${(Number(p.price) || 0).toFixed(2)} €</div>
