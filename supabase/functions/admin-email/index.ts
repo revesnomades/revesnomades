@@ -124,7 +124,7 @@ ${body}
       <tr><td align="center" style="padding:20px 24px 26px; border-top:1px solid #e6dfc4; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:1.6; color:#6c7078;">
         Âmes Nomades — Retraites &amp; séjours bien-être<br>
         <a href="${SITE_URL}" style="color:#6c7078;">amesnomades.com</a> · <a href="https://instagram.com/amesnomades_retreat" style="color:#6c7078;">Instagram</a><br><br>
-        Vous recevez cet email car vous êtes inscrit(e) à nos actualités.<br>
+        Tu reçois cet email car tu es inscrit(e) à nos actualités.<br>
         <a href="${unsubUrl}" style="color:#6c7078;">Se désinscrire</a>
       </td></tr>
     </table>
@@ -168,7 +168,7 @@ async function siteContext(supabase: SupabaseClient) {
 
 const SYSTEM_PROMPT = `Tu rédiges les emails marketing d'Âmes Nomades (amesnomades.com) : retraites et séjours bien-être en France — Pilates, yoga, randonnées, massages, alimentation saine — et un shop d'objets bien-être éco-responsables.
 
-Ton de la marque : chaleureux, apaisant, inspirant, sincère, jamais agressif ni « vendeur ». Phrases simples, quelques images sensorielles (nature, lenteur, se retrouver). Vouvoiement par défaut, sauf si l'admin demande le tutoiement. Français impeccable.
+Ton de la marque : chaleureux, apaisant, inspirant, sincère, jamais agressif ni « vendeur ». Phrases simples, quelques images sensorielles (nature, lenteur, se retrouver). Tutoiement par défaut, sauf si l'admin demande le vouvoiement. Français impeccable.
 
 Tu travailles avec l'admin du site : il décrit l'email voulu, puis demande des modifications. À chaque tour, renvoie l'email COMPLET mis à jour (pas seulement la partie modifiée), en conservant tout ce que l'admin n'a pas demandé de changer.
 

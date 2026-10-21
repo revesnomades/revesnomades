@@ -111,7 +111,7 @@ export async function getMissingForEvent(eventId) {
  */
 export async function createBooking(eventId, places=1, roomType="double_partagee") {
   const session = await getSession();
-  if (!session) throw new Error("Vous devez être connecté(e) pour réserver.");
+  if (!session) throw new Error("Tu dois être connecté(e) pour réserver.");
 
   const { data, error } = await supabase
     .from("bookings")

@@ -10,7 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="utf-8">
   <title>Créer un compte — Âmes Nomades</title>
-  <meta name="description" content="Créez votre compte Âmes Nomades pour réserver vos séjours bien-être et suivre vos commandes.">
+  <meta name="description" content="Crée ton compte Âmes Nomades pour réserver tes séjours bien-être et suivre tes commandes.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -38,7 +38,7 @@
       <div class="account-card">
         <h1 class="as-h2">Créer un compte</h1>
         <p style="color:var(--muted); margin-top:10px;">
-          Créez votre compte pour suivre vos réservations et recevoir les informations liées aux séjours.
+          Crée ton compte pour suivre tes réservations et recevoir les informations liées aux séjours.
         </p>
 
         <div style="display:grid; gap:12px; margin-top:18px;">
@@ -94,7 +94,7 @@
           <div id="signupMsg" style="color:var(--muted); font-size:13px;"></div>
 
           <div style="font-size:13px; color:var(--muted);">
-            Vous avez déjà un compte ?
+            Tu as déjà un compte ?
             <a href="/compte.html" style="text-decoration:underline; padding:14px 0;">Se connecter</a>
           </div>
         </div>
@@ -166,11 +166,11 @@
     updatePasswordStrength();
 
     function translateAuthError(message) {
-      if (!message) return "Une erreur est survenue. Veuillez réessayer.";
+      if (!message) return "Une erreur est survenue. Merci de réessayer.";
       const msg = String(message).toLowerCase();
 
       if (msg.includes("user already registered") || msg.includes("already exists") || msg.includes("already registered")) {
-        return "Un compte existe déjà avec cette adresse email. Veuillez vous connecter.";
+        return "Un compte existe déjà avec cette adresse email. Connecte-toi.";
       }
       if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
         return "Email ou mot de passe incorrect.";
@@ -179,13 +179,13 @@
         return "Le mot de passe doit contenir au moins 8 caractères.";
       }
       if (msg.includes("email not confirmed")) {
-        return "Veuillez confirmer votre adresse email avant de vous connecter.";
+        return "Merci de confirmer ton adresse email avant de te connecter.";
       }
       if (msg.includes("rate limit") || msg.includes("too many requests")) {
-        return "Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.";
+        return "Trop de tentatives. Patiente quelques minutes avant de réessayer.";
       }
       if (msg.includes("invalid email")) {
-        return "Veuillez saisir une adresse email valide.";
+        return "Merci de saisir une adresse email valide.";
       }
 
       return message;
@@ -200,7 +200,7 @@
       const newsletterOptin = !!newsletterOptinEl.checked;
 
       if(!firstname || !email || !password){
-        setMsg("Merci de renseigner votre prénom, votre email et votre mot de passe.");
+        setMsg("Merci de renseigner ton prénom, ton email et ton mot de passe.");
         return;
       }
 
@@ -256,10 +256,10 @@
 
       if (data?.session) {
         // Email confirmation disabled — logged in immediately
-        setMsg("✅ Compte créé ! Redirection en cours…");
+        setMsg("Compte créé ! Redirection en cours…");
         setTimeout(() => { window.location.href = REDIRECT; }, 800);
       } else {
-        setMsg("✅ Votre compte a été créé avec succès ! Un e-mail de confirmation vient de vous être envoyé.");
+        setMsg("Ton compte a été créé avec succès ! Un e-mail de confirmation vient de t'être envoyé.");
       }
     });
   </script>

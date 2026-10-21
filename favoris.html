@@ -11,7 +11,7 @@
   <meta charset="utf-8">
   <title>Mes favoris — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Vos produits favoris Âmes Nomades">
+  <meta name="description" content="Tes produits favoris Âmes Nomades">
   <meta name="robots" content="noindex">
   <link rel="canonical" href="https://amesnomades.com/favoris.html">
 
@@ -137,7 +137,7 @@
   <main class="band cream">
     <div class="container fav-page">
       <h1 class="fav-title">Mes favoris</h1>
-      <p class="fav-sub" id="favSub">Les produits que vous avez gardés de côté.</p>
+      <p class="fav-sub" id="favSub">Les produits que tu as gardés de côté.</p>
       <div id="favContent"><p class="fav-empty">Chargement…</p></div>
     </div>
   </main>
@@ -196,7 +196,7 @@
     function renderEmpty() {
       sub.textContent = "";
       content.innerHTML = `<div class="fav-empty">
-        Vous n'avez pas encore de favoris.<br>Touchez le ♡ d'un produit pour le retrouver ici.
+        Tu n'as pas encore de favoris.<br>Touche le ♡ d'un produit pour le retrouver ici.
         <br><a href="/boutique.html" class="btn on-light">Découvrir le shop</a>
       </div>`;
     }
@@ -230,7 +230,7 @@
         .select("id, name, price, stock, coming_soon, image_urls, image_url")
         .in("id", ids);
       if (error) {
-        content.innerHTML = `<p class="fav-empty">Impossible de charger vos favoris pour le moment.</p>`;
+        content.innerHTML = `<p class="fav-empty">Impossible de charger tes favoris pour le moment.</p>`;
         return;
       }
       products = data || [];

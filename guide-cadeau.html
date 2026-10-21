@@ -9,9 +9,9 @@
   })(window,document,'script','dataLayer','GTM-589D3XDT');</script>
   <!-- End Google Tag Manager -->
   <meta charset="utf-8">
-  <title>Recevez votre guide en cadeau — Âmes Nomades</title>
+  <title>Reçois ton guide en cadeau — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Recevez votre guide bien-être en cadeau.">
+  <meta name="description" content="Reçois ton guide bien-être en cadeau.">
   <link rel="canonical" href="https://amesnomades.com/guide-cadeau.html">
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
@@ -147,14 +147,14 @@
   <div role="main" class="main-container">
     <div class="guide-card">
       <div class="sub-title">Un premier pas vers l'évasion</div>
-      <h1 class="as-h2">Recevez votre guide en cadeau&nbsp;!</h1>
+      <h1 class="as-h2">Reçois ton guide en cadeau&nbsp;!</h1>
 
       <form id="newsletterForm" novalidate>
         <input class="input" name="lastname" placeholder="Nom" required autocomplete="family-name" />
         <input class="input" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
-        <input class="input" name="email" type="email" placeholder="Votre Email" required autocomplete="email" />
+        <input class="input" name="email" type="email" placeholder="Ton Email" required autocomplete="email" />
         
-        <label for="newsletterHoneypot" class="sr-only">Ne pas remplir ce champ si vous êtes un robot</label>
+        <label for="newsletterHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
         <input type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
         
         <button class="btn" type="submit">Recevoir mon guide</button>
@@ -163,7 +163,7 @@
       <div id="newsletterMsg" class="form-msg"></div>
       
       <p class="newsletter-legal">
-        En cliquant sur recevoir mon guide, vous acceptez d'être inscrit(e) à notre newsletter.
+        En cliquant sur recevoir mon guide, tu acceptes d'être inscrit(e) à notre newsletter.
       </p>
     </div>
   </div>
@@ -197,7 +197,7 @@
       const email = String(fd.get("email") || "").trim().toLowerCase();
 
       if(!firstname || !lastname || !email){
-        show("<span style='color:#d9534f;'>Merci de renseigner votre nom, votre prénom et votre email.</span>");
+        show("<span style='color:#d9534f;'>Merci de renseigner ton nom, ton prénom et ton email.</span>");
         return;
       }
 
@@ -221,14 +221,14 @@
         }
 
         if(data.status === "already"){
-          show(`💌 Vous êtes déjà inscrit(e).<br>
+          show(`Tu es déjà inscrit(e).<br>
             <a href="assets/pdf/5%20fa%C3%A7ons%20de%20reprendre%20du%20temps%20pour%20toi.pdf" target="_blank" style="text-decoration:underline; font-weight:600; color:var(--text);">
               Télécharger le guide
             </a>`);
           return;
         }
 
-        show(`🌿 Merci ${firstname}, votre inscription est réussie !<br>Votre guide cadeau arrive dans votre boîte mail dans quelques instants.`);
+        show(`Merci ${firstname}, ton inscription est réussie !<br>Ton guide cadeau arrive dans ta boîte mail dans quelques instants.`);
 
         form.reset();
 

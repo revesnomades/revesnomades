@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert("Veuillez vous connecter ou créer un compte pour poursuivre le paiement.");
+        alert("Connecte-toi ou crée un compte pour poursuivre le paiement.");
         window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
         return;
       }

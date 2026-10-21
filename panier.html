@@ -10,7 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="utf-8" />
   <title>Panier — Âmes Nomades</title>
-  <meta name="description" content="Votre panier Âmes Nomades : séjours bien-être et produits du shop, livraison suivie et paiement sécurisé.">
+  <meta name="description" content="Ton panier Âmes Nomades : séjours bien-être et produits du shop, livraison suivie et paiement sécurisé.">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -89,7 +89,7 @@
   <main class="band cream" style="min-height:80vh;">
     <div class="container" style="padding: calc(var(--navH) + 48px) 0 80px;">
 
-      <h1 style="font-family:'SegoCustom'; font-size:34px; margin:0 0 32px;">Votre panier</h1>
+      <h1 style="font-family:'SegoCustom'; font-size:34px; margin:0 0 32px;">Ton panier</h1>
 
       <!-- Layout: 2 colonnes sur desktop -->
       <div id="cartLayout" style="display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;">
@@ -151,7 +151,7 @@
 
               <!-- Sélecteur point relais Mondial Relay -->
               <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
-                <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
+                <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisis ton point relais :</div>
                 <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
                 <div id="relayList" style="display:none;"></div>
                 <button type="button" id="relayMore" class="cart-link-btn" style="display:none; margin-top:8px;"></button>
@@ -190,11 +190,11 @@
           </button>
           <p id="checkoutHint" class="cart-step-hint" style="margin-top:8px;" aria-live="polite"></p>
           <p id="checkoutMsg" style="margin-top:10px; font-size:13px; color:var(--muted);"></p>
-          <p id="guestNote" style="display:none; margin-top:6px; font-size:13px; color:var(--muted);">Pas besoin de compte : votre confirmation arrive par email, et vous pourrez créer un compte après l'achat.</p>
+          <p id="guestNote" style="display:none; margin-top:6px; font-size:13px; color:var(--muted);">Pas besoin de compte : ta confirmation arrive par email, et tu pourras créer un compte après l'achat.</p>
 
           <div style="margin-top:16px; text-align:center;">
             <a href="/boutique.html" style="font-size:13px; color:var(--muted); text-decoration:underline; padding:14px 0;">← Continuer mes achats</a>
-            <p style="margin-top:12px; font-size:12px; color:var(--muted); text-align:center;">En passant commande, vous acceptez nos <a href="/cgv.html" style="text-decoration:underline; color:var(--muted);">CGV</a> et notre <a href="/politique-retours.html" style="text-decoration:underline; color:var(--muted);">politique de retours</a>.</p>
+            <p style="margin-top:12px; font-size:12px; color:var(--muted); text-align:center;">En passant commande, tu acceptes nos <a href="/cgv.html" style="text-decoration:underline; color:var(--muted);">CGV</a> et notre <a href="/politique-retours.html" style="text-decoration:underline; color:var(--muted);">politique de retours</a>.</p>
           </div>
         </aside>
 
@@ -442,7 +442,7 @@
               <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" stroke-width="1.5"/>
               <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/>
             </svg>
-            <p style="font-size:16px; font-weight:500; margin-bottom:8px;">Votre panier est vide</p>
+            <p style="font-size:16px; font-weight:500; margin-bottom:8px;">Ton panier est vide</p>
             <a href="/boutique.html" class="btn on-light" style="display:inline-block; margin-top:8px;">Découvrir la boutique</a>
           </div>
         `;
@@ -517,10 +517,10 @@
       const noteEl = document.getElementById("cartShippingNote");
       if (noteEl) {
         noteEl.textContent = hasSejoursOnly
-          ? "Toutes les informations concernant votre séjour vous seront envoyées par e-mail après le paiement."
+          ? "Toutes les informations concernant ton séjour te seront envoyées par e-mail après le paiement."
           : selectedShipping
             ? ""
-            : "Renseignez votre adresse pour calculer les frais de livraison.";
+            : "Renseigne ton adresse pour calculer les frais de livraison.";
       }
 
       const rawTotal = getCartTotal();
@@ -553,11 +553,11 @@
       if (!hasProducts) return null;
       const addr = getShippingAddress();
       const relay = selectedShipping && isRelayMethod(selectedShipping);
-      if (!document.getElementById("shipName")?.value.trim() && !currentUser) return "Indiquez le nom du destinataire.";
-      if (!relay && !addr.line1) return "Indiquez votre adresse.";
-      if (!addr.postal_code || !addr.city) return "Indiquez votre code postal et votre ville.";
-      if (!selectedShipping) return "Choisissez un mode de livraison.";
-      if (relay && !selectedRelayPoint) return "Choisissez un point relais.";
+      if (!document.getElementById("shipName")?.value.trim() && !currentUser) return "Indique le nom du destinataire.";
+      if (!relay && !addr.line1) return "Indique ton adresse.";
+      if (!addr.postal_code || !addr.city) return "Indique ton code postal et ta ville.";
+      if (!selectedShipping) return "Choisis un mode de livraison.";
+      if (relay && !selectedRelayPoint) return "Choisis un point relais.";
       return null;
     }
 
@@ -794,7 +794,7 @@
     async function fetchShippingRates() {
       const addr = getShippingAddress();
       if (!addr.postal_code || !addr.city) {
-        showShippingMsg("Renseignez le code postal et la ville.", "error");
+        showShippingMsg("Renseigne le code postal et la ville.", "error");
         return;
       }
       lastRatesKey = [addr.postal_code, addr.city, addr.country, getProductsTotal() >= FREE_SHIPPING_THRESHOLD, getTotalWeightGrams()].join("|");
@@ -822,7 +822,7 @@
         renderShippingMethods(data.methods || []);
       } catch (e) {
         console.warn("Tarifs de livraison indisponibles:", e);
-        showShippingMsg("Nous n'avons pas pu calculer la livraison pour cette adresse. Vérifiez le code postal, puis réessayez dans un instant.", "error");
+        showShippingMsg("Nous n'avons pas pu calculer la livraison pour cette adresse. Vérifie le code postal, puis réessaie dans un instant.", "error");
         const listEl2 = document.getElementById("shippingMethodsList");
         if (listEl2) listEl2.innerHTML = "";
         renderCart();
@@ -848,7 +848,7 @@
       const list = document.getElementById("shippingMethodsList");
       if (!wrap || !list) return;
       if (!methods.length) {
-        list.innerHTML = `<div style="font-size:13px; color:var(--muted);">Aucune livraison n'est disponible pour cette adresse. Écrivez-nous à contact@amesnomades.com : nous trouverons une solution.</div>`;
+        list.innerHTML = `<div style="font-size:13px; color:var(--muted);">Aucune livraison n'est disponible pour cette adresse. Écris-nous à contact@amesnomades.com : nous trouverons une solution.</div>`;
         wrap.style.display = "block";
         renderCart();
         return;
@@ -890,7 +890,7 @@
       const postal = (postalInput?.value || "").trim();
       if (!postal) {
         document.getElementById("relayMsg").style.display = "block";
-        document.getElementById("relayMsg").textContent = "Renseignez votre code postal pour afficher les points relais.";
+        document.getElementById("relayMsg").textContent = "Renseigne ton code postal pour afficher les points relais.";
         document.getElementById("relayList").style.display = "none";
         return;
       }
@@ -952,7 +952,7 @@
         relayMsg.style.display = "block";
         relayMsg.style.color = "#c00";
         console.warn("Points relais indisponibles:", e);
-        relayMsg.textContent = "Les points relais ne s'affichent pas pour le moment. Choisissez la livraison à domicile ou réessayez dans un instant.";
+        relayMsg.textContent = "Les points relais ne s'affichent pas pour le moment. Choisis la livraison à domicile ou réessaie dans un instant.";
       }
     }
 
@@ -1125,18 +1125,18 @@
 
       const cart = getCart();
       if (!cart.length) {
-        checkoutMsg.textContent = "Votre panier est vide.";
+        checkoutMsg.textContent = "Ton panier est vide.";
         return;
       }
 
       const hasProducts = cart.some(i => i.type === "product");
       if (hasProducts && !selectedShipping) {
-        checkoutMsg.textContent = "Veuillez calculer et sélectionner un mode de livraison.";
+        checkoutMsg.textContent = "Calcule et sélectionne un mode de livraison.";
         document.getElementById("shippingZone")?.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
       if (hasProducts && selectedShipping && isRelayMethod(selectedShipping) && !selectedRelayPoint) {
-        checkoutMsg.textContent = "Veuillez sélectionner un point relais.";
+        checkoutMsg.textContent = "Sélectionne un point relais.";
         document.getElementById("relayZone")?.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
@@ -1144,7 +1144,7 @@
       const { data: { user } } = await supabase.auth.getUser();
       const shipName = document.getElementById("shipName")?.value.trim() || "";
       if (hasProducts && !shipName && !user) {
-        checkoutMsg.textContent = "Indiquez le nom et prénom du destinataire.";
+        checkoutMsg.textContent = "Indique le nom et prénom du destinataire.";
         document.getElementById("shipName")?.focus();
         return;
       }
@@ -1246,13 +1246,13 @@
           else removeFromCart(err.data.product_id, "product");
           renderCart();
           checkoutError.textContent = left > 0
-            ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté votre panier : vérifiez-le, puis relancez le paiement.`
-            : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de votre panier. Vérifiez-le, puis relancez le paiement.`;
+            ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté ton panier : vérifie-le, puis relance le paiement.`
+            : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de ton panier. Vérifie-le, puis relance le paiement.`;
         } else if ((err.data?.code === "shipping" || err.data?.code === "price") && err.data.error) {
           // Livraison ou tarif séjour refusés par le serveur : son message dit quoi faire
           checkoutError.textContent = err.data.error;
         } else {
-          checkoutError.textContent = "Le formulaire de paiement n'a pas pu s'ouvrir. Réessayez dans un instant ; si le problème continue, écrivez-nous à contact@amesnomades.com.";
+          checkoutError.textContent = "Le formulaire de paiement n'a pas pu s'ouvrir. Réessaie dans un instant ; si le problème continue, écris-nous à contact@amesnomades.com.";
         }
       }
     });

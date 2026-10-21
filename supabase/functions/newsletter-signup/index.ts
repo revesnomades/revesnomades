@@ -70,7 +70,7 @@ function buildGuideEmailHTML(params: {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tes quelques pages pour ralentir 🤍</title>
+  <title>Tes quelques pages pour ralentir</title>
   <style>
     body {
       margin: 0;
@@ -259,7 +259,7 @@ async function sendGuideEmailBrevo(email: string, firstname: string) {
     body: JSON.stringify({
       sender: { name: SENDER_NAME, email: SENDER_EMAIL },
       to: [{ email, name: firstname || "" }],
-      subject: "Tes quelques pages pour ralentir 🤍",
+      subject: "Tes quelques pages pour ralentir",
       htmlContent,
     }),
   });

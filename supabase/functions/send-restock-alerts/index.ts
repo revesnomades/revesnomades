@@ -52,19 +52,19 @@ serve(async (req) => {
           body: JSON.stringify({
             sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
             to: [{ email: sub.email }],
-            subject: `✨ ${productName} est de retour en stock !`,
+            subject: `${productName} est de retour en stock !`,
             htmlContent: `
               <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 20px; color: #2d2d2d;">
                 <h2 style="font-size: 22px; margin-bottom: 12px;">Bonne nouvelle !</h2>
                 <p style="font-size: 15px; line-height: 1.6; color: #555;">
-                  Le produit <strong>${productName}</strong> que vous aviez mis en favoris est à nouveau disponible sur notre boutique.
+                  Le produit <strong>${productName}</strong> que tu avais mis en favoris est à nouveau disponible sur notre boutique.
                 </p>
                 <a href="https://www.amesnomades.com/boutique.html"
                    style="display:inline-block; margin-top:20px; padding:12px 28px; background:#2d2d2d; color:#fff; text-decoration:none; border-radius:6px; font-size:14px; font-weight:600;">
                   Voir le produit
                 </a>
                 <p style="margin-top: 28px; font-size: 12px; color: #aaa;">
-                  Vous recevez cet email car vous avez demandé à être alerté du retour en stock.
+                  Tu reçois cet email car tu as demandé à être alerté du retour en stock.
                 </p>
               </div>
             `,

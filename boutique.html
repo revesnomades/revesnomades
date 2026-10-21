@@ -10,7 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="utf-8" />
   <title>Shop — Âmes Nomades</title>
-  <meta name="description" content="Le shop Âmes Nomades : tapis de yoga, bougies, carnets et objets bien-être éco-responsables pour prolonger l'esprit de nos retraites chez vous.">
+  <meta name="description" content="Le shop Âmes Nomades : tapis de yoga, bougies, carnets et objets bien-être éco-responsables pour prolonger l'esprit de nos retraites chez toi.">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -335,14 +335,14 @@
   <div class="modal" id="restockModal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="margin:0; font-size:18px;" id="restockTitle">Avertissez-moi du retour en stock</h2>
+        <h2 style="margin:0; font-size:18px;" id="restockTitle">Me prévenir du retour en stock</h2>
         <button class="btn tiny" id="btnCancelRestock" style="background:transparent; font-size:16px;">✕</button>
       </div>
-      <p class="muted-small" style="margin-bottom:16px;">Laissez votre adresse email pour recevoir un message dès que ce produit sera à nouveau disponible !</p>
+      <p class="muted-small" style="margin-bottom:16px;">Laisse ton adresse email pour recevoir un message dès que ce produit sera à nouveau disponible !</p>
       <form id="restockForm">
         <input type="hidden" id="restockProductId">
         <div style="margin-bottom:16px;">
-          <input type="email" id="restockEmail" class="input" placeholder="votre@email.com" required style="width:100%; padding:10px;">
+          <input type="email" id="restockEmail" class="input" placeholder="ton@email.com" required style="width:100%; padding:10px;">
         </div>
         <div id="restockMsg" style="font-size:13px; margin-bottom:10px;"></div>
         <button type="submit" class="btn on-light" style="width:100%;"><svg class="bell-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Me prévenir</button>
@@ -545,7 +545,7 @@
       if (filtered.length === 0) {
         shopGrid.innerHTML = `
           <div style="text-align:center; grid-column:1/-1; padding:40px; color:var(--muted);">
-            Aucun produit ne correspond à vos critères.
+            Aucun produit ne correspond à tes critères.
           </div>
         `;
         return;
@@ -634,7 +634,7 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         if (btnEl) btnEl.classList.remove("btn-loading");
-        alert("Veuillez vous connecter ou créer un compte pour commander cet article.");
+        alert("Connecte-toi ou crée un compte pour commander cet article.");
         window.location.href = `signup.html?redirect=${encodeURIComponent(window.location.href)}`;
         return;
       }
@@ -669,7 +669,7 @@
 
     window.openRestockModal = async (id, name) => {
       restockProductId.value = id;
-      restockTitle.textContent = `Alerte stock : ${name}`;
+      restockTitle.textContent = `Me prévenir : ${name}`;
       restockMsg.textContent = "";
       restockEmail.value = "";
 
@@ -697,7 +697,7 @@
       if(result.already || result.error){
         restockMsg.style.color = "#c00";
         restockMsg.textContent = result.already
-          ? "Vous êtes déjà inscrit pour recevoir l'alerte sur ce produit !"
+          ? "Tu es déjà inscrit pour recevoir l'alerte sur ce produit !"
           : "Erreur lors de l'inscription : " + result.error;
         return;
       }
@@ -722,7 +722,7 @@
       }
       toast.innerHTML = added
         ? `<strong>${item.name}</strong> ajouté au panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`
-        : `Vous avez déjà tout le stock disponible de <strong>${item.name}</strong> dans votre panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`;
+        : `Tu as déjà tout le stock disponible de <strong>${item.name}</strong> dans ton panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`;
       toast.classList.add("show");
       clearTimeout(toast._timer);
       toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);

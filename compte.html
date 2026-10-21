@@ -10,7 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="utf-8" />
   <title>Compte — Âmes Nomades</title>
-  <meta name="description" content="Votre espace Âmes Nomades : réservations de séjours, commandes, adresses et préférences newsletter.">
+  <meta name="description" content="Ton espace Âmes Nomades : réservations de séjours, commandes, adresses et préférences newsletter.">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -123,7 +123,7 @@
            <div id="welcomeName" style="font-size:22px; margin-bottom:10px; display:none;"></div>
           <h1 class="as-h2">Mon compte</h1>
           <p style="color:var(--muted); margin:10px 0 0;">
-            Accédez à vos réservations et suivez la validation des séjours.
+            Accède à tes réservations et suis la validation des séjours.
           </p>
 
           <!-- Auth (visible si déconnecté) -->
@@ -233,7 +233,7 @@
           <div id="perksBox" class="account-card">
             <h2 style="font-weight:500; margin:0; font-size:1.17em;">Pourquoi créer un compte ?</h2>
             <p style="color:var(--muted); margin-top:10px;">
-              • Suivre vos réservations passées et à venir<br>
+              • Suivre tes réservations passées et à venir<br>
               • Voir le nombre de réservations restantes pour valider un séjour<br>
               • Recevoir les informations pratiques et mises à jour
             </p>
@@ -241,12 +241,12 @@
 
           <div id="bookingsBox" class="account-card" style="display:none;">
             <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
-            <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connectez-vous pour voir vos réservations.</div>
+            <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connecte-toi pour voir tes réservations.</div>
           </div>
 
           <div id="purchasesBox" class="account-card" style="display:none; margin-top:16px;">
             <h3 style="font-weight:500; margin:0;">Mes achats</h3>
-            <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de vos achats...</div>
+            <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de tes achats...</div>
           </div>
 
           <div id="addressBox" class="account-card" style="display:none; margin-top:16px;">
@@ -297,12 +297,11 @@
       <!-- Barre d'actions non-imprimable -->
       <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:#1e1f22; color:#fff; padding:14px 20px; border-top-left-radius:10px; border-top-right-radius:10px;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:18px;">📄</span>
           <strong style="font-size:16px; font-weight:600;">Facture / Attestation de paiement</strong>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <button type="button" id="btnPrintInvoice" class="btn" style="background:#3f7a4c; color:#fff; border:none; padding:8px 16px; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-            📥 Imprimer / Télécharger (PDF)
+            Imprimer / Télécharger (PDF)
           </button>
           <button type="button" id="btnCloseInvoiceModal" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:0 6px;">✕</button>
         </div>
@@ -414,7 +413,7 @@
   <section class="band cream" id="compte-sejours" style="border-top: 1px solid var(--line);">
     <div class="container" style="padding: 12px 0 40px;">
       <h2 style="font-family:'SegoCustom', serif; font-weight:300; font-size: clamp(18px, 2vw, 22px); margin:0 0 4px 0;">Prochains séjours</h2>
-      <p style="color:var(--muted); margin:0 0 20px 0; font-size:13px;">Retrouvez nos prochaines retraites bien-être.</p>
+      <p style="color:var(--muted); margin:0 0 20px 0; font-size:13px;">Retrouve nos prochaines retraites bien-être.</p>
       <div id="compteSejours" class="stay-grid mobile-carousel" style="margin-top:0;">
         <div style="color:var(--muted); font-size:14px;">Chargement…</div>
       </div>
@@ -495,11 +494,11 @@
     const MAINTENANCE_MODE = false;
 
     function translateAuthError(message) {
-      if (!message) return "Une erreur est survenue. Veuillez réessayer.";
+      if (!message) return "Une erreur est survenue. Merci de réessayer.";
       const msg = String(message).toLowerCase();
 
       if (msg.includes("user already registered") || msg.includes("already exists") || msg.includes("already registered")) {
-        return "Un compte existe déjà avec cette adresse email. Veuillez vous connecter.";
+        return "Un compte existe déjà avec cette adresse email. Connecte-toi.";
       }
       if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
         return "Email ou mot de passe incorrect.";
@@ -508,13 +507,13 @@
         return "Le mot de passe doit contenir au moins 8 caractères.";
       }
       if (msg.includes("email not confirmed")) {
-        return "Veuillez confirmer votre adresse email avant de vous connecter.";
+        return "Merci de confirmer ton adresse email avant de te connecter.";
       }
       if (msg.includes("rate limit") || msg.includes("too many requests")) {
-        return "Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.";
+        return "Trop de tentatives. Patiente quelques minutes avant de réessayer.";
       }
       if (msg.includes("invalid email")) {
-        return "Veuillez saisir une adresse email valide.";
+        return "Merci de saisir une adresse email valide.";
       }
 
       return message;
@@ -597,11 +596,11 @@
       },
       {
         question: "Comment se passe la réservation ?",
-        answer: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois votre demande prise en compte, vous recevez toutes les informations nécessaires par email."
+        answer: "La réservation se fait en ligne via le bouton “Réserver” sur la page du séjour. Une fois ta demande prise en compte, tu reçois toutes les informations nécessaires par email."
       },
       {
         question: "Le séjour est-il confirmé automatiquement ?",
-        answer: "Un séjour est confirmé lorsqu’un nombre minimum de participants est atteint. Vous êtes informé(e) dès que le séjour est validé."
+        answer: "Un séjour est confirmé lorsqu’un nombre minimum de participants est atteint. Tu es informé(e) dès que le séjour est validé."
       },
       {
         question: "Puis-je venir seul(e) ?",
@@ -617,7 +616,7 @@
       },
       {
         question: "Puis-je annuler ma réservation ?",
-        answer: "Les conditions d’annulation dépendent du séjour. Elles sont précisées au moment de la réservation. En cas de doute, n’hésitez pas à nous contacter."
+        answer: "Les conditions d’annulation dépendent du séjour. Elles sont précisées au moment de la réservation. En cas de doute, n’hésite pas à nous contacter."
       }
     ];
 
@@ -682,11 +681,11 @@
 
       newsletterBox.style.display = "grid";
       if (isSubscribed) {
-        newsletterText.textContent = "Vous êtes déjà abonné(e) et serez parmi les premiers avertis des prochains séjours.";
+        newsletterText.textContent = "Tu es déjà abonné(e) et seras parmi les premiers avertis des prochains séjours.";
         btnNewsletterSubscribe.style.display = "none";
         btnNewsletterUnsubscribe.style.display = "inline-flex";
       } else {
-        newsletterText.textContent = "Abonnez-vous à la newsletter pour être averti(e) en priorité des prochains séjours.";
+        newsletterText.textContent = "Abonne-toi à la newsletter pour être averti(e) en priorité des prochains séjours.";
         btnNewsletterSubscribe.style.display = "inline-flex";
         btnNewsletterUnsubscribe.style.display = "none";
       }
@@ -718,7 +717,7 @@
 
       if (error) {
         console.error("NEWSLETTER STATUS ERROR:", error);
-        setMsg(newsletterMsg, "Impossible de vérifier votre abonnement newsletter.");
+        setMsg(newsletterMsg, "Impossible de vérifier ton abonnement newsletter.");
         renderNewsletterStatus(false);
         return;
       }
@@ -732,13 +731,13 @@
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) {
-        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
+        setMsg(newsletterMsg, "Connexion requise pour gérer ta newsletter.");
         return;
       }
 
       if (newsletterSubRecord) {
         renderNewsletterStatus(true);
-        setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
+        setMsg(newsletterMsg, "Tu es déjà abonné(e).");
         return;
       }
 
@@ -756,7 +755,7 @@
       if (error) {
         if (String(error.code) === "23505") {
           await loadNewsletterStatus(user);
-          setMsg(newsletterMsg, "Vous êtes déjà abonné(e).");
+          setMsg(newsletterMsg, "Tu es déjà abonné(e).");
           return;
         }
         console.error("NEWSLETTER SUBSCRIBE ERROR:", error);
@@ -775,7 +774,7 @@
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
       if (!user?.email) {
-        setMsg(newsletterMsg, "Connexion requise pour gérer votre newsletter.");
+        setMsg(newsletterMsg, "Connexion requise pour gérer ta newsletter.");
         return;
       }
 
@@ -791,7 +790,7 @@
 
       newsletterSubRecord = null;
       renderNewsletterStatus(false);
-      setMsg(newsletterMsg, "Vous êtes désabonné(e) de la newsletter.");
+      setMsg(newsletterMsg, "Tu es désabonné(e) de la newsletter.");
     }
 
     function normalizeSiteFaqItems(raw){
@@ -1319,7 +1318,7 @@
 
     function applyWelcomeName(firstname){
       if(!welcomeName) return;
-      welcomeName.textContent = firstname ? `Bienvenue ${firstname} ` : "Bienvenue ✨";
+      welcomeName.textContent = firstname ? `Bienvenue ${firstname} ` : "Bienvenue";
       welcomeName.style.display = "block";
     }
     let userBookingsStore = [];
@@ -1332,7 +1331,7 @@
     async function loadMyBookings(user) {
       if (!bookingsList || !user?.email) return;
 
-      bookingsList.textContent = "Chargement de vos réservations…";
+      bookingsList.textContent = "Chargement de tes réservations…";
 
       let bookings = null;
 
@@ -1380,7 +1379,7 @@
 
         if (directErr) {
           console.error("BOOKINGS ERROR:", directErr);
-          bookingsList.textContent = "Impossible de charger vos réservations.";
+          bookingsList.textContent = "Impossible de charger tes réservations.";
           return;
         }
         bookings = directData || [];
@@ -1413,13 +1412,13 @@
                   ${label ? `${label} · ` : ""}${amountStr} · <span style="color:${item.status === 'cancelled' ? '#c00' : '#155724'}; font-weight:600;">${item.status === 'cancelled' ? '✗' : '✓'} ${statusLabel}</span>
                 </div>
                 <div style="font-size:12px; color:var(--muted); font-family:'IBM Plex Mono', monospace; margin-top:4px;">
-                  📅 Réservé le ${date}
+                  Réservé le ${date}
                 </div>
               </div>
 
               <div style="display:flex; align-items:center; gap:8px;">
                 <button type="button" class="btn tiny btn-view-invoice" data-booking-id="${item.id}" style="padding:6px 12px; font-size:12px; font-family:'IBM Plex Mono', monospace; background:#1e1f22; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">
-                  📄 Reçu
+                  Reçu
                 </button>
               </div>
             </div>
@@ -1505,7 +1504,7 @@
 
       if (error) {
         console.error("PURCHASES ERROR:", error);
-        purchasesList.textContent = "Impossible de charger vos achats.";
+        purchasesList.textContent = "Impossible de charger tes achats.";
         return;
       }
 
@@ -1528,7 +1527,7 @@
         if (item.shipping_line1) {
           const parts = [item.shipping_line1, item.shipping_line2].filter(Boolean).join(", ");
           const cityLine = [item.shipping_postal_code, item.shipping_city, item.shipping_country].filter(Boolean).join(" ");
-          addressHtml = `<div style="font-size:12px; color:var(--muted); margin-top:4px;">📦 ${parts}, ${cityLine}</div>`;
+          addressHtml = `<div style="font-size:12px; color:var(--muted); margin-top:4px;">${parts}, ${cityLine}</div>`;
         }
 
         // Date de livraison estimée (7 jours après achat)
@@ -1537,7 +1536,7 @@
           const d = new Date(item.created_at);
           d.setDate(d.getDate() + 7);
           const deliveryDate = d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-          deliveryHtml = `<div style="font-size:12px; color:var(--muted); margin-top:2px;">🚚 Livraison estimée : ${deliveryDate}</div>`;
+          deliveryHtml = `<div style="font-size:12px; color:var(--muted); margin-top:2px;">Livraison estimée : ${deliveryDate}</div>`;
         }
 
         return `
@@ -1681,11 +1680,11 @@
     btnStripePortal?.addEventListener("click", async () => {
       if (portalMsg) {
         portalMsg.style.color = "var(--text)";
-        portalMsg.textContent = "Ouverture de votre espace factures Stripe…";
+        portalMsg.textContent = "Ouverture de ton espace factures Stripe…";
       }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !user.email) {
-        alert("Veuillez vous connecter pour accéder à vos factures.");
+        alert("Connecte-toi pour accéder à tes factures.");
         return;
       }
 
@@ -1771,7 +1770,7 @@
       const email = (emailEl?.value || "").trim();
 
       if (!email) {
-        setMsg(authMsg, "Renseignez votre email pour recevoir le lien de réinitialisation.");
+        setMsg(authMsg, "Renseigne ton email pour recevoir le lien de réinitialisation.");
         return;
       }
 
@@ -1784,7 +1783,7 @@
         return;
       }
 
-      setMsg(authMsg, "Lien envoyé. Vérifiez votre boîte email.");
+      setMsg(authMsg, "Lien envoyé. Vérifie ta boîte email.");
     });
 
     // Update password
@@ -1804,7 +1803,7 @@
         return;
       }
 
-      setMsg(resetMsg, "Mot de passe mis à jour. Vous pouvez maintenant utiliser votre compte.");
+      setMsg(resetMsg, "Mot de passe mis à jour. Tu peux maintenant utiliser ton compte.");
     });
 
     // Logout

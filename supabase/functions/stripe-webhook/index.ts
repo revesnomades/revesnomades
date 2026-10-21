@@ -246,18 +246,18 @@ serve(async (req) => {
           // Email confirmation client
           await sendEmail(
             [{ email: customerEmail, name: firstName || customerName }],
-            `Votre commande Âmes Nomades est confirmée`,
+            `Ta commande Âmes Nomades est confirmée`,
             `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;color:#222">
-              <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci pour votre commande, ${firstName} !</h2>
-              <p>Nous avons bien reçu votre paiement et votre réservation est confirmée.</p>
+              <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci pour ta commande, ${firstName} !</h2>
+              <p>Nous avons bien reçu ton paiement et ta réservation est confirmée.</p>
               <table style="width:100%;border-collapse:collapse;margin:20px 0">
                 <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Articles</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${articlesLabel}</td></tr>
                 <tr><td style="padding:8px 0;font-weight:600">Total payé</td><td style="padding:8px 0;text-align:right;font-weight:600">${amount} €</td></tr>
               </table>
-              <p style="color:#666;font-size:14px">Vous recevrez prochainement toutes les informations nécessaires concernant votre séjour par email.</p>
+              <p style="color:#666;font-size:14px">Tu recevras prochainement toutes les informations nécessaires concernant ton séjour par email.</p>
               <p style="margin-top:24px">À très bientôt,<br><strong>L'équipe Âmes Nomades</strong></p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-              <p style="font-size:12px;color:#999">Des questions ? Contactez-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
+              <p style="font-size:12px;color:#999">Des questions ? Contacte-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
             </div>`
           );
         } else {

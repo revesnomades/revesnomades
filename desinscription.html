@@ -155,10 +155,10 @@
     } catch {}
 
     if (!email.includes("@") || !t) {
-      text.textContent = "Ce lien de désinscription est incomplet. Utilisez le lien « Se désinscrire » en bas de l'un de nos emails, ou écrivez-nous à contact@amesnomades.com.";
+      text.textContent = "Ce lien de désinscription est incomplet. Utilise le lien « Se désinscrire » en bas de l'un de nos emails, ou écris-nous à contact@amesnomades.com.";
     } else {
       text.innerHTML = "";
-      text.append("Vous ne recevrez plus nos emails d'actualités à l'adresse ");
+      text.append("Tu ne recevras plus nos emails d'actualités à l'adresse ");
       const strong = document.createElement("span");
       strong.className = "unsub-email";
       strong.textContent = email;
@@ -178,11 +178,11 @@
         const data = await res.json().catch(() => null);
         if (!res.ok || !data?.ok) throw new Error(data?.error || "Désinscription impossible pour le moment.");
         btn.hidden = true;
-        text.textContent = "C'est fait : vous êtes désinscrit(e). Nous espérons vous revoir lors d'un prochain séjour.";
+        text.textContent = "C'est fait : tu es désinscrit(e). Nous espérons te revoir lors d'un prochain séjour.";
         msg.textContent = "";
       } catch (err) {
         btn.disabled = false;
-        msg.textContent = err.message + " Vous pouvez aussi nous écrire à contact@amesnomades.com.";
+        msg.textContent = err.message + " Tu peux aussi nous écrire à contact@amesnomades.com.";
       }
     });
   </script>

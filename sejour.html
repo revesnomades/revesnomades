@@ -17,7 +17,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
-  <meta id="stayMetaDescription" name="description" content="D&eacute;couvrez un s&eacute;jour bien-&ecirc;tre avec &Acirc;mes Nomades. Une exp&eacute;rience pour ralentir, se reconnecter &agrave; soi et vivre une parenth&egrave;se de douceur.">
+  <meta id="stayMetaDescription" name="description" content="D&eacute;couvre un s&eacute;jour bien-&ecirc;tre avec &Acirc;mes Nomades. Une exp&eacute;rience pour ralentir, se reconnecter &agrave; soi et vivre une parenth&egrave;se de douceur.">
   <meta name="theme-color" content="#0e0f11">
 
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co" crossorigin>
@@ -256,7 +256,7 @@
         <div id="singleDayQtyBox" style="display:none; margin-top:14px; margin-bottom:14px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.85); justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
           <div>
             <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text);">Nombre de personnes / places</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations à réserver</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Sélectionne le nombre de participations à réserver</div>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
@@ -273,7 +273,7 @@
       <p class="sejour-count reveal" style="display:none;">
         Encore <strong id="missingCount">—</strong> réservations nécessaires pour valider ce séjour.
         <br>
-        <span class="hint">Un email de confirmation vous sera envoyé dès que le séjour sera validé.</span>
+        <span class="hint">Un email de confirmation te sera envoyé dès que le séjour sera validé.</span>
       </p>
 
       <div class="booking-box reveal" id="mainBookingBox" style="display:none;">
@@ -324,7 +324,7 @@
           <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
         </div>
         <p class="sub" style="margin-top:14px; font-size:13px; color:var(--muted);">
-          Un email vous sera envoyé dès la confirmation du séjour.
+          Un email te sera envoyé dès la confirmation du séjour.
         </p>
       </section>
 
@@ -1301,7 +1301,7 @@
         ? ` ${String(stay.short_description).trim()}`
         : " Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.";
 
-      return `Découvrez le séjour bien-être ${title}${place} avec Âmes Nomades.${shortDescription}`;
+      return `Découvre le séjour bien-être ${title}${place} avec Âmes Nomades.${shortDescription}`;
     }
 
     function renderOtherStays(stays){
@@ -1476,7 +1476,7 @@
                   Ce séjour n'est plus disponible
                 </h1>
                 <p style="color:var(--muted); margin:16px auto 0; max-width:52ch; font-size:16px;">
-                  Le séjour que vous cherchez n'existe pas ou n'est plus disponible à la réservation.
+                  Le séjour que tu cherches n'existe pas ou n'est plus disponible à la réservation.
                 </p>
                 <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
                   <a class="btn on-light" href="/index.html#prochains-sejours">Voir les séjours du moment</a>
@@ -1654,8 +1654,8 @@
       }
 
       if (giftTitle) giftTitle.textContent = stay.gift_title || "Le sac cadeau Âmes Nomades";
-      if (giftIntro) giftIntro.textContent = stay.gift_intro || "À votre arrivée, vous recevez un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
-      if (giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour vous accompagner avant, pendant et après le séjour.";
+      if (giftIntro) giftIntro.textContent = stay.gift_intro || "À ton arrivée, tu reçois un sac cadeau imaginé pour prolonger l’expérience bien au-delà du séjour.";
+      if (giftOutro) giftOutro.textContent = stay.gift_outro || "Chaque élément est choisi avec soin pour t’accompagner avant, pendant et après le séjour.";
 
       const giftItemsData = stay.gift_items || [
         "Tee-shirt Âmes Nomades",
@@ -1832,7 +1832,7 @@
         bookingMsg.textContent = "Tu peux réserver directement via notre partenaire.";
       } else if (!bookingUrl && (!optData || !optData.length)) {
         bookingBtn.removeAttribute("href");
-        bookingMsg.textContent = "Réservation bientôt disponible. Contactez-nous pour réserver.";
+        bookingMsg.textContent = "Réservation bientôt disponible. Contacte-nous pour réserver.";
       }
 
       // Séjours multi-jours : lien partenaire uniquement (défini dans booking_url)

@@ -54,7 +54,7 @@ serve(async (req) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bienvenue chez Âmes Nomades 🤍</title>
+  <title>Bienvenue chez Âmes Nomades</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f7f4ef; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#1e1f22; line-height:1.7;">
   <div style="width:100%; background-color:#f7f4ef; padding:40px 0;">
@@ -67,8 +67,8 @@ serve(async (req) => {
 
       <div style="font-size:16px; color:#1e1f22; margin-bottom:24px;">
         <p style="font-size:18px; margin-top:0;">${greeting}</p>
-        <p>Bienvenue dans la communauté <strong>Âmes Nomades</strong> ✨</p>
-        <p>Votre compte a été créé avec succès ! Vous pouvez dès à présent vous connecter à votre espace personnel pour suivre vos réservations de séjours, télécharger vos factures et recevoir nos actualités exclusives.</p>
+        <p>Bienvenue dans la communauté <strong>Âmes Nomades</strong></p>
+        <p>Ton compte a été créé avec succès ! Tu peux dès à présent te connecter à ton espace personnel pour suivre tes réservations de séjours, télécharger tes factures et recevoir nos actualités exclusives.</p>
       </div>
 
       <!-- Liens / Boutons CTA -->
@@ -77,12 +77,12 @@ serve(async (req) => {
           Accéder à mon espace compte →
         </a>
         <a href="https://www.amesnomades.com/index.html#sejours" target="_blank" style="display:inline-block; width:85%; max-width:300px; background:#f7f4ef; color:#1e1f22; border:1px solid #1e1f22; font-weight:600; font-size:14px; padding:13px 20px; border-radius:6px; text-decoration:none; letter-spacing:0.04em; text-align:center;">
-          Découvrir les prochains séjours 🌿
+          Découvrir les prochains séjours
         </a>
       </div>
 
       <div style="border-top:1px solid #eee; padding-top:24px; margin-top:36px; font-size:13px; color:#666;">
-        <p style="margin:0 0 4px 0;">Si vous avez la moindre question, n'hésitez pas à nous écrire directement à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a>.</p>
+        <p style="margin:0 0 4px 0;">Si tu as la moindre question, n'hésite pas à nous écrire directement à <a href="mailto:contact@amesnomades.com" style="color:#1e1f22; text-decoration:underline;">contact@amesnomades.com</a>.</p>
         <p style="margin:16px 0 0 0; font-style:italic; color:#888;">Douceur & Sérénité,<br><strong style="font-style:normal; color:#1e1f22;">L'équipe Âmes Nomades</strong></p>
       </div>
 
@@ -102,7 +102,7 @@ serve(async (req) => {
       body: JSON.stringify({
         sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" },
         to: [{ email: cleanEmail, name: safeName || cleanEmail }],
-        subject: "Bienvenue chez Âmes Nomades ✨ — Confirmation de votre compte",
+        subject: "Bienvenue chez Âmes Nomades — Confirmation de ton compte",
         htmlContent: htmlContent,
       }),
     });

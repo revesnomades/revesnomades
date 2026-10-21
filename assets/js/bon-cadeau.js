@@ -99,7 +99,7 @@
 
     const amount = getAmount();
     if (!amount || Number.isNaN(amount)) {
-      setError("Veuillez choisir un montant (ou saisir un montant personnalisé).");
+      setError("Choisis un montant (ou saisis un montant personnalisé).");
       return;
     }
     if (amount < 10) {

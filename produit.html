@@ -580,9 +580,9 @@
         <h2 id="restockTitle">Me prévenir</h2>
         <button type="button" class="restock-close" id="restockClose" aria-label="Fermer">×</button>
       </div>
-      <p class="restock-text">Laissez votre adresse email pour recevoir un message dès que ce produit sera disponible.</p>
+      <p class="restock-text">Laisse ton adresse email pour recevoir un message dès que ce produit sera disponible.</p>
       <form id="restockForm">
-        <input type="email" id="restockEmail" class="input" placeholder="votre@email.com" required autocomplete="email">
+        <input type="email" id="restockEmail" class="input" placeholder="ton@email.com" required autocomplete="email">
         <div id="restockMsg" class="restock-msg" aria-live="polite"></div>
         <button type="submit" class="btn-add-cart" id="restockSubmit"><svg class="bell-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Me prévenir</button>
       </form>
@@ -790,7 +790,7 @@
             ${favButtonHtml(p.id, "on-product")}
           </div>
 
-          ${!isUnavailable ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : `<p class="product-notify-hint">${isComingSoon ? "Ce produit est épuisé. Recevez un email s'il revient en stock." : "Recevez un email dès que ce produit est disponible."}</p>`}
+          ${!isUnavailable ? `<button type="button" class="btn-panier-link" id="btnGoCart">Voir le panier</button>` : `<p class="product-notify-hint">${isComingSoon ? "Ce produit est épuisé. Reçois un email s'il revient en stock." : "Reçois un email dès que ce produit est disponible."}</p>`}
 
           <div class="product-divider"></div>
 
@@ -965,7 +965,7 @@
           const already = getQuantityInCart(p.id);
           const canAdd = Math.max(0, Math.min(qty, maxQty - already));
           if (canAdd === 0) {
-            showToast(`Vous avez déjà les ${maxQty} exemplaires disponibles dans votre panier.`);
+            showToast(`Tu as déjà les ${maxQty} exemplaires disponibles dans ton panier.`);
             return;
           }
           for (let i = 0; i < canAdd; i++) {
@@ -1030,12 +1030,12 @@
         restockSubmit.disabled = false;
         restockMsg.style.color = "#c00";
         restockMsg.textContent = result.already
-          ? "Vous êtes déjà inscrit pour ce produit."
+          ? "Tu es déjà inscrit pour ce produit."
           : "Erreur lors de l'inscription : " + result.error;
         return;
       }
       restockMsg.style.color = "#4f8c5b";
-      restockMsg.textContent = "C'est noté ! Vous recevrez un email dès que le produit sera disponible.";
+      restockMsg.textContent = "C'est noté ! Tu recevras un email dès que le produit sera disponible.";
       setTimeout(closeRestockModal, 2500);
     });
 

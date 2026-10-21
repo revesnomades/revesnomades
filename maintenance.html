@@ -323,13 +323,13 @@
         </p>
 
         <form id="priorityForm" class="form-stack" novalidate>
-          <input class="input" type="text" name="firstname" placeholder="Votre prénom" required
+          <input class="input" type="text" name="firstname" placeholder="Ton prénom" required
             autocomplete="given-name" />
 
-          <input class="input" type="text" name="lastname" placeholder="Votre nom" required
+          <input class="input" type="text" name="lastname" placeholder="Ton nom" required
             autocomplete="family-name" />
 
-          <input class="input" type="email" name="email" placeholder="Votre email" required autocomplete="email" />
+          <input class="input" type="email" name="email" placeholder="Ton email" required autocomplete="email" />
 
           <textarea class="input" name="intention"
             placeholder="Qu’est-ce que tu viens chercher dans cette expérience ? (optionnel)" rows="3"
@@ -340,7 +340,7 @@
             <span>J’accepte de recevoir les informations Âmes Nomades et les prochaines ouvertures de séjours.</span>
           </label>
 
-          <label for="maintenanceHoneypot" class="sr-only">Ne pas remplir ce champ si vous êtes un robot</label>
+          <label for="maintenanceHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
           <input type="text" id="maintenanceHoneypot" name="website" tabindex="-1" autocomplete="off"
             style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
@@ -395,7 +395,7 @@
       showMessage("");
 
       const fd = new FormData(form);
-      if (String(fd.get("website") || "").trim()) { form.reset(); showMessage("🌿 Merci, vous êtes bien inscrit(e)."); return; }
+      if (String(fd.get("website") || "").trim()) { form.reset(); showMessage("Merci, tu es bien inscrit(e)."); return; }
       const now = Date.now();
       if (now - priorityLastSubmit < 5000) { showMessage("Merci de patienter quelques secondes."); return; }
       priorityLastSubmit = now;
@@ -408,7 +408,7 @@
       const consent = fd.get("consent");
 
       if (!firstname || !lastname || !email) {
-        showMessage("Merci de renseigner votre prénom, votre nom et votre email.");
+        showMessage("Merci de renseigner ton prénom, ton nom et ton email.");
         return;
       }
 
@@ -448,21 +448,21 @@
             data
           });
 
-          showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
+          showMessage("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
           return;
         }
 
         if (data.status === "already") {
-          showMessage("💌 Vous êtes déjà inscrit(e). Votre priorité est bien prise en compte.");
+          showMessage("Tu es déjà inscrit(e). Ta priorité est bien prise en compte.");
           return;
         }
 
-        showMessage(`🌿 Merci ${firstname}, vous êtes bien inscrit(e) à la liste prioritaire.`);
+        showMessage(`Merci ${firstname}, tu es bien inscrit(e) à la liste prioritaire.`);
         form.reset();
 
       } catch (err) {
         console.error("priority-signup fetch error", { endpoint, payload, err });
-        showMessage("Oups… impossible d’enregistrer pour le moment. Réessayez dans un instant.");
+        showMessage("Oups… impossible d’enregistrer pour le moment. Réessaie dans un instant.");
       }
     });
   </script>
