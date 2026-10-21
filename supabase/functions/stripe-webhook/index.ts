@@ -186,6 +186,7 @@ serve(async (req) => {
         const articlesLabel = session.metadata?.cart_items
           ? JSON.parse(session.metadata.cart_items).map((i: { name: string; qty: number }) => `${i.name} ×${i.qty}`).join(", ")
           : (session.metadata?.product_name || session.metadata?.event_name || "—");
+        const orderRef = session.metadata?.order_ref || "";
 
         const shippingHtml = shipping
           ? `<li><strong>Adresse de livraison :</strong> ${shippingAddress.shipping_line1}, ${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}, ${shippingAddress.shipping_country}</li>`
@@ -230,10 +231,11 @@ serve(async (req) => {
             [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
             metaType === "sejour"
               ? `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`
-              : `🛍️ Nouvel achat — ${firstName} ${lastName} (${amount} €)`,
+              : `🛍️ Nouvel achat${orderRef ? " " + orderRef : ""} — ${firstName} ${lastName} (${amount} €)`,
             `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px">
               <h2 style="color:#2e7d32">Nouveau paiement validé !</h2>
               <ul>
+                ${orderRef ? `<li><strong>Commande :</strong> ${orderRef}</li>` : ""}
                 <li><strong>Nom :</strong> ${customerName}</li>
                 <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
                 <li><strong>Articles :</strong> ${articlesLabel}</li>
@@ -251,6 +253,7 @@ serve(async (req) => {
               <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci pour ta commande, ${firstName} !</h2>
               <p>Nous avons bien reçu ton paiement et ta réservation est confirmée.</p>
               <table style="width:100%;border-collapse:collapse;margin:20px 0">
+                ${orderRef ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Commande n°</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${orderRef}</td></tr>` : ""}
                 <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Articles</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${articlesLabel}</td></tr>
                 <tr><td style="padding:8px 0;font-weight:600">Total payé</td><td style="padding:8px 0;text-align:right;font-weight:600">${amount} €</td></tr>
               </table>

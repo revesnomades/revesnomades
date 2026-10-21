@@ -25,7 +25,7 @@
   <!-- Fonts -->
 
   <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=4" />
 </head>
 
 <body class="on-light">
@@ -213,7 +213,7 @@
           ${order.shipping ? `<div class="order-recap-line"><span>Livraison</span><span>${escapeHtml(order.shipping)}${order.relay ? ` · ${escapeHtml(order.relay)}` : ""}</span></div>` : ""}
           ${hasProducts && order.deliveryDays ? `<div class="order-recap-line"><span>Livraison estimée</span><span>vers le ${deliveryDate(order.deliveryDays + 2)}</span></div>` : ""}
           <div class="order-recap-line order-recap-total"><span>Total payé</span><strong>${escapeHtml(order.total)}</strong></div>
-          <div class="order-recap-ref">Référence : ${escapeHtml(sessionId.slice(-10).toUpperCase())}</div>`;
+          ${order.orderRef ? `<div class="order-recap-ref">Commande n° ${escapeHtml(order.orderRef)} · à rappeler si tu nous écris</div>` : ""}`;
         recap.hidden = false;
       }
       clearCart();

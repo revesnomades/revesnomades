@@ -329,6 +329,11 @@ serve(async (req) => {
       discounts = [{ coupon: coupon.id }];
     }
 
+    // Numéro de commande lisible : AN-AAAAMMJJ-XXXX (sans 0/O/1/I pour éviter les confusions)
+    const REF_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const refRand = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => REF_CHARS[b % REF_CHARS.length]).join("");
+    const orderRef = `AN-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${refRand}`;
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -353,6 +358,7 @@ serve(async (req) => {
       ...(body.userEmail ? { customer_email: String(body.userEmail) } : {}),
       metadata: {
         type: "cart",
+        order_ref: orderRef,
         cart_items: JSON.stringify(cartMeta),
         user_id: body.userId || "",
         user_email: body.userEmail || "",
@@ -372,8 +378,8 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     const responseBody = isRedirect
-      ? { url: session.url }
-      : { client_secret: session.client_secret };
+      ? { url: session.url, order_ref: orderRef }
+      : { client_secret: session.client_secret, order_ref: orderRef };
 
     return json(responseBody);
   } catch (err) {

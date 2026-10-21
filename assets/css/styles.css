@@ -2631,6 +2631,7 @@ footer.band.cream{
 .free-ship-text.is-done { color: var(--success, #3f7a4c); font-weight: 600; }
 .free-ship-track { height: 4px; margin-top: 8px; background: var(--line); border-radius: 2px; overflow: hidden; }
 .free-ship-track span { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s cubic-bezier(0.23, 1, 0.32, 1); }
+.free-ship-track.is-done span { background: var(--success, #3f7a4c); }
 @media (prefers-reduced-motion: reduce) { .free-ship-track span { transition: none; } }
 
 /* ── Panier : étapes, bouton principal, barre mobile ── */
@@ -2853,3 +2854,23 @@ footer.band.cream{
   .cart-panel .input, #promoCodeInput { font-size: 16px !important; }
 }
 .cart-item-max { margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+/* Champs d'adresse du panier : libellé visible au-dessus de chaque champ */
+.cart-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cart-field > span { font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+.cart-field > span em { font-style: normal; opacity: .8; }
+.cart-panel .input { font-size: 14px; }
+.cart-panel .input[aria-invalid="true"] { border-color: #b3261e; }
+.cart-field-err { font-size: 12px; color: #b3261e; margin-top: -2px; }
+
+/* Panier mobile : sous-total et jauge juste sous les articles */
+.cart-mini { display: none; }
+@media (max-width: 720px) {
+  .cart-mini:not([hidden]) { display: block; margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); background: rgba(255,255,255,.6); }
+  .cart-mini .free-ship { margin: 10px 0 0; }
+}
+.cart-mini-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--muted); }
+.cart-mini-row strong { color: var(--text); font-size: 16px; font-variant-numeric: tabular-nums; }
+
+/* Fenêtre de paiement : destination de la livraison */
+.checkout-recap-ship { margin-top: 6px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }

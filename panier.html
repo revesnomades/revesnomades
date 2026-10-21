@@ -20,7 +20,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=3" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=4" />
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
@@ -99,6 +99,9 @@
           <div id="cartItems">
             <!-- rempli par JS -->
           </div>
+          <div id="cartLive" class="sr-only" aria-live="polite"></div>
+          <!-- Résumé compact (mobile) : sous-total et jauge sous les articles -->
+          <div id="cartMiniSummary" class="cart-mini" hidden></div>
 
             <!-- Adresse de livraison (affichée si panier contient des produits) -->
             <div id="shippingZone" class="cart-panel" style="display:none;">
@@ -112,14 +115,26 @@
 
               <!-- Formulaire complet -->
               <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
-                <input id="shipName" class="input" placeholder="Nom et prénom" aria-label="Nom et prénom" autocomplete="name" style="font-size:13px;">
-                <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" aria-label="Adresse" autocomplete="address-line1" style="font-size:13px;">
-                <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" aria-label="Complément d'adresse (optionnel)" autocomplete="address-line2" style="font-size:13px;">
+                <label class="cart-field"><span>Nom et prénom</span>
+                  <input id="shipName" class="input" autocomplete="name" required aria-required="true">
+                </label>
+                <label class="cart-field"><span>Adresse</span>
+                  <input id="shipLine1" class="input" placeholder="12 rue de la Paix" autocomplete="address-line1">
+                </label>
+                <label class="cart-field"><span>Complément <em>(optionnel)</em></span>
+                  <input id="shipLine2" class="input" placeholder="Bâtiment, étage, digicode" autocomplete="address-line2">
+                </label>
                 <div style="display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:8px;">
-                  <input id="shipPostal" class="input" placeholder="Code postal" aria-label="Code postal" autocomplete="postal-code" inputmode="numeric" style="font-size:13px;" maxlength="10">
-                  <input id="shipCity" class="input" placeholder="Ville" aria-label="Ville" autocomplete="address-level2" style="font-size:13px;">
+                  <label class="cart-field"><span>Code postal</span>
+                    <input id="shipPostal" class="input" autocomplete="postal-code" inputmode="numeric" maxlength="10" aria-describedby="shipPostalErr">
+                  </label>
+                  <label class="cart-field"><span>Ville</span>
+                    <input id="shipCity" class="input" autocomplete="address-level2">
+                  </label>
                 </div>
-                <select id="shipCountry" class="input" aria-label="Pays" autocomplete="country" style="font-size:13px;">
+                <div id="shipPostalErr" class="cart-field-err" aria-live="polite" hidden></div>
+                <label class="cart-field"><span>Pays</span>
+                <select id="shipCountry" class="input" autocomplete="country">
                   <option value="FR">France</option>
                   <option value="BE">Belgique</option>
                   <option value="CH">Suisse</option>
@@ -133,8 +148,9 @@
                   <option value="US">États-Unis</option>
                   <option value="CA">Canada</option>
                 </select>
+                </label>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                  <button type="button" id="btnCalcShipping" class="cart-link-btn">Calculer la livraison</button>
+                  <button type="button" id="btnCalcShipping" class="cart-link-btn" hidden>Réessayer</button>
                   <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
                     <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Mémoriser cette adresse
                   </label>
@@ -249,6 +265,7 @@
       </div>
       <div class="checkout-recap" id="checkoutRecap">
         <div class="checkout-recap-row"><span id="checkoutRecapItems"></span><strong id="checkoutRecapTotal"></strong></div>
+        <div class="checkout-recap-ship" id="checkoutRecapShip" hidden></div>
         <div class="checkout-trust">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           Paiement sécurisé par Stripe · Retours gratuits sous 14 jours
@@ -459,6 +476,9 @@
       document.querySelector("#cartLayout > aside").style.display = "";
       document.getElementById("cartLayout").style.gridTemplateColumns = "1fr 340px";
 
+      // Le panier est redessiné : on garde le focus sur le même bouton −/+
+      const focused = cartItemsEl.contains(document.activeElement) && document.activeElement.classList.contains("cart-qty-btn")
+        ? { ...document.activeElement.dataset } : null;
       cartItemsEl.innerHTML = cart.map((item, idx) => {
         const img = item.image || "/assets/img/placeholder.jpg";
         const price = formatPrice(item.price);
@@ -484,6 +504,12 @@
           </div>
         `;
       }).join("");
+      if (focused) {
+        const sel = `.cart-qty-btn[data-id="${CSS.escape(focused.id)}"][data-type="${focused.type}"]`;
+        const again = cartItemsEl.querySelector(`${sel}[data-action="${focused.action}"]:not([disabled])`)
+          || cartItemsEl.querySelector(`${sel}:not([disabled])`);
+        again?.focus();
+      }
 
       summaryLinesEl.innerHTML = cart.map(item =>
         `<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
@@ -556,6 +582,7 @@
       if (!document.getElementById("shipName")?.value.trim() && !currentUser) return "Indique le nom du destinataire.";
       if (!relay && !addr.line1) return "Indique ton adresse.";
       if (!addr.postal_code || !addr.city) return "Indique ton code postal et ta ville.";
+      if (!postalValid(addr)) return "Vérifie ton code postal.";
       if (!selectedShipping) return "Choisis un mode de livraison.";
       if (relay && !selectedRelayPoint) return "Choisis un point relais.";
       return null;
@@ -599,16 +626,22 @@
 
     function renderFreeShipping(hasProducts) {
       const el = document.getElementById("freeShipBar");
+      const mini = document.getElementById("cartMiniSummary");
       if (!el) return;
-      if (!hasProducts) { el.hidden = true; return; }
+      if (!hasProducts) { el.hidden = true; if (mini) mini.hidden = true; return; }
       const total = getProductsTotal();
       const left = FREE_SHIPPING_THRESHOLD - total;
       const pct = Math.min(100, (total / FREE_SHIPPING_THRESHOLD) * 100);
-      el.hidden = false;
-      el.innerHTML = left > 0
+      const bar = (left > 0
         ? `<div class="free-ship-text">Plus que <strong>${formatPrice(left)}</strong> pour la livraison offerte</div>`
-        : `<div class="free-ship-text is-done">La livraison t'est offerte</div>`;
-      el.innerHTML += `<div class="free-ship-track" aria-hidden="true"><span style="width:${pct}%"></span></div>`;
+        : `<div class="free-ship-text is-done">La livraison t'est offerte</div>`)
+        + `<div class="free-ship-track${left > 0 ? "" : " is-done"}" aria-hidden="true"><span style="width:${pct}%"></span></div>`;
+      el.hidden = false;
+      el.innerHTML = bar;
+      if (mini) {
+        mini.hidden = false;
+        mini.innerHTML = `<div class="cart-mini-row"><span>Sous-total articles</span><strong>${formatPrice(total)}</strong></div><div class="free-ship">${bar}</div>`;
+      }
     }
 
     function deliveryLabel(businessDays) {
@@ -766,9 +799,20 @@
         const item = getCart().find(i => i.id === id && i.type === type);
         if (item) setQuantity(id, type, item.quantity - 1);
       } else if (btn.classList.contains("cart-remove-btn")) {
+        const item = getCart().find(i => i.id === id && i.type === type);
         removeFromCart(id, type);
+        announce(item ? `${item.name} retiré du panier.` : "Article retiré du panier.");
+        return;
       }
+      const item = getCart().find(i => i.id === id && i.type === type);
+      if (item && btn.dataset.action) announce(`Quantité : ${item.quantity}`);
     });
+    function announce(msg) {
+      const live = document.getElementById("cartLive");
+      if (!live) return;
+      live.textContent = "";
+      setTimeout(() => { live.textContent = msg; }, 50);
+    }
 
     // ── Livraison ─────────────────────────────────────────────────────────────
     function getShippingAddress() {
@@ -799,7 +843,7 @@
       }
       lastRatesKey = [addr.postal_code, addr.city, addr.country, getProductsTotal() >= FREE_SHIPPING_THRESHOLD, getTotalWeightGrams()].join("|");
       const btnCalc = document.getElementById("btnCalcShipping");
-      if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = "Calcul…"; }
+      if (btnCalc) btnCalc.hidden = true;
       showShippingMsg("", "");
       const listEl = document.getElementById("shippingMethodsList");
       if (listEl) listEl.innerHTML = `<div class="cart-step-hint">Calcul des frais de livraison…</div>`;
@@ -823,11 +867,11 @@
       } catch (e) {
         console.warn("Tarifs de livraison indisponibles:", e);
         showShippingMsg("Nous n'avons pas pu calculer la livraison pour cette adresse. Vérifie le code postal, puis réessaie dans un instant.", "error");
+        if (btnCalc) btnCalc.hidden = false;
         const listEl2 = document.getElementById("shippingMethodsList");
         if (listEl2) listEl2.innerHTML = "";
         renderCart();
       }
-      if (btnCalc) { btnCalc.disabled = false; btnCalc.textContent = "Calculer la livraison"; }
     }
 
     function isRelayMethod(m) {
@@ -865,16 +909,21 @@
         showShippingMsg("Ta commande dépasse " + FREE_SHIPPING_THRESHOLD + " € : la livraison est offerte, le point relais n'est plus nécessaire.", "info");
       }
       // Reprendre le mode choisi avant un rechargement, sinon le premier
+      // Livraison offerte seule proposée : on garde en mémoire le choix précédent du client
+      const forced = methods.length === 1 && Number(methods[0].price) === 0;
       let saved = null;
       try { saved = JSON.parse(sessionStorage.getItem("rn_ship") || "null"); } catch {}
       const savedIdx = saved ? methods.findIndex(m => (m.id ?? m.name) === saved.id) : -1;
+      if (savedIdx < 0 && saved && !forced) saved = null;
       const startIdx = savedIdx >= 0 ? savedIdx : 0;
       const radios = list.querySelectorAll("input[type=radio]");
       radios.forEach((r, i) => { r.checked = i === startIdx; });
       const choose = (i) => {
         selectedShipping = methods[i];
-        lastSelectedRelayMode = isRelayMethod(methods[i]);
-        try { sessionStorage.setItem("rn_ship", JSON.stringify({ id: methods[i].id ?? methods[i].name })); } catch {}
+        if (!forced) {
+          lastSelectedRelayMode = isRelayMethod(methods[i]);
+          try { sessionStorage.setItem("rn_ship", JSON.stringify({ ...(saved || {}), id: methods[i].id ?? methods[i].name })); } catch {}
+        }
         const relay = isRelayMethod(methods[i]);
         toggleRelayZone(relay);
         if (relay) fetchRelayPoints();
@@ -934,7 +983,7 @@
           relayList.innerHTML = points.slice(0, relayShown).map(relayItem).join("");
           relayList.querySelectorAll("input[type=radio]").forEach((radio, i) => {
             radio.checked = points[i] === selectedRelayPoint;
-            radio.addEventListener("change", () => { selectedRelayPoint = points[i]; renderCart(); });
+            radio.addEventListener("change", () => { selectedRelayPoint = points[i]; saveRelay(points[i]); renderCart(); });
           });
           const rest = points.length - relayShown;
           if (relayMore) {
@@ -943,7 +992,11 @@
             relayMore.onclick = () => { relayShown = Math.min(points.length, relayShown + RELAY_STEP); drawRelays(); };
           }
         };
-        selectedRelayPoint = points[0];
+        let savedRelay = null;
+        try { savedRelay = JSON.parse(sessionStorage.getItem("rn_ship") || "null")?.relay ?? null; } catch {}
+        const savedRelayIdx = savedRelay != null ? points.findIndex(p => String(p.id ?? p.name) === String(savedRelay)) : -1;
+        selectedRelayPoint = points[savedRelayIdx >= 0 ? savedRelayIdx : 0];
+        if (savedRelayIdx >= RELAY_STEP) relayShown = Math.min(points.length, Math.ceil((savedRelayIdx + 1) / RELAY_STEP) * RELAY_STEP);
         drawRelays();
         relayList.style.display = "block";
         renderCart();
@@ -954,6 +1007,13 @@
         console.warn("Points relais indisponibles:", e);
         relayMsg.textContent = "Les points relais ne s'affichent pas pour le moment. Choisis la livraison à domicile ou réessaie dans un instant.";
       }
+    }
+
+    function saveRelay(point) {
+      try {
+        const cur = JSON.parse(sessionStorage.getItem("rn_ship") || "null") || {};
+        sessionStorage.setItem("rn_ship", JSON.stringify({ ...cur, relay: point.id ?? point.name }));
+      } catch {}
     }
 
     function showShippingMsg(msg, type) {
@@ -1017,11 +1077,28 @@
     // Calcul automatique de la livraison dès que l'adresse est assez complète
     let autoCalcTimer = null;
     let lastRatesKey = "";
+    function postalValid(a) {
+      return a.country === "FR" ? /^\d{5}$/.test(a.postal_code) : a.postal_code.length >= 3;
+    }
     function addressReady() {
       const a = getShippingAddress();
-      const postalOk = a.country === "FR" ? /^\d{5}$/.test(a.postal_code) : a.postal_code.length >= 3;
-      return postalOk && a.city.length >= 2;
+      return postalValid(a) && a.city.length >= 2;
     }
+    // Code postal : message dès qu'on quitte le champ, effacé dès qu'il devient valide
+    function checkPostal(showError) {
+      const input = document.getElementById("shipPostal");
+      const err = document.getElementById("shipPostalErr");
+      const a = getShippingAddress();
+      const bad = !!a.postal_code && !postalValid(a);
+      if (!bad) { err.hidden = true; input.removeAttribute("aria-invalid"); return; }
+      if (!showError) return;
+      err.textContent = a.country === "FR" ? "Le code postal doit compter 5 chiffres." : "Vérifie ton code postal.";
+      err.hidden = false;
+      input.setAttribute("aria-invalid", "true");
+    }
+    document.getElementById("shipPostal")?.addEventListener("blur", () => checkPostal(true));
+    document.getElementById("shipPostal")?.addEventListener("input", () => checkPostal(false));
+    document.getElementById("shipCountry")?.addEventListener("change", () => checkPostal(!!document.getElementById("shipPostal").value));
     function scheduleAutoCalc(force = false) {
       clearTimeout(autoCalcTimer);
       autoCalcTimer = setTimeout(() => {
@@ -1080,6 +1157,7 @@
       checkoutContainer.innerHTML = "";
       document.getElementById("checkoutConfirm").hidden = true;
       checkoutModal.classList.remove("active");
+      setBackgroundInert(false);
       document.body.style.overflow = "";
       btnCheckout.focus();
     }
@@ -1103,9 +1181,28 @@
       if (e.key !== "Escape" || !checkoutModal.classList.contains("active")) return;
       if (!document.getElementById("checkoutConfirm").hidden) {
         document.getElementById("checkoutConfirm").hidden = true;
+        btnCancelCheckout.focus();
       } else {
         requestCloseCheckout();
       }
+    });
+
+    // Modale ouverte : le reste de la page sort de l'ordre de tabulation
+    function setBackgroundInert(on) {
+      [...document.body.children].forEach(el => {
+        if (el === checkoutModal || el.tagName === "SCRIPT") return;
+        el.inert = on;
+      });
+    }
+    // Garde le focus dans la modale (le formulaire Stripe est une iframe : on borne aux éléments de la modale)
+    checkoutModal.addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const focusables = [...checkoutModal.querySelectorAll('button:not([disabled]), a[href], input, select, iframe, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === document.getElementById("checkoutTitle"))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
     function fillCheckoutRecap() {
@@ -1118,6 +1215,19 @@
       }
       document.getElementById("checkoutRecapItems").textContent = label;
       document.getElementById("checkoutRecapTotal").textContent = cartTotalDisplayEl.textContent;
+      // Destination de la livraison
+      const shipEl = document.getElementById("checkoutRecapShip");
+      if (cart.some(i => i.type === "product") && selectedShipping) {
+        const name = document.getElementById("shipName")?.value.trim();
+        const a = getShippingAddress();
+        const dest = isRelayMethod(selectedShipping) && selectedRelayPoint
+          ? `Point relais ${selectedRelayPoint.name}, ${[selectedRelayPoint.postal_code, selectedRelayPoint.city].filter(Boolean).join(" ")}`
+          : [a.line1, [a.postal_code, a.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+        shipEl.textContent = `Livraison à : ${[name, dest].filter(Boolean).join(" · ")}`;
+        shipEl.hidden = false;
+      } else {
+        shipEl.hidden = true;
+      }
     }
 
     btnCheckout?.addEventListener("click", async () => {
@@ -1158,6 +1268,7 @@
       fillCheckoutRecap();
       document.getElementById("checkoutConfirm").hidden = true;
       checkoutModal.classList.add("active");
+      setBackgroundInert(true);
       document.body.style.overflow = "hidden";
       document.getElementById("checkoutTitle").focus();
 
@@ -1231,6 +1342,13 @@
 
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.error) { const e = new Error(data.error || "Erreur création paiement"); e.data = data; throw e; }
+
+        if (data.order_ref) {
+          try {
+            const last = JSON.parse(sessionStorage.getItem("rn_last_order") || "null");
+            if (last) sessionStorage.setItem("rn_last_order", JSON.stringify({ ...last, orderRef: data.order_ref }));
+          } catch {}
+        }
 
         checkoutLoading.style.display = "none";
         embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.client_secret });
