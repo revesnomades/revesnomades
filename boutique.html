@@ -157,8 +157,9 @@
     }
     .sold-out-badge {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      bottom: 10px;
+      left: 10px;
+      z-index: 2;
       background: #c00;
       color: #fff;
       font-size: 12px;
@@ -390,7 +391,7 @@
   <script src="assets/js/main.js?v=3"></script>
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
-    import { addToCart, initCartBadge } from "./assets/js/cart.js?v=3";
+    import { addToCart, initCartBadge, formatPrice } from "./assets/js/cart.js?v=3";
     import { favButtonHtml } from "./assets/js/favorites.js?v=3";
     import { subscribeRestock } from "./assets/js/restock.js?v=3";
 
@@ -567,7 +568,7 @@
 
             <div class="shop-image-hover">
               <div style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">${p.name}</div>
-              <div style="font-size:16px; font-weight:600; margin-top:4px;">${(Number(p.price) || 0).toFixed(2)} €</div>
+              <div style="font-size:16px; font-weight:600; margin-top:4px;">${formatPrice(p.price)}</div>
               <div style="font-size:13px; margin-top:6px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; opacity:0.95;">${p.description || "Aucune description pour le moment."}</div>
               ${p.delivery_info ? `<div style="font-size:12px; margin-top:6px; opacity:0.9;">📦 ${p.delivery_info}</div>` : ''}
 
@@ -583,9 +584,9 @@
             ${p.name}
           </a>
           <div class="shop-price" style="font-size:14px; font-weight:500; color:var(--muted); margin-top:4px;">
-            ${(Number(p.price) || 0).toFixed(2)} €
+            ${formatPrice(p.price)}
             ${promo && (promo.type === 'percent' || promo.type === 'early_bird') ? `<span style="font-size:12px; color:#c44; font-weight:700; margin-left:6px;">−${promo.value}%</span>` : ''}
-            ${promo && promo.type === 'fixed' ? `<span style="font-size:12px; color:#c44; font-weight:700; margin-left:6px;">−${Number(promo.value).toFixed(2)} €</span>` : ''}
+            ${promo && promo.type === 'fixed' ? `<span style="font-size:12px; color:#c44; font-weight:700; margin-left:6px;">−${formatPrice(promo.value)}</span>` : ''}
           </div>
           ${p.description ? `
             <div class="shop-desc" id="desc-${p.id}">${p.description}</div>
@@ -709,7 +710,7 @@
     });
 
     window.addToCart = (item) => {
-      addToCart(item);
+      const added = addToCart(item);
       let toast = document.getElementById("cartToast");
       if (!toast) {
         toast = document.createElement("div");
@@ -719,7 +720,9 @@
         toast.setAttribute("aria-live", "polite");
         document.body.appendChild(toast);
       }
-      toast.innerHTML = `✓ <strong>${item.name}</strong> ajouté au panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`;
+      toast.innerHTML = added
+        ? `<strong>${item.name}</strong> ajouté au panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`
+        : `Vous avez déjà tout le stock disponible de <strong>${item.name}</strong> dans votre panier — <a href="/panier.html" style="color:#fff; text-decoration:underline;">Voir le panier</a>`;
       toast.classList.add("show");
       clearTimeout(toast._timer);
       toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);

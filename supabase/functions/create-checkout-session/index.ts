@@ -51,7 +51,7 @@ serve(async (req) => {
     });
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-    const cartMeta: Array<{ id: string; type: string; name: string; qty: number }> = [];
+    const cartMeta: Array<{ id: string; type: string; name: string; qty: number; price?: number }> = [];
 
     for (const item of items) {
       const qty = Math.max(1, Number(item.quantity) || 1);
@@ -71,7 +71,13 @@ serve(async (req) => {
         }
 
         if (product.stock !== null && product.stock < qty) {
-          return new Response(JSON.stringify({ error: `Stock insuffisant pour "${product.name}"` }), {
+          return new Response(JSON.stringify({
+            error: `Stock insuffisant pour "${product.name}"`,
+            code: "stock",
+            product_id: product.id,
+            product_name: product.name,
+            available: Math.max(0, Number(product.stock) || 0),
+          }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -163,6 +169,8 @@ serve(async (req) => {
         },
       } : {}),
       ...(discounts ? { discounts } : {}),
+      // Client connecté : email prérempli ; invité : Stripe le demande
+      ...(body.userEmail ? { customer_email: String(body.userEmail) } : {}),
       metadata: {
         type: "cart",
         cart_items: JSON.stringify(cartMeta),

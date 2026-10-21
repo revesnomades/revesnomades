@@ -49,6 +49,7 @@
       <nav class="nav-links nav-links-desktop" aria-label="Navigation droite">
         <a href="/index.html#apropos" data-scroll>À propos</a>
         <a href="/faq.html">FAQ</a>
+        <a href="/index.html#contact">Contact</a>
 
         <a class="icon-btn cart-icon-btn cart-nav-link active" href="/panier.html" aria-label="Panier (0 article)">
           <svg class="icon" viewBox="0 0 24 24" fill="none">
@@ -77,6 +78,7 @@
           <a href="/boutique.html">Shop</a>
           <a href="/index.html#apropos">À propos</a>
           <a href="/faq.html">FAQ</a>
+          <a href="/index.html#contact">Contact</a>
           <a href="/panier.html" class="active">Panier</a>
           <a href="/compte.html">Compte</a>
         </nav>
@@ -106,10 +108,11 @@
           <div id="summaryLines" style="font-size:14px; color:var(--muted);"></div>
 
           <div style="border-top:1px solid var(--line); margin:16px 0; padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
-            <strong style="font-size:16px;">Total</strong>
+            <strong style="font-size:16px;" id="cartTotalLabel">Total</strong>
             <strong id="cartTotalDisplay" style="font-size:18px;">—</strong>
           </div>
 
+          <div id="freeShipBar" class="free-ship" hidden></div>
           <p id="cartShippingNote" style="font-size:12px; color:var(--muted); margin-bottom:16px;"></p>
 
           <!-- Code promo -->
@@ -124,7 +127,7 @@
 
           <!-- Adresse de livraison (affichée si panier contient des produits) -->
           <div id="shippingZone" style="display:none; margin-bottom:16px; border-top:1px solid var(--line); padding-top:16px;">
-            <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--text);">Adresse de livraison</div>
+            <div class="cart-step"><span class="cart-step-num" aria-hidden="true">1</span>Adresse de livraison</div>
 
             <!-- Affichage compact (adresse déjà enregistrée) -->
             <div id="shippingAddressDisplay" style="display:none; font-size:13px; color:var(--text); margin-bottom:10px;">
@@ -134,9 +137,10 @@
 
             <!-- Formulaire complet -->
             <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
+              <input id="shipName" class="input" placeholder="Nom et prénom" aria-label="Nom et prénom" autocomplete="name" style="font-size:13px;">
               <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" aria-label="Adresse" autocomplete="address-line1" style="font-size:13px;">
               <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" aria-label="Complément d'adresse (optionnel)" autocomplete="address-line2" style="font-size:13px;">
-              <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
+              <div style="display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:8px;">
                 <input id="shipPostal" class="input" placeholder="Code postal" aria-label="Code postal" autocomplete="postal-code" inputmode="numeric" style="font-size:13px;" maxlength="10">
                 <input id="shipCity" class="input" placeholder="Ville" aria-label="Ville" autocomplete="address-level2" style="font-size:13px;">
               </div>
@@ -155,9 +159,9 @@
                 <option value="CA">Canada</option>
               </select>
               <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <button type="button" id="btnCalcShipping" class="btn tiny on-light">Calculer la livraison</button>
+                <button type="button" id="btnCalcShipping" class="cart-link-btn">Calculer la livraison</button>
                 <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
-                  <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Enregistrer
+                  <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Mémoriser cette adresse
                 </label>
               </div>
             </div>
@@ -165,9 +169,9 @@
             <div id="shippingMsg" style="font-size:12px; color:var(--muted); margin-top:6px; display:none;"></div>
 
             <!-- Méthodes de livraison -->
-            <div id="shippingMethods" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
-              <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez un mode d'expédition :</div>
-              <div id="shippingMethodsList"></div>
+            <div id="shippingMethods" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+              <div class="cart-step"><span class="cart-step-num" aria-hidden="true">2</span>Mode de livraison</div>
+              <div id="shippingMethodsList"><div class="cart-step-hint">Les modes de livraison s'affichent dès que l'adresse est complète.</div></div>
             </div>
 
             <!-- Sélecteur point relais Mondial Relay -->
@@ -175,14 +179,18 @@
               <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
               <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
               <div id="relayList" style="display:none;"></div>
+              <button type="button" id="relayMore" class="cart-link-btn" style="display:none; margin-top:8px;"></button>
               <div id="relayMsg" style="display:none; font-size:12px; color:#c00;"></div>
             </div>
           </div>
 
-          <button id="btnCheckout" class="btn on-light block" type="button">
+          <div class="cart-step" id="payStep" style="display:none;"><span class="cart-step-num" aria-hidden="true">3</span>Paiement</div>
+          <button id="btnCheckout" class="btn-pay" type="button">
             Procéder au paiement
           </button>
+          <p id="checkoutHint" class="cart-step-hint" style="margin-top:8px;" aria-live="polite"></p>
           <p id="checkoutMsg" style="margin-top:10px; font-size:13px; color:var(--muted);"></p>
+          <p id="guestNote" style="display:none; margin-top:6px; font-size:13px; color:var(--muted);">Pas besoin de compte : votre confirmation arrive par email, et vous pourrez créer un compte après l'achat.</p>
 
           <div style="margin-top:16px; text-align:center;">
             <a href="/boutique.html" style="font-size:13px; color:var(--muted); text-decoration:underline; padding:14px 0;">← Continuer mes achats</a>
@@ -224,6 +232,12 @@
     </div>
   </main>
 
+  <!-- BARRE DE PAIEMENT MOBILE -->
+  <div class="pay-bar" id="payBar" role="region" aria-label="Paiement" hidden>
+    <div class="pay-bar-total"><span id="payBarLabel">Total</span><strong id="payBarTotal">—</strong></div>
+    <button type="button" class="btn-pay" id="payBarBtn">Payer</button>
+  </div>
+
   <!-- MODALE CHECKOUT STRIPE -->
   <div class="modal" id="checkoutModal">
     <div class="checkout-modal-inner" style="background:#fff; border-radius:12px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,.2); animation:modalPop .25s cubic-bezier(.16,1,.3,1);">
@@ -254,7 +268,7 @@
   </style>
 
   <!-- FOOTER -->
-  <footer class="band cream">
+  <footer class="band cream footer-dark">
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand">
@@ -293,7 +307,7 @@
   <script src="assets/js/main.js?v=3"></script>
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
-    import { getCart, removeFromCart, setQuantity, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart } from "./assets/js/cart.js?v=3";
+    import { getCart, removeFromCart, setQuantity, setMaxStock, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart, formatPrice, getProductsTotal, FREE_SHIPPING_THRESHOLD } from "./assets/js/cart.js?v=3";
 
     // TODO: remplacer par votre clé publique Stripe
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51SnOSB55WblsnY7Y9C0dRSx8r8H3JqpmSmvUsOYscigEPRyWNFDiSVxpkOny9D1YOt4u6va4XwciBM6moGDwiRX100nZDtd7Rq";
@@ -401,24 +415,29 @@
           </div>
         `;
         summaryLinesEl.innerHTML = "";
-        cartTotalDisplayEl.textContent = "0,00 €";
+        cartTotalDisplayEl.textContent = formatPrice(0);
         btnCheckout.style.display = "none";
+        document.querySelector("#cartLayout > aside").style.display = "none";
+        document.getElementById("cartLayout").style.gridTemplateColumns = "1fr";
+        payBar.hidden = true;
         return;
       }
 
       btnCheckout.style.display = "";
+      document.querySelector("#cartLayout > aside").style.display = "";
+      document.getElementById("cartLayout").style.gridTemplateColumns = "1fr 340px";
 
       cartItemsEl.innerHTML = cart.map((item, idx) => {
         const img = item.image || "/assets/img/placeholder.jpg";
-        const price = (Number(item.price) || 0).toFixed(2);
-        const lineTotal = ((Number(item.price) || 0) * item.quantity).toFixed(2);
+        const price = formatPrice(item.price);
+        const lineTotal = formatPrice((Number(item.price) || 0) * item.quantity);
         const isMax = item.quantity >= (item.maxStock ?? 99);
         return `
           <div class="cart-item" data-idx="${idx}">
             <img class="cart-item-img" src="${img}" alt="${item.name}" loading="lazy">
             <div>
               <div style="font-weight:600; font-size:14px; color:var(--text);">${item.type === 'sejour' && item.slug ? `<a href="/sejour.html?s=${item.slug}" style="color:inherit; text-decoration:underline;">${item.name}</a>` : item.name}</div>
-              <div style="font-size:13px; color:var(--muted); margin-top:2px;">${price} € / unité</div>
+              <div style="font-size:13px; color:var(--muted); margin-top:2px;">${price} / unité</div>
               <div class="cart-item-qty">
                 <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
                 <span class="cart-qty-val">${item.quantity}</span>
@@ -426,7 +445,7 @@
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-weight:600; font-size:14px;">${lineTotal} €</div>
+              <div style="font-weight:600; font-size:14px;">${lineTotal}</div>
               <button class="cart-remove-btn" data-id="${item.id}" data-type="${item.type}" title="Retirer" aria-label="Retirer cet article">×</button>
             </div>
           </div>
@@ -436,7 +455,7 @@
       summaryLinesEl.innerHTML = cart.map(item =>
         `<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <span>${item.name} × ${item.quantity}</span>
-          <span>${((Number(item.price) || 0) * item.quantity).toFixed(2)} €</span>
+          <span>${formatPrice((Number(item.price) || 0) * item.quantity)}</span>
         </div>`
       ).join("");
 
@@ -447,7 +466,7 @@
       if (shippingZone) shippingZone.style.display = hasProducts ? "block" : "none";
 
       if (hasProducts && selectedShipping) {
-        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${selectedShipping.name}</span><span>${selectedShipping.price.toFixed(2).replace(".", ",")} €</span></div>`;
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${selectedShipping.name}</span><span>${selectedShipping.price === 0 ? "Offerte" : formatPrice(selectedShipping.price)}</span></div>`;
       } else if (hasProducts) {
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">À calculer</span></div>`;
       }
@@ -458,7 +477,7 @@
       const allDiscounts = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])];
       let totalDiscount = 0;
       for (const d of allDiscounts) {
-        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>🎁 ${d.label}</span><span>−${d.amount.toFixed(2).replace('.', ',')} €</span></div>`;
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>🎁 ${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
         totalDiscount += d.amount;
       }
 
@@ -474,7 +493,17 @@
       const rawTotal = getCartTotal();
       const shippingTotal = hasProducts && selectedShipping ? selectedShipping.price : 0;
       const finalTotal = Math.max(0, rawTotal - totalDiscount + shippingTotal);
-      cartTotalDisplayEl.textContent = finalTotal.toFixed(2).replace(".", ",") + " €";
+      cartTotalDisplayEl.textContent = formatPrice(finalTotal);
+      const totalLabel = document.getElementById("cartTotalLabel");
+      if (totalLabel) totalLabel.textContent = hasProducts && !selectedShipping ? "Sous-total" : "Total";
+      renderFreeShipping(hasProducts);
+      if (hasProducts && noteEl) {
+        const days = Math.max(...cart.filter(i => i.type === "product").map(i => Number(i.deliveryDays) || 5));
+        const delay = `Expédition sous ${days} jours ouvrés · livraison estimée vers le ${deliveryLabel(days + 2)}.`;
+        noteEl.textContent = selectedShipping ? delay : `${delay} Indiquez votre adresse pour connaître les frais de livraison.`;
+      }
+
+      updateCheckoutState(hasProducts, finalTotal);
 
       // Promo code UI
       const promoZone = document.getElementById("promoCodeZone");
@@ -482,6 +511,68 @@
         const hasCodePromos = activePromos.some(p => p.type === 'promo_code');
         promoZone.style.display = hasCodePromos ? '' : 'none';
       }
+    }
+
+    function checkoutBlocker(hasProducts) {
+      if (!hasProducts) return null;
+      const addr = getShippingAddress();
+      const relay = selectedShipping && isRelayMethod(selectedShipping);
+      if (!document.getElementById("shipName")?.value.trim() && !currentUser) return "Indiquez le nom du destinataire.";
+      if (!relay && !addr.line1) return "Indiquez votre adresse.";
+      if (!addr.postal_code || !addr.city) return "Indiquez votre code postal et votre ville.";
+      if (!selectedShipping) return "Choisissez un mode de livraison.";
+      if (relay && !selectedRelayPoint) return "Choisissez un point relais.";
+      return null;
+    }
+
+    function updateCheckoutState(hasProducts, total) {
+      const blocker = checkoutBlocker(hasProducts);
+      btnCheckout.disabled = !!blocker;
+      btnCheckout.setAttribute("aria-describedby", "checkoutHint");
+      const hint = document.getElementById("checkoutHint");
+      if (hint) hint.textContent = blocker ? `Pour continuer : ${blocker.charAt(0).toLowerCase()}${blocker.slice(1)}` : "";
+      const payStep = document.getElementById("payStep");
+      if (payStep) payStep.style.display = hasProducts ? "" : "none";
+      const label = hasProducts && !selectedShipping ? "Sous-total" : "Total";
+      document.getElementById("payBarLabel").textContent = label;
+      document.getElementById("payBarTotal").textContent = formatPrice(total);
+      document.getElementById("payBarBtn").textContent = blocker ? "Continuer" : "Payer";
+      payBarVisible.cartReady = true;
+      refreshPayBar();
+    }
+
+    // Barre de paiement mobile : visible tant que le bouton principal est hors de l'écran
+    const payBar = document.getElementById("payBar");
+    const payBarVisible = { cartReady: false, mainVisible: true };
+    function refreshPayBar() {
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      payBar.hidden = !(mobile && payBarVisible.cartReady && getCart().length && !payBarVisible.mainVisible);
+    }
+    new IntersectionObserver(entries => {
+      payBarVisible.mainVisible = entries[0].isIntersecting;
+      refreshPayBar();
+    }).observe(btnCheckout);
+    window.addEventListener("resize", refreshPayBar);
+    document.getElementById("payBarBtn").addEventListener("click", () => {
+      if (btnCheckout.disabled) {
+        document.getElementById("shippingZone")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        btnCheckout.click();
+      }
+    });
+
+    function renderFreeShipping(hasProducts) {
+      const el = document.getElementById("freeShipBar");
+      if (!el) return;
+      if (!hasProducts) { el.hidden = true; return; }
+      const total = getProductsTotal();
+      const left = FREE_SHIPPING_THRESHOLD - total;
+      const pct = Math.min(100, (total / FREE_SHIPPING_THRESHOLD) * 100);
+      el.hidden = false;
+      el.innerHTML = left > 0
+        ? `<div class="free-ship-text">Plus que <strong>${formatPrice(left)}</strong> pour la livraison offerte</div>`
+        : `<div class="free-ship-text is-done">La livraison vous est offerte</div>`;
+      el.innerHTML += `<div class="free-ship-track" aria-hidden="true"><span style="width:${pct}%"></span></div>`;
     }
 
     function deliveryLabel(businessDays) {
@@ -601,7 +692,7 @@
                   </div>
                   <div class="crosssell-card-body">
                     <div class="crosssell-card-name">${p.name}</div>
-                    <div class="crosssell-card-price">${(Number(p.price)||0).toFixed(2)} €</div>
+                    <div class="crosssell-card-price">${formatPrice(p.price)}</div>
                   </div>
                 </a>
                 <div style="padding:0 12px 12px;">
@@ -670,9 +761,12 @@
         showShippingMsg("Renseignez le code postal et la ville.", "error");
         return;
       }
+      lastRatesKey = [addr.postal_code, addr.city, addr.country, getProductsTotal() >= FREE_SHIPPING_THRESHOLD, getTotalWeightGrams()].join("|");
       const btnCalc = document.getElementById("btnCalcShipping");
       if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = "Calcul…"; }
-      showShippingMsg("Récupération des tarifs…", "info");
+      showShippingMsg("", "");
+      const listEl = document.getElementById("shippingMethodsList");
+      if (listEl) listEl.innerHTML = `<div class="cart-step-hint">Calcul des frais de livraison…</div>`;
       selectedShipping = null;
       selectedRelayPoint = null;
       toggleRelayZone(false);
@@ -691,7 +785,11 @@
         renderShippingMethods(data.methods || []);
         showShippingMsg("", "");
       } catch (e) {
-        showShippingMsg("Impossible de récupérer les tarifs : " + (e.message || ""), "error");
+        console.warn("Tarifs de livraison indisponibles:", e);
+        showShippingMsg("Nous n'avons pas pu calculer la livraison pour cette adresse. Vérifiez le code postal, puis réessayez dans un instant.", "error");
+        const listEl2 = document.getElementById("shippingMethodsList");
+        if (listEl2) listEl2.innerHTML = "";
+        renderCart();
       }
       if (btnCalc) { btnCalc.disabled = false; btnCalc.textContent = "Calculer la livraison"; }
     }
@@ -714,31 +812,35 @@
       const list = document.getElementById("shippingMethodsList");
       if (!wrap || !list) return;
       if (!methods.length) {
-        list.innerHTML = `<div style="font-size:13px; color:var(--muted);">Aucune méthode de livraison configurée pour cette adresse. Activez et tarifez vos méthodes dans votre compte SendCloud.</div>`;
+        list.innerHTML = `<div style="font-size:13px; color:var(--muted);">Aucune livraison n'est disponible pour cette adresse. Écrivez-nous à contact@amesnomades.com : nous trouverons une solution.</div>`;
         wrap.style.display = "block";
+        renderCart();
         return;
       }
       list.innerHTML = methods.map((m, i) => `
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
           <input type="radio" name="shippingMethod" value="${i}" style="flex-shrink:0;" ${i === 0 ? "checked" : ""}>
           <span style="flex:1;">${m.name}<br><span style="font-size:12px; color:var(--muted);">${[m.carrier, m.delivery_time].filter(Boolean).join(" · ")}</span></span>
-          <span style="font-weight:600; white-space:nowrap;">${m.price === 0 ? "Offert" : Number(m.price).toFixed(2).replace(".", ",") + " €"}</span>
+          <span style="font-weight:600; white-space:nowrap;">${m.price === 0 ? "Offerte" : formatPrice(m.price)}</span>
         </label>`).join("");
       wrap.style.display = "block";
-      // Auto-select first
-      selectedShipping = methods[0];
-      toggleRelayZone(isRelayMethod(methods[0]));
-      if (isRelayMethod(methods[0])) fetchRelayPoints();
-      renderCart();
-      list.querySelectorAll("input[type=radio]").forEach((radio, i) => {
-        radio.addEventListener("change", () => {
-          selectedShipping = methods[i];
-          const relay = isRelayMethod(methods[i]);
-          toggleRelayZone(relay);
-          if (relay) fetchRelayPoints();
-          renderCart();
-        });
-      });
+      // Reprendre le mode choisi avant un rechargement, sinon le premier
+      let saved = null;
+      try { saved = JSON.parse(sessionStorage.getItem("rn_ship") || "null"); } catch {}
+      const savedIdx = saved ? methods.findIndex(m => (m.id ?? m.name) === saved.id) : -1;
+      const startIdx = savedIdx >= 0 ? savedIdx : 0;
+      const radios = list.querySelectorAll("input[type=radio]");
+      radios.forEach((r, i) => { r.checked = i === startIdx; });
+      const choose = (i) => {
+        selectedShipping = methods[i];
+        try { sessionStorage.setItem("rn_ship", JSON.stringify({ id: methods[i].id ?? methods[i].name })); } catch {}
+        const relay = isRelayMethod(methods[i]);
+        toggleRelayZone(relay);
+        if (relay) fetchRelayPoints();
+        renderCart();
+      };
+      choose(startIdx);
+      radios.forEach((radio, i) => radio.addEventListener("change", () => choose(i)));
     }
 
     async function fetchRelayPoints() {
@@ -773,29 +875,43 @@
           relayMsg.textContent = "Aucun point relais trouvé pour ce code postal.";
           return;
         }
-        relayList.innerHTML = points.map((p, i) => {
+        const RELAY_STEP = 5;
+        let relayShown = Math.min(RELAY_STEP, points.length);
+        const relayMore = document.getElementById("relayMore");
+        const relayItem = (p, i) => {
           const addr = [p.street, p.house_number].filter(Boolean).join(" ");
           const dist = p.distance != null ? ` · ${(p.distance / 1000).toFixed(1)} km` : "";
           return `<label style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
-            <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;" ${i === 0 ? "checked" : ""}>
+            <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;">
             <span style="flex:1;">
               <span style="font-weight:600;">${p.name}</span><span style="color:var(--muted);">${dist}</span><br>
               <span style="font-size:12px; color:var(--muted);">${[addr, p.postal_code, p.city].filter(Boolean).join(", ")}</span>
             </span>
           </label>`;
-        }).join("");
-        relayList.style.display = "block";
-        // Auto-select first
+        };
+        const drawRelays = () => {
+          relayList.innerHTML = points.slice(0, relayShown).map(relayItem).join("");
+          relayList.querySelectorAll("input[type=radio]").forEach((radio, i) => {
+            radio.checked = points[i] === selectedRelayPoint;
+            radio.addEventListener("change", () => { selectedRelayPoint = points[i]; renderCart(); });
+          });
+          const rest = points.length - relayShown;
+          if (relayMore) {
+            relayMore.style.display = rest > 0 ? "inline-block" : "none";
+            relayMore.textContent = `Voir ${Math.min(rest, RELAY_STEP)} autre${Math.min(rest, RELAY_STEP) > 1 ? "s" : ""} point${Math.min(rest, RELAY_STEP) > 1 ? "s" : ""} relais`;
+            relayMore.onclick = () => { relayShown = Math.min(points.length, relayShown + RELAY_STEP); drawRelays(); };
+          }
+        };
         selectedRelayPoint = points[0];
+        drawRelays();
+        relayList.style.display = "block";
         renderCart();
-        relayList.querySelectorAll("input[type=radio]").forEach((radio, i) => {
-          radio.addEventListener("change", () => { selectedRelayPoint = points[i]; renderCart(); });
-        });
       } catch (e) {
         relayLoading.style.display = "none";
         relayMsg.style.display = "block";
         relayMsg.style.color = "#c00";
-        relayMsg.textContent = "Impossible de récupérer les points relais : " + (e.message || "");
+        console.warn("Points relais indisponibles:", e);
+        relayMsg.textContent = "Les points relais ne s'affichent pas pour le moment. Choisissez la livraison à domicile ou réessayez dans un instant.";
       }
     }
 
@@ -836,7 +952,12 @@
       currentUser = user || null;
       const saveLabel = document.getElementById("saveAddressLabel");
       if (saveLabel) saveLabel.style.display = user ? "flex" : "none";
+      const guestNote = document.getElementById("guestNote");
+      if (guestNote) guestNote.style.display = user ? "none" : "block";
       if (!user) return;
+      const fullName = [user.user_metadata?.firstname, user.user_metadata?.lastname].filter(Boolean).join(" ") || user.user_metadata?.full_name || "";
+      const nameEl = document.getElementById("shipName");
+      if (nameEl && !nameEl.value) nameEl.value = fullName;
       const { data: profile } = await supabase.from("profiles").select("shipping_line1, shipping_line2, shipping_postal_code, shipping_city, shipping_country").eq("id", user.id).single();
       if (profile?.shipping_line1) {
         document.getElementById("shipLine1").value = profile.shipping_line1 || "";
@@ -851,6 +972,31 @@
         if (cart.some(i => i.type === "product")) fetchShippingRates();
       }
     }
+
+    // Calcul automatique de la livraison dès que l'adresse est assez complète
+    let autoCalcTimer = null;
+    let lastRatesKey = "";
+    function addressReady() {
+      const a = getShippingAddress();
+      const postalOk = a.country === "FR" ? /^\d{5}$/.test(a.postal_code) : a.postal_code.length >= 3;
+      return postalOk && a.city.length >= 2;
+    }
+    function scheduleAutoCalc(force = false) {
+      clearTimeout(autoCalcTimer);
+      autoCalcTimer = setTimeout(() => {
+        if (!getCart().some(i => i.type === "product") || !addressReady()) { renderCart(); return; }
+        const a = getShippingAddress();
+        const key = [a.postal_code, a.city, a.country, getProductsTotal() >= FREE_SHIPPING_THRESHOLD, getTotalWeightGrams()].join("|");
+        if (!force && key === lastRatesKey) { renderCart(); return; }
+        lastRatesKey = key;
+        fetchShippingRates();
+      }, 700);
+    }
+    ["shipName", "shipLine1", "shipLine2", "shipPostal", "shipCity"].forEach(id =>
+      document.getElementById(id)?.addEventListener("input", () => scheduleAutoCalc()));
+    document.getElementById("shipCountry")?.addEventListener("change", () => scheduleAutoCalc());
+    // Quantités modifiées : on recalcule (poids, livraison offerte)
+    window.addEventListener("cart:updated", () => { if (lastRatesKey) scheduleAutoCalc(); });
 
     document.getElementById("btnEditShippingAddress")?.addEventListener("click", () => {
       showShippingAddressForm();
@@ -916,8 +1062,10 @@
       }
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = `/signup.html?redirect=${encodeURIComponent(window.location.href)}`;
+      const shipName = document.getElementById("shipName")?.value.trim() || "";
+      if (hasProducts && !shipName && !user) {
+        checkoutMsg.textContent = "Indiquez le nom et prénom du destinataire.";
+        document.getElementById("shipName")?.focus();
         return;
       }
 
@@ -951,15 +1099,15 @@
             // Use relay point address for Stripe
             const relayStreet = [selectedRelayPoint.street, selectedRelayPoint.house_number].filter(Boolean).join(" ");
             shippingAddr = {
-              name: selectedRelayPoint.name,
+              name: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || user?.email || "",
               line1: relayStreet || selectedRelayPoint.name,
-              line2: "",
+              line2: `Point relais : ${selectedRelayPoint.name}${selectedRelayPoint.id ? " (n° " + selectedRelayPoint.id + ")" : ""}`,
               postal_code: selectedRelayPoint.postal_code,
               city: selectedRelayPoint.city,
               country: selectedRelayPoint.country || "FR",
             };
           } else {
-            shippingAddr = { ...getShippingAddress(), name: user.user_metadata?.firstname || user.email };
+            shippingAddr = { ...getShippingAddress(), name: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || user?.email || "" };
           }
         }
 
@@ -972,8 +1120,8 @@
           },
           body: JSON.stringify({
             items,
-            userId: user.id,
-            userEmail: user.email,
+            userId: user?.id || "",
+            userEmail: user?.email || "",
             discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
             shippingAmount: hasProducts && selectedShipping ? Math.round(selectedShipping.price * 100) : 0,
             shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
@@ -982,16 +1130,28 @@
           }),
         });
 
-        const data = await res.json();
-        if (!res.ok || data.error) throw new Error(data.error || "Erreur création paiement");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.error) { const e = new Error(data.error || "Erreur création paiement"); e.data = data; throw e; }
 
         checkoutLoading.style.display = "none";
         embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.client_secret });
         embeddedCheckout.mount("#checkout");
       } catch (err) {
+        console.warn("Paiement indisponible:", err);
         checkoutLoading.style.display = "none";
         checkoutError.style.display = "block";
-        checkoutError.textContent = err.message || "Impossible de charger le formulaire de paiement.";
+        if (err.data?.code === "stock") {
+          // Le stock a baissé entre-temps : on ajuste le panier et on explique
+          const left = Number(err.data.available) || 0;
+          if (left > 0) setMaxStock(err.data.product_id, "product", left);
+          else removeFromCart(err.data.product_id, "product");
+          renderCart();
+          checkoutError.textContent = left > 0
+            ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté votre panier : vérifiez-le, puis relancez le paiement.`
+            : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de votre panier. Vérifiez-le, puis relancez le paiement.`;
+        } else {
+          checkoutError.textContent = "Le formulaire de paiement n'a pas pu s'ouvrir. Réessayez dans un instant ; si le problème continue, écrivez-nous à contact@amesnomades.com.";
+        }
       }
     });
 
@@ -1013,7 +1173,7 @@
         return;
       }
       appliedPromoCode = code;
-      msg.textContent = promo.value_unit === 'euro' ? `✓ Code appliqué : −${Number(promo.value).toFixed(2)} €` : `✓ Code appliqué : −${promo.value}%`;
+      msg.textContent = promo.value_unit === 'euro' ? `✓ Code appliqué : −${formatPrice(promo.value)}` : `✓ Code appliqué : −${promo.value}%`;
       msg.style.color = '#1a7a40';
       msg.style.display = '';
       renderCart();

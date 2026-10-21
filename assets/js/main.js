@@ -137,6 +137,22 @@
   }
   initFavNav();
 
+  // ── Compteur du panier (badges créés dynamiquement, ex. icône mobile) ──
+  function initCartCount() {
+    const update = () => {
+      let count = 0;
+      try { const cart = JSON.parse(localStorage.getItem("rn_cart") || "[]"); count = Array.isArray(cart) ? cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0) : 0; } catch {}
+      document.querySelectorAll(".cart-badge").forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? "flex" : "none";
+      });
+    };
+    update();
+    window.addEventListener("cart:updated", update);
+    window.addEventListener("storage", e => { if (e.key === "rn_cart") update(); });
+  }
+  initCartCount();
+
   // ✅ Indique que JS est actif (sert au CSS pour animer sans cacher si JS plante)
   document.documentElement.classList.add("js");
 

@@ -96,8 +96,11 @@
 
         <div style="margin-top: 22px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
           <a class="btn on-light" href="index.html">Retour à l’accueil</a>
-          <a class="btn on-light" href="compte.html">Accéder à mon compte</a>
+          <a class="btn on-light" href="compte.html" id="merciAccountBtn">Accéder à mon compte</a>
         </div>
+        <p id="merciGuestNote" style="display:none; max-width:60ch; margin:14px auto 0; font-size:14px; color:var(--muted);">
+          Créez votre compte avec la même adresse email pour retrouver cette commande et suivre vos prochaines réservations.
+        </p>
 
         <p style="margin-top:18px; font-size:12.5px; color: var(--muted);">
           Une question ? Écrivez-nous : <a href="/index.html#contact" style="text-decoration:underline; text-underline-offset:3px;">contact@amesnomades.com</a>
@@ -171,8 +174,19 @@
 
   <script type="module">
     import { initCartBadge, clearCart } from "/assets/js/cart.js?v=3";
+    import { supabase } from "/assets/js/supabaseClient.js?v=3";
     clearCart();
     initCartBadge();
+    try { sessionStorage.removeItem("rn_ship"); } catch {}
+
+    // Client sans compte : on lui propose d'en créer un après l'achat
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      const btn = document.getElementById("merciAccountBtn");
+      if (btn) { btn.textContent = "Créer mon compte"; btn.href = "/signup.html?redirect=" + encodeURIComponent(location.origin + "/compte.html"); }
+      const note = document.getElementById("merciGuestNote");
+      if (note) note.style.display = "block";
+    }
   </script>
 
 </body>

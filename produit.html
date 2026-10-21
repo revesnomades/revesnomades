@@ -387,8 +387,18 @@
       opacity: 0;
       transition: opacity 0.25s, transform 0.25s;
       z-index: 9999;
-      white-space: nowrap;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: max-content;
+      max-width: min(460px, calc(100vw - 32px));
+      box-sizing: border-box;
+      text-align: center;
     }
+    #toastAdded.show { pointer-events: auto; }
+    .toast-link { color: #fff; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; padding: 10px 0; }
     #toastAdded.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
@@ -562,7 +572,7 @@
     </div>
   </main>
 
-  <div id="toastAdded" role="status" aria-live="polite">Ajouté au panier</div>
+  <div id="toastAdded" role="status" aria-live="polite"><span id="toastText">Ajouté au panier.</span> <a href="/panier.html" class="toast-link">Voir le panier →</a></div>
 
   <div class="restock-modal" id="restockModal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
     <div class="restock-box">
@@ -627,7 +637,7 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js?v=3";
-    import { addToCart, initCartBadge } from "/assets/js/cart.js?v=3";
+    import { addToCart, initCartBadge, getQuantityInCart, formatPrice, FREE_SHIPPING_THRESHOLD } from "/assets/js/cart.js?v=3";
     import { favButtonHtml } from "/assets/js/favorites.js?v=3";
     import { subscribeRestock } from "/assets/js/restock.js?v=3";
 
@@ -719,7 +729,7 @@
           promoBadgeText = `−${promo.value}%`;
         } else if (promo.type === "fixed") {
           promoPrice = p.price - promo.value;
-          promoBadgeText = `−${Number(promo.value).toFixed(2)} €`;
+          promoBadgeText = `−${formatPrice(promo.value)}`;
         }
         if (promo.badge_text) promoBadgeText = promo.badge_text;
       }
@@ -755,8 +765,8 @@
           <h1 class="product-name">${p.name}</h1>
 
           <div class="product-price-row">
-            <span class="product-price">${displayPrice.toFixed(2)} €</span>
-            ${promoPrice !== null ? `<span class="product-price-original">${Number(p.price).toFixed(2)} €</span>` : ""}
+            <span class="product-price">${formatPrice(displayPrice)}</span>
+            ${promoPrice !== null ? `<span class="product-price-original">${formatPrice(p.price)}</span>` : ""}
             ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
             ${isComingSoon ? `<span class="product-soon-badge is-sold-out">SOLD OUT</span>` : isSoldOut ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
           </div>
@@ -789,7 +799,7 @@
               <svg class="product-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
                 <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
               </svg>
-              <span>Livraison Colissimo · Suivi inclus</span>
+              <span>Livraison suivie · <strong style="font-weight:600; color:var(--text);">offerte dès ${FREE_SHIPPING_THRESHOLD} €</strong> d'achats</span>
             </div>
             ${p.delivery_info ? `
             <div class="product-meta-row">
@@ -952,11 +962,19 @@
       if (btnAddCart) {
         btnAddCart.addEventListener("click", () => {
           const imgSrc = firstPhoto;
-          for (let i = 0; i < qty; i++) {
-            addToCart({ type: "product", id: p.id, name: p.name, price: displayPrice, maxStock: maxQty, image: imgSrc, deliveryDays: 5 });
+          const already = getQuantityInCart(p.id);
+          const canAdd = Math.max(0, Math.min(qty, maxQty - already));
+          if (canAdd === 0) {
+            showToast(`Vous avez déjà les ${maxQty} exemplaires disponibles dans votre panier.`);
+            return;
+          }
+          for (let i = 0; i < canAdd; i++) {
+            addToCart({ type: "product", id: p.id, name: p.name, price: displayPrice, maxStock: maxQty, image: imgSrc, deliveryDays: 5, weight_grams: p.weight_grams || undefined });
           }
           if (window.MetaPixel) window.MetaPixel.trackAddToCart(p.name, p.id, displayPrice);
-          showToast();
+          showToast(canAdd < qty
+            ? `${canAdd} ajouté${canAdd > 1 ? "s" : ""} au panier : c'est le maximum disponible.`
+            : `${qty > 1 ? qty + " × " : ""}${p.name} ajouté au panier.`);
         });
       }
 
@@ -1021,10 +1039,13 @@
     });
 
     // ── Toast ──
-    function showToast() {
+    let toastTimer = null;
+    function showToast(message) {
       const toast = document.getElementById("toastAdded");
+      document.getElementById("toastText").textContent = message;
       toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 4500);
     }
   </script>
 
