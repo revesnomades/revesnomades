@@ -34,7 +34,7 @@ export async function initStayGrid(){
     {
       title:"Séjour en Camargue",
       subtitle:"5 jours · à partir de 970€",
-      img:"assets/img/sejour-camargue.jpg",
+      img:"assets/img/hero-1.webp",
       href:"sejour-camargue.html",
       eventId:"ee73b110-7d64-4344-821a-6b7980dcff69"
     },

@@ -4369,7 +4369,7 @@ function renderWizGal() {
               const idxImgBlock = currentFeaturedStay.content_blocks.find(b => b.type === "index_image");
               if (idxImgBlock && idxImgBlock.image) img = idxImgBlock.image;
             }
-            dragFeaturedMedia.style.backgroundImage = `url('${img || "/assets/img/sejour-camargue.jpg"}')`;
+            dragFeaturedMedia.style.backgroundImage = `url('${img || "/assets/img/hero-1.webp"}')`;
 
             let pos = homePositionsState.featured || { x: 50, y: 50 };
             if (homePositionsState.stays && homePositionsState.stays[currentFeaturedStay.id]?.hero) {
@@ -4409,7 +4409,7 @@ function renderWizGal() {
                 const idxImgBlock = stay.content_blocks.find(b => b.type === "index_image");
                 if (idxImgBlock && idxImgBlock.image) indexImage = idxImgBlock.image;
               }
-              const img = indexImage || "/assets/img/sejour-camargue.jpg";
+              const img = indexImage || "/assets/img/hero-1.webp";
               const pos = (homePositionsState.stays && homePositionsState.stays[stay.id]?.index) || { x: 50, y: 50 };
 
               return `

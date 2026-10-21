@@ -250,7 +250,7 @@
   <!-- PREMIER BANDEAU DYNAMIQUE -->
   <section class="band white" id="sejours">
     <div class="stay-band stay-band-compact" id="featuredStayBand" style="cursor:pointer;" onclick="if(!event.target.closest('a')) window.location.href='/sejour.html';">
-      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour" style="background-image:url('/assets/img/sejour-camargue.jpg');"></a>
+      <a class="stay-media" id="featuredStayMedia" href="/sejour.html" aria-label="Découvrir le séjour"></a>
 
       <div class="stay-copy">
         <div id="featuredStayBadge" style="display:none; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 9px; border-radius:3px; color:#fff; margin-bottom:8px; align-self:flex-start;"></div>
@@ -336,7 +336,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
 
-      <div id="galleryMarqueeWrapper" style="overflow-x:auto; scroll-behavior:smooth; width:100%; position:relative; cursor:default; scrollbar-width:none; -ms-overflow-style:none;">
+      <div id="galleryMarqueeWrapper" tabindex="0" role="region" aria-label="Galerie des séjours précédents" style="overflow-x:auto; scroll-behavior:smooth; width:100%; position:relative; cursor:default; scrollbar-width:none; -ms-overflow-style:none;">
         <div id="galleryMarqueeTrack" style="display:flex; gap:16px; padding: 10px 0;">
           <!-- Items statiques (fallback si pas d'images admin) -->
           <div class="gal-item"><img src="assets/img/hero-1.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
@@ -418,7 +418,6 @@
   </section>
 
   <section class="band cream">
-    <div class="bg" style="background-image:url('assets/img/newsletter-bg.jpg');"></div>
 
     <div class="newsletter-inner container">
       <p class="reveal" data-delay="0" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin:0 0 10px 0;">Un premier pas vers l'évasion</p>
@@ -467,7 +466,7 @@
         <div style="position:absolute; inset:0; background:rgba(10,11,13,0.62);"></div>
         <!-- Formulaire flottant -->
         <div style="position:relative; z-index:2; padding: clamp(30px,5vw,60px) clamp(24px,4vw,50px); height:100%; display:flex; flex-direction:column; justify-content:center;">
-          <p style="font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin:0 0 18px 0;">Nous contacter</p>
+          <p style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.72); margin:0 0 18px 0;">Nous contacter</p>
           <form id="indexContactForm" novalidate style="display:flex; flex-direction:column; gap:14px;">
             <label for="contactHoneypot" class="sr-only">Ne pas remplir ce champ si vous êtes un robot</label>
             <input type="text" id="contactHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
@@ -904,7 +903,7 @@
     }
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
     if (isMobile && stay.index_image_mobile) indexImage = stay.index_image_mobile;
-    const image = indexImage || "assets/img/sejour-camargue.jpg";
+    const image = indexImage || "/assets/img/hero-1.webp";
     const pos = (homepageImagePositions?.stays && homepageImagePositions.stays[stay.id]?.index) || { x: 50, y: 50 };
     const posX = pos.x !== undefined ? pos.x : 50;
     const posY = pos.y !== undefined ? pos.y : 50;
@@ -1275,10 +1274,11 @@
 
     // ── ANIMATION PARALLAX ──
     const parallaxBg = document.getElementById("homeHeroBg");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let ticking = false;
 
     window.addEventListener("scroll", () => {
-      if(!parallaxBg) return;
+      if(!parallaxBg || reduceMotion.matches) return;
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollPos = window.scrollY;

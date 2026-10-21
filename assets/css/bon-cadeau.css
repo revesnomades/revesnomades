@@ -82,7 +82,7 @@
 
 /* placeholders bien visibles */
 .gc-input::placeholder{
-  color: rgba(30,31,34,.45);
+  color: var(--muted);
   font-style: italic;
   font-weight: 300;
 }

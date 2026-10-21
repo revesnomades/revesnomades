@@ -185,7 +185,7 @@
   <div id="sejourMainTop" style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">
-        <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="/assets/img/sejour-camargue.jpg" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
+        <img class="sejour-hero-bg subtle-zoom" id="stayHeroBg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Séjour" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; object-position:center 65%; display:block;">
         <div id="stayHeroBadge" style="display:none; position:absolute; top:16px; right:16px; font-size:13px; font-weight:700; letter-spacing:0.06em; padding:5px 12px; border-radius:4px; color:#fff; z-index:3;"></div>
       </section>
     </div>
@@ -193,15 +193,15 @@
 
   <section class="band cream" style="padding-top: 0px;">
     <div class="container sejour-content">
-      <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 8px 0 6px;"></p>
+      <p id="stayLocation" class="reveal" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin: 8px 0 6px;"></p>
 
       <h1 class="reveal" id="stayTitle" style="font-family:'SegoCustom', serif; font-size: clamp(38px, 6vw, 52px); font-weight: 300; margin: 0 0 24px; border-bottom: 1px solid var(--line); padding-bottom: 24px;">Séjour</h1>
 
-      <p class="sejour-meta" id="stayMeta" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:15px; opacity:1 !important; transform:none !important;">
+      <p class="sejour-meta" id="stayMeta" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:16px; opacity:1 !important; transform:none !important;">
         5 jours · 4 nuits
       </p>
 
-      <p class="sejour-dates" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:15px; opacity:1 !important; transform:none !important; display:block !important; width:100% !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important; overflow:visible !important;">
+      <p class="sejour-dates" style="font-family:'Glacial Indifference', 'Outfit', sans-serif; font-size:16px; opacity:1 !important; transform:none !important; display:block !important; width:100% !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important; overflow:visible !important;">
         Dates : <span id="stayDates" style="display:inline !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important;">Dates à annoncer</span>
       </p>
 
@@ -239,12 +239,12 @@
 
       <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="includedSection">
         <h2 class="sejour-section-title">Ce qui est inclus</h2>
-        <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:13.5px;">
+        <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:14px;">
           <div>Chargement…</div>
         </div>
 
         <h2 class="sejour-section-title" style="margin-top:26px;">Ce qui n’est pas inclus</h2>
-        <div id="notIncludedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:13.5px;">
+        <div id="notIncludedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:14px;">
           <div>Chargement…</div>
         </div>
       </section>
@@ -256,7 +256,7 @@
         <div id="singleDayQtyBox" style="display:none; margin-top:14px; margin-bottom:14px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.85); justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
           <div>
             <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text);">Nombre de personnes / places</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations à réserver</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Sélectionnez le nombre de participations à réserver</div>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
@@ -571,16 +571,16 @@
       if(!container) return;
       if(!items || !items.length){
         container.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:12.5px;">
-            <div class="kicker" style="font-size:10.5px; font-weight:600; letter-spacing:0.08em;">FAQ</div>
+          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:13px;">
+            <div class="kicker" style="font-size:12px; font-weight:600; letter-spacing:0.08em;">FAQ</div>
             <p class="sub" style="margin-top:6px; font-size:12px; line-height:1.5; color:var(--text);">Les questions fréquentes seront bientôt disponibles.</p>
           </div>
         `;
         return;
       }
       container.innerHTML = (items || []).slice(0, 3).map(item => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:12.5px;">
-          <div class="kicker" style="font-size:10.5px; font-weight:600; letter-spacing:0.08em;">${escapeHtml(item.q || "Question")}</div>
+        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:13px;">
+          <div class="kicker" style="font-size:12px; font-weight:600; letter-spacing:0.08em;">${escapeHtml(item.q || "Question")}</div>
           <p class="sub" style="margin-top:6px; font-size:12px; line-height:1.5; color:var(--text);">${escapeHtml(item.a || "")}</p>
         </div>
       `).join("");
@@ -639,7 +639,7 @@
               <div style="font-size:12px; font-weight:500; color:var(--text); letter-spacing:0.04em; font-family:'IBM Plex Mono', monospace; text-transform:uppercase;">
                 ${escapeHtml(slot.time || "")}
               </div>
-              <div style="font-size:13.5px; color:var(--text); font-family:'IBM Plex Mono', monospace; line-height:1.5;">
+              <div style="font-size:14px; color:var(--text); font-family:'IBM Plex Mono', monospace; line-height:1.5;">
                 ${escapeHtml(actText)}
               </div>
             </div>
@@ -738,11 +738,11 @@
               <input type="radio" name="stay_option_choice" value="${idx}" ${idx === 0 ? "checked" : ""} data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="width:18px; height:18px; accent-color:var(--text); cursor:pointer;">
               <div>
                 <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.04em; color:var(--text);">${escapeHtml(label)}</div>
-                ${price ? `<div class="opt-price-val" data-unit-price="${rawPrice}" style="font-family:'IBM Plex Mono', monospace; font-size:15px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
+                ${price ? `<div class="opt-price-val" data-unit-price="${rawPrice}" style="font-family:'IBM Plex Mono', monospace; font-size:16px; letter-spacing:0.04em; color:var(--text); margin-top:2px;">${escapeHtml(price)}</div>` : ""}
               </div>
             </div>
             <div>
-              <button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:11px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>
+              <button type="button" class="btn tiny on-light btn-opt-stripe" data-url="${escapeHtml(url)}" data-label="${escapeHtml(label)}" data-price="${escapeHtml(String(rawPrice))}" style="font-family:'IBM Plex Mono', monospace; background:var(--text); color:#fff; border:none; padding:8px 16px; font-size:12px; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">Réserver →</button>
             </div>
           </label>
         `;
@@ -930,7 +930,7 @@
 
         const textHtml = `
           <div class="speaker-bio speaker-text-container" style="flex:1;">
-            ${bio.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}
+            ${bio.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}
           </div>
         `;
 
@@ -955,7 +955,7 @@
       const name  = escapeHtml(block.title || "Notre Cuisinière");
       const bio   = escapeHtml(block.text  || "");
       const bioParagraphs = bio.split(/\n|<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `
-        <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
+        <p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>
       `).join("");
 
       return `
@@ -963,8 +963,8 @@
           <div class="chef-row">
             <!-- Titre -->
             <div class="chef-title-block">
-              <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
-              <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
+              <p style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.12em; color:var(--muted); margin:0 0 6px; text-transform:uppercase;">Cuisine & repas</p>
+              <h3 style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; margin:0; color:var(--text);">${name}</h3>
             </div>
             <!-- Biographie -->
             <div class="chef-bio speaker-text-container">
@@ -1037,7 +1037,7 @@
         const safeText    = escapeHtml(block.text || "").replace(/\n/g, "<br>");
         const photo       = block.image || "";
         
-        const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14.5px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
+        const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
         const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. ${safeTitle}</h3>`;
 
@@ -1334,7 +1334,7 @@
       otherStaysTrack.innerHTML = publishedStays.map(stay => `
         <article class="other-stay-card">
           <a href="/sejour.html?slug=${encodeURIComponent(stay.slug)}" class="other-stay-link">
-            <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/sejour-camargue.jpg")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy" width="340" height="220">
+            <img class="other-stay-image" src="${escapeHtml(stay.hero_image || "/assets/img/hero-1.webp")}" alt="${escapeHtml(stay.title || "Séjour Âmes Nomades")}" loading="lazy" width="340" height="220">
             <div class="other-stay-body">
               <h3>${escapeHtml(stay.title || "Séjour Âmes Nomades")}</h3>
               ${stay.location ? `<p class="other-stay-location">${escapeHtml(stay.location)}</p>` : ""}
@@ -1602,7 +1602,7 @@
           link.fetchPriority = "high";
           document.head.appendChild(link);
         } else {
-          stayHeroBg.src = "/assets/img/sejour-camargue.jpg";
+          stayHeroBg.src = "/assets/img/hero-1.webp";
         }
 
         let blocks = normalizeContentBlocks(stay.content_blocks);

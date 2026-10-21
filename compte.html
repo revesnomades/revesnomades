@@ -10,6 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="utf-8" />
   <title>Compte — Âmes Nomades</title>
+  <meta name="description" content="Votre espace Âmes Nomades : réservations de séjours, commandes, adresses et préférences newsletter.">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -120,7 +121,7 @@
         <div>
           <div class="account-card">
            <div id="welcomeName" style="font-size:22px; margin-bottom:10px; display:none;"></div>
-          <h2>Mon compte</h2>
+          <h1 class="as-h2">Mon compte</h1>
           <p style="color:var(--muted); margin:10px 0 0;">
             Accédez à vos réservations et suivez la validation des séjours.
           </p>
@@ -160,13 +161,13 @@
                 Mot de passe oublié ?
               </button>
 
-              <div id="authMsg" style="color:var(--muted); font-size:12.5px;"></div>
+              <div id="authMsg" style="color:var(--muted); font-size:13px;"></div>
             </div>
           </div>
 
           <!-- Zone RESET -->
           <div id="resetBox" style="display:none; margin-top:16px;">
-            <h3 style="font-weight:500; margin:0;">Créer un nouveau mot de passe</h3>
+            <h2 style="font-weight:500; margin:0; font-size:1.17em;">Créer un nouveau mot de passe</h2>
 
             <div style="display:grid; gap:10px; margin-top:10px;">
               <div class="password-field">
@@ -195,7 +196,7 @@
                 Mettre à jour mon mot de passe
               </button>
 
-              <div id="resetMsg" style="color:var(--muted); font-size:12.5px;"></div>
+              <div id="resetMsg" style="color:var(--muted); font-size:13px;"></div>
             </div>
           </div>
 
@@ -217,7 +218,7 @@
               <div id="newsletterMsg" class="account-newsletter-msg"></div>
             </div>
 
-            <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:12.5px;"></div>
+            <div id="loggedMsg" style="margin-top:10px; color:var(--muted); font-size:13px;"></div>
 
             <div id="adminAccessBtn" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
               <a href="/admin-dashboard.html" class="btn on-light" style="width:100%; text-align:center; display:block;">Accès page Admin</a>
@@ -230,7 +231,7 @@
         <!-- COLONNE DROITE -->
         <div>
           <div id="perksBox" class="account-card">
-            <h3 style="font-weight:500; margin:0;">Pourquoi créer un compte ?</h3>
+            <h2 style="font-weight:500; margin:0; font-size:1.17em;">Pourquoi créer un compte ?</h2>
             <p style="color:var(--muted); margin-top:10px;">
               • Suivre vos réservations passées et à venir<br>
               • Voir le nombre de réservations restantes pour valider un séjour<br>
@@ -251,9 +252,9 @@
           <div id="addressBox" class="account-card" style="display:none; margin-top:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <h3 style="font-weight:500; margin:0;">Adresse de livraison</h3>
-              <button type="button" id="btnEditAddress" style="font-size:12.5px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Modifier</button>
+              <button type="button" id="btnEditAddress" style="font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Modifier</button>
             </div>
-            <div id="addressDisplay" style="font-size:13.5px; color:var(--muted);">Aucune adresse enregistrée.</div>
+            <div id="addressDisplay" style="font-size:14px; color:var(--muted);">Aucune adresse enregistrée.</div>
             <form id="addressForm" style="display:none; margin-top:12px;" autocomplete="on">
               <div style="display:flex; flex-direction:column; gap:8px;">
                 <input id="addrLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;" autocomplete="address-line1">
@@ -279,7 +280,7 @@
               </div>
               <div style="display:flex; gap:8px; margin-top:12px;">
                 <button type="submit" id="btnSaveAddress" class="btn on-light" style="font-size:13px;">Enregistrer</button>
-                <button type="button" id="btnCancelAddress" style="font-size:12.5px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Annuler</button>
+                <button type="button" id="btnCancelAddress" style="font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Annuler</button>
               </div>
               <div id="addressMsg" style="font-size:12px; margin-top:6px; display:none;"></div>
             </form>
@@ -297,10 +298,10 @@
       <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:#1e1f22; color:#fff; padding:14px 20px; border-top-left-radius:10px; border-top-right-radius:10px;">
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-size:18px;">📄</span>
-          <strong style="font-size:15px; font-weight:600;">Facture / Attestation de paiement</strong>
+          <strong style="font-size:16px; font-weight:600;">Facture / Attestation de paiement</strong>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <button type="button" id="btnPrintInvoice" class="btn" style="background:#4f8c5b; color:#fff; border:none; padding:8px 16px; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+          <button type="button" id="btnPrintInvoice" class="btn" style="background:#3f7a4c; color:#fff; border:none; padding:8px 16px; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
             📥 Imprimer / Télécharger (PDF)
           </button>
           <button type="button" id="btnCloseInvoiceModal" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:0 6px;">✕</button>
@@ -328,11 +329,11 @@
             <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; color:#444;">
               N° : <strong id="invNumDisplay" style="color:#1e1f22;">FAC-2026-0001</strong>
             </div>
-            <div style="font-size:12.5px; color:#666; margin-top:3px;">
+            <div style="font-size:13px; color:#666; margin-top:3px;">
               Date : <span id="invDateDisplay">22 septembre 2026</span>
             </div>
             <div style="margin-top:8px;">
-              <span style="display:inline-block; background:#d4edda; color:#155724; border:1px solid #c3e6cb; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase;">
+              <span style="display:inline-block; background:#d4edda; color:#155724; border:1px solid #c3e6cb; font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase;">
                 ✓ PAYÉ
               </span>
             </div>
@@ -342,15 +343,15 @@
         <!-- Destinataire & Séjour -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:32px; background:#fbfaf6; padding:20px; border-radius:8px; border:1px solid #eee;">
           <div>
-            <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-transform:uppercase; color:#888; letter-spacing:0.05em; margin-bottom:8px;">Facturé à</div>
-            <div id="invCustomerNameDisplay" style="font-size:15px; font-weight:700; color:#1e1f22; margin-bottom:2px;">—</div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; text-transform:uppercase; color:#6b6b6b; letter-spacing:0.05em; margin-bottom:8px;">Facturé à</div>
+            <div id="invCustomerNameDisplay" style="font-size:16px; font-weight:700; color:#1e1f22; margin-bottom:2px;">—</div>
             <div id="invCustomerEmailDisplay" style="font-size:13px; color:#555;">—</div>
           </div>
 
           <div>
-            <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-transform:uppercase; color:#888; letter-spacing:0.05em; margin-bottom:8px;">Détails du séjour</div>
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; text-transform:uppercase; color:#6b6b6b; letter-spacing:0.05em; margin-bottom:8px;">Détails du séjour</div>
             <div id="invStayTitleDisplay" style="font-size:14px; font-weight:700; color:#1e1f22; text-transform:uppercase; margin-bottom:2px;">—</div>
-            <div id="invStayDatesDisplay" style="font-size:12.5px; color:#555; font-family:'IBM Plex Mono', monospace;">—</div>
+            <div id="invStayDatesDisplay" style="font-size:13px; color:#555; font-family:'IBM Plex Mono', monospace;">—</div>
           </div>
         </div>
 
@@ -358,16 +359,16 @@
         <table style="width:100%; border-collapse:collapse; margin-bottom:28px;">
           <thead>
             <tr style="border-bottom:2px solid #e5e5e5; text-align:left;">
-              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666;">Description</th>
-              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666; text-align:center; width:80px;">Qté</th>
-              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color:#666; text-align:right; width:130px;">Total TTC</th>
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:uppercase; color:#666;">Description</th>
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:uppercase; color:#666; text-align:center; width:80px;">Qté</th>
+              <th style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:uppercase; color:#666; text-align:right; width:130px;">Total TTC</th>
             </tr>
           </thead>
           <tbody>
             <tr style="border-bottom:1px solid #eee;">
               <td style="padding:16px 12px;">
                 <div id="invOptionDisplay" style="font-size:14px; font-weight:600; color:#1e1f22;">Réservation Séjour</div>
-                <div style="font-size:12px; color:#777; margin-top:2px;">Accès complet au séjour et prestations incluses.</div>
+                <div style="font-size:12px; color:#6b6b6b; margin-top:2px;">Accès complet au séjour et prestations incluses.</div>
               </td>
               <td style="padding:16px 12px; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:13px;">1</td>
               <td style="padding:16px 12px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:600; color:#1e1f22;" id="invAmountDisplay">0,00 €</td>
@@ -382,7 +383,7 @@
               <span>Sous-total HT :</span>
               <span id="invSubtotalDisplay" style="font-family:'IBM Plex Mono', monospace;">0,00 €</span>
             </div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12px; color:#888; border-bottom:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12px; color:#6b6b6b; border-bottom:1px solid #eee;">
               <span>TVA :</span>
               <span>Non applicable*</span>
             </div>
@@ -394,7 +395,7 @@
         </div>
 
         <!-- Mentions bas de page -->
-        <div style="border-top:1px dashed #ddd; padding-top:20px; text-align:center; font-size:11px; color:#888; line-height:1.6;">
+        <div style="border-top:1px dashed #ddd; padding-top:20px; text-align:center; font-size:12px; color:#6b6b6b; line-height:1.6;">
           <p style="margin:0 0 4px 0;">*TVA non applicable, article 293 B du Code Général des Impôts.</p>
           <p style="margin:0;">Règlement effectué. Ce document vaut attestation de paiement et facture officielle.</p>
           <p style="margin:4px 0 0 0; font-weight:600; color:#555;">Âmes Nomades — www.amesnomades.com — contact@amesnomades.com</p>
@@ -405,7 +406,6 @@
     </div>
   </div>
 
-  </main>
 
   <!-- PROCHAINS SÉJOURS -->
   <style>
@@ -423,6 +423,8 @@
   </section>
 
   <!-- FOOTER -->
+  </main>
+
   <footer class="band cream footer-dark">
     <div class="container footer">
       <div class="footer-row">
@@ -632,7 +634,7 @@
 
       if (score <= 1) return { label: "faible", color: "#cc6f53", width: "33%" };
       if (score === 2 || score === 3) return { label: "moyen", color: "#b19342", width: "66%" };
-      return { label: "fort", color: "#4f8c5b", width: "100%" };
+      return { label: "fort", color: "#3f7a4c", width: "100%" };
     }
 
     function updateAccountPasswordStrength(){
@@ -1113,12 +1115,12 @@
       }
       adminGalleryPhotosList.innerHTML = currentGalleryPhotos.map((p, idx) => `
         <div class="gal-item-card" draggable="true" data-idx="${idx}" style="border:1px solid var(--line); border-radius:6px; padding:8px; background:#f9f9f9; width:135px; text-align:center; position:relative; cursor:grab; transition:all 0.2s ease; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-          <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:4px;">
+          <div style="font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:4px;">
             <span>☰</span> #${idx+1}
           </div>
           <img src="${p.url}" alt="${p.alt || ''}" style="width:100%; height:80px; object-fit:cover; border-radius:4px; background:#eee; pointer-events:none;">
-          <div style="font-size:11px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;" title="${p.alt || ''}">${p.alt || 'Sans description'}</div>
-          <button type="button" class="btn-del-gal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:6px; font-size:11px; padding:4px 6px; margin-top:6px; cursor:pointer; width:100%;">Supprimer</button>
+          <div style="font-size:12px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;" title="${p.alt || ''}">${p.alt || 'Sans description'}</div>
+          <button type="button" class="btn-del-gal" data-idx="${idx}" style="background:#d9534f; color:#fff; border:none; border-radius:6px; font-size:12px; padding:4px 6px; margin-top:6px; cursor:pointer; width:100%;">Supprimer</button>
         </div>
       `).join("");
 
@@ -1416,7 +1418,7 @@
               </div>
 
               <div style="display:flex; align-items:center; gap:8px;">
-                <button type="button" class="btn tiny btn-view-invoice" data-booking-id="${item.id}" style="padding:6px 12px; font-size:11.5px; font-family:'IBM Plex Mono', monospace; background:#1e1f22; color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:600;">
+                <button type="button" class="btn tiny btn-view-invoice" data-booking-id="${item.id}" style="padding:6px 12px; font-size:12px; font-family:'IBM Plex Mono', monospace; background:#1e1f22; color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:600;">
                   📄 Reçu
                 </button>
               </div>
@@ -1884,7 +1886,7 @@
           const d = dateMap.get(stay.id);
           const dateStr = d?.start_date ? new Date(d.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
           const promo = getStayPromoBadge(stay.id);
-          const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; white-space:nowrap; flex-shrink:0;">${promo.badge_text}</span>` : '';
+          const promoBadge = promo ? `<span style="background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; white-space:nowrap; flex-shrink:0;">${promo.badge_text}</span>` : '';
           return `
             <a class="stay-card" href="/sejour.html?slug=${encodeURIComponent(stay.slug)}">
               <div class="stay-card-media" style="background-image:url('${img}'); background-position:center; position:relative;">
