@@ -99,6 +99,65 @@
           <div id="cartItems">
             <!-- rempli par JS -->
           </div>
+
+            <!-- Adresse de livraison (affichée si panier contient des produits) -->
+            <div id="shippingZone" class="cart-panel" style="display:none;">
+              <div class="cart-step"><span class="cart-step-num" aria-hidden="true">1</span>Adresse de livraison</div>
+
+              <!-- Affichage compact (adresse déjà enregistrée) -->
+              <div id="shippingAddressDisplay" style="display:none; font-size:13px; color:var(--text); margin-bottom:10px;">
+                <div id="shippingAddressText" style="line-height:1.6;"></div>
+                <button type="button" id="btnEditShippingAddress" style="margin-top:6px; font-size:12px; color:var(--muted); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline;">Modifier l'adresse</button>
+              </div>
+
+              <!-- Formulaire complet -->
+              <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
+                <input id="shipName" class="input" placeholder="Nom et prénom" aria-label="Nom et prénom" autocomplete="name" style="font-size:13px;">
+                <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" aria-label="Adresse" autocomplete="address-line1" style="font-size:13px;">
+                <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" aria-label="Complément d'adresse (optionnel)" autocomplete="address-line2" style="font-size:13px;">
+                <div style="display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:8px;">
+                  <input id="shipPostal" class="input" placeholder="Code postal" aria-label="Code postal" autocomplete="postal-code" inputmode="numeric" style="font-size:13px;" maxlength="10">
+                  <input id="shipCity" class="input" placeholder="Ville" aria-label="Ville" autocomplete="address-level2" style="font-size:13px;">
+                </div>
+                <select id="shipCountry" class="input" aria-label="Pays" autocomplete="country" style="font-size:13px;">
+                  <option value="FR">France</option>
+                  <option value="BE">Belgique</option>
+                  <option value="CH">Suisse</option>
+                  <option value="LU">Luxembourg</option>
+                  <option value="MC">Monaco</option>
+                  <option value="DE">Allemagne</option>
+                  <option value="ES">Espagne</option>
+                  <option value="IT">Italie</option>
+                  <option value="NL">Pays-Bas</option>
+                  <option value="GB">Royaume-Uni</option>
+                  <option value="US">États-Unis</option>
+                  <option value="CA">Canada</option>
+                </select>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <button type="button" id="btnCalcShipping" class="cart-link-btn">Calculer la livraison</button>
+                  <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Mémoriser cette adresse
+                  </label>
+                </div>
+              </div>
+
+              <div id="shippingMsg" style="font-size:12px; color:var(--muted); margin-top:6px; display:none;"></div>
+
+              <!-- Méthodes de livraison -->
+              <div id="shippingMethods" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+                <div class="cart-step"><span class="cart-step-num" aria-hidden="true">2</span>Mode de livraison</div>
+                <div id="shippingMethodsList"><div class="cart-step-hint">Les modes de livraison s'affichent dès que l'adresse est complète.</div></div>
+              </div>
+
+              <!-- Sélecteur point relais Mondial Relay -->
+              <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
+                <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
+                <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
+                <div id="relayList" style="display:none;"></div>
+                <button type="button" id="relayMore" class="cart-link-btn" style="display:none; margin-top:8px;"></button>
+                <div id="relayMsg" style="display:none; font-size:12px; color:#c00;"></div>
+              </div>
+            </div>
         </div>
 
         <!-- COLONNE DROITE : récapitulatif -->
@@ -123,65 +182,6 @@
               <button type="button" id="btnApplyPromo" class="btn tiny on-light">Appliquer</button>
             </div>
             <div id="promoCodeMsg" style="font-size:12px; margin-top:5px; display:none;"></div>
-          </div>
-
-          <!-- Adresse de livraison (affichée si panier contient des produits) -->
-          <div id="shippingZone" style="display:none; margin-bottom:16px; border-top:1px solid var(--line); padding-top:16px;">
-            <div class="cart-step"><span class="cart-step-num" aria-hidden="true">1</span>Adresse de livraison</div>
-
-            <!-- Affichage compact (adresse déjà enregistrée) -->
-            <div id="shippingAddressDisplay" style="display:none; font-size:13px; color:var(--text); margin-bottom:10px;">
-              <div id="shippingAddressText" style="line-height:1.6;"></div>
-              <button type="button" id="btnEditShippingAddress" style="margin-top:6px; font-size:12px; color:var(--muted); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline;">Modifier l'adresse</button>
-            </div>
-
-            <!-- Formulaire complet -->
-            <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
-              <input id="shipName" class="input" placeholder="Nom et prénom" aria-label="Nom et prénom" autocomplete="name" style="font-size:13px;">
-              <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" aria-label="Adresse" autocomplete="address-line1" style="font-size:13px;">
-              <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" aria-label="Complément d'adresse (optionnel)" autocomplete="address-line2" style="font-size:13px;">
-              <div style="display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:8px;">
-                <input id="shipPostal" class="input" placeholder="Code postal" aria-label="Code postal" autocomplete="postal-code" inputmode="numeric" style="font-size:13px;" maxlength="10">
-                <input id="shipCity" class="input" placeholder="Ville" aria-label="Ville" autocomplete="address-level2" style="font-size:13px;">
-              </div>
-              <select id="shipCountry" class="input" aria-label="Pays" autocomplete="country" style="font-size:13px;">
-                <option value="FR">France</option>
-                <option value="BE">Belgique</option>
-                <option value="CH">Suisse</option>
-                <option value="LU">Luxembourg</option>
-                <option value="MC">Monaco</option>
-                <option value="DE">Allemagne</option>
-                <option value="ES">Espagne</option>
-                <option value="IT">Italie</option>
-                <option value="NL">Pays-Bas</option>
-                <option value="GB">Royaume-Uni</option>
-                <option value="US">États-Unis</option>
-                <option value="CA">Canada</option>
-              </select>
-              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <button type="button" id="btnCalcShipping" class="cart-link-btn">Calculer la livraison</button>
-                <label id="saveAddressLabel" style="font-size:12px; color:var(--muted); display:none; align-items:center; gap:4px; cursor:pointer;">
-                  <input type="checkbox" id="saveAddressCheck" checked style="margin:0;"> Mémoriser cette adresse
-                </label>
-              </div>
-            </div>
-
-            <div id="shippingMsg" style="font-size:12px; color:var(--muted); margin-top:6px; display:none;"></div>
-
-            <!-- Méthodes de livraison -->
-            <div id="shippingMethods" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
-              <div class="cart-step"><span class="cart-step-num" aria-hidden="true">2</span>Mode de livraison</div>
-              <div id="shippingMethodsList"><div class="cart-step-hint">Les modes de livraison s'affichent dès que l'adresse est complète.</div></div>
-            </div>
-
-            <!-- Sélecteur point relais Mondial Relay -->
-            <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
-              <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisissez votre point relais :</div>
-              <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
-              <div id="relayList" style="display:none;"></div>
-              <button type="button" id="relayMore" class="cart-link-btn" style="display:none; margin-top:8px;"></button>
-              <div id="relayMsg" style="display:none; font-size:12px; color:#c00;"></div>
-            </div>
           </div>
 
           <div class="cart-step" id="payStep" style="display:none;"><span class="cart-step-num" aria-hidden="true">3</span>Paiement</div>
@@ -239,16 +239,29 @@
   </div>
 
   <!-- MODALE CHECKOUT STRIPE -->
-  <div class="modal" id="checkoutModal">
-    <div class="checkout-modal-inner" style="background:#fff; border-radius:12px; width:100%; max-width:600px; max-height:92vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,.2); animation:modalPop .25s cubic-bezier(.16,1,.3,1);">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px 14px;">
-        <div>
-          <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;">Paiement sécurisé</div>
-          <h3 style="margin:0; font-size:18px;">Finaliser ma commande</h3>
-        </div>
-        <button type="button" id="btnCancelCheckout" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; padding:4px 8px;">✕</button>
+  <div class="modal" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+    <div class="checkout-modal-inner">
+      <div class="checkout-head">
+        <h2 id="checkoutTitle" class="checkout-title" tabindex="-1">Finaliser ta commande</h2>
+        <button type="button" id="btnCancelCheckout" class="checkout-close" aria-label="Fermer le paiement">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
       </div>
-      <div id="checkoutLoading" style="text-align:center; padding:40px 24px; color:var(--muted); font-size:14px;">Chargement du formulaire de paiement…</div>
+      <div class="checkout-recap" id="checkoutRecap">
+        <div class="checkout-recap-row"><span id="checkoutRecapItems"></span><strong id="checkoutRecapTotal"></strong></div>
+        <div class="checkout-trust">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Paiement sécurisé par Stripe · Retours gratuits sous 14 jours
+        </div>
+      </div>
+      <div class="checkout-confirm" id="checkoutConfirm" hidden>
+        <p>Quitter le paiement ? Ton panier est conservé, mais ce que tu as saisi dans le formulaire de paiement sera effacé.</p>
+        <div class="checkout-confirm-actions">
+          <button type="button" class="btn-pay" id="checkoutStay">Continuer le paiement</button>
+          <button type="button" class="cart-link-btn" id="checkoutLeave">Quitter</button>
+        </div>
+      </div>
+      <div id="checkoutLoading" style="text-align:center; padding:40px 24px; color:var(--muted); font-size:14px;" aria-live="polite">Chargement du formulaire de paiement…</div>
       <div id="checkoutError" style="display:none; padding:16px 24px; color:#c00; font-size:14px; background:#fff5f5; border-top:1px solid #fcc;"></div>
       <div id="checkout" style="padding:0 24px 24px;"></div>
     </div>
@@ -332,6 +345,7 @@
     let selectedShipping = null; // { id, name, carrier, price, is_relay? }
     let selectedRelayPoint = null; // { id, name, street, house_number, city, postal_code, country }
     let currentUser = null;
+    let lastSelectedRelayMode = false;
 
     async function loadPromos() {
       const now = new Date().toISOString();
@@ -457,10 +471,11 @@
               <div style="font-weight:600; font-size:14px; color:var(--text);">${item.type === 'sejour' && item.slug ? `<a href="/sejour.html?s=${item.slug}" style="color:inherit; text-decoration:underline;">${item.name}</a>` : item.name}</div>
               <div style="font-size:13px; color:var(--muted); margin-top:2px;">${price} / unité</div>
               <div class="cart-item-qty">
-                <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''}>−</button>
+                <button class="cart-qty-btn" data-action="dec" data-id="${item.id}" data-type="${item.type}" ${item.quantity <= 1 ? 'disabled style="opacity:.4;"' : ''} aria-label="Retirer un exemplaire">−</button>
                 <span class="cart-qty-val">${item.quantity}</span>
-                <button class="cart-qty-btn" data-action="inc" data-id="${item.id}" data-type="${item.type}" ${isMax ? 'disabled style="opacity:.4;"' : ''}>+</button>
+                <button class="cart-qty-btn" data-action="inc" data-id="${item.id}" data-type="${item.type}" ${isMax ? 'disabled style="opacity:.4;"' : ''} aria-label="Ajouter un exemplaire">+</button>
               </div>
+              ${isMax && item.type === "product" ? `<div class="cart-item-max">C'est le dernier exemplaire disponible${item.quantity > 1 ? " (stock maximum atteint)" : ""}.</div>` : ""}
             </div>
             <div style="text-align:right;">
               <div style="font-weight:600; font-size:14px;">${lineTotal}</div>
@@ -484,7 +499,7 @@
       if (shippingZone) shippingZone.style.display = hasProducts ? "block" : "none";
 
       if (hasProducts && selectedShipping) {
-        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${selectedShipping.name}</span><span>${selectedShipping.price === 0 ? "Offerte" : formatPrice(selectedShipping.price)}</span></div>`;
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${selectedShipping.name}</span><span>${selectedShipping.price === 0 ? (/offert/i.test(selectedShipping.name) ? formatPrice(0) : "Offerte") : formatPrice(selectedShipping.price)}</span></div>`;
       } else if (hasProducts) {
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">À calculer</span></div>`;
       }
@@ -495,7 +510,7 @@
       const allDiscounts = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])];
       let totalDiscount = 0;
       for (const d of allDiscounts) {
-        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>🎁 ${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
+        summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
         totalDiscount += d.amount;
       }
 
@@ -518,7 +533,10 @@
       if (hasProducts && noteEl) {
         const days = Math.max(...cart.filter(i => i.type === "product").map(i => Number(i.deliveryDays) || 5));
         const delay = `Expédition sous ${days} jours ouvrés · livraison estimée vers le ${deliveryLabel(days + 2)}.`;
-        noteEl.textContent = selectedShipping ? delay : `${delay} Indiquez votre adresse pour connaître les frais de livraison.`;
+        const freeAlready = getProductsTotal() >= FREE_SHIPPING_THRESHOLD;
+        noteEl.textContent = selectedShipping
+          ? delay
+          : `${delay} ${freeAlready ? "Indique ton adresse pour finaliser la livraison." : "Indique ton adresse pour connaître les frais de livraison."}`;
       }
 
       updateCheckoutState(hasProducts, finalTotal);
@@ -589,7 +607,7 @@
       el.hidden = false;
       el.innerHTML = left > 0
         ? `<div class="free-ship-text">Plus que <strong>${formatPrice(left)}</strong> pour la livraison offerte</div>`
-        : `<div class="free-ship-text is-done">La livraison vous est offerte</div>`;
+        : `<div class="free-ship-text is-done">La livraison t'est offerte</div>`;
       el.innerHTML += `<div class="free-ship-track" aria-hidden="true"><span style="width:${pct}%"></span></div>`;
     }
 
@@ -800,8 +818,8 @@
         });
         const data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || "Erreur");
-        renderShippingMethods(data.methods || []);
         showShippingMsg("", "");
+        renderShippingMethods(data.methods || []);
       } catch (e) {
         console.warn("Tarifs de livraison indisponibles:", e);
         showShippingMsg("Nous n'avons pas pu calculer la livraison pour cette adresse. Vérifiez le code postal, puis réessayez dans un instant.", "error");
@@ -839,9 +857,13 @@
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
           <input type="radio" name="shippingMethod" value="${i}" style="flex-shrink:0;" ${i === 0 ? "checked" : ""}>
           <span style="flex:1;">${m.name}<br><span style="font-size:12px; color:var(--muted);">${[m.carrier, m.delivery_time].filter(Boolean).join(" · ")}</span></span>
-          <span style="font-weight:600; white-space:nowrap;">${m.price === 0 ? "Offerte" : formatPrice(m.price)}</span>
+          <span style="font-weight:600; white-space:nowrap;">${m.price === 0 ? (/offert/i.test(m.name) ? formatPrice(0) : "Offerte") : formatPrice(m.price)}</span>
         </label>`).join("");
       wrap.style.display = "block";
+      const wasRelay = !!lastSelectedRelayMode;
+      if (wasRelay && methods.length === 1 && Number(methods[0].price) === 0) {
+        showShippingMsg("Ta commande dépasse " + FREE_SHIPPING_THRESHOLD + " € : la livraison est offerte, le point relais n'est plus nécessaire.", "info");
+      }
       // Reprendre le mode choisi avant un rechargement, sinon le premier
       let saved = null;
       try { saved = JSON.parse(sessionStorage.getItem("rn_ship") || "null"); } catch {}
@@ -851,6 +873,7 @@
       radios.forEach((r, i) => { r.checked = i === startIdx; });
       const choose = (i) => {
         selectedShipping = methods[i];
+        lastSelectedRelayMode = isRelayMethod(methods[i]);
         try { sessionStorage.setItem("rn_ship", JSON.stringify({ id: methods[i].id ?? methods[i].name })); } catch {}
         const relay = isRelayMethod(methods[i]);
         toggleRelayZone(relay);
@@ -898,7 +921,7 @@
         const relayMore = document.getElementById("relayMore");
         const relayItem = (p, i) => {
           const addr = [p.street, p.house_number].filter(Boolean).join(" ");
-          const dist = p.distance != null ? ` · ${(p.distance / 1000).toFixed(1)} km` : "";
+          const dist = p.distance != null ? ` · ${(p.distance / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km` : "";
           return `<label style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
             <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;">
             <span style="flex:1;">
@@ -1052,11 +1075,50 @@
 
     // ── Fin livraison ─────────────────────────────────────────────────────────
 
-    btnCancelCheckout?.addEventListener("click", async () => {
+    async function closeCheckout() {
       if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
       checkoutContainer.innerHTML = "";
+      document.getElementById("checkoutConfirm").hidden = true;
       checkoutModal.classList.remove("active");
+      document.body.style.overflow = "";
+      btnCheckout.focus();
+    }
+    function requestCloseCheckout() {
+      // Formulaire Stripe affiché : on demande confirmation pour ne pas perdre la saisie
+      if (embeddedCheckout) {
+        const confirmBox = document.getElementById("checkoutConfirm");
+        confirmBox.hidden = false;
+        document.getElementById("checkoutStay").focus();
+      } else {
+        closeCheckout();
+      }
+    }
+    btnCancelCheckout?.addEventListener("click", requestCloseCheckout);
+    document.getElementById("checkoutLeave").addEventListener("click", closeCheckout);
+    document.getElementById("checkoutStay").addEventListener("click", () => {
+      document.getElementById("checkoutConfirm").hidden = true;
+      btnCancelCheckout.focus();
     });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !checkoutModal.classList.contains("active")) return;
+      if (!document.getElementById("checkoutConfirm").hidden) {
+        document.getElementById("checkoutConfirm").hidden = true;
+      } else {
+        requestCloseCheckout();
+      }
+    });
+
+    function fillCheckoutRecap() {
+      const cart = getCart();
+      const count = cart.reduce((s, i) => s + i.quantity, 0);
+      let label = `${count} article${count > 1 ? "s" : ""}`;
+      if (cart.some(i => i.type === "product") && selectedShipping) {
+        label += ` · ${selectedShipping.price === 0 ? "livraison offerte" : selectedShipping.name}`;
+        if (isRelayMethod(selectedShipping) && selectedRelayPoint) label += ` (${selectedRelayPoint.name})`;
+      }
+      document.getElementById("checkoutRecapItems").textContent = label;
+      document.getElementById("checkoutRecapTotal").textContent = cartTotalDisplayEl.textContent;
+    }
 
     btnCheckout?.addEventListener("click", async () => {
       checkoutMsg.textContent = "";
@@ -1093,7 +1155,11 @@
       checkoutError.style.display = "none";
       checkoutContainer.innerHTML = "";
       if (embeddedCheckout) { await embeddedCheckout.destroy(); embeddedCheckout = null; }
+      fillCheckoutRecap();
+      document.getElementById("checkoutConfirm").hidden = true;
       checkoutModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+      document.getElementById("checkoutTitle").focus();
 
       try {
         if (!stripeInstance) stripeInstance = Stripe(STRIPE_PUBLISHABLE_KEY);
@@ -1128,6 +1194,19 @@
             shippingAddr = { ...getShippingAddress(), name: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || user?.email || "" };
           }
         }
+
+        // Récapitulatif gardé pour la page merci (même onglet, après le retour de Stripe)
+        try {
+          const productDays = cart.filter(i => i.type === "product").map(i => Number(i.deliveryDays) || 5);
+          sessionStorage.setItem("rn_last_order", JSON.stringify({
+            at: Date.now(),
+            items: cart.map(i => ({ name: i.name, qty: i.quantity, price: Number(i.price) || 0, type: i.type, image: i.image || null })),
+            total: cartTotalDisplayEl.textContent,
+            shipping: hasProducts && selectedShipping ? (selectedShipping.price === 0 ? "Livraison offerte" : `${selectedShipping.name} · ${formatPrice(selectedShipping.price)}`) : null,
+            relay: hasProducts && selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint ? selectedRelayPoint.name : null,
+            deliveryDays: productDays.length ? Math.max(...productDays) : null,
+          }));
+        } catch {}
 
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
           method: "POST",

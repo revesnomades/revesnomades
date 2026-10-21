@@ -2711,3 +2711,145 @@ footer.band.cream{
 .pay-bar-total strong { font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
 .pay-bar .btn-pay { flex: 1; width: auto; }
 @media (prefers-reduced-motion: reduce) { .btn-pay:active { transform: none; } }
+
+/* ── Fenêtre de paiement ── */
+.checkout-modal-inner {
+  background: var(--white);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+  animation: modalPop .25s cubic-bezier(.16,1,.3,1);
+}
+.checkout-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 12px;
+}
+.checkout-title {
+  margin: 0;
+  font-family: 'SegoCustom', serif;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.2;
+  text-transform: none;
+  color: var(--text);
+}
+.checkout-title:focus { outline: none; }
+.checkout-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color .16s ease, color .16s ease;
+}
+@media (hover: hover) and (pointer: fine) { .checkout-close:hover { background: var(--line); color: var(--text); } }
+.checkout-recap {
+  margin: 0 24px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--cream);
+}
+.checkout-recap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.checkout-recap-row strong { font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.checkout-trust {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.checkout-confirm {
+  margin: 0 24px 16px;
+  padding: 14px;
+  border: 1px solid var(--text);
+  border-radius: 4px;
+  background: var(--white);
+}
+.checkout-confirm p { margin: 0 0 12px; font-size: 14px; color: var(--text); }
+.checkout-confirm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.checkout-confirm-actions .btn-pay { width: auto; flex: 1 1 200px; }
+@media (max-width: 600px) {
+  #checkoutModal { padding: 0 !important; align-items: stretch !important; }
+  .checkout-modal-inner { max-width: none; max-height: none; height: 100%; border-radius: 0; }
+}
+
+/* ── Panier : bloc adresse et livraison dans la colonne principale ── */
+.cart-panel {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.6);
+}
+.cart-panel #shippingAddressForm,
+.cart-panel #shippingAddressDisplay { max-width: 560px; }
+@media (max-width: 720px) {
+  .cart-panel { padding: 18px 16px; }
+}
+
+/* ── Page merci : récapitulatif de commande ── */
+.order-recap {
+  max-width: 460px;
+  margin: 28px auto 0;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  text-align: left;
+}
+.order-recap-title {
+  margin: 0 0 12px;
+  font-family: 'SegoCustom', serif;
+  font-weight: 400;
+  font-size: 22px;
+  text-transform: none;
+}
+.order-recap-items { list-style: none; margin: 0 0 8px; padding: 0; }
+.order-recap-items li {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.order-recap-items img, .order-recap-noimg { width: 56px; height: 56px; object-fit: cover; background: var(--line); display: block; }
+.order-recap-price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.order-recap-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.order-recap-line span:last-child { text-align: right; }
+.order-recap-total { color: var(--text); font-size: 16px; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
+.order-recap-total strong { font-variant-numeric: tabular-nums; }
+.order-recap-ref { margin-top: 8px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Champs du panier en 16px sur mobile : évite le zoom automatique d'iOS */
+@media (max-width: 900px) {
+  .cart-panel .input, #promoCodeInput { font-size: 16px !important; }
+}
+.cart-item-max { margin-top: 6px; font-size: 12px; color: var(--muted); }

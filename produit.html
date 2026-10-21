@@ -768,7 +768,7 @@
             <span class="product-price">${formatPrice(displayPrice)}</span>
             ${promoPrice !== null ? `<span class="product-price-original">${formatPrice(p.price)}</span>` : ""}
             ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
-            ${isComingSoon ? `<span class="product-soon-badge is-sold-out">SOLD OUT</span>` : isSoldOut ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
+            ${isComingSoon ? `<span class="product-soon-badge is-sold-out">Épuisé</span>` : isSoldOut ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
           </div>
 
           <div class="product-divider"></div>

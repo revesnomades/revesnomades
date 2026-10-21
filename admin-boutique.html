@@ -165,7 +165,7 @@
 
         <div style="display:flex; align-items:center; gap:10px; padding:10px 0;">
           <input id="productComingSoon" type="checkbox" style="width:18px; height:18px; cursor:pointer; accent-color: var(--accent);">
-          <label for="productComingSoon" style="cursor:pointer; font-size:.9rem;">SOLD OUT <span class="muted-small">(affiche « SOLD OUT » et masque le bouton d'achat, quel que soit le stock)</span></label>
+          <label for="productComingSoon" style="cursor:pointer; font-size:.9rem;">Épuisé <span class="muted-small">(affiche « Épuisé » et masque le bouton d'achat, quel que soit le stock)</span></label>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -351,7 +351,7 @@
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
-        const stockLabel = p.coming_soon === true ? " · <strong style='color:#1e1f22;'>SOLD OUT</strong>" : p.stock === 0 ? " · <strong style='color:#888;'>Bientôt disponible</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
+        const stockLabel = p.coming_soon === true ? " · <strong style='color:#1e1f22;'>Épuisé</strong>" : p.stock === 0 ? " · <strong style='color:#888;'>Bientôt disponible</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
         const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
         return `
         <div class="product-card">

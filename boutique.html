@@ -562,7 +562,7 @@
           ${favButtonHtml(p.id, "on-card")}
           <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="display:block; text-decoration:none;">
             <img class="shop-image" src="${imgSrc}" alt="${String(p.name).replace(/"/g, '&quot;')}" loading="${idx < 4 ? 'eager' : 'lazy'}" decoding="async">
-            ${isComingSoon ? `<div class="sold-out-badge" style="background:var(--sold-out);">SOLD OUT</div>` : isSoldOut ? `<div class="sold-out-badge" style="background:var(--soon);">Bientôt disponible</div>` : ''}
+            ${isComingSoon ? `<div class="sold-out-badge" style="background:var(--sold-out);">Épuisé</div>` : isSoldOut ? `<div class="sold-out-badge" style="background:var(--soon);">Bientôt disponible</div>` : ''}
             ${promoBadge}
             <div class="shop-image-overlay"></div>
 
@@ -570,7 +570,7 @@
               <div style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">${p.name}</div>
               <div style="font-size:16px; font-weight:600; margin-top:4px;">${formatPrice(p.price)}</div>
               <div style="font-size:13px; margin-top:6px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; opacity:0.95;">${p.description || "Aucune description pour le moment."}</div>
-              ${p.delivery_info ? `<div style="font-size:12px; margin-top:6px; opacity:0.9;">📦 ${p.delivery_info}</div>` : ''}
+              ${p.delivery_info ? `<div style="font-size:12px; margin-top:6px; opacity:0.9;">${p.delivery_info}</div>` : ''}
 
               <div style="margin-top:12px;">
                 ${isComingSoon || isSoldOut
@@ -592,7 +592,7 @@
             <div class="shop-desc" id="desc-${p.id}">${p.description}</div>
             <button type="button" class="btn-toggle-desc" id="toggle-${p.id}" style="display:none; background:none; border:none; padding:0; margin-top:2px; margin-bottom:6px; font-size:12px; font-weight:600; color:var(--text); text-decoration:underline; cursor:pointer;" onclick="window.toggleProductDesc('${p.id}', this)">Voir plus +</button>
           ` : ''}
-          ${p.delivery_info ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">📦 ${p.delivery_info}</div>` : ''}
+          ${p.delivery_info ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">${p.delivery_info}</div>` : ''}
           ${isComingSoon || isSoldOut
             ? `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.openRestockModal('${p.id}', '${p.name.replace(/'/g, "\\'")}')"><svg class="bell-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Me prévenir</button>`
             : `<button type="button" class="btn tiny on-light" style="margin-top:8px; width:100%; padding:6px; font-size:12px; border:1px solid var(--line);" onclick="window.addToCart({type:'product',id:'${p.id}',name:'${p.name.replace(/'/g, "\\'")}',price:${p.price||0},maxStock:${p.stock ?? 99},image:'${imgSrc}',deliveryDays:5})">+ Ajouter au panier</button>`
@@ -703,7 +703,7 @@
       }
 
       restockMsg.style.color = "#4f8c5b";
-      restockMsg.textContent = "✨ Super ! Vous recevrez un email dès le retour en stock.";
+      restockMsg.textContent = "C'est noté ! Tu recevras un email dès le retour en stock.";
       setTimeout(() => {
         restockModal.classList.remove("active");
       }, 2500);

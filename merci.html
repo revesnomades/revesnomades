@@ -82,28 +82,29 @@
     <div class="container" style="min-height: 85vh; display:flex; align-items:center; padding: calc(var(--navH) + 40px) 0 70px;">
       <div class="reveal" data-delay="0" style="width:100%; text-align:center;">
         <h1 style="font-family:'SegoCustom'; font-weight:500; font-size: clamp(34px, 4.2vw, 56px); margin:0;">
-          Merci ✨
+          Merci
         </h1>
 
-        <p style="max-width: 72ch; margin: 14px auto 0; color: var(--muted);">
-          Votre paiement a bien été pris en compte.
-          Vous allez recevoir un email de confirmation de la part de Stripe.
+        <p id="merciLead" style="max-width: 60ch; margin: 14px auto 0; color: var(--muted);">
+          Ton paiement est bien enregistré. Tu vas recevoir un email de confirmation dans quelques minutes.
         </p>
 
-        <p id="merciType" style="max-width: 72ch; margin: 12px auto 0; color: var(--muted);">
-          Si votre achat concerne un séjour, un email complémentaire vous sera envoyé dès que le séjour sera validé.
+        <p id="merciType" style="max-width: 60ch; margin: 12px auto 0; color: var(--muted);">
+          Si ton achat concerne un séjour, tu recevras un second email dès que le séjour sera confirmé.
         </p>
+
+        <div class="order-recap" id="orderRecap" hidden></div>
 
         <div style="margin-top: 22px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
           <a class="btn on-light" href="index.html">Retour à l’accueil</a>
           <a class="btn on-light" href="compte.html" id="merciAccountBtn">Accéder à mon compte</a>
         </div>
         <p id="merciGuestNote" style="display:none; max-width:60ch; margin:14px auto 0; font-size:14px; color:var(--muted);">
-          Créez votre compte avec la même adresse email pour retrouver cette commande et suivre vos prochaines réservations.
+          Crée ton compte avec la même adresse email pour retrouver cette commande et suivre tes prochaines réservations.
         </p>
 
         <p style="margin-top:18px; font-size:12.5px; color: var(--muted);">
-          Une question ? Écrivez-nous : <a href="/index.html#contact" style="text-decoration:underline; text-underline-offset:3px;">contact@amesnomades.com</a>
+          Une question ? Écris-nous à <a href="mailto:contact@amesnomades.com" style="text-decoration:underline; text-underline-offset:3px;">contact@amesnomades.com</a>
         </p>
       </div>
     </div>
@@ -173,11 +174,52 @@
   </script>
 
   <script type="module">
-    import { initCartBadge, clearCart } from "/assets/js/cart.js?v=3";
+    import { initCartBadge, clearCart, formatPrice } from "/assets/js/cart.js?v=3";
     import { supabase } from "/assets/js/supabaseClient.js?v=3";
-    clearCart();
+
+    const params = new URLSearchParams(location.search);
+    const sessionId = params.get("session_id") || "";
+    const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    function deliveryDate(businessDays) {
+      const d = new Date();
+      let left = businessDays;
+      while (left > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) left--; }
+      return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    }
+
+    // On ne vide le panier que si on revient vraiment d'un paiement
+    if (sessionId) {
+      let order = null;
+      try { order = JSON.parse(sessionStorage.getItem("rn_last_order") || "null"); } catch {}
+      if (order && Date.now() - order.at < 6 * 3600 * 1000) {
+        const hasProducts = order.items.some(i => i.type === "product");
+        const hasStays = order.items.some(i => i.type !== "product");
+        document.getElementById("merciType").hidden = !hasStays;
+        if (hasProducts && !hasStays) {
+          document.getElementById("merciLead").textContent = "Ta commande est bien enregistrée. Tu vas recevoir un email de confirmation dans quelques minutes, puis un autre au moment de l'expédition.";
+        }
+        const recap = document.getElementById("orderRecap");
+        recap.innerHTML = `
+          <h2 class="order-recap-title">Ta commande</h2>
+          <ul class="order-recap-items">
+            ${order.items.map(i => `
+              <li>
+                ${i.image ? `<img src="${escapeHtml(i.image)}" alt="" width="56" height="56" loading="lazy">` : `<span class="order-recap-noimg" aria-hidden="true"></span>`}
+                <span class="order-recap-name">${escapeHtml(i.name)}${i.qty > 1 ? ` × ${i.qty}` : ""}</span>
+                <span class="order-recap-price">${formatPrice(i.price * i.qty)}</span>
+              </li>`).join("")}
+          </ul>
+          ${order.shipping ? `<div class="order-recap-line"><span>Livraison</span><span>${escapeHtml(order.shipping)}${order.relay ? ` · ${escapeHtml(order.relay)}` : ""}</span></div>` : ""}
+          ${hasProducts && order.deliveryDays ? `<div class="order-recap-line"><span>Livraison estimée</span><span>vers le ${deliveryDate(order.deliveryDays + 2)}</span></div>` : ""}
+          <div class="order-recap-line order-recap-total"><span>Total payé</span><strong>${escapeHtml(order.total)}</strong></div>
+          <div class="order-recap-ref">Référence : ${escapeHtml(sessionId.slice(-10).toUpperCase())}</div>`;
+        recap.hidden = false;
+      }
+      clearCart();
+      try { sessionStorage.removeItem("rn_ship"); sessionStorage.removeItem("rn_last_order"); } catch {}
+    }
     initCartBadge();
-    try { sessionStorage.removeItem("rn_ship"); } catch {}
 
     // Client sans compte : on lui propose d'en créer un après l'achat
     const { data: { user } } = await supabase.auth.getUser();

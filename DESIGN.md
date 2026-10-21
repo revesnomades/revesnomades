@@ -153,7 +153,7 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Texte `#1e1f22`** : tout le texte principal, les boutons pleins.
 - **Gris secondaire `#62666e`** (`--muted`) : textes d'appoint. Assombri depuis `#6c7078` pour atteindre 4,5:1 sur crème et sur `#ede5de`.
 - **Terracotta `#cc6f53`** (`--accent`) : favoris actifs, compteurs du panier et des favoris. À réserver aux signaux ; ne jamais l'utiliser pour du texte courant (3,2:1 sur crème).
-- **Gris « Bientôt disponible » `#6b6b6b`** (`--soon`) et **noir « SOLD OUT » `#1e1f22`** (`--sold-out`) : badges de disponibilité, texte blanc (≥ 5,3:1).
+- **Gris « Bientôt disponible » `#6b6b6b`** (`--soon`) et **noir « Épuisé » `#1e1f22`** (`--sold-out`) : badges de disponibilité, texte blanc (≥ 5,3:1).
 - **Menu** : fond `rgba(14,15,17,.62)` dès le chargement sur les pages claires (`body.on-light`), pour garder le texte blanc lisible (≥ 5,1:1). Sur l'accueil, plus transparent au-dessus de la photo.
 - **Pied de page** : `rgba(14,15,17,.72)`, texte blanc à 72–92 %.
 - **Promo `#cc4444`** : badges de réduction uniquement. **Erreur `#cc0000`** sur fond `#fff5f5` : messages d'erreur des formulaires.
