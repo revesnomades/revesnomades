@@ -63,6 +63,15 @@ export function setMaxStock(id, type, max) {
   saveCart(cart.filter(i => i.quantity > 0));
 }
 
+// Met à jour les champs d'un article (ex. prix relu en base) sans toucher à la quantité
+export function updateCartItem(id, type, patch) {
+  const cart = getCart();
+  const item = cart.find(i => i.id === id && i.type === type);
+  if (!item) return;
+  Object.assign(item, patch);
+  saveCart(cart);
+}
+
 export function getCartCount() {
   return getCart().reduce((sum, i) => sum + i.quantity, 0);
 }
