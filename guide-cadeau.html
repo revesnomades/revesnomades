@@ -52,7 +52,7 @@
       text-align: center;
     }
     .guide-card h2, .guide-card h1.as-h2 {
-      font-size: clamp(20px, 3vw, 26px);
+      font-size: clamp(22px, 3vw, 26px);
       margin-bottom: 24px;
       font-weight: 400;
     }
@@ -78,6 +78,10 @@
     .guide-card .input:focus {
       outline: none;
       border-color: var(--text);
+    }
+    .guide-card .input:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
     }
     .guide-card .btn {
       width: 100%;
@@ -115,7 +119,7 @@
     }
     .brand-header {
       font-family: 'SegoCustom', 'Georgia', serif;
-      font-size: clamp(24px, 4.5vw, 38px);
+      font-size: clamp(22px, 4.5vw, 42px);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.08em;

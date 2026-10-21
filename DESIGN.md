@@ -37,6 +37,9 @@ colors:
   border-soft: "#e5e5e5"
   border-light: "#eeeeee"
   border-mid: "#dddddd"
+  banner-default: "#1a1a1a"
+  links-gold: "#d4c78d"
+  links-ink: "#4b4532"
 typography:
   display-hero:
     fontFamily: "SegoCustom, serif"
@@ -83,6 +86,16 @@ typography:
     fontFamily: "Glacial Indifference, Outfit, Segoe UI, Arial, sans-serif"
     fontSize: "13px"
     lineHeight: 1.6
+  speaker-name:
+    fontFamily: "Seasons, serif"
+    fontSize: "22px"
+    fontWeight: 400
+  google-button:
+    fontFamily: "Roboto, Arial, sans-serif"
+    fontSize: "14px"
+  emoji-decor:
+    fontFamily: "inherit"
+    fontSize: "48px"
   label:
     fontFamily: "IBM Plex Mono, monospace"
     fontSize: "12px"
@@ -92,6 +105,7 @@ rounded:
   sm: "2px"
   md: "3px"
   control: "4px"
+  control-account: "6px"
   dialog: "8px"
   modal: "12px"
   pill: "9999px"
@@ -144,6 +158,7 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Pied de page** : `rgba(14,15,17,.72)`, texte blanc à 72–92 %.
 - **Promo `#cc4444`** : badges de réduction uniquement. **Erreur `#cc0000`** sur fond `#fff5f5` : messages d'erreur des formulaires.
 - **Pied de page clair `#ede5de`** : variante de pied de page sur certaines pages.
+- **Page liens** : fond doré `#d4c78d`, texte `#4b4532` (≥ 5:1). **Bannière promo** : `#1a1a1a` par défaut, réglable dans l'admin.
 - **Succès** `#3f7a4c` (bouton, texte blanc 5,1:1), messages de succès sur `#d4edda` ; **danger** `#d9534f` pour les actions destructrices de l'espace compte.
 - **Sable** `#faf6ee` → `#ede0c8` et **sauge** `#8a9a86` : dégradés et accents de l'accueil. Jamais pour du texte courant.
 
@@ -153,7 +168,8 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Texte courant** : Glacial Indifference 300, interlignage 1,75, léger espacement (0,01em).
 - **Libellés de boutons et filtres** : IBM Plex Mono 11–13px, capitales, espacement 0,08–0,12em.
 - Les prix utilisent des chiffres tabulaires quand ils sont alignés en colonne.
-- **Échelle des tailles** : 12 · 13 · 14 · 16 · 18 · 22 · 26 · 34 · 42 px, plus 56px pour le seul grand titre de l'accueil. Rien sous 12px ; 12px est réservé aux libellés, badges et mentions.
+- **Échelle des tailles** : 12 · 13 · 14 · 16 · 18 · 22 · 26 · 34 · 42 · 56 px. 56px est réservé aux grands titres de page (accueil, séjour, événement, merci) ; les titres fluides (`clamp`) partent et arrivent sur ces niveaux.
+- **Exceptions assumées** : Seasons (22px) pour les noms des intervenants sur la page séjour ; Roboto pour le bouton « Continuer avec Google » (charte Google) ; emoji décoratif en 48px sur la page de confirmation de séjour. Rien sous 12px ; 12px est réservé aux libellés, badges et mentions.
 
 ## Layout
 

@@ -43,12 +43,12 @@
     }
     .links-title {
       font-family: "SegoCustom", serif;
-      font-size: 32px;
+      font-size:34px;
       margin-bottom: 8px;
       text-transform: none;
     }
     .links-desc {
-      font-size: 15px;
+      font-size:16px;
       color: #4b4532;
       margin-bottom: 30px;
     }
@@ -67,8 +67,12 @@
       text-transform: uppercase;
       letter-spacing: .05em;
       font-size: 14px;
-      transition: all 0.2s ease;
+      transition: background-color .2s ease, color .2s ease, transform .2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow .2s ease;
       text-decoration: none;
+    }
+    .link-btn:active { transform: scale(0.98); }
+    @media (prefers-reduced-motion: reduce) {
+      .link-btn:hover, .link-btn:active { transform: none; }
     }
     .link-btn:hover {
       background: var(--text);
