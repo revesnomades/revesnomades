@@ -161,6 +161,11 @@
       padding: 2px 8px;
       border-radius: 2px;
     }
+    .product-promo-note {
+      margin: -12px 0 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
     .product-divider {
       height: 1px;
       background: var(--line);
@@ -720,16 +725,19 @@
       const isUnavailable = isComingSoon || isSoldOut;
       const maxQty = p.stock ?? 99;
 
-      // Prix promo
+      // Prix promo — même calcul que le panier (getAutoDiscounts) :
+      // un pourcentage baisse le prix unitaire, un montant en euros est déduit une seule fois de la commande
       let promoPrice = null;
       let promoBadgeText = "";
+      let promoNote = "";
       if (promo) {
-        if (promo.type === "percent" || promo.type === "early_bird") {
+        const isEuro = promo.type === "fixed" || promo.value_unit === "euro";
+        if ((promo.type === "percent" || promo.type === "early_bird") && !isEuro) {
           promoPrice = p.price * (1 - promo.value / 100);
           promoBadgeText = `−${promo.value}%`;
-        } else if (promo.type === "fixed") {
-          promoPrice = p.price - promo.value;
+        } else if (isEuro && (promo.type === "fixed" || promo.type === "percent" || promo.type === "early_bird")) {
           promoBadgeText = `−${formatPrice(promo.value)}`;
+          promoNote = `${formatPrice(promo.value)} de remise sur votre commande, déduits une seule fois dans le panier.`;
         }
         if (promo.badge_text) promoBadgeText = promo.badge_text;
       }
@@ -770,6 +778,7 @@
             ${promoBadgeText ? `<span class="product-promo-badge">${promoBadgeText}</span>` : ""}
             ${isComingSoon ? `<span class="product-soon-badge is-sold-out">SOLD OUT</span>` : isSoldOut ? `<span class="product-soon-badge">Bientôt disponible</span>` : ""}
           </div>
+          ${promoNote ? `<p class="product-promo-note">${promoNote}</p>` : ""}
 
           <div class="product-divider"></div>
 
