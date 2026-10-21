@@ -969,7 +969,8 @@
             return;
           }
           for (let i = 0; i < canAdd; i++) {
-            addToCart({ type: "product", id: p.id, name: p.name, price: displayPrice, maxStock: maxQty, image: imgSrc, deliveryDays: 5, weight_grams: p.weight_grams || undefined });
+            // Prix catalogue : la promo est appliquée une seule fois, par le panier
+            addToCart({ type: "product", id: p.id, name: p.name, price: Number(p.price) || 0, maxStock: maxQty, image: imgSrc, deliveryDays: 5, weight_grams: p.weight_grams || undefined });
           }
           if (window.MetaPixel) window.MetaPixel.trackAddToCart(p.name, p.id, displayPrice);
           showToast(canAdd < qty

@@ -307,7 +307,7 @@
   <script src="assets/js/main.js?v=3"></script>
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
-    import { getCart, removeFromCart, setQuantity, setMaxStock, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart, formatPrice, getProductsTotal, FREE_SHIPPING_THRESHOLD } from "./assets/js/cart.js?v=3";
+    import { getCart, removeFromCart, setQuantity, setMaxStock, updateCartItem, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart, formatPrice, getProductsTotal, FREE_SHIPPING_THRESHOLD } from "./assets/js/cart.js?v=4";
 
     // TODO: remplacer par votre clé publique Stripe
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51SnOSB55WblsnY7Y9C0dRSx8r8H3JqpmSmvUsOYscigEPRyWNFDiSVxpkOny9D1YOt4u6va4XwciBM6moGDwiRX100nZDtd7Rq";
@@ -345,6 +345,24 @@
         activePromos = data || [];
       } catch { activePromos = []; }
       renderCart();
+    }
+
+    // Le panier garde le prix catalogue : les promos sont appliquées une seule fois, ici.
+    // On relit prix et poids en base (paniers anciens enregistrés avec un prix déjà remisé).
+    async function syncProductPrices() {
+      const ids = getCart().filter(i => i.type === "product").map(i => i.id);
+      if (!ids.length) return;
+      try {
+        const { data } = await supabase.from("products").select("id, price, weight_grams").in("id", ids);
+        for (const p of data || []) {
+          const item = getCart().find(i => i.id === p.id && i.type === "product");
+          const price = Number(p.price) || 0;
+          const weight = p.weight_grams || undefined;
+          if (item && (Number(item.price) !== price || item.weight_grams !== weight)) {
+            updateCartItem(p.id, "product", { price, weight_grams: weight });
+          }
+        }
+      } catch (e) { console.warn("Prix du panier non resynchronisés:", e); }
     }
 
     function getAutoDiscounts(cart) {
@@ -1125,6 +1143,8 @@
             discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
             shippingAmount: hasProducts && selectedShipping ? Math.round(selectedShipping.price * 100) : 0,
             shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
+            shippingMethodId: hasProducts && selectedShipping ? String(selectedShipping.id ?? selectedShipping.name) : null,
+            promoCode: codeDiscount ? appliedPromoCode : null,
             shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
@@ -1149,6 +1169,9 @@
           checkoutError.textContent = left > 0
             ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté votre panier : vérifiez-le, puis relancez le paiement.`
             : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de votre panier. Vérifiez-le, puis relancez le paiement.`;
+        } else if ((err.data?.code === "shipping" || err.data?.code === "price") && err.data.error) {
+          // Livraison ou tarif séjour refusés par le serveur : son message dit quoi faire
+          checkoutError.textContent = err.data.error;
         } else {
           checkoutError.textContent = "Le formulaire de paiement n'a pas pu s'ouvrir. Réessayez dans un instant ; si le problème continue, écrivez-nous à contact@amesnomades.com.";
         }
@@ -1185,7 +1208,7 @@
 
     window.addEventListener("cart:updated", renderCart);
     initCartBadge();
-    loadPromos().then(() => { loadSuggestions(); loadSavedAddressAndUser(); });
+    Promise.all([syncProductPrices(), loadPromos()]).then(() => { loadSuggestions(); loadSavedAddressAndUser(); });
 
     // Carrousel mobile (JS inline pour fiabilité iOS)
     function setupMobileCarousel(gridId, dotsId, cardWidth) {
