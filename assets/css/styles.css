@@ -38,7 +38,10 @@
   --cream:#faf5dc;
   --white:#fffdf3;
   --text:#1e1f22;
-  --muted:#6c7078;
+  --muted:#62666e;
+  --accent:#cc6f53;
+  --soon:#6b6b6b;
+  --sold-out:#1e1f22;
   --line: rgba(30,31,34,.16);
 
   --navBg: rgba(14, 15, 17, .24);
@@ -124,7 +127,6 @@ select, option{ color: var(--text) !important; }
   font-family: inherit;
 }
 .btn:hover{
-  transform: translateY(-1px);
   background: var(--btnHoverBg, #fff);
   color: var(--btnHoverColor, #000);
   border-color: transparent;
@@ -180,6 +182,9 @@ a.btn-loading::after,
 }
 .nav:hover{ background: var(--navBgHover); }
 .nav.is-scrolled{ background: var(--navBgScrolled); }
+/* Pages claires : le menu garde un fond assez sombre pour rester lisible dès le chargement */
+body.on-light .nav,
+body.on-light .nav:hover{ background: var(--navBgScrolled); }
 
 /* -------- nav-inner (déclaration unique fusionnée) -------- */
 .nav-inner{
@@ -462,7 +467,7 @@ html.js .text-reveal.reveal {
   color: var(--text);
   background: transparent;
   text-decoration: none;
-  transition: all 0.25s ease;
+  transition: transform .25s cubic-bezier(0.23, 1, 0.32, 1), background-color .25s ease, color .25s ease, border-color .25s ease;
   cursor: pointer;
 }
 .btn-arrow-pill:hover {
@@ -797,7 +802,7 @@ footer.band.cream{
   background: #ede5de;
 }
 .footer-dark{
-  background: rgba(14, 15, 17, .62) !important;
+  background: rgba(14, 15, 17, .72) !important;
   color: rgba(255,255,255,.92);
 }
 .footer-dark .legal{
@@ -1253,7 +1258,8 @@ footer.band.cream{
   -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .22s ease;
+  visibility: hidden;
+  transition: opacity .22s ease, visibility 0s linear .22s;
   z-index: 120;
 }
 .mobile-menu{
@@ -1283,6 +1289,8 @@ footer.band.cream{
   background: rgba(0,0,0,.04);
 }
 .nav.is-menu-open .mobile-drawer{
+  visibility: visible;
+  transition: opacity .22s ease, visibility 0s;
   opacity: 1;
   pointer-events: auto;
 }
@@ -1719,7 +1727,7 @@ footer.band.cream{
   font-size: 14px;
   color: var(--muted);
   pointer-events: none;
-  transition: all .18s ease;
+  transition: top .18s ease-out, transform .18s ease-out, font-size .18s ease-out, color .18s ease;
   background: transparent;
   white-space: nowrap;
 }
@@ -2527,7 +2535,7 @@ footer.band.cream{
   cursor: pointer;
   transition: transform .15s ease, color .15s ease;
 }
-.fav-btn:hover { transform: scale(1.08); }
+
 .fav-btn svg {
   width: 18px;
   height: 18px;
@@ -2536,7 +2544,7 @@ footer.band.cream{
   stroke-width: 1.8;
   stroke-linejoin: round;
 }
-.fav-btn.is-fav { color: #cc6f53; }
+.fav-btn.is-fav { color: var(--accent); }
 .fav-btn.is-fav svg { fill: currentColor; }
 .fav-btn.on-card {
   position: absolute;
@@ -2549,4 +2557,61 @@ footer.band.cream{
   .nav-inner { gap: 4px; }
   .mobile-cart-btn,
   .mobile-fav-btn { width: 32px; }
+}
+
+/* ── Focus clavier visible partout (souris non concernée) ── */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* ── Zones tactiles ≥ 44px sans changer l'apparence ── */
+.cart-qty-btn,
+.cart-remove-btn,
+.fav-btn,
+.mobile-cart-btn,
+.mobile-fav-btn { position: relative; }
+.cart-qty-btn::after,
+.cart-remove-btn::after,
+.fav-btn::after,
+.mobile-cart-btn::after,
+.mobile-fav-btn::after {
+  content: "";
+  position: absolute;
+}
+.cart-qty-btn::after { inset: -9px; }
+.cart-remove-btn::after { inset: -11px -13px; }
+.fav-btn::after { inset: -4px; }
+.mobile-cart-btn::after,
+.mobile-fav-btn::after { inset: -3px 0; }
+
+/* Icône cloche des boutons « Me prévenir » */
+.bell-ico { display: inline-block; vertical-align: -2px; margin-right: 4px; }
+
+/* ── Micro-interactions ── */
+.btn-add-cart, .qty-btn, .cart-qty-btn { transition-property: opacity, background-color, transform; transition-duration: .16s; transition-timing-function: ease-out; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-1px); }
+  .fav-btn:hover { transform: scale(1.08); }
+}
+.btn:not(:disabled):active,
+.btn-add-cart:not(:disabled):active,
+.qty-btn:not(:disabled):active,
+.cart-qty-btn:not(:disabled):active { transform: scale(0.97); }
+.fav-btn:active { transform: scale(0.9); }
+
+/* ── Mouvement réduit : on garde les fondus, on retire les déplacements ── */
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal {
+    transform: none;
+    transition: opacity .3s ease;
+    transition-delay: 0s;
+  }
+  .btn:hover, .btn-arrow-pill:hover, .fav-btn:hover,
+  .btn:active, .btn-add-cart:active, .qty-btn:active, .cart-qty-btn:active, .fav-btn:active { transform: none; }
+  html { scroll-behavior: auto; }
+}
+
+@media (pointer: coarse) {
+  .btn, .btn-add-cart { min-height: 44px; }
 }

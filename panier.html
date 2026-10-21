@@ -102,7 +102,7 @@
 
         <!-- COLONNE DROITE : récapitulatif -->
         <aside style="border:1px solid var(--line); padding:24px; background:rgba(255,255,255,.6); position:sticky; top:calc(var(--navH) + 20px);">
-          <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 18px;">Récapitulatif</h3>
+          <h2 style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 18px;">Récapitulatif</h2>
 
           <div id="summaryLines" style="font-size:13.5px; color:var(--muted);"></div>
 
@@ -135,13 +135,13 @@
 
             <!-- Formulaire complet -->
             <div id="shippingAddressForm" style="display:flex; flex-direction:column; gap:8px;">
-              <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;">
-              <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" style="font-size:13px;">
+              <input id="shipLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" aria-label="Adresse" autocomplete="address-line1" style="font-size:13px;">
+              <input id="shipLine2" class="input" placeholder="Complément d'adresse (optionnel)" aria-label="Complément d'adresse (optionnel)" autocomplete="address-line2" style="font-size:13px;">
               <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
-                <input id="shipPostal" class="input" placeholder="Code postal" style="font-size:13px;" maxlength="10">
-                <input id="shipCity" class="input" placeholder="Ville" style="font-size:13px;">
+                <input id="shipPostal" class="input" placeholder="Code postal" aria-label="Code postal" autocomplete="postal-code" inputmode="numeric" style="font-size:13px;" maxlength="10">
+                <input id="shipCity" class="input" placeholder="Ville" aria-label="Ville" autocomplete="address-level2" style="font-size:13px;">
               </div>
-              <select id="shipCountry" class="input" style="font-size:13px;">
+              <select id="shipCountry" class="input" aria-label="Pays" autocomplete="country" style="font-size:13px;">
                 <option value="FR">France</option>
                 <option value="BE">Belgique</option>
                 <option value="CH">Suisse</option>
@@ -186,7 +186,7 @@
           <p id="checkoutMsg" style="margin-top:10px; font-size:12.5px; color:var(--muted);"></p>
 
           <div style="margin-top:16px; text-align:center;">
-            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline;">← Continuer mes achats</a>
+            <a href="/boutique.html" style="font-size:12.5px; color:var(--muted); text-decoration:underline; padding:14px 0;">← Continuer mes achats</a>
             <p style="margin-top:12px; font-size:11px; color:var(--muted); text-align:center;">En passant commande, vous acceptez nos <a href="/cgv.html" style="text-decoration:underline; color:var(--muted);">CGV</a> et notre <a href="/politique-retours.html" style="text-decoration:underline; color:var(--muted);">politique de retours</a>.</p>
           </div>
         </aside>
