@@ -22,7 +22,27 @@ colors:
   ink: "#000000"
   overlay: "rgba(0,0,0,.25)"
   filter-border: "rgba(0,0,0,.15)"
+  success: "#3f7a4c"
+  success-bg: "#d4edda"
+  success-text: "#155724"
+  success-border: "#c3e6cb"
+  danger: "#d9534f"
+  gold: "#b19342"
+  sand-50: "#faf6ee"
+  sand-100: "#f5ebd7"
+  sand-200: "#ede0c8"
+  sand-line: "rgba(224,208,180,0.55)"
+  sage: "#8a9a86"
+  ink-soft: "#2d2e33"
+  border-soft: "#e5e5e5"
+  border-light: "#eeeeee"
+  border-mid: "#dddddd"
 typography:
+  display-hero:
+    fontFamily: "SegoCustom, serif"
+    fontSize: "56px"
+    fontWeight: 400
+    lineHeight: 1.05
   display:
     fontFamily: "SegoCustom, serif"
     fontSize: "42px"
@@ -124,6 +144,8 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Pied de page** : `rgba(14,15,17,.72)`, texte blanc à 72–92 %.
 - **Promo `#cc4444`** : badges de réduction uniquement. **Erreur `#cc0000`** sur fond `#fff5f5` : messages d'erreur des formulaires.
 - **Pied de page clair `#ede5de`** : variante de pied de page sur certaines pages.
+- **Succès** `#3f7a4c` (bouton, texte blanc 5,1:1), messages de succès sur `#d4edda` ; **danger** `#d9534f` pour les actions destructrices de l'espace compte.
+- **Sable** `#faf6ee` → `#ede0c8` et **sauge** `#8a9a86` : dégradés et accents de l'accueil. Jamais pour du texte courant.
 
 ## Typography
 
@@ -131,7 +153,7 @@ Un univers calme et lumineux : fonds crème chauds, texte presque noir, une seul
 - **Texte courant** : Glacial Indifference 300, interlignage 1,75, léger espacement (0,01em).
 - **Libellés de boutons et filtres** : IBM Plex Mono 11–13px, capitales, espacement 0,08–0,12em.
 - Les prix utilisent des chiffres tabulaires quand ils sont alignés en colonne.
-- **Échelle des tailles (shop)** : 12 · 13 · 14 · 16 · 18 · 22 · 26 · 34 · 42 px. Rien sous 12px ; 12px est réservé aux libellés, badges et mentions.
+- **Échelle des tailles** : 12 · 13 · 14 · 16 · 18 · 22 · 26 · 34 · 42 px, plus 56px pour le seul grand titre de l'accueil. Rien sous 12px ; 12px est réservé aux libellés, badges et mentions.
 
 ## Layout
 

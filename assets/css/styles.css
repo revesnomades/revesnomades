@@ -761,15 +761,15 @@ html.js .text-reveal.reveal {
   padding:0;
   width:fit-content;
   font:inherit;
-  font-size:12.5px;
+  font-size:13px;
   letter-spacing:.02em;
   text-decoration:underline;
   text-underline-offset:3px;
   cursor:pointer;
-  opacity:.88;
+  padding-block:12px;
 }
 .account-newsletter-link:hover{
-  opacity:1;
+  color:var(--text);
 }
 .account-newsletter-msg{
   min-height:16px;
@@ -2616,4 +2616,11 @@ footer.band.cream{
 
 @media (pointer: coarse) {
   .btn, .btn-add-cart { min-height: 44px; }
+}
+
+/* ── Zones tactiles (2) : formulaires et petits liens ── */
+.password-toggle::after { content: ""; position: absolute; inset: -8px -4px; }
+.footer-social > a:not(.icon-btn) { padding: 12px 0; }
+@media (pointer: coarse) {
+  input[type="checkbox"], input[type="radio"] { width: 20px; height: 20px; }
 }
