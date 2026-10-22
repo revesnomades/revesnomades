@@ -83,6 +83,26 @@ serve(async (req) => {
         ? createClient(supabaseUrl, serviceRoleKey)
         : null;
 
+      // Compte une utilisation pour chaque promotion appliquée ; la promotion se désactive
+      // quand son nombre maximal d'utilisations est atteint (une seule fois par paiement)
+      const promoIds = String(session.metadata?.promo_ids || "").split(",").map((x: string) => x.trim()).filter(Boolean);
+      if (supabase && promoIds.length) {
+        for (const promotionId of promoIds) {
+          const { error: rpcErr } = await supabase.rpc("record_promo_use", { p_session_id: session.id, p_promotion_id: promotionId });
+          if (!rpcErr) continue;
+          // Fonction SQL absente : comptage direct (sans protection contre un double envoi de Stripe)
+          console.warn("record_promo_use indisponible, comptage direct :", rpcErr.message);
+          const { data: promo } = await supabase.from("promotions").select("uses_count, max_uses, active").eq("id", promotionId).maybeSingle();
+          if (!promo) continue;
+          const uses = (Number(promo.uses_count) || 0) + 1;
+          const { error: updErr } = await supabase.from("promotions").update({
+            uses_count: uses,
+            active: promo.max_uses != null && uses >= Number(promo.max_uses) ? false : promo.active,
+          }).eq("id", promotionId);
+          if (updErr) console.error("Comptage de la promotion impossible :", updErr.message);
+        }
+      }
+
       if (customerEmail && supabase) {
         const metaType = session.metadata?.type || "product";
 

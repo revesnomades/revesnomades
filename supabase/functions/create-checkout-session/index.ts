@@ -19,7 +19,10 @@ function json(body: unknown, status = 200) {
 type CheckedItem = { id: string; type: "product" | "sejour"; name: string; price: number; quantity: number; weight_grams: number };
 
 type Promotion = {
+  id?: string;
   type: string;
+  max_uses?: number | null;
+  uses_count?: number | null;
   value: number | string;
   value_unit?: string | null;
   min_qty?: number | null;
@@ -63,7 +66,13 @@ type DiscountResult = {
   code: string | null;    // code promo retenu, sinon null
   perItem: number[];      // remise répartie par article (même ordre que le panier)
   codeRejected: boolean;  // code valide mais moins avantageux que les promotions en cours
+  ids: string[];          // promotions appliquées (comptées comme utilisées après paiement)
 };
+
+// Promotion encore utilisable : pas de limite, ou limite pas encore atteinte
+function hasUsesLeft(p: Promotion) {
+  return p.max_uses == null || (Number(p.uses_count) || 0) < Number(p.max_uses);
+}
 
 // Répartit une remise sur les articles concernés, au prorata de leur montant
 function spread(cart: CheckedItem[], applicable: CheckedItem[], amount: number, into: number[]) {
@@ -83,6 +92,7 @@ function promoAmount(promo: Promotion, applicable: CheckedItem[]) {
 function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: string | null): DiscountResult {
   const autoPerItem = cart.map(() => 0);
   const autoNames: string[] = [];
+  const autoIds: string[] = [];
   let autoTotal = 0;
   for (const promo of promos) {
     if (promo.type === "promo_code") continue;
@@ -90,12 +100,12 @@ function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: s
     if (!applicable.length) continue;
     if (promo.type === "percent" || promo.type === "early_bird" || promo.type === "fixed") {
       const amount = promoAmount(promo, applicable);
-      if (amount > 0) { autoTotal += amount; spread(cart, applicable, amount, autoPerItem); autoNames.push(promo.name || "Promotion"); }
+      if (amount > 0) { autoTotal += amount; spread(cart, applicable, amount, autoPerItem); autoNames.push(promo.name || "Promotion"); if (promo.id) autoIds.push(promo.id); }
     } else if (promo.type === "duo") {
       for (const item of applicable) {
         if (item.quantity >= (promo.min_qty || 2)) {
           const amount = promoAmount(promo, [item]);
-          if (amount > 0) { autoTotal += amount; autoPerItem[cart.indexOf(item)] += amount; autoNames.push(promo.name || "Promotion"); }
+          if (amount > 0) { autoTotal += amount; autoPerItem[cart.indexOf(item)] += amount; autoNames.push(promo.name || "Promotion"); if (promo.id) autoIds.push(promo.id); }
         }
       }
     }
@@ -112,7 +122,7 @@ function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: s
         spread(cart, applicable, amount, perItem);
         const value = Number(promo.value) || 0;
         const valueLabel = promo.value_unit === "euro" ? `-${value.toFixed(2).replace(".", ",").replace(",00", "")} €` : `-${value} %`;
-        codeResult = { total: amount, label: `Code ${promoCode} (${valueLabel})`, code: promoCode, perItem, codeRejected: false };
+        codeResult = { total: amount, label: `Code ${promoCode} (${valueLabel})`, code: promoCode, perItem, codeRejected: false, ids: promo.id ? [promo.id] : [] };
       }
     }
   }
@@ -123,6 +133,7 @@ function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: s
     code: null,
     perItem: autoPerItem,
     codeRejected: !!codeResult,
+    ids: [...new Set(autoIds)],
   };
   const chosen = codeResult && codeResult.total >= autoTotal ? codeResult : autoResult;
   // Une remise ne dépasse jamais le montant de l'article
@@ -342,9 +353,15 @@ serve(async (req) => {
     if (promosError) throw new Error(`promotions: ${promosError.message}`);
 
     const promoCode = body.promoCode ? String(body.promoCode).trim().toUpperCase() : null;
+    // Code dont le nombre maximal d'utilisations est atteint : on prévient le client
+    const exhaustedCode = promoCode && (promos || []).find((p: Promotion) => p.type === "promo_code" && p.code === promoCode && !hasUsesLeft(p));
+    if (exhaustedCode) {
+      return json({ error: `Le code ${promoCode} a atteint son nombre maximal d'utilisations. Retire-le pour continuer.`, code: "promo" }, 400);
+    }
+    const usablePromos = ((promos || []) as Promotion[]).filter(hasUsesLeft);
     const itemsCents = checked.reduce((s, i) => s + Math.round(i.price * 100) * i.quantity, 0);
     // La remise ne porte jamais sur la livraison ; code promo non cumulable
-    const discount = computeDiscounts(checked, (promos || []) as Promotion[], promoCode);
+    const discount = computeDiscounts(checked, usablePromos, promoCode);
     const discountCents = Math.min(itemsCents, Math.round(discount.total * 100));
     if (discount.codeRejected) console.log(`create-checkout-session: code ${promoCode} écarté, promotions en cours plus avantageuses`);
     // Remise par article, gardée pour les factures (bookings / purchases)
@@ -403,6 +420,7 @@ serve(async (req) => {
           discount_amount: (discountCents / 100).toFixed(2),
           discount_label: discount.label.slice(0, 200),
           promo_code: discount.code || "",
+          promo_ids: discount.ids.join(","),
         } : {}),
         cart_items: JSON.stringify(cartMeta),
         user_id: body.userId || "",

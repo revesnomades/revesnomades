@@ -359,6 +359,7 @@
     let embeddedCheckout = null;
     let activePromos = [];
     let appliedPromoCode = null;
+    let exhaustedCodes = [];
     let selectedShipping = null; // { id, name, carrier, price, is_relay? }
     let selectedRelayPoint = null; // { id, name, street, house_number, city, postal_code, country }
     let currentUser = null;
@@ -373,7 +374,10 @@
           .eq("active", true)
           .or(`starts_at.is.null,starts_at.lte.${now}`)
           .or(`ends_at.is.null,ends_at.gte.${now}`);
-        activePromos = data || [];
+        // Promotions dont le nombre maximal d'utilisations est atteint : écartées
+        const hasUsesLeft = p => p.max_uses == null || (Number(p.uses_count) || 0) < Number(p.max_uses);
+        activePromos = (data || []).filter(hasUsesLeft);
+        exhaustedCodes = (data || []).filter(p => p.type === 'promo_code' && !hasUsesLeft(p)).map(p => p.code);
       } catch { activePromos = []; }
       renderCart();
     }
@@ -1390,6 +1394,15 @@
           checkoutError.textContent = left > 0
             ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté ton panier : vérifie-le, puis relance le paiement.`
             : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de ton panier. Vérifie-le, puis relance le paiement.`;
+        } else if (err.data?.code === "promo" && err.data.error) {
+          // Code épuisé entre-temps : on le retire et on recalcule le total
+          if (appliedPromoCode) exhaustedCodes.push(appliedPromoCode);
+          activePromos = activePromos.filter(p => !(p.type === 'promo_code' && p.code === appliedPromoCode));
+          appliedPromoCode = null;
+          const promoMsg = document.getElementById("promoCodeMsg");
+          if (promoMsg) { promoMsg.textContent = "Ce code a déjà été utilisé le nombre maximal de fois."; promoMsg.style.color = "#c00"; promoMsg.style.display = ""; }
+          renderCart();
+          checkoutError.textContent = "Ce code promo n'est plus disponible : il a atteint son nombre maximal d'utilisations. Nous l'avons retiré, vérifie le nouveau total puis relance le paiement.";
         } else if ((err.data?.code === "shipping" || err.data?.code === "price") && err.data.error) {
           // Livraison ou tarif séjour refusés par le serveur : son message dit quoi faire
           checkoutError.textContent = err.data.error;
@@ -1410,7 +1423,9 @@
       const promo = activePromos.find(p => p.type === 'promo_code' && p.code === code);
       if (!promo) {
         appliedPromoCode = null;
-        msg.textContent = "Code invalide ou expiré.";
+        msg.textContent = exhaustedCodes.includes(code)
+          ? "Ce code a déjà été utilisé le nombre maximal de fois."
+          : "Code invalide ou expiré.";
         msg.style.color = '#c00';
         msg.style.display = '';
         renderCart();

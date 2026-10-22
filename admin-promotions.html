@@ -261,7 +261,7 @@
         <div class="form-group">
           <label for="fMaxUses">Nombre maximum d'utilisations (optionnel)</label>
           <input id="fMaxUses" class="input" type="number" min="1" placeholder="Illimité" style="max-width:180px;">
-          <small style="color:var(--muted); font-size:11.5px;">Laissez vide pour une utilisation illimitée.</small>
+          <small style="color:var(--muted); font-size:11.5px;">Laissez vide pour une utilisation illimitée. Chaque commande payée compte pour une utilisation ; la promotion se désactive seule une fois la limite atteinte.</small>
         </div>
 
         <hr class="section-sep">
@@ -447,13 +447,22 @@
       if (promo.type === 'percent' || promo.type === 'early_bird') return isEuro ? `−${Number(promo.value).toFixed(2)} €` : `−${promo.value}%`;
       if (promo.type === 'fixed') return `−${Number(promo.value).toFixed(2)} €`;
       if (promo.type === 'duo') return isEuro ? `Duo : −${Number(promo.value).toFixed(2)} €` : `Duo : −${promo.value}%`;
-      if (promo.type === 'promo_code') return `Code : "${promo.code}" → −${promo.value}%`;
+      if (promo.type === 'promo_code') return `Code : "${promo.code}" → ${isEuro ? `−${Number(promo.value).toFixed(2)} €` : `−${promo.value}%`}`;
       return `${promo.value}`;
     }
 
     function applyToLabel(applyTo) {
       const map = { all: 'Tout', products: 'Produits', stays: 'Séjours', specific: 'Sélection' };
       return map[applyTo] || applyTo;
+    }
+
+    // Utilisations : compteur tenu par le webhook Stripe après chaque paiement
+    function usesHtml(p) {
+      const used = Number(p.uses_count) || 0;
+      if (p.max_uses == null) return used ? `<div style="font-size:12px; color:var(--muted);">Utilisée ${used} fois</div>` : '';
+      const max = Number(p.max_uses);
+      const done = used >= max;
+      return `<div style="font-size:12px; color:${done ? '#c00' : 'var(--muted)'};">Utilisations : <strong>${used} / ${max}</strong>${done ? ' · limite atteinte' : ` · reste ${max - used}`}</div>`;
     }
 
     function renderGrid() {
@@ -493,6 +502,7 @@
               ${p.apply_to === 'specific' ? `<span>Produits : ${(p.eligible_product_ids||[]).length} · Séjours : ${(p.eligible_stay_ids||[]).length}</span>` : ''}
             </div>
             ${dateRange ? `<div style="font-size:11.5px; color:var(--muted);">${dateRange}</div>` : ''}
+            ${usesHtml(p)}
             <div style="margin-top:4px;">
               <button class="btn tiny on-light" onclick="window.editPromo('${p.id}')">Modifier</button>
               <button class="btn tiny on-light" style="margin-left:6px; color:${p.active ? '#c00' : 'inherit'};" onclick="window.togglePromo('${p.id}', ${!p.active})">${p.active ? 'Désactiver' : 'Activer'}</button>
@@ -566,6 +576,11 @@
     };
 
     window.togglePromo = async (id, active) => {
+      const promo = allPromotions.find(p => String(p.id) === String(id));
+      if (active && promo && promo.max_uses != null && (Number(promo.uses_count) || 0) >= Number(promo.max_uses)) {
+        alert(`Cette promotion a déjà été utilisée ${promo.uses_count} fois sur ${promo.max_uses}. Pour la réactiver, augmente d'abord le nombre maximum d'utilisations (bouton Modifier).`);
+        return;
+      }
       await supabase.from("promotions").update({ active }).eq("id", id);
       await loadData();
     };
