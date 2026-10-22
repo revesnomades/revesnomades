@@ -188,6 +188,30 @@ serve(async (req) => {
           : (session.metadata?.product_name || session.metadata?.event_name || "—");
         const orderRef = session.metadata?.order_ref || "";
 
+        // Contenu de la commande : articles de la boutique, séjours, ou les deux
+        let metaItems: Array<{ type: string }> = [];
+        try { metaItems = JSON.parse(session.metadata?.cart_items || "[]"); } catch { metaItems = []; }
+        const hasProducts = metaType === "cart" ? metaItems.some(i => i.type === "product") : metaType === "product";
+        const hasStays = metaType === "cart" ? metaItems.some(i => i.type === "sejour") : metaType !== "product";
+
+        const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+        const deliveryLine = hasProducts && shipping
+          ? [shippingAddress.shipping_line1, shippingAddress.shipping_line2, `${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}`]
+              .filter(s => s && s.trim()).map(s => esc(String(s))).join("<br>")
+          : "";
+
+        const clientSubject = hasProducts && hasStays
+          ? "Ta commande et ta réservation Âmes Nomades sont confirmées"
+          : hasStays ? "Ta réservation Âmes Nomades est confirmée" : "Ta commande Âmes Nomades est confirmée";
+        const clientIntro = hasProducts && hasStays
+          ? "Nous avons bien reçu ton paiement : ta commande et ta réservation sont confirmées."
+          : hasStays ? "Nous avons bien reçu ton paiement et ta réservation est confirmée."
+          : "Nous avons bien reçu ton paiement et ta commande est confirmée.";
+        const clientNext = [
+          hasProducts ? "Nous préparons ton colis avec soin. Tu recevras un email avec le numéro de suivi dès son expédition." : "",
+          hasStays ? "Tu recevras prochainement par email toutes les informations pratiques pour ton séjour." : "",
+        ].filter(Boolean).map(p => `<p style="color:#666;font-size:14px">${p}</p>`).join("");
+
         const shippingHtml = shipping
           ? `<li><strong>Adresse de livraison :</strong> ${shippingAddress.shipping_line1}, ${shippingAddress.shipping_postal_code} ${shippingAddress.shipping_city}, ${shippingAddress.shipping_country}</li>`
           : "";
@@ -229,9 +253,9 @@ serve(async (req) => {
           // Email alerte admin
           await sendEmail(
             [{ email: "contact@amesnomades.com", name: "Admin Âmes Nomades" }],
-            metaType === "sejour"
-              ? `🎉 Nouveau paiement séjour — ${firstName} ${lastName} (${amount} €)`
-              : `🛍️ Nouvel achat${orderRef ? " " + orderRef : ""} — ${firstName} ${lastName} (${amount} €)`,
+            hasStays && !hasProducts
+              ? `🎉 Nouveau paiement séjour${orderRef ? " " + orderRef : ""} — ${firstName} ${lastName} (${amount} €)`
+              : `🛍️ Nouvel achat${hasStays ? " + séjour" : ""}${orderRef ? " " + orderRef : ""} — ${firstName} ${lastName} (${amount} €)`,
             `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px">
               <h2 style="color:#2e7d32">Nouveau paiement validé !</h2>
               <ul>
@@ -248,16 +272,17 @@ serve(async (req) => {
           // Email confirmation client
           await sendEmail(
             [{ email: customerEmail, name: firstName || customerName }],
-            `Ta commande Âmes Nomades est confirmée`,
+            clientSubject,
             `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;color:#222">
-              <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci pour ta commande, ${firstName} !</h2>
-              <p>Nous avons bien reçu ton paiement et ta réservation est confirmée.</p>
+              <h2 style="font-family:Georgia,serif;font-weight:400;color:#222">Merci ${hasStays && !hasProducts ? "pour ta réservation" : "pour ta commande"}, ${firstName} !</h2>
+              <p>${clientIntro}</p>
               <table style="width:100%;border-collapse:collapse;margin:20px 0">
                 ${orderRef ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Commande n°</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${orderRef}</td></tr>` : ""}
                 <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Articles</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${articlesLabel}</td></tr>
+                ${deliveryLine ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;vertical-align:top">Livraison</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${deliveryLine}</td></tr>` : ""}
                 <tr><td style="padding:8px 0;font-weight:600">Total payé</td><td style="padding:8px 0;text-align:right;font-weight:600">${amount} €</td></tr>
               </table>
-              <p style="color:#666;font-size:14px">Tu recevras prochainement toutes les informations nécessaires concernant ton séjour par email.</p>
+              ${clientNext}
               <p style="margin-top:24px">À très bientôt,<br><strong>L'équipe Âmes Nomades</strong></p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
               <p style="font-size:12px;color:#999">Des questions ? Contacte-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
