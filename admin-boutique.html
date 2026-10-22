@@ -17,6 +17,16 @@
     button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
       border-radius: 6px !important;
     }
+    .shop-stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-top:24px; }
+    .shop-stats:empty { display:none; }
+    .shop-stat { display:flex; flex-direction:column; gap:2px; padding:14px 16px; border:1px solid var(--line); background:rgba(255,255,255,.6); }
+    .shop-stat strong { font-size:26px; font-variant-numeric:tabular-nums; line-height:1.1; }
+    .shop-stat span { font-size:13px; color:var(--text); }
+    .shop-stat small { font-size:12px; color:var(--muted); }
+    .cat-chip { display:flex; align-items:center; gap:6px; background:var(--bg-main); padding:6px 8px 6px 12px; border-radius:20px; border:1px solid var(--line); font-size:13.5px; }
+    .cat-chip-edit { padding:4px 6px 4px 8px; }
+    .cat-count { min-width:22px; padding:0 6px; border-radius:11px; background:var(--line); font-size:12px; text-align:center; font-variant-numeric:tabular-nums; }
+    .cat-btn { background:transparent; padding:0 6px; min-width:28px; min-height:28px; }
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -110,19 +120,23 @@
 
       <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
 
+      <!-- Chiffres du shop -->
+      <div id="shopStats" class="shop-stats" aria-live="polite"></div>
+
       <div style="margin-top:30px; margin-bottom:20px; border-top:1px solid var(--line); padding-top:20px;">
         <h2 style="font-size:20px; margin:0 0 14px 0;">Catégories</h2>
         <div style="display:flex; gap:10px; margin-bottom:14px;">
           <input id="newCategoryName" class="input" placeholder="Nouvelle catégorie" style="max-width:300px;">
           <button class="btn on-light" id="btnAddCategory">Ajouter</button>
         </div>
+        <div id="categoryMsg" style="display:none; font-size:13px; margin-bottom:10px;"></div>
         <div id="categoriesList" style="display:flex; flex-wrap:wrap; gap:10px;">
           <span style="color:var(--muted); font-size:14px;">Chargement des catégories...</span>
         </div>
       </div>
 
       <div style="display:flex; align-items:center; justify-content:space-between; margin-top:40px; margin-bottom:20px;">
-        <h2 style="font-size:20px; margin:0;">Produits</h2>
+        <h2 style="font-size:20px; margin:0;">Produits <span id="productsCount" style="color:var(--muted); font-weight:400; font-size:16px;"></span></h2>
       </div>
 
       <div class="product-grid" id="productsList">
@@ -277,22 +291,77 @@
       }
       
       window.allCategories = data || [];
-      
-      if (window.allCategories.length === 0) {
-        categoriesList.innerHTML = "<span style='color:var(--muted);'>Aucune catégorie.</span>";
-      } else {
-        categoriesList.innerHTML = window.allCategories.map(c => `
-          <div style="display:flex; align-items:center; gap:6px; background:var(--bg-main); padding:6px 12px; border-radius:20px; border:1px solid var(--line); font-size:13.5px;">
-            ${c.name}
-            <button class="btn tiny" style="background:transparent; color:#c00; padding:0 4px;" onclick="deleteCategory('${c.id}')">✕</button>
-          </div>
-        `).join('');
-      }
+      renderCategories();
 
       // Populate select
-      fCategory.innerHTML = '<option value="">Sélectionnez une catégorie...</option>' + 
-        window.allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      const current = fCategory.value;
+      fCategory.innerHTML = '<option value="">Sélectionnez une catégorie...</option>' +
+        window.allCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+      fCategory.value = current;
     }
+
+    // Pastilles de catégories : nom, nombre de produits, renommer, supprimer
+    let editingCategoryId = null;
+    function renderCategories() {
+      if (window.allCategories.length === 0) {
+        categoriesList.innerHTML = "<span style='color:var(--muted);'>Aucune catégorie.</span>";
+        return;
+      }
+      const products = window.allProducts || [];
+      categoriesList.innerHTML = window.allCategories.map(c => {
+        if (c.id === editingCategoryId) {
+          return `
+          <form class="cat-chip cat-chip-edit" onsubmit="event.preventDefault(); saveCategory('${c.id}')">
+            <input id="catEdit-${c.id}" class="input" value="${escapeHtml(c.name)}" aria-label="Nouveau nom de la catégorie" maxlength="60" style="font-size:13.5px; padding:4px 8px; width:180px;">
+            <button type="submit" class="btn tiny on-light">Enregistrer</button>
+            <button type="button" class="btn tiny" style="background:transparent; border:1px solid var(--line);" onclick="cancelEditCategory()">Annuler</button>
+          </form>`;
+        }
+        const n = products.filter(p => p.category_id === c.id).length;
+        return `
+          <div class="cat-chip">
+            <span>${escapeHtml(c.name)}</span>
+            <span class="cat-count" title="Produits dans cette catégorie">${n}</span>
+            <button class="btn tiny cat-btn" onclick="editCategory('${c.id}')" aria-label="Renommer ${escapeHtml(c.name)}" title="Renommer">✎</button>
+            <button class="btn tiny cat-btn" style="color:#c00;" onclick="deleteCategory('${c.id}')" aria-label="Supprimer ${escapeHtml(c.name)}" title="Supprimer">✕</button>
+          </div>`;
+      }).join('');
+      if (editingCategoryId) {
+        const input = document.getElementById(`catEdit-${editingCategoryId}`);
+        input?.focus();
+        input?.select();
+        input?.addEventListener("keydown", e => { if (e.key === "Escape") cancelEditCategory(); });
+      }
+    }
+
+    function showCategoryMsg(msg, isError) {
+      const el = document.getElementById("categoryMsg");
+      el.style.display = msg ? "block" : "none";
+      el.style.color = isError ? "#c00" : "var(--muted)";
+      el.textContent = msg;
+    }
+
+    window.editCategory = (id) => { editingCategoryId = id; showCategoryMsg(""); renderCategories(); };
+    window.cancelEditCategory = () => { editingCategoryId = null; renderCategories(); };
+    window.saveCategory = async (id) => {
+      const name = document.getElementById(`catEdit-${id}`)?.value.trim();
+      const cat = window.allCategories.find(c => c.id === id);
+      if (!name) { showCategoryMsg("Le nom de la catégorie ne peut pas être vide.", true); return; }
+      if (name === cat?.name) { cancelEditCategory(); return; }
+      if (window.allCategories.some(c => c.id !== id && c.name.toLowerCase() === name.toLowerCase())) {
+        showCategoryMsg(`Une catégorie « ${name} » existe déjà.`, true);
+        return;
+      }
+      const { data, error } = await supabase.from("product_categories").update({ name }).eq("id", id).select();
+      if (error || !data?.length) {
+        showCategoryMsg("Impossible de renommer la catégorie : " + (error?.message || "droit de modification manquant sur la table product_categories (policy UPDATE à ajouter dans Supabase)."), true);
+        return;
+      }
+      editingCategoryId = null;
+      showCategoryMsg(`Catégorie renommée en « ${name} ».`, false);
+      await loadCategories();
+      await loadProducts();
+    };
 
     window.deleteCategory = async (id) => {
       if(!confirm("Supprimer cette catégorie définitivement ? Les produits liés perdront leur catégorie.")) return;
@@ -328,6 +397,23 @@
       </details>`;
     }
 
+    // Chiffres du shop : produits en ligne, en vente, indisponibles, unités en stock
+    function renderStats(products) {
+      const total = products.length;
+      const soldOut = products.filter(p => p.coming_soon === true).length;
+      const soon = products.filter(p => p.coming_soon !== true && p.stock === 0).length;
+      const onSale = total - soldOut - soon;
+      const unlimited = products.filter(p => p.coming_soon !== true && p.stock == null).length;
+      const units = products.filter(p => p.coming_soon !== true && p.stock > 0).reduce((s, p) => s + Number(p.stock), 0);
+      const tile = (value, label, sub = "") => `<div class="shop-stat"><strong>${value}</strong><span>${label}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
+      document.getElementById("shopStats").innerHTML =
+        tile(total, total > 1 ? "produits dans le shop" : "produit dans le shop") +
+        tile(onSale, "en vente") +
+        tile(soon + soldOut, "indisponibles", [soon ? `${soon} bientôt disponible${soon > 1 ? "s" : ""}` : "", soldOut ? `${soldOut} épuisé${soldOut > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ")) +
+        tile(units, units > 1 ? "articles en stock" : "article en stock", unlimited ? `+ ${unlimited} produit${unlimited > 1 ? "s" : ""} en stock illimité` : "");
+      document.getElementById("productsCount").textContent = `(${total})`;
+    }
+
     async function loadProducts() {
       const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
       if (error) {
@@ -336,6 +422,9 @@
       }
       
       if (!data || data.length === 0) {
+        window.allProducts = [];
+        renderStats([]);
+        renderCategories();
         productsList.innerHTML = "<p>Aucun produit dans la boutique pour le moment.</p>";
         return;
       }
@@ -347,6 +436,10 @@
         .select("product_id, email");
       if (subsError) console.warn("Inscriptions « Me prévenir » illisibles :", subsError.message);
       (subs || []).forEach(s => (waitingByProduct[s.product_id] ||= []).push(s.email));
+
+      window.allProducts = data;
+      renderStats(data);
+      renderCategories();
 
       productsList.innerHTML = data.map(p => {
         const cat = window.allCategories.find(c => c.id === p.category_id);
@@ -366,8 +459,6 @@
         </div>
         `;
       }).join('');
-
-      window.allProducts = data;
     }
 
     function resizeAndCompressImage(file, maxWidth, quality = 0.8) {
