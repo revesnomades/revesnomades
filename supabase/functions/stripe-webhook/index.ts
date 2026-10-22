@@ -59,6 +59,24 @@ serve(async (req) => {
         shipping_country: shipping.address?.country || "",
       } : {};
 
+      // Remise appliquée (code promo ou promotion en cours) : enregistrée pour les factures
+      const discountAmount = Number(session.metadata?.discount_amount) || 0;
+      const discountLabel = session.metadata?.discount_label || "";
+      const promoCodeUsed = session.metadata?.promo_code || "";
+      const discountCols = discountAmount > 0
+        ? { discount_amount: discountAmount, discount_label: discountLabel, promo_code: promoCodeUsed || null }
+        : {};
+
+      // Insère avec les colonnes de remise ; si elles n'existent pas encore, réessaie sans
+      // deno-lint-ignore no-explicit-any
+      const insertWithDiscount = async (db: any, table: string, row: Record<string, unknown>, extra: Record<string, unknown>) => {
+        const { error } = await db.from(table).insert({ ...row, ...extra });
+        if (!error || !Object.keys(extra).length) return error;
+        console.warn(`${table} : colonnes de remise absentes, insertion sans (${error.message})`);
+        const { error: retryErr } = await db.from(table).insert(row);
+        return retryErr;
+      };
+
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       const supabase = supabaseUrl && serviceRoleKey
@@ -70,7 +88,7 @@ serve(async (req) => {
 
         if (metaType === "cart") {
           // Nouveau format panier multi-articles
-          let cartItems: Array<{ id: string; type: string; name: string; qty: number; price?: number }> = [];
+          let cartItems: Array<{ id: string; type: string; name: string; qty: number; price?: number; d?: number }> = [];
           try {
             cartItems = JSON.parse(session.metadata?.cart_items || "[]");
           } catch { cartItems = []; }
@@ -78,7 +96,7 @@ serve(async (req) => {
           const productNames = cartItems.map(i => `${i.name} ×${i.qty}`).join(", ");
 
           // Enregistrer l'achat global
-          const { error: purchaseError } = await supabase.from("purchases").insert({
+          const purchaseError = await insertWithDiscount(supabase, "purchases", {
             email: customerEmail,
             firstname: firstName,
             lastname: lastName,
@@ -86,13 +104,14 @@ serve(async (req) => {
             amount,
             status: "paid",
             ...shippingAddress,
-          });
+          }, discountCols);
           if (purchaseError) console.error("Erreur insertion achat:", purchaseError);
 
           // Insérer une réservation dans bookings pour chaque séjour du panier
           const stayItems = cartItems.filter(i => i.type === "sejour");
           for (const item of stayItems) {
             const itemAmount = item.price ? item.price * item.qty : amount;
+            const itemDiscount = Number(item.d) || 0;
             const bookingRow: Record<string, unknown> = {
               stay_id: item.id || null,
               stay_title: item.name || "Séjour",
@@ -104,12 +123,12 @@ serve(async (req) => {
             };
             // Colonnes optionnelles — insérées seulement si elles existent dans la table
             try {
-              const { error: bookingErr } = await supabase.from("bookings").insert({
+              const bookingErr = await insertWithDiscount(supabase, "bookings", {
                 ...bookingRow,
-                amount_paid: itemAmount,
+                amount_paid: Math.round((itemAmount - itemDiscount) * 100) / 100,
                 stripe_session_id: session.id,
                 booking_date: new Date().toISOString().split("T")[0],
-              });
+              }, itemDiscount > 0 ? { discount_amount: itemDiscount, discount_label: discountLabel, promo_code: promoCodeUsed || null } : {});
               if (bookingErr) {
                 console.warn("Insert complet échoué, retry sans colonnes optionnelles:", bookingErr.message);
                 const { error: retryErr } = await supabase.from("bookings").insert(bookingRow);
@@ -263,6 +282,7 @@ serve(async (req) => {
                 <li><strong>Nom :</strong> ${customerName}</li>
                 <li><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></li>
                 <li><strong>Articles :</strong> ${articlesLabel}</li>
+                ${discountAmount > 0 ? `<li><strong>Remise :</strong> ${esc(discountLabel || "Promotion")} : -${discountAmount.toFixed(2).replace(".", ",")} €</li>` : ""}
                 <li><strong>Montant :</strong> ${amount} €</li>
                 ${shippingHtml}
               </ul>
@@ -280,6 +300,7 @@ serve(async (req) => {
                 ${orderRef ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Commande n°</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${orderRef}</td></tr>` : ""}
                 <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Articles</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${articlesLabel}</td></tr>
                 ${deliveryLine ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;vertical-align:top">Livraison</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${deliveryLine}</td></tr>` : ""}
+                ${discountAmount > 0 ? `<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666">Remise · ${esc(discountLabel || "Promotion")}</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;color:#b34400">-${discountAmount.toFixed(2).replace(".", ",")} €</td></tr>` : ""}
                 <tr><td style="padding:8px 0;font-weight:600">Total payé</td><td style="padding:8px 0;text-align:right;font-weight:600">${amount} €</td></tr>
               </table>
               ${clientNext}

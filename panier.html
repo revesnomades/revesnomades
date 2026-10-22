@@ -436,6 +436,15 @@
       return amount > 0 ? { promo, amount, label: `Code "${promo.code}"` } : null;
     }
 
+    // Code promo non cumulable : on garde soit le code, soit les promotions en cours (la remise la plus avantageuse)
+    function getCartDiscounts(cart) {
+      const auto = getAutoDiscounts(cart);
+      const code = getPromoCodeDiscount(cart);
+      const autoTotal = auto.reduce((s, d) => s + d.amount, 0);
+      if (code && code.amount >= autoTotal) return { list: [code], code: code.promo.code, codeRejected: false };
+      return { list: auto, code: null, codeRejected: !!code };
+    }
+
     function getApplicableCartItems(cart, promo) {
       return cart.filter(item => {
         if (promo.apply_to === 'all') return true;
@@ -530,10 +539,25 @@
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Livraison</span><span style="color:var(--muted);">À calculer</span></div>`;
       }
 
-      // Promotions automatiques
-      const autoDiscounts = getAutoDiscounts(cart);
-      const codeDiscount = getPromoCodeDiscount(cart);
-      const allDiscounts = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])];
+      // Promotions automatiques ou code promo (non cumulables)
+      const { list: allDiscounts, codeRejected } = getCartDiscounts(cart);
+      const promoMsg = document.getElementById("promoCodeMsg");
+      if (promoMsg && appliedPromoCode) {
+        const promo = activePromos.find(p => p.type === 'promo_code' && p.code === appliedPromoCode);
+        if (promo && codeRejected) {
+          promoMsg.textContent = "Ce code n'est pas cumulable avec les promotions en cours. Ta remise actuelle est plus avantageuse, nous la gardons.";
+          promoMsg.style.color = "var(--muted)";
+        } else if (promo && !getPromoCodeDiscount(cart)) {
+          promoMsg.textContent = "Ce code ne s'applique à aucun article de ton panier.";
+          promoMsg.style.color = "#c00";
+        } else if (promo) {
+          const others = getAutoDiscounts(cart).length;
+          promoMsg.textContent = (promo.value_unit === 'euro' ? `✓ Code appliqué : −${formatPrice(promo.value)}` : `✓ Code appliqué : −${promo.value} %`)
+            + (others ? " (remplace les promotions en cours, non cumulable)" : "");
+          promoMsg.style.color = "#1a7a40";
+        }
+        promoMsg.style.display = "";
+      }
       let totalDiscount = 0;
       for (const d of allDiscounts) {
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
@@ -1284,9 +1308,8 @@
           image: i.image || null,
         }));
 
-        const autoDiscounts = getAutoDiscounts(cart);
-        const codeDiscount = getPromoCodeDiscount(cart);
-        const totalDiscountAmount = [...autoDiscounts, ...(codeDiscount ? [codeDiscount] : [])].reduce((s, d) => s + d.amount, 0);
+        const cartDiscounts = getCartDiscounts(cart);
+        const totalDiscountAmount = cartDiscounts.list.reduce((s, d) => s + d.amount, 0);
 
         let shippingAddr = null;
         if (hasProducts) {
@@ -1316,6 +1339,7 @@
             shipping: hasProducts && selectedShipping ? (selectedShipping.price === 0 ? "Livraison offerte" : `${selectedShipping.name} · ${formatPrice(selectedShipping.price)}`) : null,
             relay: hasProducts && selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint ? selectedRelayPoint.name : null,
             deliveryDays: productDays.length ? Math.max(...productDays) : null,
+            discount: totalDiscountAmount > 0 ? { label: cartDiscounts.list.map(d => d.label).join(" + "), amount: totalDiscountAmount } : null,
           }));
         } catch {}
 
@@ -1334,7 +1358,7 @@
             shippingAmount: hasProducts && selectedShipping ? Math.round(selectedShipping.price * 100) : 0,
             shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
             shippingMethodId: hasProducts && selectedShipping ? String(selectedShipping.id ?? selectedShipping.name) : null,
-            promoCode: codeDiscount ? appliedPromoCode : null,
+            promoCode: cartDiscounts.code,
             shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
@@ -1392,10 +1416,8 @@
         renderCart();
         return;
       }
+      // Le message (appliqué, non cumulable, sans effet) est posé par renderCart
       appliedPromoCode = code;
-      msg.textContent = promo.value_unit === 'euro' ? `✓ Code appliqué : −${formatPrice(promo.value)}` : `✓ Code appliqué : −${promo.value}%`;
-      msg.style.color = '#1a7a40';
-      msg.style.display = '';
       renderCart();
     });
 

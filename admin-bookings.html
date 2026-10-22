@@ -396,6 +396,10 @@
               <span>Sous-total HT :</span>
               <span id="invSubtotalDisplay" style="font-family:'IBM Plex Mono', monospace;">0,00 €</span>
             </div>
+            <div id="invDiscountRow" style="display:none; justify-content:space-between; gap:12px; padding:6px 0; font-size:13px; color:#b34400;">
+              <span id="invDiscountLabel">Remise :</span>
+              <span id="invDiscountDisplay" style="font-family:'IBM Plex Mono', monospace; white-space:nowrap;">0,00 €</span>
+            </div>
             <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12px; color:#888; border-bottom:1px solid #eee;">
               <span>TVA :</span>
               <span>Non applicable*</span>
@@ -1055,7 +1059,11 @@
       const stayDatesFormatted = stay ? formatDateRange(stayDateObj?.start_date, stayDateObj?.end_date, stay.is_single_day) : (b.booking_date || "Dates confirmées");
 
       const amountVal = b.amount || b.amount_paid || 0;
-      const amountStr = amountVal ? `${amountVal},00 €` : "0,00 €";
+      const euro = n => `${Number(n || 0).toFixed(2).replace(".", ",")} €`;
+      const amountStr = euro(amountVal);
+      // Remise (code promo ou promotion) enregistrée par le webhook
+      const discountVal = Number(b.discount_amount) || 0;
+      const totalStr = euro(Math.max(0, Number(amountVal) - discountVal));
       const optionName = b.price_label || "Formule Réservation";
 
       document.getElementById("invNumDisplay").textContent = invoiceNum;
@@ -1067,7 +1075,12 @@
       document.getElementById("invOptionDisplay").textContent = `Réservation — ${stayTitle} (${optionName})`;
       document.getElementById("invAmountDisplay").textContent = amountStr;
       document.getElementById("invSubtotalDisplay").textContent = amountStr;
-      document.getElementById("invTotalDisplay").textContent = amountStr;
+      document.getElementById("invDiscountRow").style.display = discountVal > 0 ? "flex" : "none";
+      document.getElementById("invDiscountLabel").textContent = discountVal > 0
+        ? `Remise${b.promo_code ? ` (code ${b.promo_code})` : b.discount_label ? ` (${b.discount_label})` : ""} :`
+        : "Remise :";
+      document.getElementById("invDiscountDisplay").textContent = `−${euro(discountVal)}`;
+      document.getElementById("invTotalDisplay").textContent = totalStr;
 
       const stripeBtn = document.getElementById("btnStripeReceipt");
       if (stripeBtn) {

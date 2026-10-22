@@ -57,46 +57,78 @@ function getApplicableItems(cart: CheckedItem[], promo: Promotion) {
   });
 }
 
-function computeDiscountTotal(cart: CheckedItem[], promos: Promotion[], promoCode: string | null) {
-  let total = 0;
+type DiscountResult = {
+  total: number;          // euros
+  label: string;          // libellé affiché sur Stripe, la facture et l'email
+  code: string | null;    // code promo retenu, sinon null
+  perItem: number[];      // remise répartie par article (même ordre que le panier)
+  codeRejected: boolean;  // code valide mais moins avantageux que les promotions en cours
+};
+
+// Répartit une remise sur les articles concernés, au prorata de leur montant
+function spread(cart: CheckedItem[], applicable: CheckedItem[], amount: number, into: number[]) {
+  const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
+  if (base <= 0) return;
+  for (const item of applicable) into[cart.indexOf(item)] += amount * (item.price * item.quantity) / base;
+}
+
+function promoAmount(promo: Promotion, applicable: CheckedItem[]) {
+  const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
+  const value = Number(promo.value) || 0;
+  return promo.value_unit === "euro" || promo.type === "fixed" ? Math.min(value, base) : base * value / 100;
+}
+
+// Un code promo n'est jamais cumulable : on garde soit le code, soit les promotions automatiques,
+// selon ce qui est le plus avantageux pour le client.
+function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: string | null): DiscountResult {
+  const autoPerItem = cart.map(() => 0);
+  const autoNames: string[] = [];
+  let autoTotal = 0;
   for (const promo of promos) {
     if (promo.type === "promo_code") continue;
     const applicable = getApplicableItems(cart, promo);
     if (!applicable.length) continue;
-
-    const isEuro = promo.value_unit === "euro";
-    const value = Number(promo.value) || 0;
-    if (promo.type === "percent" || promo.type === "early_bird") {
-      const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
-      const amount = isEuro ? Math.min(value, base) : base * value / 100;
-      if (amount > 0) total += amount;
-    } else if (promo.type === "fixed") {
-      const amount = Math.min(value, applicable.reduce((s, i) => s + i.price * i.quantity, 0));
-      if (amount > 0) total += amount;
+    if (promo.type === "percent" || promo.type === "early_bird" || promo.type === "fixed") {
+      const amount = promoAmount(promo, applicable);
+      if (amount > 0) { autoTotal += amount; spread(cart, applicable, amount, autoPerItem); autoNames.push(promo.name || "Promotion"); }
     } else if (promo.type === "duo") {
       for (const item of applicable) {
         if (item.quantity >= (promo.min_qty || 2)) {
-          const base = item.price * item.quantity;
-          const amount = isEuro ? Math.min(value, base) : base * value / 100;
-          if (amount > 0) total += amount;
+          const amount = promoAmount(promo, [item]);
+          if (amount > 0) { autoTotal += amount; autoPerItem[cart.indexOf(item)] += amount; autoNames.push(promo.name || "Promotion"); }
         }
       }
     }
   }
 
+  let codeResult: DiscountResult | null = null;
   if (promoCode) {
     const promo = promos.find(p => p.type === "promo_code" && p.code === promoCode);
-    if (promo) {
-      const applicable = getApplicableItems(cart, promo);
-      if (applicable.length) {
-        const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
+    const applicable = promo ? getApplicableItems(cart, promo) : [];
+    if (promo && applicable.length) {
+      const amount = promoAmount(promo, applicable);
+      if (amount > 0) {
+        const perItem = cart.map(() => 0);
+        spread(cart, applicable, amount, perItem);
         const value = Number(promo.value) || 0;
-        const amount = promo.value_unit === "euro" ? Math.min(value, base) : base * value / 100;
-        if (amount > 0) total += amount;
+        const valueLabel = promo.value_unit === "euro" ? `-${value.toFixed(2).replace(".", ",").replace(",00", "")} €` : `-${value} %`;
+        codeResult = { total: amount, label: `Code ${promoCode} (${valueLabel})`, code: promoCode, perItem, codeRejected: false };
       }
     }
   }
-  return total;
+
+  const autoResult: DiscountResult = {
+    total: autoTotal,
+    label: [...new Set(autoNames)].join(" + ") || "Promotion",
+    code: null,
+    perItem: autoPerItem,
+    codeRejected: !!codeResult,
+  };
+  const chosen = codeResult && codeResult.total >= autoTotal ? codeResult : autoResult;
+  // Une remise ne dépasse jamais le montant de l'article
+  chosen.perItem = chosen.perItem.map((d, i) => Math.min(d, cart[i].price * cart[i].quantity));
+  chosen.total = chosen.perItem.reduce((s, d) => s + d, 0);
+  return chosen;
 }
 
 // ── Livraison : on redemande les tarifs à get-shipping-rates (même source que le panier) ──
@@ -158,7 +190,7 @@ serve(async (req) => {
     });
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-    const cartMeta: Array<{ id: string; type: string; name: string; qty: number; price?: number }> = [];
+    const cartMeta: Array<{ id: string; type: string; name: string; qty: number; price?: number; d?: number }> = [];
     const checked: CheckedItem[] = [];
 
     for (const item of items) {
@@ -311,8 +343,15 @@ serve(async (req) => {
 
     const promoCode = body.promoCode ? String(body.promoCode).trim().toUpperCase() : null;
     const itemsCents = checked.reduce((s, i) => s + Math.round(i.price * 100) * i.quantity, 0);
-    // La remise ne porte jamais sur la livraison
-    const discountCents = Math.min(itemsCents, Math.round(computeDiscountTotal(checked, (promos || []) as Promotion[], promoCode) * 100));
+    // La remise ne porte jamais sur la livraison ; code promo non cumulable
+    const discount = computeDiscounts(checked, (promos || []) as Promotion[], promoCode);
+    const discountCents = Math.min(itemsCents, Math.round(discount.total * 100));
+    if (discount.codeRejected) console.log(`create-checkout-session: code ${promoCode} écarté, promotions en cours plus avantageuses`);
+    // Remise par article, gardée pour les factures (bookings / purchases)
+    checked.forEach((item, i) => {
+      const d = Math.round(discount.perItem[i] * 100) / 100;
+      if (d > 0) cartMeta[i].d = d;
+    });
     if (discountCents !== Math.round(Number(body.discountAmount) || 0)) {
       console.warn(`create-checkout-session: remise corrigée ${body.discountAmount} → ${discountCents} centimes`);
     }
@@ -323,7 +362,8 @@ serve(async (req) => {
         amount_off: discountCents,
         currency: "eur",
         duration: "once",
-        name: "Promotion",
+        // Ce nom apparaît sur le paiement Stripe, le reçu et la facture Stripe (40 caractères max)
+        name: discount.label.slice(0, 40),
         max_redemptions: 1,
       });
       discounts = [{ coupon: coupon.id }];
@@ -359,6 +399,11 @@ serve(async (req) => {
       metadata: {
         type: "cart",
         order_ref: orderRef,
+        ...(discountCents > 0 ? {
+          discount_amount: (discountCents / 100).toFixed(2),
+          discount_label: discount.label.slice(0, 200),
+          promo_code: discount.code || "",
+        } : {}),
         cart_items: JSON.stringify(cartMeta),
         user_id: body.userId || "",
         user_email: body.userEmail || "",
