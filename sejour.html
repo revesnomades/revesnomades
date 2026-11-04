@@ -208,7 +208,6 @@
       <!-- Réserver dès le haut de page : mène aux options et quantités en bas -->
       <div id="topBooking" class="top-booking" hidden>
         <a id="topBookingBtn" class="btn on-light" href="#optionsSection">Réserver</a>
-        <span id="topBookingNote" class="top-booking-note"></span>
       </div>
 
       <div class="sejour-text" id="stayText">
@@ -409,22 +408,12 @@
     function refreshTopBooking() {
       const wrap = document.getElementById("topBooking");
       const btn = document.getElementById("topBookingBtn");
-      const note = document.getElementById("topBookingNote");
       const section = document.getElementById("optionsSection");
       if (!wrap || !btn || !section) return;
       const cta = section.querySelector(".btn-opt-single-checkout, .btn-opt-stripe");
       if (section.style.display === "none" || !cta) { wrap.hidden = true; return; }
 
-      // Libellé fixe ; à côté, le prix d'entrée (« dès » quand il y a plusieurs formules)
-      const radios = [...section.querySelectorAll("input[type='radio']")];
-      const prices = radios.length
-        ? radios.map(r => Number(r.getAttribute("data-price")) || 0)
-        : [Number(cta.getAttribute("data-price")) || 0];
-      const lowest = Math.min(...prices.filter(n => n > 0));
       btn.textContent = "Réserver";
-      const fmt = n => `${n % 1 === 0 ? n : n.toFixed(2)} €`;
-      const text = isFinite(lowest) ? (radios.length > 1 ? `dès ${fmt(lowest)}` : fmt(lowest)) : "";
-      note.textContent = text;
       wrap.hidden = false;
     }
     document.getElementById("topBookingBtn")?.addEventListener("click", (e) => {
