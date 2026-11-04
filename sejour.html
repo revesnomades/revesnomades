@@ -406,8 +406,6 @@
     }
 
     // ── Bouton « Réserver » du haut : reflète le choix et la quantité du bas, puis y mène ──
-    let stayCurrentQty = 1;
-    let stayIsSingleDay = false;
     function refreshTopBooking() {
       const wrap = document.getElementById("topBooking");
       const btn = document.getElementById("topBookingBtn");
@@ -417,26 +415,15 @@
       const cta = section.querySelector(".btn-opt-single-checkout, .btn-opt-stripe");
       if (section.style.display === "none" || !cta) { wrap.hidden = true; return; }
 
-      const bookingBtnEl = document.getElementById("bookingBtn");
-      const selected = section.querySelector("input[type='radio']:checked");
-      const unitPrice = Number(selected?.getAttribute("data-price") || bookingBtnEl?.getAttribute("data-price") || cta.getAttribute("data-price") || 0);
+      // Libellé fixe ; à côté, le prix d'entrée (« dès » quand il y a plusieurs formules)
       const radios = [...section.querySelectorAll("input[type='radio']")];
-      const optionCount = radios.length;
-      const qty = stayIsSingleDay ? stayCurrentQty : 1;
-      const lowest = radios.map(r => Number(r.getAttribute("data-price")) || 0).filter(n => n > 0);
-
-      btn.textContent = stayIsSingleDay ? `Réserver — ${qty} ${qty > 1 ? "places" : "place"}` : "Réserver";
-      let text = "";
+      const prices = radios.length
+        ? radios.map(r => Number(r.getAttribute("data-price")) || 0)
+        : [Number(cta.getAttribute("data-price")) || 0];
+      const lowest = Math.min(...prices.filter(n => n > 0));
+      btn.textContent = "Réserver";
       const fmt = n => `${n % 1 === 0 ? n : n.toFixed(2)} €`;
-      if (optionCount > 1 && !stayIsSingleDay && lowest.length) {
-        // Plusieurs formules : on annonce le prix d'entrée
-        text = `dès ${fmt(Math.min(...lowest))}`;
-      } else if (unitPrice > 0) {
-        const total = unitPrice * qty;
-        const { finalPrice, saved } = computeDiscountedPrice(total, qty);
-        text = saved > 0 ? `${fmt(finalPrice)} au lieu de ${fmt(total)}` : fmt(total);
-        if (optionCount > 1) text += ` · ${selected?.getAttribute("data-label") || ""}`;
-      }
+      const text = isFinite(lowest) ? (radios.length > 1 ? `dès ${fmt(lowest)}` : fmt(lowest)) : "";
       note.textContent = text;
       wrap.hidden = false;
     }
@@ -1773,10 +1760,8 @@
 
         let currentQty = 1;
         const maxQty = Number(firstDate?.seats_remaining) || 10;
-        stayIsSingleDay = true;
 
         const updateQtyUI = () => {
-          stayCurrentQty = currentQty;
           if (stayQtyVal) stayQtyVal.textContent = String(currentQty);
 
           // 1. Bouton unique (single option)
