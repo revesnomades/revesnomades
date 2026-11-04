@@ -31,8 +31,8 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 
-  <link rel="preload" href="/assets/css/styles.css?v=4" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/assets/css/styles.css?v=4"></noscript>
+  <link rel="preload" href="/assets/css/styles.css?v=5" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/assets/css/styles.css?v=5"></noscript>
 
   <style>
     /* Styles critiques inlinés pour éviter le FOUC et le CLS */
@@ -120,6 +120,7 @@
 </head>
 
 <body class="on-light">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -181,7 +182,7 @@
   <!-- Bannière promotionnelle sous le header -->
   <div id="sejourPromoBanner" style="display:none; position:fixed; top:var(--navH); left:0; right:0; background:#1a1a1a; color:#fff; text-align:center; font-size:13px; font-weight:500; padding:10px 16px; letter-spacing:.02em; z-index:199; transition:opacity .25s, transform .25s;"></div>
 
-  <main>
+  <main id="contenu">
   <div id="sejourMainTop" style="border-top: 1px solid var(--line); padding: 30px 0 0px; margin-top: var(--navH); background: var(--cream);">
     <div class="container">
       <section class="sejour-hero" style="height: clamp(540px, 80vh, 840px); min-height: 480px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%;">

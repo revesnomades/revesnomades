@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Visuel à venir">
+  <rect width="800" height="800" fill="#faf5dc"/>
+  <g fill="none" stroke="#62666e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+    <circle cx="520" cy="300" r="46"/>
+    <path d="M160 600 L330 400 L430 520 L500 450 L640 600 Z"/>
+    <path d="M120 600 H680"/>
+  </g>
+  <text x="400" y="690" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" letter-spacing="6" fill="#62666e" opacity=".7">ÂMES NOMADES</text>
+</svg>

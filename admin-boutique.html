@@ -11,7 +11,7 @@
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=4" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=5" />
   <style>
     /* Léger arrondi sur tous les boutons admin */
     button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
@@ -445,7 +445,7 @@
         const cat = window.allCategories.find(c => c.id === p.category_id);
         const catLabel = cat ? ` · ${cat.name}` : '';
         const stockLabel = p.coming_soon === true ? " · <strong style='color:#1e1f22;'>Épuisé</strong>" : p.stock === 0 ? " · <strong style='color:#888;'>Bientôt disponible</strong>" : (p.stock != null ? ` · Stock: ${p.stock}` : "");
-        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
+        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.svg';
         return `
         <div class="product-card">
           <img src="${imgSrc}" alt="${p.name}" class="product-image">

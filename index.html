@@ -50,8 +50,8 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 
-  <link rel="preload" href="assets/css/styles.css?v=4" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="assets/css/styles.css?v=4"></noscript>
+  <link rel="preload" href="assets/css/styles.css?v=5" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/css/styles.css?v=5"></noscript>
 
   <style>
     /* Styles critiques inlinés pour éviter le FOUC et le CLS */
@@ -164,6 +164,7 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -219,7 +220,7 @@
   </header>
 
 
-  <main>
+  <main id="contenu">
   <section class="hero hero-left" style="position: relative; height: 100vh; min-height: 100vh; overflow: hidden; background: #0e0f11;">
     <div class="hero-bg parallax-bg" id="homeHeroBg" style="background-image:url('assets/img/hero-1.webp'); position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
     <div class="hero-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,.14); z-index: 1;"></div>
@@ -340,9 +341,9 @@
         <div id="galleryMarqueeTrack" style="display:flex; gap:16px; padding: 10px 0;">
           <!-- Items statiques (fallback si pas d'images admin) -->
           <div class="gal-item"><img src="assets/img/hero-1.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
-          <div class="gal-item"><img src="assets/img/pool-brunch-yoga.jpg" alt="Séjour" loading="lazy" width="280" height="380"></div>
-          <div class="gal-item"><img src="assets/img/bottom-wide.jpg" alt="Séjour" loading="lazy" width="280" height="380"></div>
-          <div class="gal-item"><img src="assets/img/pool-brunch-yoga-2.jpg" alt="Séjour" loading="lazy" width="280" height="380"></div>
+          <div class="gal-item"><img src="assets/img/pool-brunch-yoga.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
+          <div class="gal-item"><img src="assets/img/bottom-wide.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
+          <div class="gal-item"><img src="assets/img/pool-brunch-yoga-2.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
           <div class="gal-item"><img src="assets/img/sac-cadeau-reves-nomades.jpg" alt="Séjour" loading="lazy" width="280" height="380"></div>
           <div class="gal-item"><img src="assets/img/hero-2.webp" alt="Séjour" loading="lazy" width="280" height="380"></div>
         </div>
@@ -471,19 +472,31 @@
             <label for="contactHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
             <input type="text" id="contactHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-              <input name="lastname" placeholder="NOM *" required autocomplete="family-name"
-                style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
-                onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
-              <input name="email" type="email" placeholder="EMAIL *" required autocomplete="email"
+              <div class="contact-field">
+                <label for="icLastname">Nom *</label>
+                <input id="icLastname" name="lastname" required autocomplete="family-name"
+                  style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
+                  onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
+              </div>
+              <div class="contact-field">
+                <label for="icEmail">Email *</label>
+                <input id="icEmail" name="email" type="email" required autocomplete="email"
+                  style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
+                  onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
+              </div>
+            </div>
+            <div class="contact-field">
+              <label for="icSubject">Objet *</label>
+              <input id="icSubject" name="subject" required
                 style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
                 onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
             </div>
-            <input name="subject" placeholder="OBJET *" required
-              style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box;"
-              onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'">
-            <textarea name="message" placeholder="TON MESSAGE *" required rows="4"
-              style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box; resize:vertical;"
-              onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'"></textarea>
+            <div class="contact-field">
+              <label for="icMessage">Ton message *</label>
+              <textarea id="icMessage" name="message" required rows="4"
+                style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:12px 14px; font-family:'Glacial Indifference','Outfit',sans-serif; font-size:13px; color:#fff; outline:none; width:100%; box-sizing:border-box; resize:vertical;"
+                onfocus="this.style.borderColor='rgba(255,255,255,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.18)'"></textarea>
+            </div>
             <div style="display:flex; align-items:center; gap:10px;">
               <input type="checkbox" name="privacyConsent" id="indexContactConsent" required style="width:20px; height:20px; accent-color:#fff; cursor:pointer; flex-shrink:0;">
               <label for="indexContactConsent" style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:12px; color:rgba(255,255,255,0.6); cursor:pointer; line-height:1.4;">J'accepte la <a href="/politique-confidentialite.html" style="color:rgba(255,255,255,0.8); text-decoration:underline;">Politique de confidentialité</a></label>
@@ -510,13 +523,15 @@
         outline: 2px solid #fff !important;
         outline-offset: 2px;
       }
+      .contact-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+      .contact-field label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,0.78); }
       #indexContactForm input::placeholder,
       #indexContactForm textarea::placeholder { color: rgba(255,255,255,0.35); }
     </style>
   </section>
 
   <section class="bottom-wide on-photo">
-    <div class="bg" style="background-image:url('assets/img/bottom-wide.jpg');"></div>
+    <div class="bg" style="background-image:url('assets/img/bottom-wide.webp');"></div>
     <div class="content container reveal">
       <h2 style="font-family:'IBM Plex Mono', monospace; font-size: clamp(14px, 1.6vw, 18px); font-weight: 300; text-transform: none; letter-spacing: 0.08em;">partir pour mieux se retrouver.</h2>
     </div>
@@ -958,7 +973,7 @@
       }
 
       grid.innerHTML = products.map(p => {
-        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
+        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.svg';
         const stockBadge = p.stock === 0 ? `<div style="background:#c00; color:#fff; font-size:12px; padding:3px 8px; font-weight:700; position:absolute; top:12px; right:12px; z-index:10; border-radius:2px; letter-spacing:0.05em;">SOLD OUT</div>` : '';
         return `
           <a class="stay-card" href="boutique.html" style="background:transparent; border:none; display:block; text-decoration:none;">

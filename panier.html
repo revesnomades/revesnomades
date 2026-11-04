@@ -20,7 +20,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=4" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=5" />
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
@@ -29,6 +29,7 @@
 </head>
 
 <body class="on-light">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -86,7 +87,7 @@
     </div>
   </header>
 
-  <main class="band cream" style="min-height:80vh;">
+  <main id="contenu" class="band cream" style="min-height:80vh;">
     <div class="container" style="padding: calc(var(--navH) + 48px) 0 80px;">
 
       <h1 style="font-family:'SegoCustom'; font-size:34px; margin:0 0 32px;">Ton panier</h1>
@@ -359,6 +360,7 @@
     let embeddedCheckout = null;
     let activePromos = [];
     let appliedPromoCode = null;
+    let miniDiscount = null; // remise affichée dans le bloc compact mobile
     let exhaustedCodes = [];
     let selectedShipping = null; // { id, name, carrier, price, is_relay? }
     let selectedRelayPoint = null; // { id, name, street, house_number, city, postal_code, country }
@@ -529,7 +531,7 @@
       const focused = cartItemsEl.contains(document.activeElement) && document.activeElement.classList.contains("cart-qty-btn")
         ? { ...document.activeElement.dataset } : null;
       cartItemsEl.innerHTML = cart.map((item, idx) => {
-        const img = item.image || "/assets/img/placeholder.jpg";
+        const img = item.image || "/assets/img/placeholder.svg";
         const price = formatPrice(item.price);
         const lineTotal = formatPrice((Number(item.price) || 0) * item.quantity);
         const isMax = item.quantity >= (item.maxStock ?? 99);
@@ -605,6 +607,7 @@
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
         totalDiscount += d.amount;
       }
+      miniDiscount = totalDiscount > 0 ? { amount: totalDiscount, label: allDiscounts.map(d => d.label).join(" + ") } : null;
       const nudge = allDiscounts.length ? null : nextPromoNudge(cart);
       if (nudge) summaryLinesEl.innerHTML += `<div class="cart-step-hint" style="margin-bottom:8px;">${nudge}</div>`;
 
@@ -708,7 +711,9 @@
       el.innerHTML = bar;
       if (mini) {
         mini.hidden = false;
-        mini.innerHTML = `<div class="cart-mini-row"><span>Sous-total articles</span><strong>${formatPrice(total)}</strong></div><div class="free-ship">${bar}</div>`;
+        mini.innerHTML = `<div class="cart-mini-row"><span>Sous-total articles</span><strong>${formatPrice(total)}</strong></div>`
+          + (miniDiscount ? `<div class="cart-mini-row cart-mini-discount"><span>Remise · ${miniDiscount.label}</span><strong>−${formatPrice(miniDiscount.amount)}</strong></div>` : "")
+          + `<div class="free-ship">${bar}</div>`;
       }
     }
 
@@ -817,7 +822,7 @@
 
         if (products && products.length) {
           productsSuggestGrid.innerHTML = products.map(p => {
-            const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.jpg";
+            const img = (p.image_urls && p.image_urls[0]) || p.image_url || "/assets/img/placeholder.svg";
             const safeName = p.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             const promo = getProductPromoBadge(p.id);
             return `

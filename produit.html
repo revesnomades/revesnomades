@@ -19,7 +19,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=5">
   <style>
     /* ── Layout produit ── */
     .product-layout {
@@ -509,6 +509,7 @@
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
 </head>
 <body class="on-light">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -564,7 +565,7 @@
     </div>
   </header>
 
-  <main class="band cream">
+  <main id="contenu" class="band cream">
     <div class="container">
       <div class="product-layout" id="productLayout">
         <div class="product-loading">Chargement du produit…</div>
@@ -703,7 +704,7 @@
       const images = (p.image_urls && p.image_urls.length > 0)
         ? p.image_urls
         : (p.image_url ? [p.image_url] : []);
-      const placeholder = "/assets/img/placeholder.jpg";
+      const placeholder = "/assets/img/placeholder.svg";
       const isVideo = url => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url || "");
       const firstPhoto = images.find(u => !isVideo(u)) || placeholder;
       const mainMediaHtml = src => isVideo(src)

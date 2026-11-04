@@ -18,7 +18,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=4" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=5" />
   <style>
     .shop-grid {
       display: grid;
@@ -123,6 +123,7 @@
     }
     .filter-pill select {
       padding: 8px 22px 8px 4px;
+      min-height: 44px;
       border: none;
       background: transparent;
       font-family: inherit;
@@ -142,6 +143,7 @@
     @media (pointer: coarse) {
       .filter-pill select { padding-top: 15px; padding-bottom: 15px; }
     }
+    .shop-card .btn { min-height: 44px; }
     .filter-pill:has(select:focus-visible) {
       outline: 2px solid var(--text);
       outline-offset: 2px;
@@ -222,6 +224,7 @@
 </head>
 
 <body class="on-light">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -279,7 +282,7 @@
     </div>
   </header>
 
-  <main class="band cream" style="min-height: 80vh;">
+  <main id="contenu" class="band cream" style="min-height: 80vh;">
     <div class="container" style="padding: calc(var(--navH) + 60px) 0 80px;">
 
       <div style="text-align:center; max-width:600px; margin:0 auto;">
@@ -559,14 +562,14 @@
       shopGrid.innerHTML = filtered.map((p, idx) => {
         const isComingSoon = p.coming_soon === true;
         const isSoldOut = !isComingSoon && p.stock === 0;
-        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.jpg';
+        const imgSrc = (p.image_urls && p.image_urls[0]) || p.image_url || '/assets/img/placeholder.svg';
         const promo = getProductPromo(p.id);
         const promoBadge = promo ? `<div style="position:absolute; top:10px; right:10px; background:${promo.badge_color||'#cc4444'}; color:#fff; font-size:12px; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:3px; z-index:2;">${promo.badge_text}</div>` : '';
         return `
         <div class="shop-card">
           ${favButtonHtml(p.id, "on-card")}
           <a href="/produit.html?id=${p.id}" class="shop-image-wrapper" style="display:block; text-decoration:none;">
-            <img class="shop-image" src="${imgSrc}" alt="${String(p.name).replace(/"/g, '&quot;')}" loading="${idx < 4 ? 'eager' : 'lazy'}" decoding="async">
+            <img class="shop-image" src="${imgSrc}" alt="${String(p.name).replace(/"/g, '&quot;')}" loading="${idx < 2 ? 'eager' : 'lazy'}" decoding="async">
             ${isComingSoon ? `<div class="sold-out-badge" style="background:var(--sold-out);">Épuisé</div>` : isSoldOut ? `<div class="sold-out-badge" style="background:var(--soon);">Bientôt disponible</div>` : ''}
             ${promoBadge}
             <div class="shop-image-overlay"></div>
@@ -590,8 +593,8 @@
           </a>
           <div class="shop-price" style="font-size:14px; font-weight:500; color:var(--muted); margin-top:4px;">
             ${formatPrice(p.price)}
-            ${promo && !promoHasConditions(promo) && (promo.type === 'percent' || promo.type === 'early_bird') ? `<span style="font-size:12px; color:#c44; font-weight:700; margin-left:6px;">−${promo.value}%</span>` : ''}
-            ${promo && !promoHasConditions(promo) && promo.type === 'fixed' ? `<span style="font-size:12px; color:#c44; font-weight:700; margin-left:6px;">−${formatPrice(promo.value)}</span>` : ''}
+            ${promo && !promoHasConditions(promo) && (promo.type === 'percent' || promo.type === 'early_bird') ? `<span style="font-size:12px; color:#ad553b; font-weight:700; margin-left:6px;">−${promo.value}%</span>` : ''}
+            ${promo && !promoHasConditions(promo) && promo.type === 'fixed' ? `<span style="font-size:12px; color:#ad553b; font-weight:700; margin-left:6px;">−${formatPrice(promo.value)}</span>` : ''}
           </div>
           ${p.description ? `
             <div class="shop-desc" id="desc-${p.id}">${p.description}</div>

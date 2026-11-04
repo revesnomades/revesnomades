@@ -20,7 +20,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=5">
   <style>
     .fav-page { padding: calc(var(--navH, 110px) + 48px) 0 80px; }
     .fav-title {
@@ -79,6 +79,7 @@
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
 </head>
 <body class="on-light">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-589D3XDT"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -134,7 +135,7 @@
     </div>
   </header>
 
-  <main class="band cream">
+  <main id="contenu" class="band cream">
     <div class="container fav-page">
       <h1 class="fav-title">Mes favoris</h1>
       <p class="fav-sub" id="favSub">Les produits que tu as gardés de côté.</p>
@@ -208,7 +209,7 @@
       sub.textContent = `${list.length} produit${list.length > 1 ? "s" : ""} gardé${list.length > 1 ? "s" : ""} de côté.`;
       content.innerHTML = `<div class="fav-grid">${list.map(p => {
         const media = (p.image_urls && p.image_urls.length) ? p.image_urls : (p.image_url ? [p.image_url] : []);
-        const img = media.find(u => !isVideo(u)) || "/assets/img/placeholder.jpg";
+        const img = media.find(u => !isVideo(u)) || "/assets/img/placeholder.svg";
         const unavailable = p.coming_soon === true || p.stock === 0;
         const url = `/produit.html?id=${encodeURIComponent(p.id)}`;
         return `<div class="fav-card">
