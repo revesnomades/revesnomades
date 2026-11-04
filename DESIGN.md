@@ -195,6 +195,21 @@ Formes presque droites : boutons à angles vifs ou arrondis de 2–3px, champs d
 - **Focus clavier** : contour de 2px de la couleur du texte, décalé de 3px (`:focus-visible`).
 - **Mouvement** : transitions courtes (150–250ms) en ease-out ; avec « réduire les animations », seuls les fondus sont conservés.
 
+### Classes partagées (extraites des pages)
+
+Définies en fin de `assets/css/styles.css`, à préférer aux styles écrits dans les pages :
+
+- **Pied de page** : `.footer-wordmark`, `.footer-about`, `.legal-row`, `.legal-col`, `.cart-badge-inline`.
+- **Pages légales** : `.legal-page`, `.legal-page-inner`, `.legal-title`, `.legal-card` (+ `--tight`), `.legal-h2` (+ `--first`), `.legal-p` (+ `--tight`), `.legal-ul`, `.u`.
+- **Cartes produit et séjour** : `.card-title`, `.card-price`, `.price-promo`, `.btn.card-btn`, `.stay-mini-btn.card-btn-ghost`, `.grid-empty`, `.grid-empty-link`.
+- **Panier** : `.sum-row`, `.section-head`, `.section-title`, `.loading-note`, `.link-muted` (+ `--sm`).
+- **Texte secondaire** : `.txt-muted`, `.txt-muted-13`, `.txt-muted-16`, `.txt-hint`, `.note-muted`, `.sub-13`, `.sub-12`, `.eyebrow`, `.mono-note`.
+- **Page séjour** : `.sejour-block` (+ `--sm`), `.sejour-list` (+ `--tight`), `.panel-soft` (+ `--13`), `.btn.qty-btn`, `.sejour-p`, `.sejour-kicker`.
+- **Formulaires et compte** : `.input-sm`, `.input-soft`, `.input-plain`, `.h-plain` (+ `--lg`), `.btn-link`, `.row-10`, `.row-8`, `.hp-field` (champ piège à robots).
+- **Utilitaires** (réglages isolés seulement) : `.grow`, `.inline-block`, `.mt-8`, `.mt-10`, `.mt-16`, `.mx-6`.
+
+Règle : un style inline répété deux fois dans une page, ou présent dans plusieurs pages, devient une classe ici.
+
 ## Do's and Don'ts
 
 - **Do** garder le crème et une seule couleur d'accent.

@@ -172,7 +172,7 @@
           <a href="/index.html#apropos" data-scroll>À propos</a>
           <a href="/boutique.html">Shop</a>
           <a href="/index.html#contact" data-scroll>Contact</a>
-          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
+          <a href="/panier.html">Panier <span class="cart-badge cart-badge-inline"></span></a>
           <a href="/compte.html">Compte</a>
         </nav>
       </div>
@@ -215,47 +215,47 @@
         <p class="text-reveal">Chargement du séjour…</p>
       </div>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="contentBlocksSection">
+      <section class="reveal sejour-section sejour-divider sejour-block sejour-block--sm" style="display:none;" id="contentBlocksSection">
         <div id="contentBlocksContainer" style="display:grid; gap:18px;"></div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:26px; display:none;" id="highlightsSection">
+      <section class="reveal sejour-section sejour-divider sejour-block sejour-block--sm" style="display:none;" id="highlightsSection">
         <h2 class="sejour-section-title">Ce que tu vas vivre</h2>
-        <div id="highlightsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+        <div class="sejour-list" id="highlightsList">
           <div>Chargement…</div>
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="programSection">
+      <section class="reveal sejour-section sejour-divider sejour-block" style="display:none;" id="programSection">
         <div style="margin-bottom:16px;">
-          <h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">03. Programme</h3>
+          <h3 class="sejour-kicker">03. Programme</h3>
         </div>
-        <p class="small muted" id="programNote" style="margin-top:10px;">
+        <p class="small muted mt-10" id="programNote">
           * Le programme exact dépend du lieu, de la météo et de l’énergie du groupe.
         </p>
         <div id="programList" style="margin-top:14px; display:grid; gap:14px;">
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+          <div class="panel-soft">
             <div class="kicker">Chargement…</div>
-            <p class="sub" style="margin-top:8px;">Le programme s’affichera ici.</p>
+            <p class="sub mt-8">Le programme s’affichera ici.</p>
           </div>
         </div>
       </section>
 
       
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="includedSection">
+      <section class="reveal sejour-section sejour-divider sejour-block" style="display:none;" id="includedSection">
         <h2 class="sejour-section-title">Ce qui est inclus</h2>
-        <div id="includedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:14px;">
+        <div class="sejour-list sejour-list--tight" id="includedList">
           <div>Chargement…</div>
         </div>
 
         <h2 class="sejour-section-title" style="margin-top:26px;">Ce qui n’est pas inclus</h2>
-        <div id="notIncludedList" style="margin-top:12px; display:grid; gap:8px; color:var(--muted); font-size:14px;">
+        <div class="sejour-list sejour-list--tight" id="notIncludedList">
           <div>Chargement…</div>
         </div>
       </section>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="optionsSection">
+      <section class="reveal sejour-section sejour-divider sejour-block" style="display:none;" id="optionsSection">
         <h2 class="sejour-section-title" id="optionsTitle">Options & Tarifs</h2>
 
         <!-- Single Day Quantity Control -->
@@ -265,13 +265,13 @@
             <div style="font-size:12px; color:var(--muted); margin-top:2px;">Sélectionne le nombre de participations à réserver</div>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
-            <button type="button" id="btnQtyMinus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
+            <button type="button" id="btnQtyMinus" class="btn tiny on-light qty-btn">−</button>
             <span id="stayQtyVal" style="font-family:'IBM Plex Mono', monospace; font-size:16px; font-weight:700; min-width:24px; text-align:center;">1</span>
-            <button type="button" id="btnQtyPlus" class="btn tiny on-light" style="width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; cursor:pointer;">+</button>
+            <button type="button" id="btnQtyPlus" class="btn tiny on-light qty-btn">+</button>
           </div>
         </div>
 
-        <div id="optionsList" style="margin-top:12px; display:grid; gap:10px; color:var(--muted);">
+        <div class="sejour-list" id="optionsList">
           <div>Chargement…</div>
         </div>
       </section>
@@ -294,16 +294,16 @@
           <a class="btn tiny on-light" href="/index.html#contact">Nous contacter</a>
         </div>
 
-        <p id="bookingMsg" class="small muted" style="margin-top:10px;"></p>
+        <p id="bookingMsg" class="small muted mt-10"></p>
       </div>
 
-      <section class="reveal sejour-section sejour-divider" style="margin-top:34px; display:none;" id="faqSection">
+      <section class="reveal sejour-section sejour-divider sejour-block" style="display:none;" id="faqSection">
         <h2 class="sejour-section-title">FAQ</h2>
 
         <div id="faqList" style="margin-top:12px; display:grid; gap:12px;">
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+          <div class="panel-soft">
             <div class="kicker">Chargement…</div>
-            <p class="sub" style="margin-top:8px;">Les questions fréquentes s’afficheront ici.</p>
+            <p class="sub mt-8">Les questions fréquentes s’afficheront ici.</p>
           </div>
         </div>
       </section>
@@ -343,7 +343,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+          <div class="footer-wordmark">ÂMESNOMADES</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
@@ -367,14 +367,14 @@
             </svg>
           </a>
 
-          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a class="footer-about" href="/index.html#apropos">À propos</a>
         </div>
       </div>
 
       <div class="legal reveal" data-delay="2">
-        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
         </div>
       </div>
     </div>
@@ -618,7 +618,7 @@
       if(!container) return;
       if(!items || !items.length){
         container.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:13px;">
+          <div class="panel-soft panel-soft--13">
             <div class="kicker" style="font-size:12px; font-weight:600; letter-spacing:0.08em;">FAQ</div>
             <p class="sub" style="margin-top:6px; font-size:12px; line-height:1.5; color:var(--text);">Les questions fréquentes seront bientôt disponibles.</p>
           </div>
@@ -626,7 +626,7 @@
         return;
       }
       container.innerHTML = (items || []).slice(0, 3).map(item => `
-        <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px; font-size:13px;">
+        <div class="panel-soft panel-soft--13">
           <div class="kicker" style="font-size:12px; font-weight:600; letter-spacing:0.08em;">${escapeHtml(item.q || "Question")}</div>
           <p class="sub" style="margin-top:6px; font-size:12px; line-height:1.5; color:var(--text);">${escapeHtml(item.a || "")}</p>
         </div>
@@ -637,9 +637,9 @@
       if(!container) return;
       if(!items || !items.length){
         container.innerHTML = `
-          <div style="border:1px solid var(--line); background:rgba(255,255,255,.55); padding:14px;">
+          <div class="panel-soft">
             <div class="kicker">Programme</div>
-            <p class="sub" style="margin-top:8px;">Le programme détaillé sera bientôt disponible.</p>
+            <p class="sub mt-8">Le programme détaillé sera bientôt disponible.</p>
           </div>
         `;
         return;
@@ -1086,7 +1086,7 @@
         
         const textPanel = `<div class="accom-bio accom-text-container">${safeText.split(/<br\s*\/?>/).map(p => p.trim()).filter(Boolean).map(p => `<p style="font-family:'Glacial Indifference','Outfit',sans-serif; font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 14px 0;">${p}</p>`).join("")}</div>`;
         
-        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">01. ${safeTitle}</h3>`;
+        const titleHtml = `<h3 class="sejour-kicker">01. ${safeTitle}</h3>`;
 
         const photoHtml = photo ? `
           <div class="accom-photo-wrapper" style="width:320px; max-width:100%; flex-shrink:0; border-radius:4px; overflow:hidden;">
@@ -1110,7 +1110,7 @@
       });
       // 3. Intervenants (après hébergement)
       if(speakers.length){
-        const titleHtml = `<h3 style="font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.12em; color:var(--text); margin:0; text-transform:uppercase; font-weight:500;">02. Intervenant</h3>`;
+        const titleHtml = `<h3 class="sejour-kicker">02. Intervenant</h3>`;
         html += `
           <article class="speaker-section-wrapper" style="border-top:1px solid rgba(30, 31, 34, 0.12); padding:32px 0 0 0; margin-top:40px;">
             <div style="margin-bottom:16px;">
@@ -1142,7 +1142,7 @@
           const imageFirst = block.type === "image_text" && block.layout !== "image_right";
           const imgStyle = `width:100%; height:280px; object-fit:cover; display:block; border-radius:4px;`;
           const imagePanel = block.image
-            ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted" style="margin-top:8px;">${safeCaption}</p>` : ""}</div>`
+            ? `<div><img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.image_alt || block.title || 'Image')}" style="${imgStyle}">${safeCaption ? `<p class="small muted mt-8">${safeCaption}</p>` : ""}</div>`
             : "";
           const textPanel = `<div class="accom-text-container">${safeTitle ? `<h3 style="margin:0 0 10px;font-family:'Glacial Indifference','Outfit',sans-serif;font-weight:400;">${safeTitle}</h3>` : ""}<p class="sub" style="margin:0;font-family:'Glacial Indifference','Outfit',sans-serif;">${safeText}</p></div>`;
           html += `<article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;align-items:center;">${imageFirst ? imagePanel + textPanel : textPanel + imagePanel}</article>`;

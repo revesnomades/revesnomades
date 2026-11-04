@@ -25,12 +25,12 @@
   
   <style>
     body {
-      background-color: var(--cream, #faf5dc) !important;
+      background-color: var(--cream, var(--cream)) !important;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       margin: 0;
-      color: var(--text, #1e1f22);
+      color: var(--text, var(--text));
     }
     .main-container {
       flex: 1;
@@ -41,7 +41,7 @@
       padding: 20px;
     }
     .guide-card {
-      background: var(--white, #fffdf3);
+      background: var(--white, var(--white));
       border: 1px solid var(--line, rgba(30, 31, 34, 0.08));
       border-radius: 4px;
       padding: clamp(30px, 6vw, 60px);
@@ -156,7 +156,7 @@
         <input class="input" name="email" type="email" placeholder="Ton Email" required autocomplete="email" />
         
         <label for="newsletterHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
-        <input type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        <input class="hp-field" type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off">
         
         <button class="btn" type="submit">Recevoir mon guide</button>
       </form>

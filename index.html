@@ -212,7 +212,7 @@
           <a href="index.html#apropos" data-scroll>À propos</a>
           <a href="boutique.html">Shop</a>
           <a href="#contact" data-scroll>Contact</a>
-          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
+          <a href="/panier.html">Panier <span class="cart-badge cart-badge-inline"></span></a>
           <a href="compte.html">Compte</a>
         </nav>
       </div>
@@ -261,11 +261,11 @@
 
         <div class="sep reveal" data-delay="2"></div>
 
-        <p class="sub reveal" data-delay="3" id="featuredStayDuration" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.04em;">
+        <p class="sub reveal mono-note" data-delay="3" id="featuredStayDuration">
           Durée à annoncer
         </p>
 
-        <p class="sub reveal" data-delay="4" id="featuredStayDates" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.04em;">
+        <p class="sub reveal mono-note" data-delay="4" id="featuredStayDates">
           Chargement…
         </p>
 
@@ -291,13 +291,13 @@
     <div class="container" style="padding: 30px 0 var(--space-lg);">
       <div class="reveal">
         <h2 style="margin:0; font-family:'SegoCustom', serif !important; font-weight:300 !important; text-transform:none !important;">Prochains séjours</h2>
-        <p style="margin-top:12px; color:var(--muted);">
+        <p class="note-muted">
           Survole un séjour pour découvrir les prochaines dates.
         </p>
       </div>
 
       <div id="highlightStaysGrid" class="stay-grid" style="margin-top:24px;">
-        <div style="color:var(--muted);">Chargement…</div>
+        <div class="txt-muted">Chargement…</div>
       </div>
     </div>
   </section>
@@ -316,7 +316,7 @@
       <div class="reveal" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
         <div>
           <h2 style="margin:0;">Le Shop — Sélection Vedette</h2>
-          <p style="margin-top:12px; color:var(--muted);">
+          <p class="note-muted">
             Découvre nos créations, accessoires et e-books pour prolonger l'expérience chez toi.
           </p>
         </div>
@@ -324,7 +324,7 @@
       </div>
 
       <div id="boutiqueVedetteGrid" class="shop-grid-4" style="margin-top:32px;">
-        <div style="color:var(--muted);">Chargement de la sélection…</div>
+        <div class="txt-muted">Chargement de la sélection…</div>
       </div>
     </div>
   </section>
@@ -429,7 +429,7 @@
         <input class="input" name="firstname" placeholder="Prénom" required autocomplete="given-name" />
         <input class="input" name="email" type="email" placeholder="Ton Email" required autocomplete="email" />
         <label for="newsletterHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
-        <input type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        <input class="hp-field" type="text" id="newsletterHoneypot" name="website" tabindex="-1" autocomplete="off">
         <button class="btn block" type="submit">Recevoir mon guide</button>
       </form>
 
@@ -470,7 +470,7 @@
           <p style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.72); margin:0 0 18px 0;">Nous contacter</p>
           <form id="indexContactForm" novalidate style="display:flex; flex-direction:column; gap:14px;">
             <label for="contactHoneypot" class="sr-only">Ne pas remplir ce champ si tu es un robot</label>
-            <input type="text" id="contactHoneypot" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+            <input class="hp-field" type="text" id="contactHoneypot" name="website" tabindex="-1" autocomplete="off">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div class="contact-field">
                 <label for="icLastname">Nom *</label>
@@ -543,7 +543,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+          <div class="footer-wordmark">ÂMESNOMADES</div>
         </div>
 
         <div class="footer-social reveal" data-delay="1">
@@ -567,14 +567,14 @@
             </svg>
           </a>
 
-          <a href="index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a class="footer-about" href="index.html#apropos">À propos</a>
         </div>
       </div>
 
       <div class="legal reveal" data-delay="2">
-        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
         </div>
       </div>
     </div>
@@ -870,7 +870,7 @@
 
   if (!highlightStaysGrid) return;
 
-  highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Chargement…</div>`;
+  highlightStaysGrid.innerHTML = `<div class="txt-muted">Chargement…</div>`;
 
   const { data: stays, error } = await supabase
     .from("stays")
@@ -882,12 +882,12 @@
 
   if (error) {
     console.error("Erreur chargement bandeau 5 séjours :", error);
-    highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Erreur chargement</div>`;
+    highlightStaysGrid.innerHTML = `<div class="txt-muted">Erreur chargement</div>`;
     return;
   }
 
   if (!stays || !stays.length) {
-    highlightStaysGrid.innerHTML = `<div style="color:var(--muted);">Aucun séjour</div>`;
+    highlightStaysGrid.innerHTML = `<div class="txt-muted">Aucun séjour</div>`;
     return;
   }
 
@@ -982,8 +982,8 @@
               <div class="stay-card-overlay"></div>
 
               <div class="stay-card-hover">
-                <div class="stay-card-line" style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">${p.name}</div>
-                <div class="stay-card-line" style="font-size:16px; font-weight:600; margin-top:4px;">${(Number(p.price) || 0).toFixed(2)} €</div>
+                <div class="stay-card-line card-title">${p.name}</div>
+                <div class="stay-card-line card-price">${(Number(p.price) || 0).toFixed(2)} €</div>
                 <div class="stay-card-line stay-card-dates" style="margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.description || "Découvrir cet article"}</div>
 
                 <div class="stay-card-cta" style="margin-top:12px;">
@@ -1260,7 +1260,7 @@
         console.error("CONTACT FORM ERROR:", error);
         const mailtoUrl = `mailto:contact@amesnomades.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("De: " + lastname + " (" + email + ")\n\n" + message)}`;
         if(indexContactMsg) {
-          indexContactMsg.innerHTML = `Oups… Envoi direct indisponible. <a href="${mailtoUrl}" style="color:#fff; text-decoration:underline;">Clique ici pour envoyer par email</a>.`;
+          indexContactMsg.innerHTML = `Oups… Envoi direct indisponible. <a class="link-on-dark" href="${mailtoUrl}">Clique ici pour envoyer par email</a>.`;
         }
         return;
       }

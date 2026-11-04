@@ -140,14 +140,10 @@
 
               <div class="social-divider"><span>ou</span></div>
 
-              <input id="email" class="input"
-                style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                placeholder="Email">
+              <input id="email" class="input input-soft" placeholder="Email">
 
               <div class="password-field">
-                <input id="password" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  type="password" placeholder="Mot de passe">
+                <input id="password" class="input input-soft" type="password" placeholder="Mot de passe">
                 <button type="button" class="password-toggle" data-target="password" aria-label="Afficher le mot de passe">
                   Afficher
                 </button>
@@ -162,19 +158,17 @@
                 Mot de passe oublié ?
               </button>
 
-              <div id="authMsg" style="color:var(--muted); font-size:13px;"></div>
+              <div class="txt-muted-13" id="authMsg"></div>
             </div>
           </div>
 
           <!-- Zone RESET -->
-          <div id="resetBox" style="display:none; margin-top:16px;">
-            <h2 style="font-weight:500; margin:0; font-size:1.17em;">Créer un nouveau mot de passe</h2>
+          <div class="mt-16" id="resetBox" style="display:none;">
+            <h2 class="h-plain h-plain--lg">Créer un nouveau mot de passe</h2>
 
             <div style="display:grid; gap:10px; margin-top:10px;">
               <div class="password-field">
-                <input id="newPassword" class="input"
-                  style="color:var(--text); background:rgba(255,255,255,.55); border:1px solid var(--line);"
-                  type="password" placeholder="Nouveau mot de passe">
+                <input id="newPassword" class="input input-soft" type="password" placeholder="Nouveau mot de passe">
                 <button type="button" class="password-toggle" data-target="newPassword" aria-label="Afficher le nouveau mot de passe">
                   Afficher
                 </button>
@@ -197,13 +191,13 @@
                 Mettre à jour mon mot de passe
               </button>
 
-              <div id="resetMsg" style="color:var(--muted); font-size:13px;"></div>
+              <div class="txt-muted-13" id="resetMsg"></div>
             </div>
           </div>
 
           <!-- Logged -->
-          <div id="loggedBox" style="display:none; margin-top:16px;">
-            <div style="color:var(--muted); font-size:13px;">
+          <div class="mt-16" id="loggedBox" style="display:none;">
+            <div class="txt-muted-13">
               Connecté(e) : <b id="userEmail"></b>
             </div>
 
@@ -232,7 +226,7 @@
         <!-- COLONNE DROITE -->
         <div>
           <div id="perksBox" class="account-card">
-            <h2 style="font-weight:500; margin:0; font-size:1.17em;">Pourquoi créer un compte ?</h2>
+            <h2 class="h-plain h-plain--lg">Pourquoi créer un compte ?</h2>
             <p style="color:var(--muted); margin-top:10px;">
               • Suivre tes réservations passées et à venir<br>
               • Voir le nombre de réservations restantes pour valider un séjour<br>
@@ -241,28 +235,28 @@
           </div>
 
           <div id="bookingsBox" class="account-card" style="display:none;">
-            <h3 style="font-weight:500; margin:0;">Mes réservations</h3>
-            <div id="bookingsList" style="margin-top:12px; color:var(--muted);">Connecte-toi pour voir tes réservations.</div>
+            <h3 class="h-plain">Mes réservations</h3>
+            <div class="note-muted" id="bookingsList">Connecte-toi pour voir tes réservations.</div>
           </div>
 
-          <div id="purchasesBox" class="account-card" style="display:none; margin-top:16px;">
-            <h3 style="font-weight:500; margin:0;">Mes achats</h3>
-            <div id="purchasesList" style="margin-top:12px; color:var(--muted);">Chargement de tes achats...</div>
+          <div id="purchasesBox" class="account-card mt-16" style="display:none;">
+            <h3 class="h-plain">Mes achats</h3>
+            <div class="note-muted" id="purchasesList">Chargement de tes achats...</div>
           </div>
 
-          <div id="addressBox" class="account-card" style="display:none; margin-top:16px;">
+          <div id="addressBox" class="account-card mt-16" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <h3 style="font-weight:500; margin:0;">Adresse de livraison</h3>
-              <button type="button" id="btnEditAddress" style="font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Modifier</button>
+              <h3 class="h-plain">Adresse de livraison</h3>
+              <button class="btn-link" type="button" id="btnEditAddress">Modifier</button>
             </div>
             <div id="addressDisplay" style="font-size:14px; color:var(--muted);">Aucune adresse enregistrée.</div>
             <form id="addressForm" style="display:none; margin-top:12px;" autocomplete="on">
               <div style="display:flex; flex-direction:column; gap:8px;">
-                <input id="addrLine1" class="input" placeholder="Adresse (ex: 12 rue de la Paix)" style="font-size:13px;" autocomplete="address-line1">
-                <input id="addrLine2" class="input" placeholder="Complément d'adresse (optionnel)" style="font-size:13px;" autocomplete="address-line2">
+                <input id="addrLine1" class="input input-sm" placeholder="Adresse (ex: 12 rue de la Paix)" autocomplete="address-line1">
+                <input id="addrLine2" class="input input-sm" placeholder="Complément d'adresse (optionnel)" autocomplete="address-line2">
                 <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px;">
-                  <input id="addrPostal" class="input" placeholder="Code postal" style="font-size:13px;" maxlength="10" autocomplete="postal-code">
-                  <input id="addrCity" class="input" placeholder="Ville" style="font-size:13px;" autocomplete="address-level2">
+                  <input id="addrPostal" class="input input-sm" placeholder="Code postal" maxlength="10" autocomplete="postal-code">
+                  <input id="addrCity" class="input input-sm" placeholder="Ville" autocomplete="address-level2">
                 </div>
                 <select id="addrCountry" class="input" style="font-size:13px;" autocomplete="country">
                   <option value="FR">France</option>
@@ -281,7 +275,7 @@
               </div>
               <div style="display:flex; gap:8px; margin-top:12px;">
                 <button type="submit" id="btnSaveAddress" class="btn on-light" style="font-size:13px;">Enregistrer</button>
-                <button type="button" id="btnCancelAddress" style="font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0;">Annuler</button>
+                <button class="btn-link" type="button" id="btnCancelAddress">Annuler</button>
               </div>
               <div id="addressMsg" style="font-size:12px; margin-top:6px; display:none;"></div>
             </form>
@@ -296,11 +290,11 @@
     <div style="max-width:760px; margin:20px auto;">
       
       <!-- Barre d'actions non-imprimable -->
-      <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:#1e1f22; color:#fff; padding:14px 20px; border-top-left-radius:10px; border-top-right-radius:10px;">
-        <div style="display:flex; align-items:center; gap:10px;">
+      <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:var(--text); color:#fff; padding:14px 20px; border-top-left-radius:10px; border-top-right-radius:10px;">
+        <div class="row-10">
           <strong style="font-size:16px; font-weight:600;">Facture / Attestation de paiement</strong>
         </div>
-        <div style="display:flex; align-items:center; gap:10px;">
+        <div class="row-10">
           <button type="button" id="btnPrintInvoice" class="btn" style="background:#3f7a4c; color:#fff; border:none; padding:8px 16px; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
             Imprimer / Télécharger (PDF)
           </button>
@@ -309,12 +303,12 @@
       </div>
 
       <!-- Zone Imprimable de la Facture -->
-      <div id="invoicePrintArea" class="invoice-card" style="background:#ffffff; padding:45px 50px; border-bottom-left-radius:10px; border-bottom-right-radius:10px; color:#1e1f22; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+      <div id="invoicePrintArea" class="invoice-card" style="background:#ffffff; padding:45px 50px; border-bottom-left-radius:10px; border-bottom-right-radius:10px; color:var(--text); font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
         
         <!-- En-tête Facture -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #1e1f22; padding-bottom:24px; margin-bottom:28px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--text); padding-bottom:24px; margin-bottom:28px;">
           <div>
-            <div style="font-family:'SegoCustom', serif, Georgia; font-size:26px; font-weight:400; letter-spacing:0.02em; color:#1e1f22; margin-bottom:4px;">
+            <div style="font-family:'SegoCustom', serif, Georgia; font-size:26px; font-weight:400; letter-spacing:0.02em; color:var(--text); margin-bottom:4px;">
               ÂmesNomades
             </div>
             <div style="font-size:12px; color:#666; line-height:1.5;">
@@ -325,9 +319,9 @@
           </div>
 
           <div style="text-align:right;">
-            <h2 style="margin:0 0 6px 0; font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; letter-spacing:0.05em; color:#1e1f22;">FACTURE</h2>
+            <h2 style="margin:0 0 6px 0; font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; letter-spacing:0.05em; color:var(--text);">FACTURE</h2>
             <div style="font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--text);">
-              N° : <strong id="invNumDisplay" style="color:#1e1f22;">FAC-2026-0001</strong>
+              N° : <strong id="invNumDisplay" style="color:var(--text);">FAC-2026-0001</strong>
             </div>
             <div style="font-size:13px; color:#666; margin-top:3px;">
               Date : <span id="invDateDisplay">22 septembre 2026</span>
@@ -344,13 +338,13 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:32px; background:#fbfaf6; padding:20px; border-radius:8px; border:1px solid #eee;">
           <div>
             <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; text-transform:uppercase; color:#6b6b6b; letter-spacing:0.05em; margin-bottom:8px;">Facturé à</div>
-            <div id="invCustomerNameDisplay" style="font-size:16px; font-weight:700; color:#1e1f22; margin-bottom:2px;">—</div>
+            <div id="invCustomerNameDisplay" style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:2px;">—</div>
             <div id="invCustomerEmailDisplay" style="font-size:13px; color:var(--text);">—</div>
           </div>
 
           <div>
             <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; text-transform:uppercase; color:#6b6b6b; letter-spacing:0.05em; margin-bottom:8px;">Détails du séjour</div>
-            <div id="invStayTitleDisplay" style="font-size:14px; font-weight:700; color:#1e1f22; text-transform:uppercase; margin-bottom:2px;">—</div>
+            <div id="invStayTitleDisplay" style="font-size:14px; font-weight:700; color:var(--text); text-transform:uppercase; margin-bottom:2px;">—</div>
             <div id="invStayDatesDisplay" style="font-size:13px; color:var(--text); font-family:'IBM Plex Mono', monospace;">—</div>
           </div>
         </div>
@@ -367,11 +361,11 @@
           <tbody>
             <tr style="border-bottom:1px solid #eee;">
               <td style="padding:16px 12px;">
-                <div id="invOptionDisplay" style="font-size:14px; font-weight:600; color:#1e1f22;">Réservation Séjour</div>
+                <div id="invOptionDisplay" style="font-size:14px; font-weight:600; color:var(--text);">Réservation Séjour</div>
                 <div style="font-size:12px; color:#6b6b6b; margin-top:2px;">Accès complet au séjour et prestations incluses.</div>
               </td>
               <td style="padding:16px 12px; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:13px;">1</td>
-              <td style="padding:16px 12px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:600; color:#1e1f22;" id="invAmountDisplay">0,00 €</td>
+              <td style="padding:16px 12px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:600; color:var(--text);" id="invAmountDisplay">0,00 €</td>
             </tr>
           </tbody>
         </table>
@@ -391,7 +385,7 @@
               <span>TVA :</span>
               <span>Non applicable*</span>
             </div>
-            <div style="display:flex; justify-content:space-between; padding:12px 0; font-size:16px; font-weight:700; color:#1e1f22;">
+            <div style="display:flex; justify-content:space-between; padding:12px 0; font-size:16px; font-weight:700; color:var(--text);">
               <span>Total TTC :</span>
               <span id="invTotalDisplay" style="font-family:'IBM Plex Mono', monospace; font-size:18px;">0,00 €</span>
             </div>
@@ -433,7 +427,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand">
-          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+          <div class="footer-wordmark">ÂMESNOMADES</div>
         </div>
 
         <div class="footer-social">
@@ -457,14 +451,14 @@
             </svg>
           </a>
 
-          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a class="footer-about" href="/index.html#apropos">À propos</a>
         </div>
       </div>
 
       <div class="legal">
-        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
         </div>
       </div>
     </div>
@@ -815,7 +809,7 @@
       siteFaqList.innerHTML = "";
 
       if(!siteFaqItems.length){
-        siteFaqList.innerHTML = `<div style="color:var(--muted); font-size:13px;">Aucune question FAQ pour le moment.</div>`;
+        siteFaqList.innerHTML = `<div class="txt-muted-13">Aucune question FAQ pour le moment.</div>`;
         return;
       }
 
@@ -834,11 +828,11 @@
           <input class="input faq-question" placeholder="Question" value="${item.question.replace(/"/g, "&quot;")}">
           <textarea class="input faq-answer" style="min-height:90px;" placeholder="Réponse">${item.answer}</textarea>
           <div class="account-actions">
-            <label style="display:flex; align-items:center; gap:8px;">
+            <label class="row-8">
               <input type="checkbox" class="faq-active" ${item.is_active ? "checked" : ""}>
               <span>Active</span>
             </label>
-            <label style="display:flex; align-items:center; gap:8px;">
+            <label class="row-8">
               <input type="checkbox" class="faq-stay-default" ${item.use_for_stay_default ? "checked" : ""}>
               <span>FAQ modèle séjour</span>
             </label>
@@ -1114,7 +1108,7 @@
     function renderAdminGalleryPhotos() {
       if (!adminGalleryPhotosList) return;
       if (currentGalleryPhotos.length === 0) {
-        adminGalleryPhotosList.innerHTML = `<div style="color:var(--muted); font-size:13px;">Aucune photo dans la galerie.</div>`;
+        adminGalleryPhotosList.innerHTML = `<div class="txt-muted-13">Aucune photo dans la galerie.</div>`;
         return;
       }
       adminGalleryPhotosList.innerHTML = currentGalleryPhotos.map((p, idx) => `
@@ -1413,7 +1407,7 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
               <div>
                 <strong style="font-size:14px; color:var(--text); font-weight:700; font-family:inherit;">${title}</strong>
-                <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+                <div class="sub-13">
                   ${label ? `${label} · ` : ""}${amountStr} · <span style="color:${item.status === 'cancelled' ? '#c00' : '#155724'}; font-weight:600;">${item.status === 'cancelled' ? '✗' : '✓'} ${statusLabel}</span>
                 </div>
                 <div style="font-size:12px; color:var(--muted); font-family:'IBM Plex Mono', monospace; margin-top:4px;">
@@ -1541,7 +1535,7 @@
         if (item.shipping_line1) {
           const parts = [item.shipping_line1, item.shipping_line2].filter(Boolean).join(", ");
           const cityLine = [item.shipping_postal_code, item.shipping_city, item.shipping_country].filter(Boolean).join(" ");
-          addressHtml = `<div style="font-size:12px; color:var(--muted); margin-top:4px;">${parts}, ${cityLine}</div>`;
+          addressHtml = `<div class="sub-12">${parts}, ${cityLine}</div>`;
         }
 
         // Date de livraison estimée (7 jours après achat)
@@ -1556,10 +1550,10 @@
         return `
           <div style="padding:14px 0; border-bottom:1px solid var(--line);">
             <div style="font-weight:500; color:var(--text);">${title}</div>
-            <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+            <div class="sub-13">
               ${amount} · ${status}
             </div>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+            <div class="sub-12">
               Achat du ${date}
             </div>
             ${addressHtml}

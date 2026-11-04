@@ -2897,3 +2897,81 @@ footer.band.cream{
 /* Panier mobile : remise dans le bloc compact */
 .cart-mini-discount { margin-top: 6px; color: #b34400; }
 .cart-mini-discount strong { color: #b34400; font-size: 14px; }
+
+/* ── Pied de page : classes partagées par toutes les pages ── */
+.footer-wordmark { font-family: 'SegoCustom', serif; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.footer-about { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.legal-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.legal-col { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.cart-badge-inline { position: static; display: inline-flex; margin-left: 4px; }
+/* Champ piège à robots : hors écran, jamais visible */
+.hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+/* ── Pages légales (CGV, mentions, confidentialité, retours) ── */
+.legal-page { padding-top: 120px; padding-bottom: 80px; }
+.legal-page-inner { max-width: 860px; }
+.legal-title { font-family: 'SegoCustom', serif; font-weight: 400; font-size: 42px; margin: 36px 0 16px; }
+.legal-card { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-top: 36px; box-shadow: 0 4px 24px rgba(0,0,0,0.03); font-size: 12.5px; line-height: 1.8; color: var(--text); }
+.legal-card--tight { line-height: 1.6; }
+.legal-h2 { margin: 28px 0 0; font-size: 16px; border-bottom: 1px solid var(--line); padding-bottom: 8px; color: var(--text); }
+.legal-h2--first { margin-top: 0; }
+.legal-p { margin-top: 10px; }
+.legal-p--tight { margin-top: 8px; }
+.legal-ul { margin: 8px 0 0 16px; }
+.u { text-decoration: underline; }
+
+/* ── Composants extraits des pages (extract, nov. 2026) ── */
+/* Cartes produit / séjour (boutique, accueil) */
+.card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.card-price { font-size: 16px; font-weight: 600; margin-top: 4px; }
+.price-promo { font-size: 12px; color: #ad553b; font-weight: 700; margin-left: 6px; }
+.btn.card-btn { margin-top: 8px; width: 100%; padding: 6px; font-size: 12px; border: 1px solid var(--line); }
+.stay-mini-btn.card-btn-ghost { cursor: pointer; width: 100%; background: rgba(255,255,255,0.15); }
+.link-on-dark { color: #fff; text-decoration: underline; }
+.grid-empty { text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--muted); }
+.grid-empty-link { grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--muted); font-size: 13px; }
+.shop-h2 { margin: 0; font-size: 18px; }
+/* Panier : récapitulatif et liens */
+.sum-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+.section-title { font-family: 'SegoCustom'; font-size: 26px; margin: 0; }
+.loading-note { color: var(--muted); font-size: 13px; padding: 20px 0; }
+.link-muted { text-decoration: underline; color: var(--muted); }
+.link-muted--sm { font-size: 13px; }
+.cart-qty-btn:disabled { opacity: .4; }
+/* Texte secondaire */
+.txt-muted { color: var(--muted); }
+.txt-muted-13 { color: var(--muted); font-size: 13px; }
+.txt-muted-16 { color: var(--muted); font-size: 16px; }
+.txt-hint { font-size: 12px; color: var(--muted); }
+.note-muted { margin-top: 12px; color: var(--muted); }
+.sub-13 { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.sub-12 { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.mono-note { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.04em; }
+/* Page séjour */
+.sejour-block { margin-top: 34px; }
+.sejour-block--sm { margin-top: 26px; }
+.sejour-list { margin-top: 12px; display: grid; gap: 10px; color: var(--muted); }
+.sejour-list--tight { gap: 8px; font-size: 14px; }
+.panel-soft { border: 1px solid var(--line); background: rgba(255,255,255,.55); padding: 14px; }
+.panel-soft--13 { font-size: 13px; }
+.btn.qty-btn { width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; cursor: pointer; }
+.sejour-p { font-family: 'Glacial Indifference', 'Outfit', sans-serif; font-size: 14px; line-height: 1.65; color: var(--muted); margin: 0 0 14px; }
+.sejour-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; color: var(--text); margin: 0; text-transform: uppercase; font-weight: 500; }
+/* Compte, inscription, formulaires */
+.input-sm { font-size: 13px; }
+.input-soft { color: var(--text); background: rgba(255,255,255,.55); border: 1px solid var(--line); }
+.input-plain { padding: 12px; border: 1px solid var(--line); background: #fff; }
+.h-plain { font-weight: 500; margin: 0; }
+.h-plain--lg { font-size: 1.17em; }
+.btn-link { font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+.row-10 { display: flex; align-items: center; gap: 10px; }
+.row-8 { display: flex; align-items: center; gap: 8px; }
+/* Utilitaires d'espacement, à n'utiliser que pour des réglages isolés */
+.grow { flex: 1; }
+.inline-block { display: inline-block; }
+.mt-8 { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-16 { margin-top: 16px; }
+.mx-6 { margin: 0 6px; }

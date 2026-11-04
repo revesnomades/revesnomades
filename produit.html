@@ -558,7 +558,7 @@
           <a href="/index.html#apropos">À propos</a>
           <a href="/faq.html">FAQ</a>
           <a href="/index.html#contact">Contact</a>
-          <a href="/panier.html">Panier <span class="cart-badge" style="position:static; display:inline-flex; margin-left:4px;"></span></a>
+          <a href="/panier.html">Panier <span class="cart-badge cart-badge-inline"></span></a>
           <a href="/compte.html">Compte</a>
         </nav>
       </div>
@@ -602,7 +602,7 @@
     <div class="container footer">
       <div class="footer-row">
         <div class="footer-brand reveal" data-delay="0">
-          <div style="font-family:'SegoCustom', serif; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">ÂMESNOMADES</div>
+          <div class="footer-wordmark">ÂMESNOMADES</div>
         </div>
         <div class="footer-social reveal" data-delay="1">
           <a class="icon-btn light" href="https://instagram.com/amesnomades_retreat" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
@@ -622,14 +622,14 @@
               <path d="M12.5 3v13.1c0 1.4-1.2 2.6-2.6 2.6s-2.6-1.2-2.6-2.6 1.2-2.6 2.6-2.6v-2.6a5.2 5.2 0 1 0 5.2 5.2V7.1a7.3 7.3 0 0 0 3.8 1.1V5.5A4.6 4.6 0 0 1 15 3h-2.5z"/>
             </svg>
           </a>
-          <a href="/index.html#apropos" style="font-size:12px; letter-spacing:.08em; text-transform:uppercase;">À propos</a>
+          <a class="footer-about" href="/index.html#apropos">À propos</a>
         </div>
       </div>
       <div class="legal reveal" data-delay="2">
-        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
           <div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+            <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
           </div>
         </div>
       </div>
@@ -651,7 +651,7 @@
     const productId = params.get("id");
 
     if (!productId) {
-      layout.innerHTML = `<div class="product-error"><p style="color:var(--muted); font-size:16px;">Produit introuvable.</p><a href="/boutique.html" class="btn on-light" style="margin-top:16px; display:inline-block;">← Retour à la boutique</a></div>`;
+      layout.innerHTML = `<div class="product-error"><p class="txt-muted-16">Produit introuvable.</p><a href="/boutique.html" class="btn on-light mt-16 inline-block">← Retour à la boutique</a></div>`;
     } else {
       loadProduct(productId);
     }
@@ -664,7 +664,7 @@
         .single();
 
       if (error || !p) {
-        layout.innerHTML = `<div class="product-error"><p style="color:var(--muted); font-size:16px;">Produit introuvable.</p><a href="/boutique.html" class="btn on-light" style="margin-top:16px; display:inline-block;">← Retour à la boutique</a></div>`;
+        layout.innerHTML = `<div class="product-error"><p class="txt-muted-16">Produit introuvable.</p><a href="/boutique.html" class="btn on-light mt-16 inline-block">← Retour à la boutique</a></div>`;
         return;
       }
 
@@ -760,8 +760,8 @@
         <!-- Info -->
         <div class="product-info">
           <div class="product-breadcrumb">
-            <a href="/boutique.html">Shop</a> <span style="margin:0 6px;">›</span>
-            ${category ? `<a href="/boutique.html?categorie=${encodeURIComponent(category.id)}">${category.name}</a> <span style="margin:0 6px;">›</span>` : ""}
+            <a href="/boutique.html">Shop</a> <span class="mx-6">›</span>
+            ${category ? `<a href="/boutique.html?categorie=${encodeURIComponent(category.id)}">${category.name}</a> <span class="mx-6">›</span>` : ""}
             ${p.name}
           </div>
 
