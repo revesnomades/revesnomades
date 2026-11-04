@@ -723,7 +723,9 @@
       // Prix promo
       let promoPrice = null;
       let promoBadgeText = "";
-      if (promo) {
+      // Promotion sous condition (minimum d'achat, quantité, duo) : le badge reste, le prix barré non
+      const promoHasConditions = promo && (Number(promo.min_amount) > 0 || Number(promo.min_qty) > 1 || promo.type === "duo");
+      if (promo && !promoHasConditions) {
         if (promo.type === "percent" || promo.type === "early_bird") {
           promoPrice = p.price * (1 - promo.value / 100);
           promoBadgeText = `−${promo.value}%`;
@@ -731,8 +733,8 @@
           promoPrice = p.price - promo.value;
           promoBadgeText = `−${formatPrice(promo.value)}`;
         }
-        if (promo.badge_text) promoBadgeText = promo.badge_text;
       }
+      if (promo?.badge_text) promoBadgeText = promo.badge_text;
       const displayPrice = promoPrice !== null ? promoPrice : p.price;
 
       // Rendu galerie

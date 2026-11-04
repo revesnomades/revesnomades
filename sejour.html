@@ -205,6 +205,12 @@
         Dates : <span id="stayDates" style="display:inline !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important;">Dates à annoncer</span>
       </p>
 
+      <!-- Réserver dès le haut de page : mène aux options et quantités en bas -->
+      <div id="topBooking" class="top-booking" hidden>
+        <a id="topBookingBtn" class="btn on-light" href="#optionsSection">Réserver</a>
+        <span id="topBookingNote" class="top-booking-note"></span>
+      </div>
+
       <div class="sejour-text" id="stayText">
         <p class="text-reveal">Chargement du séjour…</p>
       </div>
@@ -399,10 +405,73 @@
       }
     }
 
+    // ── Bouton « Réserver » du haut : reflète le choix et la quantité du bas, puis y mène ──
+    let stayCurrentQty = 1;
+    let stayIsSingleDay = false;
+    function refreshTopBooking() {
+      const wrap = document.getElementById("topBooking");
+      const btn = document.getElementById("topBookingBtn");
+      const note = document.getElementById("topBookingNote");
+      const section = document.getElementById("optionsSection");
+      if (!wrap || !btn || !section) return;
+      const cta = section.querySelector(".btn-opt-single-checkout, .btn-opt-stripe");
+      if (section.style.display === "none" || !cta) { wrap.hidden = true; return; }
+
+      const bookingBtnEl = document.getElementById("bookingBtn");
+      const selected = section.querySelector("input[type='radio']:checked");
+      const unitPrice = Number(selected?.getAttribute("data-price") || bookingBtnEl?.getAttribute("data-price") || cta.getAttribute("data-price") || 0);
+      const radios = [...section.querySelectorAll("input[type='radio']")];
+      const optionCount = radios.length;
+      const qty = stayIsSingleDay ? stayCurrentQty : 1;
+      const lowest = radios.map(r => Number(r.getAttribute("data-price")) || 0).filter(n => n > 0);
+
+      btn.textContent = stayIsSingleDay ? `Réserver — ${qty} ${qty > 1 ? "places" : "place"}` : "Réserver";
+      let text = "";
+      const fmt = n => `${n % 1 === 0 ? n : n.toFixed(2)} €`;
+      if (optionCount > 1 && !stayIsSingleDay && lowest.length) {
+        // Plusieurs formules : on annonce le prix d'entrée
+        text = `dès ${fmt(Math.min(...lowest))}`;
+      } else if (unitPrice > 0) {
+        const total = unitPrice * qty;
+        const { finalPrice, saved } = computeDiscountedPrice(total, qty);
+        text = saved > 0 ? `${fmt(finalPrice)} au lieu de ${fmt(total)}` : fmt(total);
+        if (optionCount > 1) text += ` · ${selected?.getAttribute("data-label") || ""}`;
+      }
+      note.textContent = text;
+      wrap.hidden = false;
+    }
+    document.getElementById("topBookingBtn")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      const section = document.getElementById("optionsSection");
+      if (!section) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      section.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      // Le clavier arrive sur le premier choix ; le bloc clignote pour situer le regard
+      const first = [...section.querySelectorAll("#btnQtyPlus, input[type='radio'], .btn-opt-single-checkout")].find(el => el.offsetParent !== null);
+      setTimeout(() => first?.focus({ preventScroll: true }), reduce ? 0 : 450);
+      section.classList.remove("is-target");
+      void section.offsetWidth;
+      section.classList.add("is-target");
+    });
+    // Tout changement dans le bloc options (option cochée, quantité, prix) met le bouton du haut à jour
+    const optionsSectionEl = document.getElementById("optionsSection");
+    if (optionsSectionEl) {
+      let topBookingRaf = 0;
+      new MutationObserver(() => {
+        cancelAnimationFrame(topBookingRaf);
+        topBookingRaf = requestAnimationFrame(refreshTopBooking);
+      }).observe(optionsSectionEl, { subtree: true, childList: true, characterData: true, attributes: true });
+    }
+
     function computeDiscountedPrice(totalPrice, qty = 1) {
       if (!currentStayPromo || !totalPrice) return { finalPrice: totalPrice, saved: 0 };
       const p = currentStayPromo;
       const isEuro = p.value_unit === 'euro';
+      // Conditions : minimum d'achat et quantité minimum (le duo garde sa règle par article)
+      const minQty = p.type === 'duo' ? 0 : (Number(p.min_qty) || 0);
+      if ((Number(p.min_amount) > 0 && totalPrice < Number(p.min_amount)) || (minQty > 1 && qty < minQty)) {
+        return { finalPrice: totalPrice, saved: 0 };
+      }
       let saved = 0;
       if (p.type === 'percent' || p.type === 'early_bird') {
         saved = isEuro ? Math.min(Number(p.value), totalPrice) : totalPrice * Number(p.value) / 100;
@@ -411,6 +480,7 @@
       } else if (p.type === 'duo' && qty >= (p.min_qty || 2)) {
         saved = isEuro ? Math.min(Number(p.value), totalPrice) : totalPrice * Number(p.value) / 100;
       }
+      if (Number(p.max_discount) > 0) saved = Math.min(saved, Number(p.max_discount));
       return { finalPrice: Math.max(0, totalPrice - saved), saved };
     }
 
@@ -1703,8 +1773,10 @@
 
         let currentQty = 1;
         const maxQty = Number(firstDate?.seats_remaining) || 10;
+        stayIsSingleDay = true;
 
         const updateQtyUI = () => {
+          stayCurrentQty = currentQty;
           if (stayQtyVal) stayQtyVal.textContent = String(currentQty);
 
           // 1. Bouton unique (single option)

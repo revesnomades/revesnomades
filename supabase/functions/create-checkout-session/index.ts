@@ -23,6 +23,8 @@ type Promotion = {
   type: string;
   max_uses?: number | null;
   uses_count?: number | null;
+  min_amount?: number | null;
+  max_discount?: number | null;
   value: number | string;
   value_unit?: string | null;
   min_qty?: number | null;
@@ -84,7 +86,21 @@ function spread(cart: CheckedItem[], applicable: CheckedItem[], amount: number, 
 function promoAmount(promo: Promotion, applicable: CheckedItem[]) {
   const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
   const value = Number(promo.value) || 0;
-  return promo.value_unit === "euro" || promo.type === "fixed" ? Math.min(value, base) : base * value / 100;
+  const amount = promo.value_unit === "euro" || promo.type === "fixed" ? Math.min(value, base) : base * value / 100;
+  // Remise plafonnée si la promotion fixe un maximum
+  const cap = Number(promo.max_discount) || 0;
+  return cap > 0 ? Math.min(amount, cap) : amount;
+}
+
+// Conditions (minimum d'achat, quantité minimum) sur les articles concernés ; même règle que panier.html
+function meetsConditions(promo: Promotion, applicable: CheckedItem[]) {
+  const base = applicable.reduce((s, i) => s + i.price * i.quantity, 0);
+  const qty = applicable.reduce((s, i) => s + i.quantity, 0);
+  const minAmount = Number(promo.min_amount) || 0;
+  const minQty = promo.type === "duo" ? 0 : (Number(promo.min_qty) || 0);
+  if (minAmount > 0 && base < minAmount) return false;
+  if (minQty > 1 && qty < minQty) return false;
+  return true;
 }
 
 // Un code promo n'est jamais cumulable : on garde soit le code, soit les promotions automatiques,
@@ -97,7 +113,7 @@ function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: s
   for (const promo of promos) {
     if (promo.type === "promo_code") continue;
     const applicable = getApplicableItems(cart, promo);
-    if (!applicable.length) continue;
+    if (!applicable.length || !meetsConditions(promo, applicable)) continue;
     if (promo.type === "percent" || promo.type === "early_bird" || promo.type === "fixed") {
       const amount = promoAmount(promo, applicable);
       if (amount > 0) { autoTotal += amount; spread(cart, applicable, amount, autoPerItem); autoNames.push(promo.name || "Promotion"); if (promo.id) autoIds.push(promo.id); }
@@ -115,7 +131,7 @@ function computeDiscounts(cart: CheckedItem[], promos: Promotion[], promoCode: s
   if (promoCode) {
     const promo = promos.find(p => p.type === "promo_code" && p.code === promoCode);
     const applicable = promo ? getApplicableItems(cart, promo) : [];
-    if (promo && applicable.length) {
+    if (promo && applicable.length && meetsConditions(promo, applicable)) {
       const amount = promoAmount(promo, applicable);
       if (amount > 0) {
         const perItem = cart.map(() => 0);

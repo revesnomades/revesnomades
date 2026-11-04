@@ -211,9 +211,25 @@
           <small style="color:var(--muted); font-size:11.5px;">Les clients devront saisir ce code dans leur panier.</small>
         </div>
 
-        <div class="form-group" id="minQtyGroup" style="display:none;">
-          <label for="fMinQty">Quantité minimum pour déclencher la remise</label>
-          <input id="fMinQty" class="input" type="number" min="1" value="2" placeholder="2">
+        <hr class="section-sep">
+        <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Conditions (optionnel)</p>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 12px;">La remise ne s'applique que si le panier remplit toutes les conditions. Elles portent sur les articles concernés par la promotion, hors livraison.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fMinAmount">Minimum d'achat (€)</label>
+            <input id="fMinAmount" class="input" type="number" min="0" step="0.01" placeholder="Aucun">
+            <small style="color:var(--muted); font-size:11.5px;">Ex : 50 → la remise s'applique dès 50 € d'articles concernés.</small>
+          </div>
+          <div class="form-group" id="minQtyGroup">
+            <label for="fMinQty" id="fMinQtyLabel">Quantité minimum d'articles</label>
+            <input id="fMinQty" class="input" type="number" min="1" placeholder="Aucune">
+            <small id="fMinQtyHint" style="color:var(--muted); font-size:11.5px;">Ex : 3 → la remise s'applique dès 3 articles concernés dans le panier.</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="fMaxDiscount">Remise maximum (€)</label>
+          <input id="fMaxDiscount" class="input" type="number" min="0" step="0.01" placeholder="Aucune" style="max-width:180px;">
+          <small style="color:var(--muted); font-size:11.5px;">Plafonne la remise, utile pour un pourcentage. Ex : −20 % avec un maximum de 30 €.</small>
         </div>
 
         <hr class="section-sep">
@@ -381,6 +397,8 @@
     fUnitEuro.addEventListener("click", () => setUnit('euro'));
     const fCode = document.getElementById("fCode");
     const fMinQty = document.getElementById("fMinQty");
+    const fMinAmount = document.getElementById("fMinAmount");
+    const fMaxDiscount = document.getElementById("fMaxDiscount");
     const fApplyTo = document.getElementById("fApplyTo");
     const fStartsAt = document.getElementById("fStartsAt");
     const fEndsAt = document.getElementById("fEndsAt");
@@ -456,6 +474,16 @@
       return map[applyTo] || applyTo;
     }
 
+    // Conditions d'application : minimum d'achat, quantité minimum, remise plafonnée
+    function conditionsHtml(p) {
+      const parts = [];
+      if (Number(p.min_amount) > 0) parts.push(`dès ${Number(p.min_amount).toFixed(2).replace('.', ',')} € d'achat`);
+      if (p.type === 'duo') parts.push(`${p.min_qty || 2} exemplaires d'un même article`);
+      else if (Number(p.min_qty) > 1) parts.push(`dès ${p.min_qty} articles`);
+      if (Number(p.max_discount) > 0) parts.push(`remise max ${Number(p.max_discount).toFixed(2).replace('.', ',')} €`);
+      return parts.length ? `<div style="font-size:12px; color:var(--muted);">Conditions : ${parts.join(' · ')}</div>` : '';
+    }
+
     // Utilisations : compteur tenu par le webhook Stripe après chaque paiement
     function usesHtml(p) {
       const used = Number(p.uses_count) || 0;
@@ -502,6 +530,7 @@
               ${p.apply_to === 'specific' ? `<span>Produits : ${(p.eligible_product_ids||[]).length} · Séjours : ${(p.eligible_stay_ids||[]).length}</span>` : ''}
             </div>
             ${dateRange ? `<div style="font-size:11.5px; color:var(--muted);">${dateRange}</div>` : ''}
+            ${conditionsHtml(p)}
             ${usesHtml(p)}
             <div style="margin-top:4px;">
               <button class="btn tiny on-light" onclick="window.editPromo('${p.id}')">Modifier</button>
@@ -526,7 +555,9 @@
       fBannerColor.value = '#1a1a1a';
       bannerFullPreview.style.background = '#1a1a1a';
       bannerFullPreview.textContent = fBannerText.placeholder;
-      fMinQty.value = 2;
+      fMinQty.value = '';
+      fMinAmount.value = '';
+      fMaxDiscount.value = '';
       fMaxUses.value = '';
       setUnit('percent');
       updateTypeUI(true);
@@ -546,7 +577,9 @@
       fType.value = p.type;
       fValue.value = p.value;
       fCode.value = p.code || '';
-      fMinQty.value = p.min_qty || 2;
+      fMinQty.value = p.type === 'duo' ? (p.min_qty || 2) : (Number(p.min_qty) > 1 ? p.min_qty : '');
+      fMinAmount.value = p.min_amount || '';
+      fMaxDiscount.value = p.max_discount || '';
       setUnit(p.value_unit || (p.type === 'fixed' ? 'euro' : 'percent'));
       fApplyTo.value = p.apply_to || 'all';
       fStartsAt.value = p.starts_at ? p.starts_at.slice(0, 16) : '';
@@ -588,7 +621,19 @@
     function updateTypeUI(keepUnit = false) {
       const type = fType.value;
       codeGroup.style.display = type === 'promo_code' ? '' : 'none';
-      minQtyGroup.style.display = type === 'duo' ? '' : 'none';
+      // Offre duo : la quantité minimum se compte par article (2 exemplaires du même) ; sinon sur tout le panier
+      const minQtyLabel = document.getElementById("fMinQtyLabel");
+      const minQtyHint = document.getElementById("fMinQtyHint");
+      if (type === 'duo') {
+        minQtyLabel.textContent = "Exemplaires minimum par article *";
+        minQtyHint.textContent = "Ex : 2 → la remise s'applique à chaque article pris en 2 exemplaires ou plus.";
+        fMinQty.placeholder = "2";
+        if (!(parseInt(fMinQty.value) > 1)) fMinQty.value = 2;
+      } else {
+        minQtyLabel.textContent = "Quantité minimum d'articles";
+        minQtyHint.textContent = "Ex : 3 → la remise s'applique dès 3 articles concernés dans le panier.";
+        fMinQty.placeholder = "Aucune";
+      }
 
       // For percent/early_bird: default to %, for fixed: default to €
       if (!keepUnit) {
@@ -687,7 +732,9 @@
         value: parseFloat(fValue.value) || 0,
         value_unit: selectedUnit,
         code: fType.value === 'promo_code' ? fCode.value.trim().toUpperCase() || null : null,
-        min_qty: fType.value === 'duo' ? parseInt(fMinQty.value) || 2 : 1,
+        min_qty: fType.value === 'duo' ? (parseInt(fMinQty.value) || 2) : (parseInt(fMinQty.value) > 1 ? parseInt(fMinQty.value) : 1),
+        min_amount: parseFloat(fMinAmount.value) > 0 ? parseFloat(fMinAmount.value) : null,
+        max_discount: parseFloat(fMaxDiscount.value) > 0 ? parseFloat(fMaxDiscount.value) : null,
         apply_to: fApplyTo.value,
         eligible_product_ids: fApplyTo.value === 'specific' ? eligibleProductIds : [],
         eligible_stay_ids: fApplyTo.value === 'specific' ? eligibleStayIds : [],

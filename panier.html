@@ -400,26 +400,49 @@
       } catch (e) { console.warn("Prix du panier non resynchronisés:", e); }
     }
 
+    // Conditions d'une promotion (minimum d'achat, quantité minimum) sur les articles concernés.
+    // Renvoie null si tout est rempli, sinon ce qu'il manque, pour le dire au client.
+    function promoConditionBlocker(promo, applicable) {
+      const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+      const qty = applicable.reduce((s, i) => s + i.quantity, 0);
+      const minAmount = Number(promo.min_amount) || 0;
+      const minQty = promo.type === 'duo' ? 0 : (Number(promo.min_qty) || 0);
+      if (minAmount > 0 && base < minAmount) {
+        return `dès ${formatPrice(minAmount)} d'articles concernés (il manque ${formatPrice(minAmount - base)})`;
+      }
+      if (minQty > 1 && qty < minQty) {
+        const missing = minQty - qty;
+        return `dès ${minQty} articles concernés (il en manque ${missing})`;
+      }
+      return null;
+    }
+    // Remise plafonnée si la promotion fixe un maximum
+    function capDiscount(promo, amount) {
+      const max = Number(promo.max_discount) || 0;
+      return max > 0 ? Math.min(amount, max) : amount;
+    }
+
     function getAutoDiscounts(cart) {
       const discounts = [];
       for (const promo of activePromos) {
         if (promo.type === 'promo_code') continue;
         const applicable = getApplicableCartItems(cart, promo);
         if (!applicable.length) continue;
+        if (promoConditionBlocker(promo, applicable)) continue;
 
         const isEuro = promo.value_unit === 'euro';
         if (promo.type === 'percent' || promo.type === 'early_bird') {
           const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
-          const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
+          const amount = capDiscount(promo, isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100);
           if (amount > 0) discounts.push({ promo, amount, label: promo.name });
         } else if (promo.type === 'fixed') {
-          const amount = Math.min(Number(promo.value), applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0));
+          const amount = capDiscount(promo, Math.min(Number(promo.value), applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0)));
           if (amount > 0) discounts.push({ promo, amount, label: promo.name });
         } else if (promo.type === 'duo') {
           for (const item of applicable) {
             if (item.quantity >= (promo.min_qty || 2)) {
               const base = Number(item.price) * item.quantity;
-              const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
+              const amount = capDiscount(promo, isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100);
               if (amount > 0) discounts.push({ promo, amount, label: `${promo.name} (${item.name})` });
             }
           }
@@ -434,10 +457,23 @@
       if (!promo) return null;
       const applicable = getApplicableCartItems(cart, promo);
       if (!applicable.length) return null;
+      if (promoConditionBlocker(promo, applicable)) return null;
       const base = applicable.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
       const isEuro = promo.value_unit === 'euro';
-      const amount = isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100;
+      const amount = capDiscount(promo, isEuro ? Math.min(Number(promo.value), base) : base * promo.value / 100);
       return amount > 0 ? { promo, amount, label: `Code "${promo.code}"` } : null;
+    }
+
+    // Première promotion automatique presque atteinte : on dit au client ce qu'il manque
+    function nextPromoNudge(cart) {
+      for (const promo of activePromos) {
+        if (promo.type === 'promo_code') continue;
+        const applicable = getApplicableCartItems(cart, promo);
+        if (!applicable.length) continue;
+        const blocker = promoConditionBlocker(promo, applicable);
+        if (blocker) return `« ${promo.name} » s'applique ${blocker}.`;
+      }
+      return null;
     }
 
     // Code promo non cumulable : on garde soit le code, soit les promotions en cours (la remise la plus avantageuse)
@@ -552,7 +588,9 @@
           promoMsg.textContent = "Ce code n'est pas cumulable avec les promotions en cours. Ta remise actuelle est plus avantageuse, nous la gardons.";
           promoMsg.style.color = "var(--muted)";
         } else if (promo && !getPromoCodeDiscount(cart)) {
-          promoMsg.textContent = "Ce code ne s'applique à aucun article de ton panier.";
+          const applicable = getApplicableCartItems(cart, promo);
+          const blocker = applicable.length ? promoConditionBlocker(promo, applicable) : null;
+          promoMsg.textContent = blocker ? `Ce code s'applique ${blocker}.` : "Ce code ne s'applique à aucun article de ton panier.";
           promoMsg.style.color = "#c00";
         } else if (promo) {
           const others = getAutoDiscounts(cart).length;
@@ -567,6 +605,8 @@
         summaryLinesEl.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#b34400;"><span>${d.label}</span><span>−${formatPrice(d.amount)}</span></div>`;
         totalDiscount += d.amount;
       }
+      const nudge = allDiscounts.length ? null : nextPromoNudge(cart);
+      if (nudge) summaryLinesEl.innerHTML += `<div class="cart-step-hint" style="margin-bottom:8px;">${nudge}</div>`;
 
       const noteEl = document.getElementById("cartShippingNote");
       if (noteEl) {
