@@ -221,7 +221,7 @@
       <div style="margin-top:64px; border-top:1px solid var(--line); padding-top:48px;">
 
         <!-- Séjours -->
-        <div style="margin-bottom:48px;">
+        <div id="staysSuggestBlock" style="margin-bottom:48px;">
           <div class="section-head">
             <h2 class="section-title">Nos prochains séjours</h2>
             <a class="link-muted link-muted--sm" href="/index.html#sejours">Voir tous les séjours</a>
@@ -233,9 +233,12 @@
         </div>
 
         <!-- Produits -->
-        <div>
+        <div id="productsSuggestBlock">
           <div class="section-head">
-            <h2 class="section-title">Articles de la boutique</h2>
+            <div>
+              <h2 class="section-title" id="productsSuggestTitle">Articles de la boutique</h2>
+              <p class="txt-muted-13" id="productsSuggestSub" style="margin:6px 0 0; display:none;"></p>
+            </div>
             <a class="link-muted link-muted--sm" href="/boutique.html">Voir toute la boutique</a>
           </div>
           <div class="crosssell-grid mobile-carousel" id="productsSuggestGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
@@ -811,14 +814,44 @@
         staysSuggestGrid.innerHTML = `<a class="stay-card grid-empty-link" href="/index.html#sejours">Voir nos séjours →</a>`;
       }
 
-      // Produits
+      // Produits : seulement ceux en stock (≥ 1) et non marqués « Épuisé »
       try {
-        const { data: products } = await supabase
-          .from("products")
-          .select("id, name, price, stock, image_urls, image_url")
-          .gt("stock", 0)
-          .order("created_at", { ascending: false })
-          .limit(4);
+        const cart = getCart();
+        const stayOnly = cart.length > 0 && cart.every(i => i.type === "sejour");
+        const inCart = new Set(cart.filter(i => i.type === "product").map(i => i.id));
+        const [{ data: rawProducts }, { data: categories }] = await Promise.all([
+          supabase
+            .from("products")
+            .select("id, name, price, stock, image_urls, image_url, category_id, coming_soon")
+            .gte("stock", 1)
+            .or("coming_soon.is.null,coming_soon.eq.false")
+            .order("created_at", { ascending: false })
+            .limit(24),
+          supabase.from("product_categories").select("id, name"),
+        ]);
+        // Catégories « tapis de yoga » (nom contenant « tapis ») : proposées en premier
+        const matCategoryIds = new Set((categories || []).filter(c => /tapis/i.test(c.name || "")).map(c => c.id));
+        const isMat = p => matCategoryIds.has(p.category_id);
+        let products = (rawProducts || []).filter(p => p.coming_soon !== true && Number(p.stock) >= 1 && !inCart.has(p.id));
+        if (stayOnly) products = [...products.filter(isMat), ...products.filter(p => !isMat(p))];
+        products = products.slice(0, stayOnly ? 8 : 4);
+
+        // Panier avec un séjour seulement : la boutique passe avant les autres séjours, avec un titre dédié
+        const productsBlock = document.getElementById("productsSuggestBlock");
+        const staysBlock = document.getElementById("staysSuggestBlock");
+        const titleEl = document.getElementById("productsSuggestTitle");
+        const subEl = document.getElementById("productsSuggestSub");
+        if (stayOnly && productsBlock && staysBlock) {
+          staysBlock.parentNode.insertBefore(productsBlock, staysBlock);
+          productsBlock.style.marginBottom = "48px";
+          if (titleEl) titleEl.textContent = "Équipe-toi pour ton séjour";
+          if (subEl) {
+            subEl.textContent = products.some(isMat)
+              ? "Tapis de yoga et essentiels, en stock et livrés avant ton départ."
+              : "Nos essentiels en stock, livrés avant ton départ.";
+            subEl.style.display = "";
+          }
+        }
 
         if (products && products.length) {
           productsSuggestGrid.innerHTML = products.map(p => {
