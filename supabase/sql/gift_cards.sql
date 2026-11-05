@@ -83,3 +83,7 @@ begin
   return v_balance;
 end $$;
 revoke execute on function public.gift_card_redeem(text, text, numeric) from public, anon, authenticated;
+
+-- 6. Bucket public pour les cartes cadeaux générées en image (envoyées par email)
+insert into storage.buckets (id, name, public) values ('gift-cards', 'gift-cards', true)
+on conflict (id) do update set public = true;

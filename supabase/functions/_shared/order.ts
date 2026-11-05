@@ -2,6 +2,7 @@
 // Utilisé par stripe-webhook (après paiement Stripe) et par create-checkout-session
 // (commande entièrement réglée par un bon cadeau, sans passage par Stripe).
 // deno-lint-ignore-file no-explicit-any
+import { Image, decode } from "https://deno.land/x/imagescript@1.2.15/mod.ts";
 
 export type OrderItem = {
   id: string;
@@ -41,6 +42,92 @@ export function makeGiftCode() {
   const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
   const part = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), b => chars[b % chars.length]).join("");
   return `CADEAU-${part()}-${part()}`;
+}
+
+// ── Carte cadeau en image : la carte « Bon cadeau » d'Âmes Nomades, remplie ──
+// Base : assets/img/bon-cadeau-vierge.jpg (1200 × 851) ; polices : Outfit et JetBrains Mono (assets/fonts).
+// Les valeurs sont dessinées dans les cadres blancs, et un 4e cadre reçoit le code.
+const GIFT_ASSETS_BASE = Deno.env.get("GIFT_ASSETS_BASE") || "https://amesnomades.com";
+const GIFT_BUCKET = "gift-cards";
+const giftAssetCache = new Map<string, Promise<Uint8Array>>();
+function giftAsset(path: string) {
+  if (!giftAssetCache.has(path)) {
+    giftAssetCache.set(path, fetch(`${GIFT_ASSETS_BASE}${path}`).then(async r => {
+      if (!r.ok) throw new Error(`asset ${path} : HTTP ${r.status}`);
+      return new Uint8Array(await r.arrayBuffer());
+    }).catch(e => { giftAssetCache.delete(path); throw e; }));
+  }
+  return giftAssetCache.get(path)!;
+}
+
+export async function renderGiftCardImage(g: { code: string; amount: number; expiresAt: Date; from?: string }) {
+  const [baseBytes, label, value, mono] = await Promise.all([
+    giftAsset("/assets/img/bon-cadeau-vierge.jpg"),
+    giftAsset("/assets/fonts/Outfit-Medium.ttf"),
+    giftAsset("/assets/fonts/Outfit-SemiBold.ttf"),
+    giftAsset("/assets/fonts/JetBrainsMono-Medium.ttf"),
+  ]);
+  const base = await decode(baseBytes) as Image;
+  const INK = 0x1e1f22ff, WHITE = 0xfffdf3ff;
+  // Cadres blancs mesurés sur l'image de base : x 85→703, hauteur 37, en y 357 / 422 / 481, pas 59,5
+  const BOX = { x0: 85, x1: 703, h: 37, ys: [357, 422, 481], step: 59.5 };
+  const put = async (text: string, font: Uint8Array, size: number, x: number, boxY: number) => {
+    const img = await Image.renderText(font, size, text, INK);
+    base.composite(img, x, Math.round(boxY + (BOX.h - img.height) / 2) + 1);
+  };
+  await put(g.from || "Âmes Nomades", value, 21, 300, BOX.ys[0]);
+  await put(`${g.amount} €`, value, 21, 300, BOX.ys[1]);
+  await put(dateFr(g.expiresAt), value, 21, 300, BOX.ys[2]);
+  const y4 = Math.round(BOX.ys[2] + BOX.step);
+  base.drawBox(BOX.x0, y4, BOX.x1 - BOX.x0, BOX.h, WHITE);
+  await put("Code :", label, 21, 100, y4);
+  await put(g.code, mono, 21, 300, y4);
+  return await base.encodeJPEG(88);
+}
+
+// Génère la carte, la dépose dans le bucket public « gift-cards » et renvoie son URL (null en cas d'échec)
+export async function publishGiftCardImage(db: any, g: { code: string; amount: number; expiresAt: Date; from?: string }) {
+  try {
+    const bytes = await renderGiftCardImage(g);
+    const path = `${g.code}.jpg`;
+    const { error } = await db.storage.from(GIFT_BUCKET).upload(path, bytes, { contentType: "image/jpeg", upsert: true });
+    if (error) throw new Error(error.message);
+    const { data } = db.storage.from(GIFT_BUCKET).getPublicUrl(path);
+    return data?.publicUrl as string || null;
+  } catch (e) {
+    console.error("Carte cadeau en image non générée, carte HTML envoyée à la place :", e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+// Email avec la carte en image (identique à la carte imprimée), message et mode d'emploi
+export function giftCardImageEmailHtml(g: { code: string; amount: number; to?: string; from?: string; msg?: string; imageUrl: string }) {
+  const sans = "Helvetica, Arial, sans-serif";
+  return `<div style="margin:0;padding:20px 12px;background:#faf5dc">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;border-collapse:collapse">
+    <tr><td style="padding:0 0 14px;font-family:${sans};font-size:16px;line-height:1.5;color:#1e1f22">
+      ${g.to ? `${esc(g.to)}, ` : ""}${g.from ? `${esc(g.from)} t'offre` : "voici"} un bon cadeau Âmes Nomades de <strong>${euro(g.amount)}</strong>.
+    </td></tr>
+    <tr><td style="padding:0">
+      <a href="${g.imageUrl}" style="display:block"><img src="${g.imageUrl}" width="640" alt="Bon cadeau Âmes Nomades de ${euro(g.amount)}, code ${esc(g.code)}" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a>
+    </td></tr>
+    <tr><td style="padding:14px 0 0;font-family:${sans};font-size:13px;color:#62666e"><a href="${g.imageUrl}" style="color:#1e1f22">Télécharger la carte</a> pour l'imprimer ou l'offrir en main propre.</td></tr>
+  </table>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:18px auto 0;background:#fffdf3;border-collapse:collapse">
+    <tr><td style="padding:24px 30px;font-family:${sans};color:#1e1f22">
+      ${g.msg ? `<p style="margin:0 0 18px;font-size:15px;line-height:1.6;font-style:italic;color:#2d2e33">« ${esc(g.msg)} »</p>` : ""}
+      <h3 style="font-weight:600;font-size:15px;margin:0 0 8px">Comment l'utiliser</h3>
+      <ol style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#2d2e33">
+        <li>Choisis un séjour ou des articles sur <a href="https://amesnomades.com" style="color:#1e1f22">amesnomades.com</a>.</li>
+        <li>Dans le panier, saisis le code <strong style="font-family:'Courier New',monospace">${esc(g.code)}</strong> dans le champ « Bon cadeau » : sa valeur est déduite du total.</li>
+        <li>Il est utilisable en plusieurs fois : le reste est conservé sur le bon.</li>
+      </ol>
+      <p style="font-size:14px;line-height:1.7;color:#2d2e33;margin:14px 0 0">Tu peux aussi l'enregistrer dans ton <a href="https://amesnomades.com/compte.html" style="color:#1e1f22">espace compte</a> pour suivre le montant restant et la date de validité.</p>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+      <p style="font-size:12px;color:#999;margin:0">Des questions ? Contacte-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
+    </td></tr>
+  </table>
+</div>`;
 }
 
 // Email : carte cadeau envoyée au destinataire (ou à l'acheteur).
@@ -200,11 +287,11 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
 
   // 6. Bons cadeaux achetés : création + envoi de la carte
   const brevoApiKey = Deno.env.get("BREVO_API_KEY");
-  const sendEmail = async (to: { email: string; name: string }[], subject: string, htmlContent: string) => {
+  const sendEmail = async (to: { email: string; name: string }[], subject: string, htmlContent: string, attachment?: Array<{ url: string; name: string }>) => {
     if (!brevoApiKey) { console.warn("BREVO_API_KEY manquante — email non envoyé :", subject); return; }
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST", headers: { "Content-Type": "application/json", "api-key": brevoApiKey },
-      body: JSON.stringify({ sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" }, to, subject, htmlContent }),
+      body: JSON.stringify({ sender: { name: "Âmes Nomades", email: "contact@amesnomades.com" }, to, subject, htmlContent, ...(attachment?.length ? { attachment } : {}) }),
     });
     const txt = await res.text();
     if (!res.ok) console.error(`Brevo email erreur (${res.status}):`, txt);
@@ -230,11 +317,16 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
     if (!code) continue;
     const sentTo = g.email || customerEmail;
     createdCards.push({ code, amount: g.amount, sentTo });
-    const cardHtml = giftCardEmailHtml({ code, amount: g.amount, expiresAt, from: g.from, to: g.to, msg: g.msg });
+    // Carte en image (identique à la carte imprimée) ; carte HTML si la génération échoue
+    const imageUrl = await publishGiftCardImage(db, { code, amount: g.amount, expiresAt, from: g.from });
+    const cardHtml = imageUrl
+      ? giftCardImageEmailHtml({ code, amount: g.amount, to: g.to, from: g.from, msg: g.msg, imageUrl })
+      : giftCardEmailHtml({ code, amount: g.amount, expiresAt, from: g.from, to: g.to, msg: g.msg });
+    const attachment = imageUrl ? [{ url: imageUrl, name: `bon-cadeau-ames-nomades-${code}.jpg` }] : undefined;
     if (sentTo) {
       await sendEmail([{ email: sentTo, name: g.to || firstName || "" }],
         g.from ? `${g.from} t'offre un bon cadeau Âmes Nomades` : "Ton bon cadeau Âmes Nomades",
-        cardHtml);
+        cardHtml, attachment);
     }
     // L'acheteur garde une copie de la carte envoyée au destinataire (adresse erronée, bon à réimprimer…)
     if (g.email && customerEmail && g.email !== customerEmail) {
@@ -242,7 +334,7 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
         `Copie du bon cadeau offert${g.to ? ` à ${g.to}` : ""}`,
         `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px 20px 0;color:#1e1f22">
           <p style="font-size:14px;line-height:1.6;margin:0">Voici une copie du bon cadeau que nous venons d'envoyer à <strong>${esc(g.email)}</strong>. Garde-la : elle te permet de transmettre le code toi-même si besoin.</p>
-        </div>` + cardHtml);
+        </div>` + cardHtml, attachment);
     }
   }
 
