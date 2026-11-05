@@ -2993,3 +2993,14 @@ footer.band.cream{
 .gift-banner-text span { font-size: 12.5px; color: var(--muted); }
 .gift-banner-cta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 @media (max-width: 600px) { .gift-banner-cta { display: none; } }
+
+/* Page bon cadeau : explication dépliable */
+.gc-more { max-width: 62ch; margin: 18px auto 0; text-align: left; font-size: 13px; color: var(--muted); line-height: 1.65; }
+.gc-more summary { cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text); padding: 8px 0; list-style: none; display: inline-flex; align-items: center; gap: 8px; }
+.gc-more summary::-webkit-details-marker { display: none; }
+.gc-more summary::before { content: "+"; width: 18px; height: 18px; border: 1px solid var(--text); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; }
+.gc-more[open] summary::before { content: "−"; }
+.gc-more summary:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.gc-more ol { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.gc-more strong { color: var(--text); font-weight: 600; }
+.gc-more p { margin: 12px 0 0; }

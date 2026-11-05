@@ -196,10 +196,19 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
     if (!code) continue;
     const sentTo = g.email || customerEmail;
     createdCards.push({ code, amount: g.amount, sentTo });
+    const cardHtml = giftCardEmailHtml({ code, amount: g.amount, expiresAt, from: g.from, to: g.to, msg: g.msg });
     if (sentTo) {
       await sendEmail([{ email: sentTo, name: g.to || firstName || "" }],
         g.from ? `${g.from} t'offre un bon cadeau Âmes Nomades` : "Ton bon cadeau Âmes Nomades",
-        giftCardEmailHtml({ code, amount: g.amount, expiresAt, from: g.from, to: g.to, msg: g.msg }));
+        cardHtml);
+    }
+    // L'acheteur garde une copie de la carte envoyée au destinataire (adresse erronée, bon à réimprimer…)
+    if (g.email && customerEmail && g.email !== customerEmail) {
+      await sendEmail([{ email: customerEmail, name: firstName || customerName }],
+        `Copie du bon cadeau offert${g.to ? ` à ${g.to}` : ""}`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px 20px 0;color:#1e1f22">
+          <p style="font-size:14px;line-height:1.6;margin:0">Voici une copie du bon cadeau que nous venons d'envoyer à <strong>${esc(g.email)}</strong>. Garde-la : elle te permet de transmettre le code toi-même si besoin.</p>
+        </div>` + cardHtml);
     }
   }
 
@@ -258,7 +267,7 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
     hasStays ? "Tu recevras prochainement par email toutes les informations pratiques pour ton séjour." : "",
     ...createdCards.map(c => c.sentTo === customerEmail
       ? `Ton bon cadeau de ${euro(c.amount)} (code ${c.code}) arrive dans un email séparé, prêt à être offert ou utilisé.`
-      : `Le bon cadeau de ${euro(c.amount)} a été envoyé à ${esc(c.sentTo)} avec son code.`),
+      : `Le bon cadeau de ${euro(c.amount)} a été envoyé à ${esc(c.sentTo)} avec son code. Tu en reçois une copie dans un email séparé.`),
   ].filter(Boolean).map(p => `<p style="color:#666;font-size:14px">${p}</p>`).join("");
 
   await sendEmail([{ email: customerEmail, name: firstName || customerName }],
