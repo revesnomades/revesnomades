@@ -2982,3 +2982,13 @@ footer.band.cream{
 .gift-row:last-child { border-bottom: none; }
 .gift-row--off { opacity: .6; }
 .gift-code { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: .08em; }
+
+/* Boutique : accès au bon cadeau */
+.gift-banner { display: flex; align-items: center; gap: 16px; margin: 26px auto 0; max-width: 720px; padding: 16px 20px; border: 1px solid var(--line); background: rgba(255,255,255,.6); color: var(--text); text-decoration: none; transition: background .2s, border-color .2s; }
+.gift-banner:hover, .gift-banner:focus-visible { background: #fff; border-color: var(--text); }
+.gift-banner-icon { flex-shrink: 0; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--cream); color: var(--accent); }
+.gift-banner-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; text-align: left; }
+.gift-banner-text strong { font-size: 15px; }
+.gift-banner-text span { font-size: 13px; color: var(--muted); }
+.gift-banner-cta { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+@media (max-width: 600px) { .gift-banner { flex-wrap: wrap; } .gift-banner-cta { width: 100%; padding-left: 60px; } }
