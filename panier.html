@@ -20,7 +20,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=10" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=11" />
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
@@ -356,6 +356,7 @@
   <script type="module">
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
     import { getCart, removeFromCart, setQuantity, setMaxStock, updateCartItem, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart, formatPrice, getProductsTotal, FREE_SHIPPING_THRESHOLD } from "./assets/js/cart.js?v=4";
+    import { giftCardPreviewHtml, openGiftCardLightbox } from "./assets/js/gift-card-preview.js?v=1";
 
     // TODO: remplacer par votre clé publique Stripe
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51SnOSB55WblsnY7Y9C0dRSx8r8H3JqpmSmvUsOYscigEPRyWNFDiSVxpkOny9D1YOt4u6va4XwciBM6moGDwiRX100nZDtd7Rq";
@@ -566,7 +567,7 @@
           const who = [g.to ? `Pour ${escGift(g.to)}` : "", g.email ? `envoyé à ${escGift(g.email)}` : "envoyé à ton adresse email"].filter(Boolean).join(" · ");
           return `
           <div class="cart-item cart-item--gift" data-idx="${idx}">
-            <img class="cart-item-img" src="/assets/img/gift-card.svg" alt="">
+            <button type="button" class="cart-item-gift-thumb" data-gift-idx="${idx}" aria-label="Agrandir la carte cadeau">${giftCardPreviewHtml({ from: g.from, amount: item.price })}</button>
             <div>
               <div style="font-weight:600; font-size:14px; color:var(--text);">Bon cadeau ${formatPrice(item.price)}</div>
               <div class="txt-muted-13" style="margin-top:2px;">${who}</div>
@@ -947,6 +948,11 @@
     cartItemsEl.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
       if (!btn) return;
+      if (btn.classList.contains("cart-item-gift-thumb")) {
+        const item = getCart()[Number(btn.dataset.giftIdx)];
+        if (item) openGiftCardLightbox({ from: item.gift?.from, amount: item.price });
+        return;
+      }
 
       const id = btn.dataset.id;
       const type = btn.dataset.type;

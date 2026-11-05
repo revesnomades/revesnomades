@@ -1,6 +1,7 @@
 // Page « Offrir un bon cadeau » : choix du montant et du destinataire, puis ajout au panier.
 // Le paiement, la création du code et l'envoi de la carte se font ensuite (panier → Stripe → webhook).
 import { addToCart } from "/assets/js/cart.js?v=3";
+import { giftCardPreviewHtml, openGiftCardLightbox } from "/assets/js/gift-card-preview.js?v=1";
 
 const GIFT_MIN = 20, GIFT_MAX = 500;
 
@@ -36,8 +37,11 @@ function getAmount() {
   const r = radios.find(x => x.checked);
   return r ? Number(r.value) : null;
 }
+const previewValues = () => ({ from: fromName.value.trim(), amount: getAmount() });
 function updateRecap() {
   const amount = getAmount();
+  const preview = document.getElementById("gcPreview");
+  if (preview) preview.innerHTML = giftCardPreviewHtml(previewValues());
   setText(rAmount, amount && amount >= GIFT_MIN && amount <= GIFT_MAX ? euro(amount) : "", "—");
   setText(rFrom, fromName.value);
   setText(rTo, toName.value);
@@ -49,6 +53,7 @@ radios.forEach(r => r.addEventListener("change", () => { if (amountCustom.value)
 amountCustom.addEventListener("input", () => { if (amountCustom.value) radios.forEach(r => r.checked = false); updateRecap(); });
 [fromName, toName, toEmail, message].forEach(el => el.addEventListener("input", updateRecap));
 updateRecap();
+document.getElementById("gcPreviewBtn")?.addEventListener("click", () => openGiftCardLightbox(previewValues()));
 
 btnPay.addEventListener("click", () => {
   setError("");
