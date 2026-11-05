@@ -43,31 +43,65 @@ export function makeGiftCode() {
   return `CADEAU-${part()}-${part()}`;
 }
 
-// Email : carte cadeau envoyée au destinataire (ou à l'acheteur)
+// Email : carte cadeau envoyée au destinataire (ou à l'acheteur).
+// Reprend la carte « Bon cadeau » d'Âmes Nomades (fond jaune paille, soleils dessinés à droite),
+// remplie avec les informations de la commande. Tableaux et polices web-safe pour les clients email.
+const GIFT_CARD_BG = "#f1e6b6";
+const GIFT_CARD_SUNS = "https://amesnomades.com/assets/img/bon-cadeau-soleils.jpg";
+
 export function giftCardEmailHtml(g: { code: string; amount: number; expiresAt: Date; from?: string; to?: string; msg?: string }) {
-  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e1f22">
-    <div style="background:#faf5dc;padding:28px 24px;border-radius:6px;text-align:center">
-      <div style="font-family:Georgia,serif;font-size:22px;letter-spacing:.08em;text-transform:uppercase">Âmes Nomades</div>
-      <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#62666e;margin-top:6px">Bon cadeau</div>
-      <div style="background:#fffdf3;border:1px solid rgba(30,31,34,.16);border-radius:6px;padding:26px 20px;margin:22px 0 0">
-        ${g.to ? `<p style="margin:0 0 6px;font-size:15px">Pour <strong>${esc(g.to)}</strong></p>` : ""}
-        <div style="font-family:Georgia,serif;font-size:44px;line-height:1.1;margin:6px 0">${euro(g.amount)}</div>
-        ${g.from ? `<p style="margin:6px 0 0;font-size:14px;color:#62666e">Offert par ${esc(g.from)}</p>` : ""}
-        ${g.msg ? `<p style="margin:18px 0 0;font-size:14px;line-height:1.6;font-style:italic;color:#2d2e33">« ${esc(g.msg)} »</p>` : ""}
-        <div style="margin:22px auto 0;display:inline-block;background:#1e1f22;color:#fffdf3;font-family:'Courier New',monospace;font-size:20px;letter-spacing:.14em;padding:12px 20px;border-radius:4px">${esc(g.code)}</div>
-        <p style="margin:14px 0 0;font-size:12px;color:#62666e">Valable jusqu'au ${dateFr(g.expiresAt)}</p>
-      </div>
-    </div>
-    <h3 style="font-weight:600;font-size:15px;margin:26px 0 8px">Comment l'utiliser</h3>
-    <ol style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#2d2e33">
-      <li>Choisis un séjour ou des articles sur <a href="https://amesnomades.com" style="color:#1e1f22">amesnomades.com</a>.</li>
-      <li>Dans le panier, saisis ce code dans le champ « Bon cadeau » : sa valeur est déduite du total.</li>
-      <li>Il est utilisable en plusieurs fois : le reste est conservé sur le bon.</li>
-    </ol>
-    <p style="font-size:14px;line-height:1.7;color:#2d2e33;margin:14px 0 0">Tu peux aussi l'enregistrer dans ton <a href="https://amesnomades.com/compte.html" style="color:#1e1f22">espace compte</a> pour suivre le montant restant et la date de validité.</p>
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-    <p style="font-size:12px;color:#999">Des questions ? Contacte-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
-  </div>`;
+  const mono = "'Courier New', Courier, monospace";
+  const sans = "Helvetica, Arial, sans-serif";
+  const row = (label: string, value: string, strong = false) =>
+    `<tr><td style="padding:0 0 12px"><table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#fffdf3"><tr>
+      <td style="padding:9px 14px;font-family:${sans};font-size:15px;color:#1e1f22;white-space:nowrap">${label}</td>
+      <td class="gc-value" style="padding:9px 14px 9px 0;font-family:${strong ? mono : sans};font-size:${strong ? "17px" : "15px"};font-weight:700;letter-spacing:${strong ? ".12em" : "0"};color:#1e1f22;text-align:right;white-space:nowrap">${value}</td>
+    </tr></table></td></tr>`;
+  const rows = [
+    g.to ? row("Pour :", esc(g.to)) : "",
+    g.from ? row("De la part de :", esc(g.from)) : "",
+    row("D'une valeur de :", euro(g.amount)),
+    row("Valable jusqu'au :", dateFr(g.expiresAt)),
+    row("Code :", esc(g.code), true),
+  ].join("");
+  return `<div style="margin:0;padding:20px 12px;background:#faf5dc">
+  <style>
+    @media only screen and (max-width: 520px) {
+      .gc-left, .gc-suns { display: block !important; width: 100% !important; box-sizing: border-box; }
+      .gc-suns { height: 150px !important; background-position: center 30% !important; }
+      .gc-suns img { display: none !important; }
+      .gc-value { font-size: 14px !important; }
+    }
+  </style>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;background:${GIFT_CARD_BG};border-collapse:collapse">
+    <tr>
+      <td class="gc-left" valign="top" style="padding:34px 20px 30px 30px;width:62%">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:21px;letter-spacing:.3em;text-transform:uppercase;color:#1e1f22;margin:0 0 44px">Âmes Nomades</div>
+        <div style="font-family:${mono};font-size:30px;letter-spacing:.28em;text-transform:uppercase;color:#1e1f22;line-height:1.1">Bon cadeau</div>
+        <div style="font-family:${mono};font-size:14px;letter-spacing:.14em;color:#1e1f22;margin:12px 0 24px">Valable sur tout le site</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">${rows}</table>
+        <div style="font-family:${mono};font-size:13px;letter-spacing:.1em;line-height:1.7;color:#1e1f22;margin-top:40px">Âmes Nomades Retreat,<br>Retraites et séjours bien-être<br>www.amesnomades.com</div>
+      </td>
+      <td class="gc-suns" valign="top" style="width:38%;padding:0;background:${GIFT_CARD_BG} url('${GIFT_CARD_SUNS}') no-repeat right top;background-size:cover">
+        <img src="${GIFT_CARD_SUNS}" width="240" alt="" style="display:block;width:100%;height:auto;border:0">
+      </td>
+    </tr>
+  </table>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;background:#fffdf3;border-collapse:collapse">
+    <tr><td style="padding:24px 30px;font-family:${sans};color:#1e1f22">
+      ${g.msg ? `<p style="margin:0 0 18px;font-size:15px;line-height:1.6;font-style:italic;color:#2d2e33">« ${esc(g.msg)} »</p>` : ""}
+      <h3 style="font-weight:600;font-size:15px;margin:0 0 8px">Comment l'utiliser</h3>
+      <ol style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#2d2e33">
+        <li>Choisis un séjour ou des articles sur <a href="https://amesnomades.com" style="color:#1e1f22">amesnomades.com</a>.</li>
+        <li>Dans le panier, saisis le code ci-dessus dans le champ « Bon cadeau » : sa valeur est déduite du total.</li>
+        <li>Il est utilisable en plusieurs fois : le reste est conservé sur le bon.</li>
+      </ol>
+      <p style="font-size:14px;line-height:1.7;color:#2d2e33;margin:14px 0 0">Tu peux aussi l'enregistrer dans ton <a href="https://amesnomades.com/compte.html" style="color:#1e1f22">espace compte</a> pour suivre le montant restant et la date de validité.</p>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+      <p style="font-size:12px;color:#999;margin:0">Des questions ? Contacte-nous : <a href="mailto:contact@amesnomades.com" style="color:#666">contact@amesnomades.com</a></p>
+    </td></tr>
+  </table>
+</div>`;
 }
 
 // Insère avec des colonnes optionnelles ; si elles n'existent pas encore, réessaie sans
