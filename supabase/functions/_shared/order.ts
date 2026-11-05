@@ -61,23 +61,23 @@ function giftAsset(path: string) {
 }
 
 export async function renderGiftCardImage(g: { code: string; amount: number; expiresAt: Date; from?: string }) {
-  const [baseBytes, label, value, mono] = await Promise.all([
+  const [baseBytes, label, mono] = await Promise.all([
     giftAsset("/assets/img/bon-cadeau-vierge.jpg"),
     giftAsset("/assets/fonts/Outfit-Medium.ttf"),
-    giftAsset("/assets/fonts/Outfit-SemiBold.ttf"),
     giftAsset("/assets/fonts/JetBrainsMono-Medium.ttf"),
   ]);
   const base = await decode(baseBytes) as Image;
-  const INK = 0x1e1f22ff, WHITE = 0xfffdf3ff;
+  // Même encre noire et même graisse (Outfit Medium) que les libellés imprimés sur la carte
+  const INK = 0x000000ff, WHITE = 0xfffdf3ff;
   // Cadres blancs mesurés sur l'image de base : x 85→703, hauteur 37, en y 357 / 422 / 481, pas 59,5
   const BOX = { x0: 85, x1: 703, h: 37, ys: [357, 422, 481], step: 59.5 };
   const put = async (text: string, font: Uint8Array, size: number, x: number, boxY: number) => {
     const img = await Image.renderText(font, size, text, INK);
     base.composite(img, x, Math.round(boxY + (BOX.h - img.height) / 2) + 1);
   };
-  await put(g.from || "Âmes Nomades", value, 21, 300, BOX.ys[0]);
-  await put(`${g.amount} €`, value, 21, 300, BOX.ys[1]);
-  await put(dateFr(g.expiresAt), value, 21, 300, BOX.ys[2]);
+  await put(g.from || "Âmes Nomades", label, 21, 300, BOX.ys[0]);
+  await put(`${g.amount} €`, label, 21, 300, BOX.ys[1]);
+  await put(dateFr(g.expiresAt), label, 21, 300, BOX.ys[2]);
   const y4 = Math.round(BOX.ys[2] + BOX.step);
   base.drawBox(BOX.x0, y4, BOX.x1 - BOX.x0, BOX.h, WHITE);
   await put("Code :", label, 21, 100, y4);

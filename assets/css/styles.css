@@ -3013,7 +3013,7 @@ footer.band.cream{
 /* Aperçu de la carte : image de la carte + valeurs positionnées en % (mesures sur 1200 × 851) */
 .gift-visual { position: relative; width: 100%; aspect-ratio: 1200 / 851; container-type: inline-size; overflow: hidden; background: #f1e6b6; }
 .gift-visual img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.gift-visual-v, .gift-visual-label { position: absolute; left: 25%; height: 4.35%; display: flex; align-items: center; font-family: 'Outfit', 'Glacial Indifference', sans-serif; font-weight: 600; font-size: 1.75cqw; line-height: 1; color: #1e1f22; white-space: nowrap; pointer-events: none; }
+.gift-visual-v, .gift-visual-label { position: absolute; left: 25%; height: 4.35%; display: flex; align-items: center; font-family: 'Outfit', 'Glacial Indifference', sans-serif; font-weight: 500; font-size: 1.75cqw; line-height: 1; color: #000; white-space: nowrap; pointer-events: none; }
 .gift-visual-from { top: 41.95%; }
 .gift-visual-amount { top: 49.6%; }
 .gift-visual-until { top: 56.5%; }
