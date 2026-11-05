@@ -2990,7 +2990,7 @@ footer.band.cream{
 .gift-banner-icon svg { width: 16px; height: 16px; }
 .gift-banner-text { display: flex; align-items: baseline; flex-wrap: nowrap; gap: 2px 8px; flex: 1; min-width: 0; text-align: left; }
 .gift-banner-text span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gift-banner-text strong { font-size: 14px; }
+.gift-banner-text strong { font-size: 14px; white-space: nowrap; flex-shrink: 0; }
 .gift-banner-text span { font-size: 12.5px; color: var(--muted); }
 .gift-banner-cta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 @media (max-width: 600px) { .gift-banner-cta { display: none; } .gift-banner-text { flex-wrap: wrap; } .gift-banner-text span { white-space: normal; } }
