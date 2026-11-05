@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.11.0?target=deno&no-check=true";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { recordPaidOrder, type GiftItem, type PaidOrder } from "../_shared/order.ts";
+
+// Bons cadeaux : montants fixes proposés, et bornes du montant libre
+const GIFT_FIXED_AMOUNTS = [50, 100, 150, 200];
+const GIFT_MIN = 20, GIFT_MAX = 500, GIFT_MAX_PER_ORDER = 3;
+const clean = (v: unknown, max: number) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
+const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,7 +196,7 @@ serve(async (req) => {
     const body = await req.json();
 
     // Support both legacy single-product and new cart format
-    let items: Array<{ id: string; type: string; name?: string; price?: number; quantity?: number; image?: string | null }>;
+    let items: Array<{ id: string; type: string; name?: string; price?: number; quantity?: number; image?: string | null; gift?: { to?: string; email?: string; from?: string; msg?: string } }>;
     let return_url: string;
 
     if (body.items && Array.isArray(body.items)) {
@@ -219,9 +226,30 @@ serve(async (req) => {
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     const cartMeta: Array<{ id: string; type: string; name: string; qty: number; price?: number; d?: number }> = [];
     const checked: CheckedItem[] = [];
+    const giftItems: GiftItem[] = [];
 
     for (const item of items) {
       const qty = Math.max(1, Math.floor(Number(item.quantity) || 1));
+
+      if (item.type === "gift_card") {
+        // Bon cadeau : montant fixe de la liste, ou libre entre GIFT_MIN et GIFT_MAX (entier)
+        const giftAmount = Math.round(Number(item.price) || 0);
+        const valid = GIFT_FIXED_AMOUNTS.includes(giftAmount) || (giftAmount >= GIFT_MIN && giftAmount <= GIFT_MAX);
+        if (!valid) {
+          return json({ error: `Le montant d'un bon cadeau doit être compris entre ${GIFT_MIN} € et ${GIFT_MAX} €.`, code: "gift" }, 400);
+        }
+        for (let k = 0; k < qty; k++) {
+          if (giftItems.length >= GIFT_MAX_PER_ORDER) return json({ error: `${GIFT_MAX_PER_ORDER} bons cadeaux maximum par commande.`, code: "gift" }, 400);
+          const g = item.gift || {};
+          const email = clean(g.email, 120).toLowerCase();
+          giftItems.push({ amount: giftAmount, to: clean(g.to, 60), email: email && isEmail(email) ? email : "", from: clean(g.from, 60), msg: clean(g.msg, 160) });
+        }
+        lineItems.push({
+          price_data: { currency: "eur", product_data: { name: `Bon cadeau Âmes Nomades — ${giftAmount} €` }, unit_amount: giftAmount * 100 },
+          quantity: qty,
+        });
+        continue;
+      }
 
       if (item.type === "product") {
         const { data: product, error } = await supabase
@@ -312,6 +340,7 @@ serve(async (req) => {
 
     // Frais de livraison recalculés côté serveur (seuls les articles shop sont expédiés)
     const products = checked.filter(i => i.type === "product");
+    let shippingTotalCents = 0;
     if (products.length) {
       const addr = body.shippingAddress || {};
       const productsTotal = products.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -339,6 +368,7 @@ serve(async (req) => {
       }
 
       const shippingCents = Math.round(method.price * 100);
+      shippingTotalCents = shippingCents;
       if (shippingCents !== Math.round(Number(body.shippingAmount) || 0)) {
         console.warn(`create-checkout-session: livraison corrigée ${body.shippingAmount} → ${shippingCents} centimes`);
       }
@@ -388,24 +418,74 @@ serve(async (req) => {
     if (discountCents !== Math.round(Number(body.discountAmount) || 0)) {
       console.warn(`create-checkout-session: remise corrigée ${body.discountAmount} → ${discountCents} centimes`);
     }
-    let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
-
-    if (discountCents > 0) {
-      const coupon = await stripe.coupons.create({
-        amount_off: discountCents,
-        currency: "eur",
-        duration: "once",
-        // Ce nom apparaît sur le paiement Stripe, le reçu et la facture Stripe (40 caractères max)
-        name: discount.label.slice(0, 40),
-        max_redemptions: 1,
-      });
-      discounts = [{ coupon: coupon.id }];
-    }
-
     // Numéro de commande lisible : AN-AAAAMMJJ-XXXX (sans 0/O/1/I pour éviter les confusions)
     const REF_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     const refRand = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => REF_CHARS[b % REF_CHARS.length]).join("");
     const orderRef = `AN-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${refRand}`;
+
+    // ── Bon cadeau utilisé pour payer ──
+    const giftCode = body.giftCode ? String(body.giftCode).replace(/[^A-Za-z0-9-]/g, "").toUpperCase() : "";
+    let giftCents = 0;
+    const giftItemsCents = giftItems.reduce((s, g) => s + g.amount * 100, 0);
+    const orderTotalCents = itemsCents + giftItemsCents + shippingTotalCents - discountCents;
+    if (giftCode) {
+      if (giftItems.length) {
+        return json({ error: "Un bon cadeau ne peut pas servir à acheter un autre bon cadeau. Retire-le pour continuer.", code: "gift" }, 400);
+      }
+      const { data: card } = await supabase.from("gift_cards").select("code, balance, status, expires_at").ilike("code", giftCode).maybeSingle();
+      if (!card) return json({ error: "Ce code ne correspond à aucun bon cadeau.", code: "gift" }, 400);
+      if (card.status !== "active" || new Date(card.expires_at) < new Date()) {
+        return json({ error: card.status === "used" ? "Ce bon cadeau a déjà été entièrement utilisé." : "Ce bon cadeau n'est plus valable.", code: "gift" }, 400);
+      }
+      const balanceCents = Math.round(Number(card.balance) * 100);
+      if (balanceCents <= 0) return json({ error: "Ce bon cadeau a déjà été entièrement utilisé.", code: "gift" }, 400);
+      giftCents = Math.min(balanceCents, orderTotalCents);
+    }
+
+    // Commande entièrement réglée par le bon cadeau : pas de passage par Stripe
+    if (giftCode && giftCents >= orderTotalCents) {
+      const customerEmail = String(body.userEmail || body.customerEmail || "").trim().toLowerCase();
+      const customerName = String(body.customerName || body.shippingAddress?.name || "").trim();
+      if (!isEmail(customerEmail)) return json({ error: "Indique ton email pour recevoir la confirmation de commande.", code: "email" }, 400);
+      const order: PaidOrder = {
+        sessionId: `gift_${orderRef}`,
+        orderRef,
+        customerEmail,
+        customerName: customerName || customerEmail,
+        amount: 0,
+        items: cartMeta as PaidOrder["items"],
+        giftItems: [],
+        shipping: body.shippingAddress && body.shippingAddress.line1 ? {
+          name: customerName || customerEmail,
+          line1: String(body.shippingAddress.line1), line2: String(body.shippingAddress.line2 || ""),
+          city: String(body.shippingAddress.city || ""), postal_code: String(body.shippingAddress.postal_code || ""), country: String(body.shippingAddress.country || "FR"),
+        } : null,
+        discount: { amount: discountCents / 100, label: discount.label, promoCode: discount.code || "", promoIds: discount.ids },
+        giftUsed: { code: giftCode, amount: giftCents / 100 },
+        userId: body.userId || "",
+        legacy: null,
+      };
+      await recordPaidOrder(supabase, order);
+      return json({ paid: true, order_ref: orderRef, gift_amount: giftCents / 100 });
+    }
+
+    // Remise Stripe = promotion + bon cadeau (un seul coupon par paiement)
+    let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
+    const couponCents = discountCents + giftCents;
+    if (couponCents > 0) {
+      const couponName = giftCents > 0
+        ? (discountCents > 0 ? `${discount.label.slice(0, 22)} + Bon cadeau` : `Bon cadeau ${giftCode}`)
+        : discount.label;
+      const coupon = await stripe.coupons.create({
+        amount_off: couponCents,
+        currency: "eur",
+        duration: "once",
+        // Ce nom apparaît sur le paiement Stripe, le reçu et la facture Stripe (40 caractères max)
+        name: couponName.slice(0, 40),
+        max_redemptions: 1,
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
@@ -439,6 +519,8 @@ serve(async (req) => {
           promo_ids: discount.ids.join(","),
         } : {}),
         cart_items: JSON.stringify(cartMeta),
+        ...(giftItems.length ? { gift_items: JSON.stringify(giftItems) } : {}),
+        ...(giftCents > 0 ? { gift_code: giftCode, gift_amount: (giftCents / 100).toFixed(2) } : {}),
         user_id: body.userId || "",
         user_email: body.userEmail || "",
       },

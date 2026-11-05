@@ -25,7 +25,7 @@
   <!-- Fonts -->
 
   <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/styles.css?v=5" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=6" />
 </head>
 
 <body class="on-light">
@@ -180,6 +180,8 @@
 
     const params = new URLSearchParams(location.search);
     const sessionId = params.get("session_id") || "";
+    // Commande entièrement réglée par un bon cadeau : pas de session Stripe, mais une vraie commande
+    const paidByGift = params.get("paid") === "gift";
     const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
     function deliveryDate(businessDays) {
@@ -190,15 +192,22 @@
     }
 
     // On ne vide le panier que si on revient vraiment d'un paiement
-    if (sessionId) {
+    if (sessionId || paidByGift) {
       let order = null;
       try { order = JSON.parse(sessionStorage.getItem("rn_last_order") || "null"); } catch {}
       if (order && Date.now() - order.at < 6 * 3600 * 1000) {
         const hasProducts = order.items.some(i => i.type === "product");
-        const hasStays = order.items.some(i => i.type !== "product");
+        const hasStays = order.items.some(i => i.type === "sejour");
+        const hasGifts = order.items.some(i => i.type === "gift_card");
         document.getElementById("merciType").hidden = !hasStays;
         if (hasProducts && !hasStays) {
           document.getElementById("merciLead").textContent = "Ta commande est bien enregistrée. Tu vas recevoir un email de confirmation dans quelques minutes, puis un autre au moment de l'expédition.";
+        }
+        if (hasGifts && !hasProducts && !hasStays) {
+          const sentElsewhere = (order.giftItems || []).some(g => g.email);
+          document.getElementById("merciLead").textContent = sentElsewhere
+            ? "Le bon cadeau part par email à son destinataire dans quelques minutes, avec son code. Tu reçois de ton côté la confirmation."
+            : "Ton bon cadeau arrive par email dans quelques minutes, avec son code : tu pourras l'offrir ou l'utiliser quand tu veux.";
         }
         const recap = document.getElementById("orderRecap");
         recap.innerHTML = `
@@ -213,9 +222,10 @@
           </ul>
           ${order.shipping ? `<div class="order-recap-line"><span>Livraison</span><span>${escapeHtml(order.shipping)}${order.relay ? ` · ${escapeHtml(order.relay)}` : ""}</span></div>` : ""}
           ${order.discount ? `<div class="order-recap-line"><span>Remise · ${escapeHtml(order.discount.label)}</span><span>−${formatPrice(order.discount.amount)}</span></div>` : ""}
+          ${order.gift ? `<div class="order-recap-line"><span>Bon cadeau ${escapeHtml(order.gift.code)}</span><span>−${formatPrice(order.gift.amount)}</span></div>` : ""}
           ${hasProducts && order.deliveryDays ? `<div class="order-recap-line"><span>Livraison estimée</span><span>vers le ${deliveryDate(order.deliveryDays + 2)}</span></div>` : ""}
           <div class="order-recap-line order-recap-total"><span>Total payé</span><strong>${escapeHtml(order.total)}</strong></div>
-          ${order.orderRef ? `<div class="order-recap-ref">Commande n° ${escapeHtml(order.orderRef)} · à rappeler si tu nous écris</div>` : ""}`;
+          ${order.orderRef || params.get("ref") ? `<div class="order-recap-ref">Commande n° ${escapeHtml(order.orderRef || params.get("ref"))} · à rappeler si tu nous écris</div>` : ""}`;
         recap.hidden = false;
       }
       clearCart();

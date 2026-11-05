@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Bon cadeau Âmes Nomades">
+  <rect width="400" height="300" fill="#faf5dc"/>
+  <rect x="40" y="60" width="320" height="180" rx="8" fill="#fffdf3" stroke="#1e1f22" stroke-opacity=".16"/>
+  <path d="M40 150 H360" stroke="#cc6f53" stroke-width="3" opacity=".8"/>
+  <path d="M200 60 V240" stroke="#cc6f53" stroke-width="3" opacity=".8"/>
+  <circle cx="200" cy="150" r="18" fill="#faf5dc" stroke="#cc6f53" stroke-width="3"/>
+  <text x="200" y="110" text-anchor="middle" font-family="Georgia, serif" font-size="16" letter-spacing="4" fill="#1e1f22">ÂMES NOMADES</text>
+  <text x="200" y="212" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" letter-spacing="3" fill="#62666e">BON CADEAU</text>
+</svg>

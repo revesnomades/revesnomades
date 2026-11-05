@@ -2975,3 +2975,10 @@ footer.band.cream{
 .mt-10 { margin-top: 10px; }
 .mt-16 { margin-top: 16px; }
 .mx-6 { margin: 0 6px; }
+
+/* ── Bons cadeaux ── */
+.cart-item--gift .cart-item-img { object-fit: cover; background: var(--cream); }
+.gift-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.gift-row:last-child { border-bottom: none; }
+.gift-row--off { opacity: .6; }
+.gift-code { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: .08em; }

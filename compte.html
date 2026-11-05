@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=5" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=6" />
   <style>
     /* Léger arrondi sur tous les boutons admin */
     button, .btn, input[type="submit"], input[type="button"], input[type="reset"], a.btn, select, input.input, textarea.input {
@@ -242,6 +242,17 @@
           <div id="purchasesBox" class="account-card mt-16" style="display:none;">
             <h3 class="h-plain">Mes achats</h3>
             <div class="note-muted" id="purchasesList">Chargement de tes achats...</div>
+          </div>
+
+          <div id="giftCardsBox" class="account-card mt-16" style="display:none;">
+            <h3 class="h-plain">Mes bons cadeaux</h3>
+            <div id="giftCardsList" class="note-muted">Aucun bon cadeau enregistré pour le moment.</div>
+            <form id="giftClaimForm" style="display:flex; gap:8px; margin-top:12px;" autocomplete="off">
+              <input id="giftClaimCode" class="input input-sm" placeholder="CADEAU-XXXX-XXXX" maxlength="20" style="flex:1; text-transform:uppercase;" aria-label="Code du bon cadeau">
+              <button type="submit" class="btn tiny on-light">Enregistrer</button>
+            </form>
+            <div id="giftClaimMsg" style="font-size:12px; margin-top:6px; display:none;" aria-live="polite"></div>
+            <p class="txt-hint" style="margin-top:8px;">Enregistre le code reçu par email pour suivre le montant restant et la date de validité. Pour l'utiliser, saisis-le dans le panier au moment de payer.</p>
           </div>
 
           <div id="addressBox" class="account-card mt-16" style="display:none;">
@@ -1597,8 +1608,58 @@
         loadMyPurchases(user),
         loadNewsletterStatus(user),
         loadMyAddress(user),
+        loadMyGiftCards(),
       ]);
     }
+
+    // ── Bons cadeaux enregistrés sur le compte ──
+    const fmtEuro = n => (Number(n) || 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "\u00a0€";
+    function giftStatus(g) {
+      const exp = g.expires_at ? new Date(g.expires_at) : null;
+      if (g.status === "cancelled") return { label: "Annulé", color: "#c00" };
+      if (Number(g.balance) <= 0 || g.status === "used") return { label: "Utilisé", color: "var(--muted)" };
+      if (exp && exp < new Date()) return { label: `Expiré le ${exp.toLocaleDateString("fr-FR")}`, color: "#c00" };
+      return { label: exp ? `Valable jusqu'au ${exp.toLocaleDateString("fr-FR")}` : "Valable", color: "#1a7a40" };
+    }
+    async function loadMyGiftCards() {
+      const box = document.getElementById("giftCardsBox");
+      const list = document.getElementById("giftCardsList");
+      if (!box || !list) return;
+      box.style.display = "block";
+      const { data, error } = await supabase.from("gift_cards").select("code, initial_amount, balance, expires_at, status, recipient_name, created_at").order("created_at", { ascending: false });
+      if (error) { list.textContent = "Impossible de charger tes bons cadeaux pour le moment."; return; }
+      if (!data || !data.length) { list.textContent = "Aucun bon cadeau enregistré pour le moment."; return; }
+      list.innerHTML = data.map(g => {
+        const st = giftStatus(g);
+        const active = st.color === "#1a7a40";
+        return `
+          <div class="gift-row${active ? "" : " gift-row--off"}">
+            <div>
+              <div class="gift-code">${cleanLabel(g.code)}</div>
+              <div style="font-size:12px; color:${st.color}; margin-top:4px;">${st.label}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:600; font-size:15px;">${fmtEuro(g.balance)}</div>
+              <div style="font-size:12px; color:var(--muted);">restants sur ${fmtEuro(g.initial_amount)}</div>
+            </div>
+          </div>`;
+      }).join("");
+    }
+    document.getElementById("giftClaimForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("giftClaimCode");
+      const msg = document.getElementById("giftClaimMsg");
+      const code = (input?.value || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      if (!code) return;
+      const { data, error } = await supabase.rpc("gift_card_claim", { p_code: code });
+      msg.style.display = "";
+      if (error) { msg.style.color = "#c00"; msg.textContent = error.message || "Ce code ne correspond à aucun bon cadeau."; return; }
+      const row = Array.isArray(data) ? data[0] : data;
+      msg.style.color = "#1a7a40";
+      msg.textContent = row ? `Bon cadeau enregistré : ${fmtEuro(row.balance)} disponibles.` : "Bon cadeau enregistré.";
+      input.value = "";
+      await loadMyGiftCards();
+    });
 
     async function loadMyAddress(user) {
       const box = document.getElementById("addressBox");

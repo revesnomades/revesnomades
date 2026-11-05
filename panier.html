@@ -20,7 +20,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <meta name="robots" content="noindex, nofollow">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=5" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=6" />
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
   <script src="/assets/js/metaPixel.js?v=3" defer></script>
@@ -201,6 +201,20 @@
             <div id="promoCodeMsg" style="font-size:12px; margin-top:5px; display:none;"></div>
           </div>
 
+          <!-- Bon cadeau : sa valeur est déduite du total, utilisable en plusieurs fois -->
+          <div id="giftCardZone" style="display:none; margin-bottom:16px;">
+            <div style="font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text);">Bon cadeau</div>
+            <div style="display:flex; gap:8px;">
+              <input id="giftCodeInput" class="input" placeholder="CADEAU-XXXX-XXXX" style="flex:1; font-size:13px; text-transform:uppercase;" maxlength="20" autocomplete="off" aria-label="Code du bon cadeau">
+              <button type="button" id="btnApplyGift" class="btn tiny on-light">Appliquer</button>
+            </div>
+            <div id="giftCodeMsg" style="font-size:12px; margin-top:5px; display:none;" aria-live="polite"></div>
+            <div id="giftEmailWrap" style="display:none; margin-top:10px;">
+              <label for="giftEmail" style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Ton email, pour recevoir la confirmation</label>
+              <input id="giftEmail" class="input" type="email" placeholder="marie@exemple.fr" style="font-size:13px;" autocomplete="email">
+            </div>
+          </div>
+
           <div class="cart-step" id="payStep" style="display:none;"><span class="cart-step-num" aria-hidden="true">3</span>Paiement</div>
           <button id="btnCheckout" class="btn-pay" type="button">
             Procéder au paiement
@@ -363,6 +377,13 @@
     let embeddedCheckout = null;
     let activePromos = [];
     let appliedPromoCode = null;
+    // Bon cadeau appliqué au paiement : { code, balance, expires_at } ; giftUse = part utilisée sur cette commande
+    let giftCard = null;
+    let giftUse = 0;
+    let lastToPay = 0;
+    const escGift = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const isEmailLike = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
+    const giftEmailValue = () => (document.getElementById("giftEmail")?.value || "").trim();
     let miniDiscount = null; // remise affichée dans le bloc compact mobile
     let exhaustedCodes = [];
     let selectedShipping = null; // { id, name, carrier, price, is_relay? }
@@ -492,6 +513,7 @@
 
     function getApplicableCartItems(cart, promo) {
       return cart.filter(item => {
+        if (item.type === 'gift_card') return false;
         if (promo.apply_to === 'all') return true;
         if (promo.apply_to === 'products') return item.type === 'product';
         if (promo.apply_to === 'stays') return item.type === 'sejour';
@@ -538,6 +560,23 @@
         const price = formatPrice(item.price);
         const lineTotal = formatPrice((Number(item.price) || 0) * item.quantity);
         const isMax = item.quantity >= (item.maxStock ?? 99);
+        if (item.type === "gift_card") {
+          const g = item.gift || {};
+          const who = [g.to ? `Pour ${escGift(g.to)}` : "", g.email ? `envoyé à ${escGift(g.email)}` : "envoyé à ton adresse email"].filter(Boolean).join(" · ");
+          return `
+          <div class="cart-item cart-item--gift" data-idx="${idx}">
+            <img class="cart-item-img" src="/assets/img/gift-card.svg" alt="">
+            <div>
+              <div style="font-weight:600; font-size:14px; color:var(--text);">Bon cadeau ${formatPrice(item.price)}</div>
+              <div class="txt-muted-13" style="margin-top:2px;">${who}</div>
+              <div class="txt-hint" style="margin-top:4px;">Envoyé par email après le paiement · valable 12 mois sur les séjours et la boutique</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:600; font-size:14px;">${lineTotal}</div>
+              <button class="cart-remove-btn" data-id="${item.id}" data-type="${item.type}" title="Retirer" aria-label="Retirer ce bon cadeau">×</button>
+            </div>
+          </div>`;
+        }
         return `
           <div class="cart-item" data-idx="${idx}">
             <img class="cart-item-img" src="${img}" alt="${item.name}" loading="lazy">
@@ -573,7 +612,8 @@
       ).join("");
 
       const hasProducts = cart.some(i => i.type === "product");
-      const hasSejoursOnly = !hasProducts;
+      const hasGiftItems = cart.some(i => i.type === "gift_card");
+      const hasSejoursOnly = !hasProducts && cart.some(i => i.type === "sejour") && !hasGiftItems;
 
       const shippingZone = document.getElementById("shippingZone");
       if (shippingZone) shippingZone.style.display = hasProducts ? "block" : "none";
@@ -618,6 +658,8 @@
       if (noteEl) {
         noteEl.textContent = hasSejoursOnly
           ? "Toutes les informations concernant ton séjour te seront envoyées par e-mail après le paiement."
+          : !hasProducts
+            ? (hasGiftItems ? "Le bon cadeau est envoyé par email juste après le paiement." : "")
           : selectedShipping
             ? ""
             : "Renseigne ton adresse pour calculer les frais de livraison.";
@@ -626,7 +668,14 @@
       const rawTotal = getCartTotal();
       const shippingTotal = hasProducts && selectedShipping ? selectedShipping.price : 0;
       const finalTotal = Math.max(0, rawTotal - totalDiscount + shippingTotal);
-      cartTotalDisplayEl.textContent = formatPrice(finalTotal);
+      // Bon cadeau : déduit après remises et livraison ; jamais pour acheter un autre bon cadeau
+      giftUse = giftCard && !hasGiftItems ? Math.min(giftCard.balance, finalTotal) : 0;
+      if (giftUse > 0) {
+        summaryLinesEl.innerHTML += `<div class="sum-row" style="color:#b34400;"><span>Bon cadeau ${escGift(giftCard.code)}</span><span>−${formatPrice(giftUse)}</span></div>`;
+      }
+      lastToPay = Math.max(0, finalTotal - giftUse);
+      cartTotalDisplayEl.textContent = formatPrice(lastToPay);
+      renderGiftZone(cart, hasGiftItems, finalTotal);
       const totalLabel = document.getElementById("cartTotalLabel");
       if (totalLabel) totalLabel.textContent = hasProducts && !selectedShipping ? "Sous-total" : "Total";
       renderFreeShipping(hasProducts);
@@ -639,7 +688,7 @@
           : `${delay} ${freeAlready ? "Indique ton adresse pour finaliser la livraison." : "Indique ton adresse pour connaître les frais de livraison."}`;
       }
 
-      updateCheckoutState(hasProducts, finalTotal);
+      updateCheckoutState(hasProducts, lastToPay);
 
       // Promo code UI
       const promoZone = document.getElementById("promoCodeZone");
@@ -650,6 +699,7 @@
     }
 
     function checkoutBlocker(hasProducts) {
+      if (giftUse > 0 && lastToPay === 0 && !currentUser && !isEmailLike(giftEmailValue())) return "Indique ton email pour recevoir la confirmation.";
       if (!hasProducts) return null;
       const addr = getShippingAddress();
       const relay = selectedShipping && isRelayMethod(selectedShipping);
@@ -673,7 +723,9 @@
       const label = hasProducts && !selectedShipping ? "Sous-total" : "Total";
       document.getElementById("payBarLabel").textContent = label;
       document.getElementById("payBarTotal").textContent = formatPrice(total);
-      document.getElementById("payBarBtn").textContent = blocker ? "Continuer" : "Payer";
+      const giftOnlyPay = giftUse > 0 && lastToPay === 0;
+      btnCheckout.textContent = giftOnlyPay ? "Confirmer la commande" : "Procéder au paiement";
+      document.getElementById("payBarBtn").textContent = blocker ? "Continuer" : (giftOnlyPay ? "Confirmer" : "Payer");
       payBarVisible.cartReady = true;
       refreshPayBar();
     }
@@ -1157,6 +1209,7 @@
     async function loadSavedAddressAndUser() {
       const { data: { user } } = await supabase.auth.getUser();
       currentUser = user || null;
+      renderCart();
       const saveLabel = document.getElementById("saveAddressLabel");
       if (saveLabel) saveLabel.style.display = user ? "flex" : "none";
       const guestNote = document.getElementById("guestNote");
@@ -1388,7 +1441,10 @@
           price: Number(i.price) || 0,
           quantity: i.quantity,
           image: i.image || null,
+          ...(i.type === "gift_card" ? { gift: i.gift || {} } : {}),
         }));
+        const giftOnlyPay = giftUse > 0 && lastToPay === 0;
+        checkoutLoading.textContent = giftOnlyPay ? "Validation de ta commande…" : "Chargement du formulaire de paiement…";
 
         const cartDiscounts = getCartDiscounts(cart);
         const totalDiscountAmount = cartDiscounts.list.reduce((s, d) => s + d.amount, 0);
@@ -1421,6 +1477,8 @@
             shipping: hasProducts && selectedShipping ? (selectedShipping.price === 0 ? "Livraison offerte" : `${selectedShipping.name} · ${formatPrice(selectedShipping.price)}`) : null,
             relay: hasProducts && selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint ? selectedRelayPoint.name : null,
             deliveryDays: productDays.length ? Math.max(...productDays) : null,
+            gift: giftUse > 0 ? { code: giftCard.code, amount: giftUse } : null,
+            giftItems: cart.filter(i => i.type === "gift_card").map(i => ({ amount: Number(i.price) || 0, to: i.gift?.to || "", email: i.gift?.email || "" })),
             discount: totalDiscountAmount > 0 ? { label: cartDiscounts.list.map(d => d.label).join(" + "), amount: totalDiscountAmount } : null,
           }));
         } catch {}
@@ -1441,6 +1499,9 @@
             shippingLabel: hasProducts && selectedShipping ? selectedShipping.name : null,
             shippingMethodId: hasProducts && selectedShipping ? String(selectedShipping.id ?? selectedShipping.name) : null,
             promoCode: cartDiscounts.code,
+            giftCode: giftUse > 0 ? giftCard.code : null,
+            customerEmail: user?.email || giftEmailValue() || "",
+            customerName: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || "",
             shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
           }),
@@ -1454,6 +1515,13 @@
             const last = JSON.parse(sessionStorage.getItem("rn_last_order") || "null");
             if (last) sessionStorage.setItem("rn_last_order", JSON.stringify({ ...last, orderRef: data.order_ref }));
           } catch {}
+        }
+
+        // Commande entièrement réglée par le bon cadeau : pas de formulaire Stripe
+        if (data.paid) {
+          try { sessionStorage.removeItem("rn_gift"); } catch {}
+          window.location.href = `/merci.html?paid=gift&ref=${encodeURIComponent(data.order_ref || "")}`;
+          return;
         }
 
         checkoutLoading.style.display = "none";
@@ -1472,6 +1540,10 @@
           checkoutError.textContent = left > 0
             ? `Il ne reste que ${left} « ${err.data.product_name} ». Nous avons ajusté ton panier : vérifie-le, puis relance le paiement.`
             : `« ${err.data.product_name} » vient d'être épuisé et a été retiré de ton panier. Vérifie-le, puis relance le paiement.`;
+        } else if ((err.data?.code === "gift" || err.data?.code === "email") && err.data.error) {
+          // Bon cadeau refusé par le serveur (épuisé, expiré, inconnu) ou email manquant
+          checkoutError.textContent = err.data.error;
+          if (err.data.code === "gift") { giftCard = null; try { sessionStorage.removeItem("rn_gift"); } catch {} ; renderCart(); }
         } else if (err.data?.code === "promo" && err.data.error) {
           // Code épuisé entre-temps : on le retire et on recalcule le total
           if (appliedPromoCode) exhaustedCodes.push(appliedPromoCode);
@@ -1513,6 +1585,72 @@
       appliedPromoCode = code;
       renderCart();
     });
+
+    // ── Bon cadeau : consultation, application, affichage ──
+    async function lookupGiftCard(code) {
+      const { data, error } = await supabase.rpc("gift_card_lookup", { p_code: code });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (error || !row) return { error: "Ce code ne correspond à aucun bon cadeau." };
+      const expires = row.expires_at ? new Date(row.expires_at) : null;
+      if (row.status === "expired" || (expires && expires < new Date())) return { error: `Ce bon cadeau a expiré le ${expires ? expires.toLocaleDateString("fr-FR") : ""}.` };
+      if (row.status === "used" || Number(row.balance) <= 0) return { error: "Ce bon cadeau a déjà été entièrement utilisé." };
+      if (row.status !== "active") return { error: "Ce bon cadeau n'est plus valable." };
+      return { card: { code: row.code, balance: Number(row.balance), expires_at: row.expires_at } };
+    }
+    function showGiftMsg(msg, color) {
+      const el = document.getElementById("giftCodeMsg");
+      if (!el) return;
+      el.innerHTML = msg;
+      el.style.color = color;
+      el.style.display = msg ? "" : "none";
+    }
+    function renderGiftZone(cart, hasGiftItems, finalTotal) {
+      const zone = document.getElementById("giftCardZone");
+      if (!zone) return;
+      zone.style.display = cart.length && !hasGiftItems ? "" : "none";
+      const emailWrap = document.getElementById("giftEmailWrap");
+      if (emailWrap) emailWrap.style.display = giftUse > 0 && lastToPay === 0 && !currentUser ? "" : "none";
+      if (!giftCard) return;
+      const rest = giftCard.balance - giftUse;
+      const until = giftCard.expires_at ? ` · valable jusqu'au ${new Date(giftCard.expires_at).toLocaleDateString("fr-FR")}` : "";
+      showGiftMsg(
+        (lastToPay === 0 && giftUse > 0
+          ? `✓ Bon cadeau ${escGift(giftCard.code)} : il couvre toute la commande, il te restera ${formatPrice(rest)}`
+          : `✓ Bon cadeau ${escGift(giftCard.code)} : ${formatPrice(giftUse)} utilisés, il te restera ${formatPrice(rest)}`)
+        + until + ` <button type="button" class="btn-link" id="btnRemoveGift" style="margin-left:6px;">Retirer</button>`,
+        "#1a7a40");
+      document.getElementById("btnRemoveGift")?.addEventListener("click", () => {
+        giftCard = null;
+        try { sessionStorage.removeItem("rn_gift"); } catch {}
+        const input = document.getElementById("giftCodeInput"); if (input) input.value = "";
+        showGiftMsg("", "");
+        renderCart();
+      });
+    }
+    async function applyGiftCode(code, silent = false) {
+      code = String(code || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      if (!code) return;
+      const btn = document.getElementById("btnApplyGift");
+      if (btn) btn.disabled = true;
+      const r = await lookupGiftCard(code);
+      if (btn) btn.disabled = false;
+      if (r.error) {
+        giftCard = null;
+        try { sessionStorage.removeItem("rn_gift"); } catch {}
+        if (!silent) showGiftMsg(escGift(r.error), "#c00");
+        renderCart();
+        return;
+      }
+      giftCard = r.card;
+      try { sessionStorage.setItem("rn_gift", giftCard.code); } catch {}
+      const input = document.getElementById("giftCodeInput"); if (input) input.value = giftCard.code;
+      renderCart();
+    }
+    document.getElementById("btnApplyGift")?.addEventListener("click", () => applyGiftCode(document.getElementById("giftCodeInput")?.value));
+    document.getElementById("giftCodeInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("btnApplyGift")?.click(); } });
+    document.getElementById("giftEmail")?.addEventListener("input", () => renderCart());
+    // Bon cadeau saisi avant un rechargement : on le reprend
+    try { const saved = sessionStorage.getItem("rn_gift"); if (saved) applyGiftCode(saved, true); } catch {}
 
     document.getElementById("promoCodeInput")?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") document.getElementById("btnApplyPromo")?.click();
