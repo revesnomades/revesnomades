@@ -491,9 +491,12 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      // Pre-fill shipping address from saved profile if provided
-      ...(body.shippingAddress && body.shippingAddress.line1 ? {
-        payment_intent_data: {
+      payment_intent_data: {
+        // Numéro de commande visible sur le paiement Stripe (comptabilité)
+        description: `Commande ${orderRef}`,
+        metadata: { order_ref: orderRef },
+        // Pre-fill shipping address from saved profile if provided
+        ...(body.shippingAddress && body.shippingAddress.line1 ? {
           shipping: {
             name: body.shippingAddress.name || body.userEmail || "",
             address: {
@@ -504,8 +507,8 @@ serve(async (req) => {
               country: body.shippingAddress.country || "FR",
             },
           },
-        },
-      } : {}),
+        } : {}),
+      },
       ...(discounts ? { discounts } : {}),
       // Client connecté : email prérempli ; invité : Stripe le demande
       ...(body.userEmail ? { customer_email: String(body.userEmail) } : {}),

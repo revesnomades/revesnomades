@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Comptabilité — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/site.webmanifest">
+  <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="dns-prefetch" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+
+  <link rel="stylesheet" href="assets/css/styles.css?v=13" />
+  <style>
+    button, .btn, select, input { border-radius: 6px !important; }
+
+    .acc-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-top: 20px; }
+    .acc-field { display: flex; flex-direction: column; gap: 4px; }
+    .acc-field label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+    .acc-field select, .acc-field input { padding: 8px 10px; border: 1px solid var(--line); background: #fff; font: inherit; font-size: 13.5px; min-width: 120px; }
+    .acc-field.hidden { display: none; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 22px; }
+    .kpi { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+    .kpi-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+    .kpi-value { font-size: 26px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .kpi.neg .kpi-value { color: #a33; }
+    .kpi.main { background: #1e1f22; color: #fff; border-color: #1e1f22; }
+    .kpi.main .kpi-label, .kpi.main .kpi-sub { color: rgba(255,255,255,.7); }
+
+    .acc-section { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-top: 20px; }
+    .acc-section h2 { margin: 0; font-size: 17px; }
+    .acc-section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .acc-note { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+
+    .acc-table-wrap { overflow-x: auto; margin-top: 12px; }
+    .acc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .acc-table th { text-align: left; padding: 9px 10px; background: #f8f6f0; color: #666; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid rgba(0,0,0,.08); white-space: nowrap; }
+    .acc-table td { padding: 9px 10px; border-bottom: 1px solid rgba(0,0,0,.05); vertical-align: top; }
+    .acc-table tr:last-child td { border-bottom: none; }
+    .acc-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .acc-table th.num { text-align: right; }
+    .acc-table tfoot td { font-weight: 600; background: #fbfaf6; border-top: 2px solid rgba(0,0,0,.1); }
+    .acc-table .muted { color: var(--muted); font-size: 12px; }
+    .acc-empty { color: var(--muted); font-size: 13px; padding: 14px 0; }
+
+    .kind-badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+    .kind-paiement { background: #e8f8f0; color: #1a7a40; }
+    .kind-remboursement { background: #fdece8; color: #a33; }
+    .kind-virement { background: #e8f4fd; color: #1a6fa8; }
+    .kind-frais { background: #f3f3f3; color: #555; }
+    .kind-litige { background: #fdf0e8; color: #b05a10; }
+    .kind-autre { background: #f0e8fd; color: #6a1aaa; }
+
+    .split-bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; margin-top: 12px; background: #eee; }
+    .split-bar span { display: block; height: 100%; }
+    .split-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 13px; }
+    .split-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+    .c-sejours { background: #c9a227; }
+    .c-boutique { background: #1e1f22; }
+    .c-bons { background: #8a6bbf; }
+    .c-livraison { background: #9bb; }
+
+    .acc-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .acc-filters input { padding: 7px 10px; border: 1px solid var(--line); font: inherit; font-size: 13px; }
+    .btn.tiny { padding: 8px 12px; }
+    #accMsg { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    #accMsg.error { color: #a33; }
+    .mode-tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; background: #fff3cd; color: #856404; }
+  </style>
+</head>
+
+<body class="on-light">
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <img src="/assets/img/logo-reves-nomades.png" alt="Âmes Nomades">
+        <span>Âmes Nomades</span>
+      </a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/admin-bookings.html">Réservations</a>
+        <a href="/admin-boutique.html">Shop</a>
+        <a href="/admin-dashboard.html">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container" style="padding:120px 0 60px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h1 style="margin:0;">Comptabilité des revenus</h1>
+          <p style="color:var(--muted); margin-top:8px; margin-bottom:0;">
+            Encaissements, frais, remboursements et virements lus directement dans Stripe, reliés aux commandes du site.
+          </p>
+        </div>
+        <span id="modeTag" class="mode-tag" hidden>Mode test</span>
+      </div>
+
+      <div id="adminStatus" style="margin-top:14px; color:var(--muted); font-size:12.5px;"></div>
+
+      <div class="acc-toolbar">
+        <div class="acc-field">
+          <label for="selYear">Année</label>
+          <select id="selYear"></select>
+        </div>
+        <div class="acc-field">
+          <label for="selMonth">Mois</label>
+          <select id="selMonth">
+            <option value="">Toute l'année</option>
+            <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option>
+            <option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option>
+            <option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option>
+            <option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
+            <option value="custom">Dates personnalisées</option>
+          </select>
+        </div>
+        <div class="acc-field hidden" id="fromField">
+          <label for="inpFrom">Du</label>
+          <input type="date" id="inpFrom">
+        </div>
+        <div class="acc-field hidden" id="toField">
+          <label for="inpTo">Au</label>
+          <input type="date" id="inpTo">
+        </div>
+        <button class="btn on-light" id="btnLoad" type="button">Actualiser</button>
+        <button class="btn tiny on-light" id="btnCsvOps" type="button" disabled>Exporter les opérations (CSV)</button>
+        <button class="btn tiny on-light" id="btnCsvMonths" type="button" disabled>Exporter le récap mensuel (CSV)</button>
+      </div>
+      <div id="accMsg"></div>
+
+      <div class="kpi-grid" id="kpis">
+        <div class="kpi main"><div class="kpi-label">Encaissé (brut)</div><div class="kpi-value" id="kBrut">—</div><div class="kpi-sub" id="kBrutSub">paiements clients</div></div>
+        <div class="kpi neg"><div class="kpi-label">Remboursements</div><div class="kpi-value" id="kRemb">—</div><div class="kpi-sub" id="kRembSub">&nbsp;</div></div>
+        <div class="kpi neg"><div class="kpi-label">Frais Stripe</div><div class="kpi-value" id="kFrais">—</div><div class="kpi-sub" id="kFraisSub">&nbsp;</div></div>
+        <div class="kpi"><div class="kpi-label">Net Stripe</div><div class="kpi-value" id="kNet">—</div><div class="kpi-sub">brut − remboursements − frais</div></div>
+        <div class="kpi"><div class="kpi-label">Viré en banque</div><div class="kpi-value" id="kVir">—</div><div class="kpi-sub" id="kVirSub">&nbsp;</div></div>
+        <div class="kpi"><div class="kpi-label">Solde Stripe actuel</div><div class="kpi-value" id="kSolde">—</div><div class="kpi-sub" id="kSoldeSub">&nbsp;</div></div>
+      </div>
+
+      <div class="acc-section">
+        <div class="acc-section-head">
+          <h2>Répartition des encaissements</h2>
+          <span class="muted" style="font-size:12.5px; color:var(--muted);">net des remboursements, hors frais</span>
+        </div>
+        <div class="split-bar" id="splitBar"></div>
+        <div class="split-legend" id="splitLegend"></div>
+        <p class="acc-note" id="splitNote"></p>
+      </div>
+
+      <div class="acc-section">
+        <div class="acc-section-head"><h2>Récapitulatif par mois</h2></div>
+        <div class="acc-table-wrap">
+          <table class="acc-table" id="monthTable">
+            <thead><tr>
+              <th>Mois</th><th class="num">Paiements</th><th class="num">Brut</th><th class="num">Remboursé</th><th class="num">Frais</th><th class="num">Net</th><th class="num">Viré en banque</th>
+            </tr></thead>
+            <tbody><tr><td colspan="7" class="acc-empty">Choisissez une période puis cliquez sur Actualiser.</td></tr></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="acc-section">
+        <div class="acc-section-head">
+          <h2>Opérations</h2>
+          <div class="acc-filters">
+            <select id="selKind" style="padding:7px 10px; border:1px solid var(--line); font:inherit; font-size:13px;">
+              <option value="">Tous les types</option>
+              <option value="paiement">Paiements</option>
+              <option value="remboursement">Remboursements</option>
+              <option value="virement">Virements</option>
+              <option value="frais">Frais</option>
+              <option value="litige">Litiges</option>
+              <option value="autre">Autres</option>
+            </select>
+            <input type="search" id="inpSearch" placeholder="Référence, client, email…">
+          </div>
+        </div>
+        <div class="acc-table-wrap">
+          <table class="acc-table" id="opsTable">
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Référence</th><th>Client</th><th>Détail</th><th class="num">Brut</th><th class="num">Frais</th><th class="num">Net</th><th>Disponible le</th><th></th>
+            </tr></thead>
+            <tbody><tr><td colspan="10" class="acc-empty">Aucune opération chargée.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="acc-section">
+        <h2>Comment lire ces chiffres</h2>
+        <ul style="margin:10px 0 0; padding-left:18px; font-size:13.5px; line-height:1.6; color:var(--text);">
+          <li><strong>Brut</strong> : ce que le client a payé par carte via Stripe. <strong>Frais</strong> : commission Stripe sur chaque paiement (une charge, déductible). <strong>Net</strong> : ce qui reste sur le solde Stripe.</li>
+          <li><strong>Viré en banque</strong> : les virements de Stripe vers votre compte. Le net d'un mois n'est pas forcément viré le même mois (délai de quelques jours).</li>
+          <li><strong>Bons cadeaux vendus</strong> : encaissés tout de suite, mais la prestation n'est réalisée qu'à l'utilisation du bon. Votre comptable peut les traiter comme un acompte jusqu'à leur usage.</li>
+          <li><strong>Bons cadeaux utilisés</strong> : part des commandes payée avec un bon, donc absente de Stripe. Elle est indiquée séparément.</li>
+          <li>Les exports CSV s'ouvrent dans Excel, Numbers ou Google Sheets (séparateur point-virgule, virgule décimale).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script src="assets/js/main.js?v=3"></script>
+  <script type="module">
+    import { supabase } from "./assets/js/supabaseClient.js?v=3";
+
+    const $ = (id) => document.getElementById(id);
+    const adminStatus = $("adminStatus");
+    const accMsg = $("accMsg");
+    const selYear = $("selYear"), selMonth = $("selMonth"), inpFrom = $("inpFrom"), inpTo = $("inpTo");
+    const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+    const MONTHS_LONG = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    const euro = (n) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const r2 = (n) => Math.round(n * 100) / 100;
+    const fmtDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const KIND_LABEL = { paiement: "Paiement", remboursement: "Remboursement", virement: "Virement", frais: "Frais", litige: "Litige", autre: "Autre" };
+
+    let rows = [];
+    let lastPayload = null;
+
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { window.location.href = "/compte.html"; return null; }
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      const email = (user.email || "").toLowerCase();
+      const isEmailAdmin = email === "contact@amesnomades.com" || email === "sarnelli.ap@gmail.com" || email === "revesnomades@gmail.com";
+      if (!isEmailAdmin && data?.role !== "admin") {
+        adminStatus.textContent = "Accès refusé.";
+        throw new Error("Not admin");
+      }
+      adminStatus.textContent = `Connecté (Admin : ${user.email})`;
+      return user;
+    }
+
+    // ─── Période ──────────────────────────────────────────────────────────
+    function initPeriod() {
+      const now = new Date();
+      for (let y = now.getFullYear(); y >= now.getFullYear() - 4; y--) {
+        const o = document.createElement("option"); o.value = String(y); o.textContent = String(y); selYear.appendChild(o);
+      }
+      selMonth.value = String(now.getMonth());
+      selMonth.addEventListener("change", () => {
+        const custom = selMonth.value === "custom";
+        $("fromField").classList.toggle("hidden", !custom);
+        $("toField").classList.toggle("hidden", !custom);
+        selYear.disabled = custom;
+      });
+    }
+
+    function periodBounds() {
+      const y = Number(selYear.value);
+      if (selMonth.value === "custom") {
+        if (!inpFrom.value || !inpTo.value) throw new Error("Indiquez les deux dates.");
+        const from = new Date(inpFrom.value + "T00:00:00");
+        const to = new Date(inpTo.value + "T23:59:59");
+        if (to < from) throw new Error("La date de fin est avant la date de début.");
+        return { from, to, label: `du ${fmtDate(from)} au ${fmtDate(to)}` };
+      }
+      if (selMonth.value === "") return { from: new Date(y, 0, 1), to: new Date(y, 11, 31, 23, 59, 59), label: `année ${y}` };
+      const m = Number(selMonth.value);
+      return { from: new Date(y, m, 1), to: new Date(y, m + 1, 0, 23, 59, 59), label: `${MONTHS_LONG[m]} ${y}` };
+    }
+
+    // ─── Chargement ───────────────────────────────────────────────────────
+    async function load() {
+      let bounds;
+      try { bounds = periodBounds(); } catch (e) { accMsg.className = "error"; accMsg.textContent = e.message; return; }
+      accMsg.className = ""; accMsg.textContent = "Lecture des opérations Stripe…";
+      $("btnLoad").disabled = true;
+      try {
+        const { data, error } = await supabase.functions.invoke("stripe-accounting", {
+          body: { from: Math.floor(bounds.from.getTime() / 1000), to: Math.floor(bounds.to.getTime() / 1000) },
+        });
+        if (error) {
+          let msg = error.message || "Erreur";
+          try { const j = await error.context?.json(); if (j?.error) msg = j.error; } catch {}
+          throw new Error(msg);
+        }
+        if (!data || data.error) throw new Error(data?.error || "Réponse vide");
+        lastPayload = data;
+        rows = (data.rows || []).slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+        $("modeTag").hidden = data.livemode !== false;
+        render(bounds);
+        accMsg.textContent = rows.length ? `${rows.length} opération${rows.length > 1 ? "s" : ""} sur la période (${bounds.label}).` : `Aucune opération Stripe sur la période (${bounds.label}).`;
+        $("btnCsvOps").disabled = $("btnCsvMonths").disabled = rows.length === 0;
+      } catch (e) {
+        accMsg.className = "error"; accMsg.textContent = "Impossible de lire Stripe : " + (e.message || e);
+      } finally {
+        $("btnLoad").disabled = false;
+      }
+    }
+
+    // ─── Calculs ──────────────────────────────────────────────────────────
+    function summarize(list) {
+      const s = { nb: 0, brut: 0, remb: 0, frais: 0, net: 0, vir: 0, litiges: 0, remise: 0, bonUtil: 0, split: { sejours: 0, boutique: 0, bons_cadeaux: 0, livraison: 0 } };
+      for (const r of list) {
+        if (r.kind === "paiement") { s.nb++; s.brut += r.brut; s.remise += r.remise || 0; s.bonUtil += r.bon_utilise || 0; }
+        else if (r.kind === "remboursement") s.remb += -r.brut;
+        else if (r.kind === "virement") s.vir += -r.brut;
+        else if (r.kind === "litige") s.litiges += r.brut;
+        if (r.kind !== "virement") s.frais += r.frais;
+        if (r.kind !== "virement") s.net += r.net;
+        if (r.split && (r.kind === "paiement" || r.kind === "remboursement")) {
+          for (const k of Object.keys(s.split)) s.split[k] += r.split[k] || 0;
+        }
+      }
+      for (const k of Object.keys(s)) if (typeof s[k] === "number") s[k] = r2(s[k]);
+      for (const k of Object.keys(s.split)) s.split[k] = r2(s.split[k]);
+      return s;
+    }
+
+    function byMonth(list) {
+      const map = new Map();
+      for (const r of list) {
+        const d = new Date(r.date); const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(r);
+      }
+      return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, l]) => {
+        const [y, m] = key.split("-");
+        return { key, label: `${MONTHS_LONG[Number(m) - 1]} ${y}`, ...summarize(l) };
+      });
+    }
+
+    // ─── Rendu ────────────────────────────────────────────────────────────
+    function render(bounds) {
+      const s = summarize(rows);
+      $("kBrut").textContent = euro(s.brut);
+      $("kBrutSub").textContent = `${s.nb} paiement${s.nb > 1 ? "s" : ""}${s.remise ? ` · remises ${euro(s.remise)}` : ""}`;
+      $("kRemb").textContent = s.remb ? "− " + euro(s.remb) : euro(0);
+      $("kRembSub").textContent = s.litiges ? `litiges : ${euro(s.litiges)}` : " ";
+      $("kFrais").textContent = s.frais ? "− " + euro(s.frais) : euro(0);
+      $("kFraisSub").textContent = s.brut ? `${(100 * s.frais / s.brut).toFixed(1).replace(".", ",")} % du brut` : " ";
+      $("kNet").textContent = euro(s.net);
+      $("kVir").textContent = euro(s.vir);
+      $("kVirSub").textContent = `${rows.filter(r => r.kind === "virement").length} virement(s) sur la période`;
+      const b = lastPayload?.balance;
+      $("kSolde").textContent = b ? euro(b.disponible + b.en_attente) : "—";
+      $("kSoldeSub").textContent = b ? `disponible ${euro(b.disponible)} · en attente ${euro(b.en_attente)}` : "non disponible";
+
+      // Répartition
+      const sp = s.split;
+      const total = sp.sejours + sp.boutique + sp.bons_cadeaux + sp.livraison;
+      const parts = [["sejours", "Séjours", "c-sejours"], ["boutique", "Shop", "c-boutique"], ["bons_cadeaux", "Bons cadeaux vendus", "c-bons"], ["livraison", "Livraison", "c-livraison"]];
+      $("splitBar").innerHTML = total > 0 ? parts.map(([k, , c]) => `<span class="${c}" style="width:${(100 * sp[k] / total).toFixed(2)}%" title="${esc(euro(sp[k]))}"></span>`).join("") : "";
+      $("splitLegend").innerHTML = parts.map(([k, label, c]) => `<span><i class="${c}"></i>${label} : <strong>${euro(sp[k])}</strong>${total > 0 ? ` <span style="color:var(--muted)">(${Math.round(100 * sp[k] / total)} %)</span>` : ""}</span>`).join("");
+      const unmatched = r2(s.brut - s.remb - total);
+      const notes = [];
+      if (lastPayload?.gift_redemptions) notes.push(`Bons cadeaux utilisés sur la période (payés hors Stripe) : ${euro(lastPayload.gift_redemptions)}.`);
+      if (Math.abs(unmatched) >= 0.05) notes.push(`${euro(unmatched)} de paiements non reliés à une commande du site (paiements manuels ou anciens).`);
+      $("splitNote").textContent = notes.join(" ");
+
+      // Mois
+      const months = byMonth(rows);
+      const mt = $("monthTable");
+      mt.querySelector("tbody").innerHTML = months.length ? months.map(m => `
+        <tr><td>${esc(m.label)}</td><td class="num">${m.nb}</td><td class="num">${euro(m.brut)}</td><td class="num">${m.remb ? "− " + euro(m.remb) : "—"}</td><td class="num">${m.frais ? "− " + euro(m.frais) : "—"}</td><td class="num">${euro(m.net)}</td><td class="num">${m.vir ? euro(m.vir) : "—"}</td></tr>`).join("")
+        : `<tr><td colspan="7" class="acc-empty">Aucune opération sur la période.</td></tr>`;
+      mt.querySelector("tfoot").innerHTML = months.length > 1 ? `<tr><td>Total</td><td class="num">${s.nb}</td><td class="num">${euro(s.brut)}</td><td class="num">${s.remb ? "− " + euro(s.remb) : "—"}</td><td class="num">${s.frais ? "− " + euro(s.frais) : "—"}</td><td class="num">${euro(s.net)}</td><td class="num">${s.vir ? euro(s.vir) : "—"}</td></tr>` : "";
+
+      renderOps();
+    }
+
+    function filteredRows() {
+      const kind = $("selKind").value;
+      const q = $("inpSearch").value.trim().toLowerCase();
+      return rows.filter(r => (!kind || r.kind === kind) && (!q || [r.order_ref, r.client, r.email, r.articles, r.description].join(" ").toLowerCase().includes(q)));
+    }
+
+    function renderOps() {
+      const list = filteredRows();
+      const tb = $("opsTable").querySelector("tbody");
+      if (!list.length) { tb.innerHTML = `<tr><td colspan="10" class="acc-empty">Aucune opération.</td></tr>`; return; }
+      tb.innerHTML = list.map(r => {
+        const detail = r.articles || r.description || "";
+        const extra = [];
+        if (r.remise) extra.push(`remise ${euro(r.remise)}`);
+        if (r.bon_utilise) extra.push(`bon cadeau utilisé ${euro(r.bon_utilise)}`);
+        return `<tr>
+          <td>${fmtDate(r.date)}</td>
+          <td><span class="kind-badge kind-${esc(r.kind)}">${KIND_LABEL[r.kind] || r.kind}</span></td>
+          <td>${esc(r.order_ref || "—")}</td>
+          <td>${esc(r.client || "")}${r.email ? `<div class="muted">${esc(r.email)}</div>` : ""}</td>
+          <td style="max-width:320px;">${esc(detail)}${extra.length ? `<div class="muted">${esc(extra.join(" · "))}</div>` : ""}</td>
+          <td class="num">${euro(r.brut)}</td>
+          <td class="num">${r.frais ? "− " + euro(r.frais) : "—"}</td>
+          <td class="num">${euro(r.net)}</td>
+          <td class="muted">${r.statut === "pending" ? "en attente · " : ""}${fmtDate(r.disponible_le)}</td>
+          <td>${r.recu_url ? `<a href="${esc(r.recu_url)}" target="_blank" rel="noopener" style="font-size:12px;">Reçu</a>` : ""}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    // ─── Export CSV ───────────────────────────────────────────────────────
+    const csvNum = (n) => (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace(".", ",");
+    const csvCell = (v) => { const s = String(v ?? ""); return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    function downloadCsv(name, lines) {
+      const blob = new Blob(["﻿" + lines.map(l => l.map(csvCell).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    }
+    function periodSlug() {
+      const y = selYear.value;
+      if (selMonth.value === "custom") return `${inpFrom.value}_${inpTo.value}`;
+      return selMonth.value === "" ? y : `${y}-${String(Number(selMonth.value) + 1).padStart(2, "0")}`;
+    }
+
+    $("btnCsvOps").addEventListener("click", () => {
+      const lines = [["Date", "Type", "Référence", "Client", "Email", "Détail", "Brut (€)", "Frais Stripe (€)", "Net (€)", "Séjours (€)", "Shop (€)", "Bons cadeaux (€)", "Livraison (€)", "Remise (€)", "Bon cadeau utilisé (€)", "Disponible le", "Statut", "ID Stripe"]];
+      for (const r of rows.slice().sort((a, b) => new Date(a.date) - new Date(b.date))) {
+        lines.push([fmtDate(r.date), KIND_LABEL[r.kind] || r.kind, r.order_ref, r.client, r.email, r.articles || r.description, csvNum(r.brut), csvNum(r.frais), csvNum(r.net),
+          csvNum(r.split?.sejours), csvNum(r.split?.boutique), csvNum(r.split?.bons_cadeaux), csvNum(r.split?.livraison), csvNum(r.remise), csvNum(r.bon_utilise), fmtDate(r.disponible_le), r.statut, r.id]);
+      }
+      downloadCsv(`operations-stripe-${periodSlug()}.csv`, lines);
+    });
+
+    $("btnCsvMonths").addEventListener("click", () => {
+      const lines = [["Mois", "Paiements", "Brut (€)", "Remboursements (€)", "Frais Stripe (€)", "Net (€)", "Viré en banque (€)", "Séjours (€)", "Shop (€)", "Bons cadeaux vendus (€)", "Livraison (€)", "Remises (€)", "Bons cadeaux utilisés hors Stripe (€)"]];
+      for (const m of byMonth(rows)) lines.push([m.label, m.nb, csvNum(m.brut), csvNum(m.remb), csvNum(m.frais), csvNum(m.net), csvNum(m.vir), csvNum(m.split.sejours), csvNum(m.split.boutique), csvNum(m.split.bons_cadeaux), csvNum(m.split.livraison), csvNum(m.remise), csvNum(m.bonUtil)]);
+      const s = summarize(rows);
+      lines.push(["Total", s.nb, csvNum(s.brut), csvNum(s.remb), csvNum(s.frais), csvNum(s.net), csvNum(s.vir), csvNum(s.split.sejours), csvNum(s.split.boutique), csvNum(s.split.bons_cadeaux), csvNum(s.split.livraison), csvNum(s.remise), csvNum(s.bonUtil)]);
+      downloadCsv(`recap-mensuel-stripe-${periodSlug()}.csv`, lines);
+    });
+
+    $("btnLoad").addEventListener("click", load);
+    $("selKind").addEventListener("change", renderOps);
+    $("inpSearch").addEventListener("input", renderOps);
+
+    try {
+      initPeriod();
+      await checkAdmin();
+      await load();
+    } catch (err) {
+      console.warn(err);
+    }
+  </script>
+</body>
+</html>
