@@ -127,6 +127,15 @@
               <input type="checkbox" id="chkShowBoutiqueBand" checked style="width:18px; height:18px;">
               Afficher "Shop — Sélection Vedette"
             </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:500;">
+              Articles affichés
+              <select id="selBoutiqueCount" class="input" style="width:auto; padding:6px 10px;">
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </label>
             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14.5px; font-weight:500;">
               <input type="checkbox" id="chkShowGalleryBand" checked style="width:18px; height:18px;">
               Afficher "Galerie — Retour en images"
@@ -201,6 +210,7 @@
     const chkShowBoutiqueBand = document.getElementById("chkShowBoutiqueBand");
     const chkShowGalleryBand = document.getElementById("chkShowGalleryBand");
     const btnSaveHomepageBands = document.getElementById("btnSaveHomepageBands");
+    const selBoutiqueCount = document.getElementById("selBoutiqueCount");
     const homepageBandsMsg = document.getElementById("homepageBandsMsg");
 
     async function checkAdmin(){
@@ -234,6 +244,8 @@
           if (data.value.show_stays !== undefined) chkShowStaysBand.checked = data.value.show_stays;
           if (data.value.show_boutique !== undefined) chkShowBoutiqueBand.checked = data.value.show_boutique;
           if (data.value.show_gallery !== undefined && chkShowGalleryBand) chkShowGalleryBand.checked = data.value.show_gallery;
+          const n = Number(data.value.boutique_count);
+          if (selBoutiqueCount && n >= 3 && n <= 6) selBoutiqueCount.value = String(Math.round(n));
         } else {
           chkShowStaysBand.checked = false;
           chkShowBoutiqueBand.checked = true;
@@ -257,7 +269,8 @@
       const value = {
         show_stays: chkShowStaysBand.checked,
         show_boutique: chkShowBoutiqueBand.checked,
-        show_gallery: chkShowGalleryBand ? chkShowGalleryBand.checked : true
+        show_gallery: chkShowGalleryBand ? chkShowGalleryBand.checked : true,
+        boutique_count: selBoutiqueCount ? Number(selBoutiqueCount.value) : 4
       };
       const { error } = await saveSiteSettingSafe("homepage_bands", value);
       if (error) {

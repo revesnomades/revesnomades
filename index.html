@@ -305,11 +305,26 @@
   <!-- BANDEAU BOUTIQUE VEDETTE DYNAMIQUE -->
   <section class="band cream" id="boutique-vedette" style="display:none;">
     <style>
-      @media (min-width: 1024px) {
-        .shop-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-      }
+      /* Nombre de colonnes = nombre d'articles choisi dans l'admin (3 à 6) : plus il y en a, plus les cartes sont petites */
+      .vedette-grid { display: grid; grid-template-columns: repeat(var(--vedette-cols, 4), minmax(0, 1fr)); gap: 20px; }
+      .vedette-grid[data-cols="3"] { --vedette-cols: 3; }
+      .vedette-grid[data-cols="5"] { --vedette-cols: 5; }
+      .vedette-grid[data-cols="6"] { --vedette-cols: 6; }
+      .vedette-grid .stay-card-media { min-height: 0; aspect-ratio: 4 / 5; }
+      .vedette-grid[data-cols="5"], .vedette-grid[data-cols="6"] { gap: 14px; }
+      .vedette-grid[data-cols="5"] .stay-card-title, .vedette-grid[data-cols="6"] .stay-card-title,
+      .vedette-grid[data-cols="5"] .stay-card-price, .vedette-grid[data-cols="6"] .stay-card-price { font-size: 12px !important; }
+      .vedette-grid[data-cols="6"] .stay-card-dates { display: none !important; }
+      /* Tablette : 5 ou 6 articles passent sur 3 colonnes */
       @media (max-width: 1023px) {
-        .shop-grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .vedette-grid[data-cols="5"], .vedette-grid[data-cols="6"] { --vedette-cols: 3; }
+      }
+      /* Mobile : 2 articles par rangée, image nette et nom + prix dessous */
+      @media (max-width: 640px) {
+        .vedette-grid, .vedette-grid[data-cols] { --vedette-cols: 2; gap: 12px; }
+        .vedette-grid .stay-card-overlay, .vedette-grid .stay-card-hover { display: none; }
+        .vedette-grid .stay-card-title { display: block !important; font-size: 12px !important; margin-top: 8px !important; padding-left: 0 !important; overflow-wrap: anywhere; }
+        .vedette-grid .stay-card-price { font-size: 12.5px !important; padding-left: 0 !important; }
       }
     </style>
     <div class="container" style="padding: calc(var(--navH) + 40px) 0 var(--space-lg);">
@@ -323,7 +338,7 @@
         <a class="btn on-light" href="boutique.html" style="font-weight:500;">Explorer tout le Shop</a>
       </div>
 
-      <div id="boutiqueVedetteGrid" class="shop-grid-4" style="margin-top:32px;">
+      <div id="boutiqueVedetteGrid" class="vedette-grid" data-cols="4" style="margin-top:32px;">
         <div class="txt-muted">Chargement de la sélection…</div>
       </div>
     </div>
@@ -961,11 +976,22 @@
       const grid = document.getElementById("boutiqueVedetteGrid");
       if (!grid) return;
 
+      // Nombre d'articles affichés (réglé dans l'admin, de 3 à 6 ; 4 par défaut)
+      let count = 4;
+      try {
+        const { data: bands } = await supabase.from("site_settings").select("value").eq("key", "homepage_bands").maybeSingle();
+        const n = Number(bands?.value?.boutique_count);
+        if (n >= 3 && n <= 6) count = Math.round(n);
+      } catch (e) {
+        console.warn("Nombre d'articles vedette par défaut :", e);
+      }
+      grid.dataset.cols = String(count);
+
       const { data: products, error } = await supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(4);
+        .limit(count);
 
       if (error || !products || !products.length) {
         grid.innerHTML = `<div style="color:var(--muted); grid-column: 1/-1;">Découvre prochainement notre sélection d'articles dans notre Shop en ligne.</div>`;
