@@ -315,6 +315,8 @@
       .vedette-grid[data-cols="5"] .stay-card-title, .vedette-grid[data-cols="6"] .stay-card-title,
       .vedette-grid[data-cols="5"] .stay-card-price, .vedette-grid[data-cols="6"] .stay-card-price { font-size: 12px !important; }
       .vedette-grid[data-cols="6"] .stay-card-dates { display: none !important; }
+      /* Juste après le bandeau « Prochains séjours » : on ne double pas l'espace entre les deux */
+      #boutique-vedette.after-stays > .container { padding-top: 24px !important; }
       /* Tablette : 5 ou 6 articles passent sur 3 colonnes */
       @media (max-width: 1023px) {
         .vedette-grid[data-cols="5"], .vedette-grid[data-cols="6"] { --vedette-cols: 3; }
@@ -325,6 +327,8 @@
         .vedette-grid .stay-card-overlay, .vedette-grid .stay-card-hover { display: none; }
         .vedette-grid .stay-card-title { display: block !important; font-size: 12px !important; margin-top: 8px !important; padding-left: 0 !important; overflow-wrap: anywhere; }
         .vedette-grid .stay-card-price { font-size: 12.5px !important; padding-left: 0 !important; }
+        /* Nombre impair d'articles : le dernier, seul sur sa rangée, est masqué */
+        .vedette-grid > .stay-card:last-child:nth-child(odd):not(:first-child) { display: none !important; }
       }
     </style>
     <div class="container" style="padding: calc(var(--navH) + 40px) 0 var(--space-lg);">
@@ -1053,7 +1057,10 @@
       const boutiqueBand = document.getElementById("boutique-vedette");
       const galleryBand = document.getElementById("galerie-retour-image");
       if (staysBand) staysBand.style.display = showStays ? "" : "none";
-      if (boutiqueBand) boutiqueBand.style.display = showBoutique ? "" : "none";
+      if (boutiqueBand) {
+        boutiqueBand.style.display = showBoutique ? "" : "none";
+        boutiqueBand.classList.toggle("after-stays", !!staysBand && showStays);
+      }
       if (galleryBand) galleryBand.style.display = showGallery ? "" : "none";
 
       try {
