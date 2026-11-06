@@ -127,6 +127,16 @@
           <label for="inpTo">Au</label>
           <input type="date" id="inpTo">
         </div>
+        <div class="acc-field">
+          <label for="selActivity">Activité</label>
+          <select id="selActivity">
+            <option value="">Toutes les activités</option>
+            <option value="sejours">Séjours</option>
+            <option value="shop">Shop (articles + livraison)</option>
+            <option value="bons">Bons cadeaux vendus</option>
+            <option value="autre">Paiements non reliés</option>
+          </select>
+        </div>
         <button class="btn on-light" id="btnLoad" type="button">Actualiser</button>
         <button class="btn tiny on-light" id="btnCsvOps" type="button" disabled>Exporter les opérations (CSV)</button>
         <button class="btn tiny on-light" id="btnCsvMonths" type="button" disabled>Exporter le récap mensuel (CSV)</button>
@@ -157,12 +167,59 @@
         <div class="acc-table-wrap">
           <table class="acc-table" id="monthTable">
             <thead><tr>
-              <th>Mois</th><th class="num">Paiements</th><th class="num">Brut</th><th class="num">Remboursé</th><th class="num">Frais</th><th class="num">Net</th><th class="num">Viré en banque</th>
+              <th>Mois</th><th class="num">Paiements</th><th class="num">Brut</th><th class="num">Remboursé</th><th class="num">Frais</th><th class="num">Net</th><th class="num">Viré en banque</th><th class="num">À déclarer séjours</th><th class="num">À déclarer shop</th><th class="num">Cotisations est.</th>
             </tr></thead>
-            <tbody><tr><td colspan="7" class="acc-empty">Choisissez une période puis cliquez sur Actualiser.</td></tr></tbody>
+            <tbody><tr><td colspan="10" class="acc-empty">Choisissez une période puis cliquez sur Actualiser.</td></tr></tbody>
             <tfoot></tfoot>
           </table>
         </div>
+        <p class="acc-note" id="monthNote"></p>
+      </div>
+
+      <div class="acc-section" id="cotSection">
+        <div class="acc-section-head">
+          <h2>Estimation des cotisations URSSAF</h2>
+          <span style="font-size:12.5px; color:var(--muted);">sur la période, d'après les encaissements</span>
+        </div>
+        <div class="acc-toolbar" style="margin-top:12px;">
+          <div class="acc-field">
+            <label for="rateSejours">Taux séjours (%)</label>
+            <input type="number" id="rateSejours" min="0" max="100" step="0.1" value="21.2" style="min-width:90px; width:110px;">
+          </div>
+          <div class="acc-field">
+            <label for="rateShop">Taux shop (%)</label>
+            <input type="number" id="rateShop" min="0" max="100" step="0.1" value="12.3" style="min-width:90px; width:110px;">
+          </div>
+          <div class="acc-field">
+            <label for="selBonsWith">Bons cadeaux vendus comptés avec</label>
+            <select id="selBonsWith">
+              <option value="sejours">les séjours</option>
+              <option value="shop">le shop</option>
+              <option value="none">ne pas compter</option>
+            </select>
+          </div>
+          <div class="acc-field">
+            <label for="selOtherWith">Paiements non reliés comptés avec</label>
+            <select id="selOtherWith">
+              <option value="sejours">les séjours</option>
+              <option value="shop">le shop</option>
+              <option value="none">ne pas compter</option>
+            </select>
+          </div>
+          <button class="btn tiny on-light" id="btnSaveRates" type="button">Enregistrer les réglages</button>
+        </div>
+        <div id="ratesMsg" style="margin-top:8px; font-size:12.5px; color:var(--muted);"></div>
+        <div class="acc-table-wrap">
+          <table class="acc-table" id="cotTable">
+            <thead><tr><th>Activité</th><th class="num">Chiffre d'affaires à déclarer</th><th class="num">Taux</th><th class="num">Cotisations estimées</th></tr></thead>
+            <tbody><tr><td colspan="4" class="acc-empty">Aucune donnée chargée.</td></tr></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+        <p class="acc-note">
+          Chiffre d'affaires à déclarer = encaissements moins remboursements, avant les frais Stripe (le régime micro se calcule sur les sommes encaissées). La livraison facturée compte avec le shop.
+          Estimation indicative : vérifie tes taux sur autoentrepreneur.urssaf.fr ou avec ton comptable, ils changent selon l'activité et l'année. Le versement libératoire de l'impôt, si tu l'as choisi, s'ajoute.
+        </p>
       </div>
 
       <div class="acc-section">
@@ -212,16 +269,23 @@
     const adminStatus = $("adminStatus");
     const accMsg = $("accMsg");
     const selYear = $("selYear"), selMonth = $("selMonth"), inpFrom = $("inpFrom"), inpTo = $("inpTo");
-    const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+    const selActivity = $("selActivity");
     const MONTHS_LONG = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
     const euro = (n) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
+    const pct = (n) => `${(Number(n) || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} %`;
     const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const r2 = (n) => Math.round(n * 100) / 100;
     const fmtDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
     const KIND_LABEL = { paiement: "Paiement", remboursement: "Remboursement", virement: "Virement", frais: "Frais", litige: "Litige", autre: "Autre" };
+    const ACT_LABEL = { "": "toutes les activités", sejours: "séjours", shop: "shop", bons: "bons cadeaux", autre: "paiements non reliés" };
 
     let rows = [];
     let lastPayload = null;
+    let lastBounds = null;
+
+    // Réglages des cotisations (enregistrés dans site_settings « accounting_rates »)
+    const DEFAULT_RATES = { sejours: 21.2, shop: 12.3, bons_with: "sejours", other_with: "sejours" };
+    let rates = { ...DEFAULT_RATES };
 
     async function checkAdmin() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -266,6 +330,39 @@
       return { from: new Date(y, m, 1), to: new Date(y, m + 1, 0, 23, 59, 59), label: `${MONTHS_LONG[m]} ${y}` };
     }
 
+    // ─── Réglages cotisations ─────────────────────────────────────────────
+    function applyRatesToForm() {
+      $("rateSejours").value = String(rates.sejours);
+      $("rateShop").value = String(rates.shop);
+      $("selBonsWith").value = rates.bons_with;
+      $("selOtherWith").value = rates.other_with;
+    }
+    function readRatesFromForm() {
+      const num = (v, d) => { const n = parseFloat(String(v).replace(",", ".")); return Number.isFinite(n) && n >= 0 && n <= 100 ? n : d; };
+      rates = {
+        sejours: num($("rateSejours").value, DEFAULT_RATES.sejours),
+        shop: num($("rateShop").value, DEFAULT_RATES.shop),
+        bons_with: $("selBonsWith").value,
+        other_with: $("selOtherWith").value,
+      };
+    }
+    async function loadRates() {
+      try {
+        const { data } = await supabase.from("site_settings").select("value").eq("key", "accounting_rates").maybeSingle();
+        if (data?.value) rates = { ...DEFAULT_RATES, ...data.value };
+      } catch (e) { console.warn("Réglages cotisations par défaut :", e); }
+      applyRatesToForm();
+    }
+    async function saveRates() {
+      readRatesFromForm();
+      $("ratesMsg").textContent = "Enregistrement…";
+      let { data, error } = await supabase.from("site_settings").update({ value: rates }).eq("key", "accounting_rates").select();
+      if (!error && (!data || data.length === 0)) {
+        ({ error } = await supabase.from("site_settings").upsert({ key: "accounting_rates", value: rates }, { onConflict: "key" }));
+      }
+      $("ratesMsg").textContent = error ? "❌ Erreur : " + error.message : "✅ Réglages enregistrés.";
+    }
+
     // ─── Chargement ───────────────────────────────────────────────────────
     async function load() {
       let bounds;
@@ -283,10 +380,10 @@
         }
         if (!data || data.error) throw new Error(data?.error || "Réponse vide");
         lastPayload = data;
+        lastBounds = bounds;
         rows = (data.rows || []).slice().sort((a, b) => new Date(b.date) - new Date(a.date));
         $("modeTag").hidden = data.livemode !== false;
-        render(bounds);
-        accMsg.textContent = rows.length ? `${rows.length} opération${rows.length > 1 ? "s" : ""} sur la période (${bounds.label}).` : `Aucune opération Stripe sur la période (${bounds.label}).`;
+        render();
         $("btnCsvOps").disabled = $("btnCsvMonths").disabled = rows.length === 0;
       } catch (e) {
         accMsg.className = "error"; accMsg.textContent = "Impossible de lire Stripe : " + (e.message || e);
@@ -295,26 +392,70 @@
       }
     }
 
+    // ─── Ventilation par activité ─────────────────────────────────────────
+    // Part d'une opération qui revient à une activité (négative pour un remboursement)
+    function partOf(r, act) {
+      if (!act) return r.brut;
+      if (r.kind !== "paiement" && r.kind !== "remboursement") return 0;
+      const s = r.split;
+      if (act === "autre") {
+        const rest = r2(r.brut - (s ? s.sejours + s.boutique + s.bons_cadeaux + s.livraison : 0));
+        return Math.abs(rest) >= 0.05 ? rest : 0;
+      }
+      if (!s) return 0;
+      if (act === "sejours") return s.sejours || 0;
+      if (act === "shop") return r2((s.boutique || 0) + (s.livraison || 0));
+      if (act === "bons") return s.bons_cadeaux || 0;
+      return 0;
+    }
+    // Frais Stripe au prorata de la part de l'activité dans le paiement
+    function feeOf(r, act) {
+      if (!act) return r.frais;
+      return r.brut ? r2(r.frais * partOf(r, act) / r.brut) : 0;
+    }
+
     // ─── Calculs ──────────────────────────────────────────────────────────
-    function summarize(list) {
-      const s = { nb: 0, brut: 0, remb: 0, frais: 0, net: 0, vir: 0, litiges: 0, remise: 0, bonUtil: 0, split: { sejours: 0, boutique: 0, bons_cadeaux: 0, livraison: 0 } };
+    function summarize(list, act = "") {
+      const s = { nb: 0, brut: 0, remb: 0, frais: 0, net: 0, vir: 0, litiges: 0, remise: 0, bonUtil: 0,
+        split: { sejours: 0, boutique: 0, bons_cadeaux: 0, livraison: 0 },
+        ca: { sejours: 0, shop: 0, bons: 0, autre: 0 } };
       for (const r of list) {
-        if (r.kind === "paiement") { s.nb++; s.brut += r.brut; s.remise += r.remise || 0; s.bonUtil += r.bon_utilise || 0; }
-        else if (r.kind === "remboursement") s.remb += -r.brut;
-        else if (r.kind === "virement") s.vir += -r.brut;
-        else if (r.kind === "litige") s.litiges += r.brut;
-        if (r.kind !== "virement") s.frais += r.frais;
-        if (r.kind !== "virement") s.net += r.net;
-        if (r.split && (r.kind === "paiement" || r.kind === "remboursement")) {
-          for (const k of Object.keys(s.split)) s.split[k] += r.split[k] || 0;
+        const part = partOf(r, act);
+        if (r.kind === "paiement") {
+          if (!act || Math.abs(part) >= 0.01) s.nb++;
+          s.brut += part;
+          if (!act) { s.remise += r.remise || 0; s.bonUtil += r.bon_utilise || 0; }
+        } else if (r.kind === "remboursement") s.remb += -part;
+        else if (r.kind === "virement") { if (!act) s.vir += -r.brut; }
+        else if (r.kind === "litige") { if (!act) s.litiges += r.brut; }
+        if (r.kind !== "virement") {
+          if (!act) { s.frais += r.frais; s.net += r.net; }
+          else s.frais += feeOf(r, act);
+        }
+        if (r.kind === "paiement" || r.kind === "remboursement") {
+          if (r.split) for (const k of Object.keys(s.split)) s.split[k] += r.split[k] || 0;
+          for (const k of Object.keys(s.ca)) s.ca[k] += partOf(r, k);
         }
       }
+      if (act) s.net = s.brut - s.remb - s.frais;
       for (const k of Object.keys(s)) if (typeof s[k] === "number") s[k] = r2(s[k]);
       for (const k of Object.keys(s.split)) s.split[k] = r2(s.split[k]);
+      for (const k of Object.keys(s.ca)) s.ca[k] = r2(s.ca[k]);
       return s;
     }
 
-    function byMonth(list) {
+    // Chiffre d'affaires à déclarer et cotisations, selon les réglages
+    function declare(ca) {
+      const base = { sejours: ca.sejours, shop: ca.shop };
+      if (rates.bons_with !== "none") base[rates.bons_with] += ca.bons;
+      if (rates.other_with !== "none") base[rates.other_with] += ca.autre;
+      base.sejours = r2(base.sejours); base.shop = r2(base.shop);
+      // Un mois où les remboursements dépassent les ventes ne donne pas de cotisation négative
+      const cot = { sejours: r2(Math.max(0, base.sejours) * rates.sejours / 100), shop: r2(Math.max(0, base.shop) * rates.shop / 100) };
+      return { base, cot, total: r2(cot.sejours + cot.shop) };
+    }
+
+    function byMonth(list, act = "") {
       const map = new Map();
       for (const r of list) {
         const d = new Date(r.date); const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -323,73 +464,115 @@
       }
       return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, l]) => {
         const [y, m] = key.split("-");
-        return { key, label: `${MONTHS_LONG[Number(m) - 1]} ${y}`, ...summarize(l) };
+        return { key, label: `${MONTHS_LONG[Number(m) - 1]} ${y}`, ...summarize(l, act) };
       });
     }
 
     // ─── Rendu ────────────────────────────────────────────────────────────
-    function render(bounds) {
-      const s = summarize(rows);
+    function render() {
+      if (!lastBounds) return;
+      const act = selActivity.value;
+      const s = summarize(rows, act);
+      const all = act ? summarize(rows) : s;
+
+      accMsg.className = "";
+      accMsg.textContent = rows.length
+        ? `${rows.length} opération${rows.length > 1 ? "s" : ""} sur la période (${lastBounds.label})${act ? ` · chiffres limités aux ${ACT_LABEL[act]}` : ""}.`
+        : `Aucune opération Stripe sur la période (${lastBounds.label}).`;
+
       $("kBrut").textContent = euro(s.brut);
-      $("kBrutSub").textContent = `${s.nb} paiement${s.nb > 1 ? "s" : ""}${s.remise ? ` · remises ${euro(s.remise)}` : ""}`;
+      $("kBrutSub").textContent = act
+        ? `${s.nb} commande${s.nb > 1 ? "s" : ""} avec ${ACT_LABEL[act]}`
+        : `${s.nb} paiement${s.nb > 1 ? "s" : ""}${s.remise ? ` · remises ${euro(s.remise)}` : ""}`;
       $("kRemb").textContent = s.remb ? "− " + euro(s.remb) : euro(0);
-      $("kRembSub").textContent = s.litiges ? `litiges : ${euro(s.litiges)}` : " ";
+      $("kRembSub").textContent = !act && s.litiges ? `litiges : ${euro(s.litiges)}` : " ";
       $("kFrais").textContent = s.frais ? "− " + euro(s.frais) : euro(0);
-      $("kFraisSub").textContent = s.brut ? `${(100 * s.frais / s.brut).toFixed(1).replace(".", ",")} % du brut` : " ";
+      $("kFraisSub").textContent = s.brut ? `${(100 * s.frais / s.brut).toFixed(1).replace(".", ",")} % du brut${act ? " (au prorata)" : ""}` : " ";
       $("kNet").textContent = euro(s.net);
-      $("kVir").textContent = euro(s.vir);
-      $("kVirSub").textContent = `${rows.filter(r => r.kind === "virement").length} virement(s) sur la période`;
+      $("kVir").textContent = act ? "—" : euro(s.vir);
+      $("kVirSub").textContent = act ? "non ventilé par activité" : `${rows.filter(r => r.kind === "virement").length} virement(s) sur la période`;
       const b = lastPayload?.balance;
       $("kSolde").textContent = b ? euro(b.disponible + b.en_attente) : "—";
       $("kSoldeSub").textContent = b ? `disponible ${euro(b.disponible)} · en attente ${euro(b.en_attente)}` : "non disponible";
 
-      // Répartition
-      const sp = s.split;
+      // Répartition (toujours toutes activités)
+      const sp = all.split;
       const total = sp.sejours + sp.boutique + sp.bons_cadeaux + sp.livraison;
       const parts = [["sejours", "Séjours", "c-sejours"], ["boutique", "Shop", "c-boutique"], ["bons_cadeaux", "Bons cadeaux vendus", "c-bons"], ["livraison", "Livraison", "c-livraison"]];
       $("splitBar").innerHTML = total > 0 ? parts.map(([k, , c]) => `<span class="${c}" style="width:${(100 * sp[k] / total).toFixed(2)}%" title="${esc(euro(sp[k]))}"></span>`).join("") : "";
       $("splitLegend").innerHTML = parts.map(([k, label, c]) => `<span><i class="${c}"></i>${label} : <strong>${euro(sp[k])}</strong>${total > 0 ? ` <span style="color:var(--muted)">(${Math.round(100 * sp[k] / total)} %)</span>` : ""}</span>`).join("");
-      const unmatched = r2(s.brut - s.remb - total);
       const notes = [];
       if (lastPayload?.gift_redemptions) notes.push(`Bons cadeaux utilisés sur la période (payés hors Stripe) : ${euro(lastPayload.gift_redemptions)}.`);
-      if (Math.abs(unmatched) >= 0.05) notes.push(`${euro(unmatched)} de paiements non reliés à une commande du site (paiements manuels ou anciens).`);
+      if (Math.abs(all.ca.autre) >= 0.05) notes.push(`${euro(all.ca.autre)} de paiements non reliés à une commande du site (paiements manuels ou anciens).`);
       $("splitNote").textContent = notes.join(" ");
 
       // Mois
-      const months = byMonth(rows);
+      const months = byMonth(rows, act);
+      const monthsAll = act ? byMonth(rows) : months;
+      const decl = (m) => declare((monthsAll.find(x => x.key === m.key) || m).ca);
+      const minus = (n) => n ? "− " + euro(n) : "—";
       const mt = $("monthTable");
-      mt.querySelector("tbody").innerHTML = months.length ? months.map(m => `
-        <tr><td>${esc(m.label)}</td><td class="num">${m.nb}</td><td class="num">${euro(m.brut)}</td><td class="num">${m.remb ? "− " + euro(m.remb) : "—"}</td><td class="num">${m.frais ? "− " + euro(m.frais) : "—"}</td><td class="num">${euro(m.net)}</td><td class="num">${m.vir ? euro(m.vir) : "—"}</td></tr>`).join("")
-        : `<tr><td colspan="7" class="acc-empty">Aucune opération sur la période.</td></tr>`;
-      mt.querySelector("tfoot").innerHTML = months.length > 1 ? `<tr><td>Total</td><td class="num">${s.nb}</td><td class="num">${euro(s.brut)}</td><td class="num">${s.remb ? "− " + euro(s.remb) : "—"}</td><td class="num">${s.frais ? "− " + euro(s.frais) : "—"}</td><td class="num">${euro(s.net)}</td><td class="num">${s.vir ? euro(s.vir) : "—"}</td></tr>` : "";
+      mt.querySelector("tbody").innerHTML = months.length ? months.map(m => {
+        const d = decl(m);
+        return `<tr><td>${esc(m.label)}</td><td class="num">${m.nb}</td><td class="num">${euro(m.brut)}</td><td class="num">${minus(m.remb)}</td><td class="num">${minus(m.frais)}</td><td class="num">${euro(m.net)}</td><td class="num">${act ? "—" : (m.vir ? euro(m.vir) : "—")}</td><td class="num">${euro(d.base.sejours)}</td><td class="num">${euro(d.base.shop)}</td><td class="num">${euro(d.total)}</td></tr>`;
+      }).join("") : `<tr><td colspan="10" class="acc-empty">Aucune opération sur la période.</td></tr>`;
+      // Base : toute la période ; cotisations : somme des mois (déclaration mensuelle)
+      const dAll = declare(all.ca);
+      const monthDecl = monthsAll.map(m => declare(m.ca));
+      dAll.cot = { sejours: r2(monthDecl.reduce((t, d) => t + d.cot.sejours, 0)), shop: r2(monthDecl.reduce((t, d) => t + d.cot.shop, 0)) };
+      dAll.total = r2(dAll.cot.sejours + dAll.cot.shop);
+      mt.querySelector("tfoot").innerHTML = months.length > 1
+        ? `<tr><td>Total</td><td class="num">${s.nb}</td><td class="num">${euro(s.brut)}</td><td class="num">${minus(s.remb)}</td><td class="num">${minus(s.frais)}</td><td class="num">${euro(s.net)}</td><td class="num">${act ? "—" : (s.vir ? euro(s.vir) : "—")}</td><td class="num">${euro(dAll.base.sejours)}</td><td class="num">${euro(dAll.base.shop)}</td><td class="num">${euro(dAll.total)}</td></tr>` : "";
+      $("monthNote").textContent = act
+        ? `Brut, remboursements, frais et net : ${ACT_LABEL[act]} seulement. Les colonnes « à déclarer » et les cotisations restent calculées sur toutes les activités.`
+        : "";
+
+      // Cotisations
+      const ct = $("cotTable");
+      const extra = (key) => {
+        const bits = [];
+        if (rates.bons_with === key && all.ca.bons) bits.push(`dont bons cadeaux ${euro(all.ca.bons)}`);
+        if (rates.other_with === key && Math.abs(all.ca.autre) >= 0.05) bits.push(`dont non reliés ${euro(all.ca.autre)}`);
+        return bits.length ? `<div class="muted">${esc(bits.join(" · "))}</div>` : "";
+      };
+      ct.querySelector("tbody").innerHTML = `
+        <tr><td>Séjours (prestations)${extra("sejours")}</td><td class="num">${euro(dAll.base.sejours)}</td><td class="num">${pct(rates.sejours)}</td><td class="num">${euro(dAll.cot.sejours)}</td></tr>
+        <tr><td>Shop (ventes et livraison)${extra("shop")}</td><td class="num">${euro(dAll.base.shop)}</td><td class="num">${pct(rates.shop)}</td><td class="num">${euro(dAll.cot.shop)}</td></tr>`;
+      ct.querySelector("tfoot").innerHTML = `<tr><td>Total</td><td class="num">${euro(dAll.base.sejours + dAll.base.shop)}</td><td></td><td class="num">${euro(dAll.total)}</td></tr>`;
 
       renderOps();
     }
 
     function filteredRows() {
       const kind = $("selKind").value;
+      const act = selActivity.value;
       const q = $("inpSearch").value.trim().toLowerCase();
-      return rows.filter(r => (!kind || r.kind === kind) && (!q || [r.order_ref, r.client, r.email, r.articles, r.description].join(" ").toLowerCase().includes(q)));
+      return rows.filter(r => (!kind || r.kind === kind)
+        && (!act || Math.abs(partOf(r, act)) >= 0.01)
+        && (!q || [r.order_ref, r.client, r.email, r.articles, r.description].join(" ").toLowerCase().includes(q)));
     }
 
     function renderOps() {
+      const act = selActivity.value;
       const list = filteredRows();
       const tb = $("opsTable").querySelector("tbody");
       if (!list.length) { tb.innerHTML = `<tr><td colspan="10" class="acc-empty">Aucune opération.</td></tr>`; return; }
       tb.innerHTML = list.map(r => {
+        const part = partOf(r, act), fee = feeOf(r, act), net = act ? r2(part - fee) : r.net;
         const detail = r.articles || r.description || "";
         const extra = [];
-        if (r.remise) extra.push(`remise ${euro(r.remise)}`);
-        if (r.bon_utilise) extra.push(`bon cadeau utilisé ${euro(r.bon_utilise)}`);
+        if (act && Math.abs(part - r.brut) >= 0.01) extra.push(`part ${ACT_LABEL[act]} d'une commande de ${euro(r.brut)}`);
+        if (!act && r.remise) extra.push(`remise ${euro(r.remise)}`);
+        if (!act && r.bon_utilise) extra.push(`bon cadeau utilisé ${euro(r.bon_utilise)}`);
         return `<tr>
           <td>${fmtDate(r.date)}</td>
           <td><span class="kind-badge kind-${esc(r.kind)}">${KIND_LABEL[r.kind] || r.kind}</span></td>
           <td>${esc(r.order_ref || "—")}</td>
           <td>${esc(r.client || "")}${r.email ? `<div class="muted">${esc(r.email)}</div>` : ""}</td>
           <td style="max-width:320px;">${esc(detail)}${extra.length ? `<div class="muted">${esc(extra.join(" · "))}</div>` : ""}</td>
-          <td class="num">${euro(r.brut)}</td>
-          <td class="num">${r.frais ? "− " + euro(r.frais) : "—"}</td>
-          <td class="num">${euro(r.net)}</td>
+          <td class="num">${euro(part)}</td>
+          <td class="num">${fee ? "− " + euro(fee) : "—"}</td>
+          <td class="num">${euro(net)}</td>
           <td class="muted">${r.statut === "pending" ? "en attente · " : ""}${fmtDate(r.disponible_le)}</td>
           <td>${r.recu_url ? `<a href="${esc(r.recu_url)}" target="_blank" rel="noopener" style="font-size:12px;">Reçu</a>` : ""}</td>
         </tr>`;
@@ -406,34 +589,48 @@
     }
     function periodSlug() {
       const y = selYear.value;
-      if (selMonth.value === "custom") return `${inpFrom.value}_${inpTo.value}`;
-      return selMonth.value === "" ? y : `${y}-${String(Number(selMonth.value) + 1).padStart(2, "0")}`;
+      const base = selMonth.value === "custom" ? `${inpFrom.value}_${inpTo.value}` : selMonth.value === "" ? y : `${y}-${String(Number(selMonth.value) + 1).padStart(2, "0")}`;
+      return selActivity.value ? `${base}-${selActivity.value}` : base;
     }
 
     $("btnCsvOps").addEventListener("click", () => {
-      const lines = [["Date", "Type", "Référence", "Client", "Email", "Détail", "Brut (€)", "Frais Stripe (€)", "Net (€)", "Séjours (€)", "Shop (€)", "Bons cadeaux (€)", "Livraison (€)", "Remise (€)", "Bon cadeau utilisé (€)", "Disponible le", "Statut", "ID Stripe"]];
-      for (const r of rows.slice().sort((a, b) => new Date(a.date) - new Date(b.date))) {
-        lines.push([fmtDate(r.date), KIND_LABEL[r.kind] || r.kind, r.order_ref, r.client, r.email, r.articles || r.description, csvNum(r.brut), csvNum(r.frais), csvNum(r.net),
+      const act = selActivity.value;
+      const lines = [["Date", "Type", "Référence", "Client", "Email", "Détail", act ? `Montant ${ACT_LABEL[act]} (€)` : "Brut (€)", "Frais Stripe (€)", "Net (€)", "Séjours (€)", "Shop (€)", "Bons cadeaux (€)", "Livraison (€)", "Remise (€)", "Bon cadeau utilisé (€)", "Disponible le", "Statut", "ID Stripe"]];
+      const list = rows.filter(r => !act || Math.abs(partOf(r, act)) >= 0.01).sort((a, b) => new Date(a.date) - new Date(b.date));
+      for (const r of list) {
+        const part = partOf(r, act), fee = feeOf(r, act);
+        lines.push([fmtDate(r.date), KIND_LABEL[r.kind] || r.kind, r.order_ref, r.client, r.email, r.articles || r.description, csvNum(part), csvNum(fee), csvNum(act ? part - fee : r.net),
           csvNum(r.split?.sejours), csvNum(r.split?.boutique), csvNum(r.split?.bons_cadeaux), csvNum(r.split?.livraison), csvNum(r.remise), csvNum(r.bon_utilise), fmtDate(r.disponible_le), r.statut, r.id]);
       }
       downloadCsv(`operations-stripe-${periodSlug()}.csv`, lines);
     });
 
     $("btnCsvMonths").addEventListener("click", () => {
-      const lines = [["Mois", "Paiements", "Brut (€)", "Remboursements (€)", "Frais Stripe (€)", "Net (€)", "Viré en banque (€)", "Séjours (€)", "Shop (€)", "Bons cadeaux vendus (€)", "Livraison (€)", "Remises (€)", "Bons cadeaux utilisés hors Stripe (€)"]];
-      for (const m of byMonth(rows)) lines.push([m.label, m.nb, csvNum(m.brut), csvNum(m.remb), csvNum(m.frais), csvNum(m.net), csvNum(m.vir), csvNum(m.split.sejours), csvNum(m.split.boutique), csvNum(m.split.bons_cadeaux), csvNum(m.split.livraison), csvNum(m.remise), csvNum(m.bonUtil)]);
-      const s = summarize(rows);
-      lines.push(["Total", s.nb, csvNum(s.brut), csvNum(s.remb), csvNum(s.frais), csvNum(s.net), csvNum(s.vir), csvNum(s.split.sejours), csvNum(s.split.boutique), csvNum(s.split.bons_cadeaux), csvNum(s.split.livraison), csvNum(s.remise), csvNum(s.bonUtil)]);
+      const act = selActivity.value;
+      const head = act ? `${ACT_LABEL[act]} : ` : "";
+      const lines = [["Mois", `${head}paiements`, `${head}brut (€)`, `${head}remboursements (€)`, `${head}frais Stripe (€)`, `${head}net (€)`, "Viré en banque (€)", "Séjours (€)", "Shop + livraison (€)", "Bons cadeaux vendus (€)", "Non reliés (€)", "À déclarer séjours (€)", "À déclarer shop (€)", `Cotisations séjours ${pct(rates.sejours)} (€)`, `Cotisations shop ${pct(rates.shop)} (€)`, "Cotisations total (€)"]];
+      const monthsAll = byMonth(rows);
+      const line = (label, m, a) => { const d = declare(a.ca); return [label, m.nb, csvNum(m.brut), csvNum(m.remb), csvNum(m.frais), csvNum(m.net), act ? "" : csvNum(m.vir), csvNum(a.ca.sejours), csvNum(a.ca.shop), csvNum(a.ca.bons), csvNum(a.ca.autre), csvNum(d.base.sejours), csvNum(d.base.shop), csvNum(d.cot.sejours), csvNum(d.cot.shop), csvNum(d.total)]; };
+      for (const m of byMonth(rows, act)) lines.push(line(m.label, m, monthsAll.find(x => x.key === m.key)));
+      const tot = line("Total", summarize(rows, act), summarize(rows));
+      const md = monthsAll.map(m => declare(m.ca));
+      const cs = r2(md.reduce((t, d) => t + d.cot.sejours, 0)), cb = r2(md.reduce((t, d) => t + d.cot.shop, 0));
+      tot.splice(13, 3, csvNum(cs), csvNum(cb), csvNum(cs + cb));
+      lines.push(tot);
       downloadCsv(`recap-mensuel-stripe-${periodSlug()}.csv`, lines);
     });
 
     $("btnLoad").addEventListener("click", load);
     $("selKind").addEventListener("change", renderOps);
     $("inpSearch").addEventListener("input", renderOps);
+    selActivity.addEventListener("change", render);
+    ["rateSejours", "rateShop", "selBonsWith", "selOtherWith"].forEach(id => $(id).addEventListener("input", () => { readRatesFromForm(); render(); }));
+    $("btnSaveRates").addEventListener("click", saveRates);
 
     try {
       initPeriod();
       await checkAdmin();
+      await loadRates();
       await load();
     } catch (err) {
       console.warn(err);
