@@ -316,7 +316,8 @@
       .vedette-grid[data-cols="5"] .stay-card-price, .vedette-grid[data-cols="6"] .stay-card-price { font-size: 12px !important; }
       .vedette-grid[data-cols="6"] .stay-card-dates { display: none !important; }
       /* Juste après le bandeau « Prochains séjours » : on ne double pas l'espace entre les deux */
-      #boutique-vedette.after-stays > .container { padding-top: 24px !important; }
+      #boutique-vedette.after-stays > .container { padding-top: 8px !important; }
+      #prochains-sejours.before-shop > .container { padding-bottom: 48px !important; }
       /* Tablette : 5 ou 6 articles passent sur 3 colonnes */
       @media (max-width: 1023px) {
         .vedette-grid[data-cols="5"], .vedette-grid[data-cols="6"] { --vedette-cols: 3; }
@@ -1061,6 +1062,7 @@
         boutiqueBand.style.display = showBoutique ? "" : "none";
         boutiqueBand.classList.toggle("after-stays", !!staysBand && showStays);
       }
+      if (staysBand) staysBand.classList.toggle("before-shop", !!boutiqueBand && showBoutique && showStays);
       if (galleryBand) galleryBand.style.display = showGallery ? "" : "none";
 
       try {
