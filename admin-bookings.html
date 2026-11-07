@@ -270,6 +270,11 @@
           <input type="email" id="addEmail" placeholder="Ex: sophie@example.com" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;" required>
         </div>
 
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Téléphone cliente *</label>
+          <input type="tel" id="addPhone" placeholder="Ex: 06 12 34 56 78" style="width:100%; padding:10px; border:1px solid var(--line); background:#fff; font-size:13px;" required>
+        </div>
+
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Tarif / Option</label>
@@ -453,6 +458,10 @@
     const addBookingMsg = document.getElementById("addBookingMsg");
 
     let allStaysData = [];
+    let accountPhones = {}; // email → téléphone du compte
+    const phoneOf = (b) => b.customer_phone || accountPhones[String(b.customer_email || "").toLowerCase()] || "";
+    // +33612345678 → 06 12 34 56 78
+    const showPhone = (v) => /^\+33[1-9]\d{8}$/.test(v) ? ("0" + v.slice(3)).replace(/(\d{2})(?=\d)/g, "$1 ") : v;
     let orphanBookings = [];
     let currentFilter = "all";
     let currentSearch = "";
@@ -629,6 +638,7 @@
         if (!edgeErr && edgeData && Array.isArray(edgeData.stays)) {
           stays = edgeData.stays;
           allBookings = edgeData.bookings || [];
+          accountPhones = edgeData.phones || {};
 
           // Convertir les commandes 'orders' éventuelles en réservations si présentes
           if (Array.isArray(edgeData.orders)) {
@@ -758,7 +768,8 @@
           const matchLoc = (stay.location || "").toLowerCase().includes(q);
           const matchClient = (stay.bookings || []).some(b => 
             (b.customer_name || "").toLowerCase().includes(q) ||
-            (b.customer_email || "").toLowerCase().includes(q)
+            (b.customer_email || "").toLowerCase().includes(q) ||
+            phoneOf(b).replace(/\D/g, "").includes(q.replace(/\D/g, "") || "§")
           );
           if (!matchTitle && !matchLoc && !matchClient) return false;
         }
@@ -849,6 +860,7 @@
                 <th>Prénom</th>
                 <th>Nom</th>
                 <th>Email</th>
+                <th>Téléphone</th>
                 <th>Date de réservation</th>
                 <th>Option / Tarif</th>
                 <th>Montant / Facture</th>
@@ -887,6 +899,7 @@
                     <td>
                       <a href="mailto:${b.customer_email}" style="color:#2563eb; text-decoration:none;">${b.customer_email || "—"}</a>
                     </td>
+                    <td style="white-space:nowrap;">${phoneOf(b) ? `<a href="tel:${phoneOf(b)}" style="color:#2563eb; text-decoration:none;">${showPhone(phoneOf(b))}</a>` : `<span style="color:var(--muted);">—</span>`}</td>
                     <td style="font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted);">${bookingDate}</td>
                     <td style="font-size:12px;">${priceLabel}</td>
                     <td>${invoiceBtnHTML}</td>
@@ -964,6 +977,13 @@
         const firstName = document.getElementById("addFirstName").value.trim();
         const lastName = document.getElementById("addLastName").value.trim();
         const email = document.getElementById("addEmail").value.trim();
+        let phone = document.getElementById("addPhone").value.replace(/[\s.\-()\/]/g, "");
+        if (phone.startsWith("00")) phone = "+" + phone.slice(2);
+        if (/^0[1-9]\d{8}$/.test(phone)) phone = "+33" + phone.slice(1);
+        if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+          if (addBookingMsg) { addBookingMsg.style.color = "#c00"; addBookingMsg.textContent = "Indique un numéro valide : 06 12 34 56 78 ou +32 470 12 34 56."; }
+          return;
+        }
         const priceLabel = document.getElementById("addPriceLabel").value.trim();
         const amount = Number(document.getElementById("addAmount").value || 0);
         const status = document.getElementById("addStatus").value || "confirmed";
@@ -981,6 +1001,7 @@
           stay_title: selectedStay ? selectedStay.title : (priceLabel || "Séjour"),
           customer_name: fullName,
           customer_email: email,
+          customer_phone: phone,
           price_label: priceLabel || (selectedStay ? selectedStay.title : "Standard"),
           amount: amount,
           amount_paid: amount,

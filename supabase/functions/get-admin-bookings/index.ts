@@ -1,5 +1,19 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const ADMIN_EMAILS = new Set(["contact@amesnomades.com", "sarnelli.ap@gmail.com", "revesnomades@gmail.com"]);
+
+// Données clientes (emails, téléphones) : réservé aux administrateurs connectés
+async function requireAdmin(req: Request, supabase: SupabaseClient) {
+  const auth = req.headers.get("authorization") ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token) return null;
+  const { data: { user } } = await supabase.auth.getUser(token);
+  if (!user) return null;
+  if (ADMIN_EMAILS.has((user.email || "").toLowerCase())) return user;
+  const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  return data?.role === "admin" ? user : null;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +38,12 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+    if (!(await requireAdmin(req, supabase))) {
+      return new Response(JSON.stringify({ error: "Accès réservé aux administrateurs" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Fetch stays with stay_dates
     const { data: stays, error: staysErr } = await supabase
@@ -49,11 +69,20 @@ serve(async (req) => {
 
     if (ordersErr) console.warn("Erreur récuperation orders:", ordersErr);
 
+    // Téléphones des comptes clients (par email), pour les réservations enregistrées avant le numéro obligatoire
+    const phones: Record<string, string> = {};
+    const { data: profiles, error: profilesErr } = await supabase.from("profiles").select("email, phone").not("phone", "is", null);
+    if (profilesErr) console.warn("Erreur récupération téléphones:", profilesErr.message);
+    for (const p of profiles || []) {
+      if (p.email && p.phone) phones[String(p.email).toLowerCase()] = String(p.phone);
+    }
+
     return new Response(
       JSON.stringify({
         stays: stays || [],
         bookings: bookings || [],
-        orders: orders || []
+        orders: orders || [],
+        phones,
       }),
       {
         status: 200,

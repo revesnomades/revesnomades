@@ -338,6 +338,25 @@ serve(async (req) => {
       }
     }
 
+    // Séjour / événement : réservé aux clientes connectées, avec un numéro de téléphone sur leur compte
+    let bookingUser: { id: string; email: string } | null = null;
+    let customerPhone = "";
+    if (checked.some(i => i.type === "sejour")) {
+      const auth = req.headers.get("authorization") ?? "";
+      const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+      const { data: authData } = token ? await supabase.auth.getUser(token) : { data: { user: null } };
+      const user = authData?.user;
+      if (!user) {
+        return json({ error: "Pour réserver un séjour ou un événement, connecte-toi ou crée ton compte.", code: "auth" }, 401);
+      }
+      const { data: profile } = await supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle();
+      customerPhone = String(profile?.phone || user.user_metadata?.phone || "").trim();
+      if (!/^\+?[0-9]{8,15}$/.test(customerPhone.replace(/[\s.\-()]/g, ""))) {
+        return json({ error: "Ajoute ton numéro de téléphone à ton compte pour réserver un séjour ou un événement.", code: "phone" }, 400);
+      }
+      bookingUser = { id: user.id, email: String(user.email || "") };
+    }
+
     // Frais de livraison recalculés côté serveur (seuls les articles shop sont expédiés)
     const products = checked.filter(i => i.type === "product");
     let shippingTotalCents = 0;
@@ -444,7 +463,7 @@ serve(async (req) => {
 
     // Commande entièrement réglée par le bon cadeau : pas de passage par Stripe
     if (giftCode && giftCents >= orderTotalCents) {
-      const customerEmail = String(body.userEmail || body.customerEmail || "").trim().toLowerCase();
+      const customerEmail = String(bookingUser?.email || body.userEmail || body.customerEmail || "").trim().toLowerCase();
       const customerName = String(body.customerName || body.shippingAddress?.name || "").trim();
       if (!isEmail(customerEmail)) return json({ error: "Indique ton email pour recevoir la confirmation de commande.", code: "email" }, 400);
       const order: PaidOrder = {
@@ -452,6 +471,7 @@ serve(async (req) => {
         orderRef,
         customerEmail,
         customerName: customerName || customerEmail,
+        customerPhone,
         amount: 0,
         items: cartMeta as PaidOrder["items"],
         giftItems: [],
@@ -462,7 +482,7 @@ serve(async (req) => {
         } : null,
         discount: { amount: discountCents / 100, label: discount.label, promoCode: discount.code || "", promoIds: discount.ids },
         giftUsed: { code: giftCode, amount: giftCents / 100 },
-        userId: body.userId || "",
+        userId: bookingUser?.id || body.userId || "",
         legacy: null,
       };
       await recordPaidOrder(supabase, order);
@@ -511,7 +531,7 @@ serve(async (req) => {
       },
       ...(discounts ? { discounts } : {}),
       // Client connecté : email prérempli ; invité : Stripe le demande
-      ...(body.userEmail ? { customer_email: String(body.userEmail) } : {}),
+      ...(bookingUser?.email || body.userEmail ? { customer_email: String(bookingUser?.email || body.userEmail) } : {}),
       metadata: {
         type: "cart",
         order_ref: orderRef,
@@ -524,8 +544,9 @@ serve(async (req) => {
         cart_items: JSON.stringify(cartMeta),
         ...(giftItems.length ? { gift_items: JSON.stringify(giftItems) } : {}),
         ...(giftCents > 0 ? { gift_code: giftCode, gift_amount: (giftCents / 100).toFixed(2) } : {}),
-        user_id: body.userId || "",
-        user_email: body.userEmail || "",
+        user_id: bookingUser?.id || body.userId || "",
+        user_email: bookingUser?.email || body.userEmail || "",
+        ...(customerPhone ? { customer_phone: customerPhone } : {}),
       },
     };
 

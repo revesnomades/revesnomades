@@ -215,6 +215,27 @@
             </div>
           </div>
 
+          <!-- Séjour / événement : compte et téléphone obligatoires -->
+          <div id="accountGate" hidden style="margin-bottom:16px; padding:14px 16px; border:1px solid var(--line); background:#fff;">
+            <div id="accountGateLogin" hidden>
+              <div style="font-size:14px; font-weight:600; color:var(--text);">Connecte-toi pour réserver</div>
+              <p style="margin:6px 0 12px; font-size:13px; line-height:1.5; color:var(--muted);">Pour réserver un séjour ou un événement, il faut un compte Âmes Nomades avec ton numéro de téléphone. Ton panier est gardé.</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a id="gateSignup" class="btn tiny on-light" href="/signup.html">Créer mon compte</a>
+                <a id="gateLogin" class="btn tiny on-light" href="/compte.html">J'ai déjà un compte</a>
+              </div>
+            </div>
+            <form id="accountGatePhone" hidden novalidate>
+              <label for="gatePhoneInput" style="font-size:14px; font-weight:600; color:var(--text); display:block;">Ton numéro de téléphone</label>
+              <p style="margin:6px 0 10px; font-size:13px; line-height:1.5; color:var(--muted);">Obligatoire pour réserver un séjour ou un événement. Il est enregistré sur ton compte.</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <input id="gatePhoneInput" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" style="flex:1; min-width:170px; font-size:13px;">
+                <button type="submit" id="gatePhoneSave" class="btn tiny on-light">Enregistrer</button>
+              </div>
+              <div id="gatePhoneMsg" style="font-size:12px; margin-top:6px;" aria-live="polite"></div>
+            </form>
+          </div>
+
           <div class="cart-step" id="payStep" style="display:none;"><span class="cart-step-num" aria-hidden="true">3</span>Paiement</div>
           <button id="btnCheckout" class="btn-pay" type="button">
             Procéder au paiement
@@ -357,6 +378,7 @@
     import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
     import { getCart, removeFromCart, setQuantity, setMaxStock, updateCartItem, getCartTotal, getCartCount, initCartBadge, clearCart, addToCart, formatPrice, getProductsTotal, FREE_SHIPPING_THRESHOLD } from "./assets/js/cart.js?v=4";
     import { giftCardPreviewHtml, openGiftCardLightbox } from "./assets/js/gift-card-preview.js?v=1";
+    import { normalizePhone, PHONE_HINT, savePhone, getProfilePhone } from "./assets/js/phone.js?v=1";
 
     // TODO: remplacer par votre clé publique Stripe
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51SnOSB55WblsnY7Y9C0dRSx8r8H3JqpmSmvUsOYscigEPRyWNFDiSVxpkOny9D1YOt4u6va4XwciBM6moGDwiRX100nZDtd7Rq";
@@ -390,6 +412,8 @@
     let selectedShipping = null; // { id, name, carrier, price, is_relay? }
     let selectedRelayPoint = null; // { id, name, street, house_number, city, postal_code, country }
     let currentUser = null;
+    let currentPhone = "";
+    let accountChecked = false; // connexion et téléphone vérifiés au moins une fois
     let lastSelectedRelayMode = false;
 
     async function loadPromos() {
@@ -700,7 +724,34 @@
       }
     }
 
+    const cartHasStays = () => getCart().some(i => i.type === "sejour");
+
+    // Séjour ou événement dans le panier : compte et numéro de téléphone obligatoires
+    function accountBlocker() {
+      if (!cartHasStays()) return null;
+      if (!accountChecked) return "Vérification de ton compte…";
+      if (!currentUser) return "Connecte-toi ou crée ton compte pour réserver.";
+      if (!currentPhone) return "Ajoute ton numéro de téléphone.";
+      return null;
+    }
+
+    function renderAccountGate() {
+      const gate = document.getElementById("accountGate");
+      if (!gate) return;
+      const need = cartHasStays() && accountChecked && (!currentUser || !currentPhone);
+      gate.hidden = !need;
+      document.getElementById("accountGateLogin").hidden = !need || !!currentUser;
+      document.getElementById("accountGatePhone").hidden = !need || !currentUser;
+      const back = encodeURIComponent(`${location.origin}/panier.html`);
+      document.getElementById("gateSignup").href = `/signup.html?redirect=${back}`;
+      document.getElementById("gateLogin").href = `/compte.html?redirect=${back}`;
+      const guestNote = document.getElementById("guestNote");
+      if (guestNote) guestNote.style.display = currentUser || cartHasStays() ? "none" : "block";
+    }
+
     function checkoutBlocker(hasProducts) {
+      const account = accountBlocker();
+      if (account) return account;
       if (giftUse > 0 && lastToPay === 0 && !currentUser && !isEmailLike(giftEmailValue())) return "Indique ton email pour recevoir la confirmation.";
       if (!hasProducts) return null;
       const addr = getShippingAddress();
@@ -715,6 +766,7 @@
     }
 
     function updateCheckoutState(hasProducts, total) {
+      renderAccountGate();
       const blocker = checkoutBlocker(hasProducts);
       btnCheckout.disabled = !!blocker;
       btnCheckout.setAttribute("aria-describedby", "checkoutHint");
@@ -746,7 +798,8 @@
     window.addEventListener("resize", refreshPayBar);
     document.getElementById("payBarBtn").addEventListener("click", () => {
       if (btnCheckout.disabled) {
-        document.getElementById("shippingZone")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const gate = document.getElementById("accountGate");
+        (gate && !gate.hidden ? gate : document.getElementById("shippingZone"))?.scrollIntoView({ behavior: "smooth", block: gate && !gate.hidden ? "center" : "start" });
       } else {
         btnCheckout.click();
       }
@@ -1216,11 +1269,11 @@
     async function loadSavedAddressAndUser() {
       const { data: { user } } = await supabase.auth.getUser();
       currentUser = user || null;
+      currentPhone = user ? await getProfilePhone(user) : "";
+      accountChecked = true;
       renderCart();
       const saveLabel = document.getElementById("saveAddressLabel");
       if (saveLabel) saveLabel.style.display = user ? "flex" : "none";
-      const guestNote = document.getElementById("guestNote");
-      if (guestNote) guestNote.style.display = user ? "none" : "block";
       if (!user) return;
       const fullName = [user.user_metadata?.firstname, user.user_metadata?.lastname].filter(Boolean).join(" ") || user.user_metadata?.full_name || "";
       const nameEl = document.getElementById("shipName");
@@ -1418,6 +1471,13 @@
       }
 
       const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (cart.some(i => i.type === "sejour") && (!user || !currentPhone)) {
+        currentUser = user || null;
+        renderCart();
+        document.getElementById("accountGate")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       const shipName = document.getElementById("shipName")?.value.trim() || "";
       if (hasProducts && !shipName && !user) {
         checkoutMsg.textContent = "Indique le nom et prénom du destinataire.";
@@ -1495,10 +1555,12 @@
           headers: {
             "Content-Type": "application/json",
             "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            // Cliente connectée : son jeton permet au serveur de vérifier compte et téléphone
+            "Authorization": `Bearer ${authSession?.access_token || SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify({
             items,
+            customerPhone: currentPhone || "",
             userId: user?.id || "",
             userEmail: user?.email || "",
             discountAmount: totalDiscountAmount > 0 ? Math.round(totalDiscountAmount * 100) : 0,
@@ -1560,6 +1622,12 @@
           if (promoMsg) { promoMsg.textContent = "Ce code a déjà été utilisé le nombre maximal de fois."; promoMsg.style.color = "#c00"; promoMsg.style.display = ""; }
           renderCart();
           checkoutError.textContent = "Ce code promo n'est plus disponible : il a atteint son nombre maximal d'utilisations. Nous l'avons retiré, vérifie le nouveau total puis relance le paiement.";
+        } else if ((err.data?.code === "auth" || err.data?.code === "phone") && err.data.error) {
+          // Le serveur exige un compte avec téléphone pour un séjour
+          checkoutError.textContent = err.data.error;
+          if (err.data.code === "auth") currentUser = null; else currentPhone = "";
+          renderCart();
+          document.getElementById("accountGate")?.scrollIntoView({ behavior: "smooth", block: "center" });
         } else if ((err.data?.code === "shipping" || err.data?.code === "price") && err.data.error) {
           // Livraison ou tarif séjour refusés par le serveur : son message dit quoi faire
           checkoutError.textContent = err.data.error;
@@ -1570,6 +1638,24 @@
     });
 
     window._addToCartFromPanier = (item) => { addToCart(item); renderCart(); };
+
+    document.getElementById("accountGatePhone")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("gatePhoneInput");
+      const msg = document.getElementById("gatePhoneMsg");
+      const phone = normalizePhone(input.value);
+      if (!phone) { msg.style.color = "#c00"; msg.textContent = PHONE_HINT; input.setAttribute("aria-invalid", "true"); input.focus(); return; }
+      input.removeAttribute("aria-invalid");
+      if (!currentUser) return;
+      const btn = document.getElementById("gatePhoneSave");
+      btn.disabled = true;
+      const err = await savePhone(currentUser, phone);
+      btn.disabled = false;
+      if (err) { msg.style.color = "#c00"; msg.textContent = "Erreur : " + err.message; return; }
+      currentPhone = phone;
+      msg.textContent = "";
+      renderCart();
+    });
 
     document.getElementById("btnApplyPromo")?.addEventListener("click", () => {
       const input = document.getElementById("promoCodeInput");

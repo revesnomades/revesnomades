@@ -20,6 +20,7 @@ export type PaidOrder = {
   orderRef: string;
   customerEmail: string;
   customerName: string;
+  customerPhone?: string; // téléphone du compte (obligatoire pour un séjour)
   amount: number; // total réellement payé (euros)
   items: OrderItem[];
   giftItems: GiftItem[];
@@ -264,8 +265,10 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
       const itemAmount = item.price ? item.price * item.qty : amount;
       const itemDiscount = Number(item.d) || 0;
       const row: Record<string, unknown> = { stay_id: item.id || null, stay_title: item.name || "Séjour", customer_name: customerName, customer_email: customerEmail, price_label: item.name || "Standard", amount: itemAmount, status: "paid" };
-      const err = await insertWithExtra(db, "bookings", { ...row, amount_paid: Math.round((itemAmount - itemDiscount) * 100) / 100, stripe_session_id: sessionId, booking_date: new Date().toISOString().split("T")[0] },
-        itemDiscount > 0 ? { discount_amount: itemDiscount, discount_label: order.discount.label, promo_code: order.discount.promoCode || null } : {});
+      const err = await insertWithExtra(db, "bookings", { ...row, amount_paid: Math.round((itemAmount - itemDiscount) * 100) / 100, stripe_session_id: sessionId, booking_date: new Date().toISOString().split("T")[0] }, {
+        ...(itemDiscount > 0 ? { discount_amount: itemDiscount, discount_label: order.discount.label, promo_code: order.discount.promoCode || null } : {}),
+        ...(order.customerPhone ? { customer_phone: order.customerPhone } : {}),
+      });
       if (err) {
         console.warn("Insert complet échoué, retry sans colonnes optionnelles:", err.message);
         const { error: retryErr } = await db.from("bookings").insert(row);
@@ -376,6 +379,7 @@ export async function recordPaidOrder(db: any, order: PaidOrder) {
         ${orderRef ? `<li><strong>Commande :</strong> ${orderRef}</li>` : ""}
         <li><strong>Nom :</strong> ${esc(customerName)}</li>
         <li><strong>Email :</strong> <a href="mailto:${esc(customerEmail)}">${esc(customerEmail)}</a></li>
+        ${order.customerPhone ? `<li><strong>Téléphone :</strong> <a href="tel:${esc(order.customerPhone)}">${esc(order.customerPhone)}</a></li>` : ""}
         <li><strong>Articles :</strong> ${esc(articlesLabel)}</li>
         ${order.discount.amount > 0 ? `<li><strong>Remise :</strong> ${esc(order.discount.label || "Promotion")} : -${euro(order.discount.amount)}</li>` : ""}
         ${order.giftUsed && order.giftUsed.amount > 0 ? `<li><strong>Bon cadeau utilisé :</strong> ${esc(order.giftUsed.code)} : -${euro(order.giftUsed.amount)}</li>` : ""}

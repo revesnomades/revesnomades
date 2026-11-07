@@ -61,6 +61,7 @@ serve(async (req) => {
         orderRef: meta.order_ref || "",
         customerEmail,
         customerName,
+        customerPhone: meta.customer_phone || session.customer_details?.phone || "",
         amount,
         items: metaType === "cart" ? parseJson<OrderItem[]>(meta.cart_items, []) : [],
         giftItems: metaType === "cart" ? parseJson<GiftItem[]>(meta.gift_items, []) : [],

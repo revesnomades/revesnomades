@@ -201,6 +201,26 @@
               Connecté(e) : <b id="userEmail"></b>
             </div>
 
+            <!-- Téléphone : obligatoire pour finaliser le compte et réserver -->
+            <div id="phoneBox" style="margin-top:8px;">
+              <div id="phoneDisplayRow" class="txt-muted-13" style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;">
+                <span>Téléphone : <b id="userPhone">—</b></span>
+                <button class="btn-link" type="button" id="btnEditPhone">Modifier</button>
+              </div>
+              <form id="phoneForm" hidden style="margin-top:10px; padding:14px; border:1px solid var(--line); background:#fff;" novalidate>
+                <p id="phoneRequiredNote" hidden style="margin:0 0 10px; font-size:13.5px; line-height:1.5; color:var(--text);">
+                  <strong>Ajoute ton numéro de téléphone pour finaliser ton compte.</strong> Il est obligatoire pour réserver un séjour ou un événement.
+                </p>
+                <label for="phoneInput" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Numéro de téléphone</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <input id="phoneInput" class="input input-sm" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" style="flex:1; min-width:180px;">
+                  <button type="submit" id="btnSavePhone" class="btn tiny on-light">Enregistrer</button>
+                  <button type="button" id="btnCancelPhone" class="btn-link">Annuler</button>
+                </div>
+                <div id="phoneMsg" style="font-size:12px; margin-top:6px;" aria-live="polite"></div>
+              </form>
+            </div>
+
             <div class="account-actions" style="margin-top:12px; flex-wrap:wrap;">
               <button class="btn on-light" id="btnSeeBookings" type="button">Voir mes réservations</button>
               <button class="btn on-light" id="btnLogout" type="button">Déconnexion</button>
@@ -479,6 +499,7 @@
 
   <script type="module">
     import { supabase } from "/assets/js/supabaseClient.js?v=3";
+    import { normalizePhone, formatPhone, PHONE_HINT, savePhone, getProfilePhone } from "/assets/js/phone.js?v=1";
     import { initCartBadge } from "/assets/js/cart.js?v=3";
     initCartBadge();
 
@@ -532,10 +553,17 @@
     const emailEl = document.getElementById("email");
     const passEl  = document.getElementById("password");
 
-    const REDIRECT = `${location.origin}/compte.html`;
+    // ?redirect=/panier.html : retour à la page d'origine une fois connecté(e) avec un numéro
+    const AFTER_LOGIN = (() => {
+      const raw = new URLSearchParams(location.search).get("redirect");
+      try { const u = new URL(raw, location.origin); return raw && u.origin === location.origin ? u.href : null; } catch { return null; }
+    })();
+    const REDIRECT = AFTER_LOGIN ? `${location.origin}/compte.html?redirect=${encodeURIComponent(AFTER_LOGIN)}` : `${location.origin}/compte.html`;
     document.getElementById("btnGoogle")?.addEventListener("click", () =>
       supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: REDIRECT } })
     );
+    // Lien « Inscription » : garde la page d'origine
+    if (AFTER_LOGIN) document.querySelectorAll('a[href="/signup.html"]').forEach(a => a.href = `/signup.html?redirect=${encodeURIComponent(AFTER_LOGIN)}`);
 
 
     const btnLogin = document.getElementById("btnLogin");
@@ -1595,6 +1623,10 @@
 
       applyWelcomeName(metaFirstname || profileFirstname);
 
+      // Téléphone obligatoire ; retour vers la page d'origine (ex. panier) dès qu'il est renseigné
+      const phone = await loadMyPhone(user);
+      if (phone && AFTER_LOGIN) { window.location.href = AFTER_LOGIN; return; }
+
       // Afficher le bouton admin si nécessaire
       const adminAccessBtn = document.getElementById("adminAccessBtn");
       if (adminAccessBtn) adminAccessBtn.style.display = isAdmin ? "block" : "none";
@@ -1611,6 +1643,51 @@
         loadMyGiftCards(),
       ]);
     }
+
+    // ── Téléphone ──
+    const phoneForm = document.getElementById("phoneForm");
+    const phoneInput = document.getElementById("phoneInput");
+    const phoneMsg = document.getElementById("phoneMsg");
+
+    function showPhoneForm(required) {
+      phoneForm.hidden = false;
+      document.getElementById("phoneRequiredNote").hidden = !required;
+      // style.display : l'attribut hidden ne l'emporte pas sur un display inline
+      document.getElementById("btnCancelPhone").style.display = required ? "none" : "";
+      document.getElementById("phoneDisplayRow").style.display = required ? "none" : "flex";
+      phoneMsg.textContent = "";
+    }
+
+    async function loadMyPhone(user) {
+      const phone = await getProfilePhone(user);
+      document.getElementById("userPhone").textContent = phone ? formatPhone(phone) : "—";
+      phoneInput.value = phone ? formatPhone(phone) : "";
+      if (phone) { phoneForm.hidden = true; document.getElementById("phoneDisplayRow").style.display = "flex"; }
+      else showPhoneForm(true);
+      return phone;
+    }
+
+    document.getElementById("btnEditPhone")?.addEventListener("click", () => { showPhoneForm(false); phoneInput.focus(); });
+    document.getElementById("btnCancelPhone")?.addEventListener("click", () => { phoneForm.hidden = true; document.getElementById("phoneDisplayRow").style.display = "flex"; });
+
+    phoneForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const phone = normalizePhone(phoneInput.value);
+      if (!phone) { phoneMsg.style.color = "#c00"; phoneMsg.textContent = PHONE_HINT; phoneInput.setAttribute("aria-invalid", "true"); phoneInput.focus(); return; }
+      phoneInput.removeAttribute("aria-invalid");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const btn = document.getElementById("btnSavePhone");
+      btn.disabled = true;
+      const err = await savePhone(user, phone);
+      btn.disabled = false;
+      if (err) { phoneMsg.style.color = "#c00"; phoneMsg.textContent = "Erreur : " + err.message; return; }
+      document.getElementById("userPhone").textContent = formatPhone(phone);
+      phoneForm.hidden = true;
+      document.getElementById("phoneDisplayRow").style.display = "flex";
+      if (AFTER_LOGIN) { window.location.href = AFTER_LOGIN; return; }
+      phoneMsg.textContent = "";
+    });
 
     // ── Bons cadeaux enregistrés sur le compte ──
     const fmtEuro = n => (Number(n) || 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "\u00a0€";
