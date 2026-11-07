@@ -29,9 +29,14 @@ export function rememberPendingPhone(phone) {
 const loaded = new Map();
 
 export async function savePhone(user, phone) {
-  // upsert : un compte créé avec Google n'a pas toujours de ligne profil
-  const { error } = await supabase.from("profiles").upsert({ id: user.id, email: user.email, phone }, { onConflict: "id" });
+  // Mise à jour du profil existant (autorisée par la politique de sécurité de « profiles »)
+  const { data, error } = await supabase.from("profiles").update({ phone }).eq("id", user.id).select("id");
   if (error) return error;
+  // Pas encore de profil (compte créé avec Google) : on le crée
+  if (!data || !data.length) {
+    const { error: insertError } = await supabase.from("profiles").insert({ id: user.id, email: user.email, phone });
+    if (insertError) return insertError;
+  }
   loaded.set(user.id, Promise.resolve(phone));
   await supabase.auth.updateUser({ data: { phone } }).catch(() => {});
   return null;
