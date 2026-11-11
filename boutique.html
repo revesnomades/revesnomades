@@ -18,7 +18,7 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=13" />
+  <link rel="stylesheet" href="assets/css/styles.css?v=14" />
   <style>
     .shop-grid {
       display: grid;
@@ -739,8 +739,18 @@
         ? `<strong>${item.name}</strong> ajouté au panier — <a class="link-on-dark" href="/panier.html">Voir le panier</a>`
         : `Tu as déjà tout le stock disponible de <strong>${item.name}</strong> dans ton panier — <a class="link-on-dark" href="/panier.html">Voir le panier</a>`;
       toast.classList.add("show");
-      clearTimeout(toast._timer);
-      toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
+      // Reste affichée tant que la souris ou le clavier est dessus, le temps de cliquer
+      const hideLater = () => { clearTimeout(toast._timer); toast._timer = setTimeout(() => toast.classList.remove("show"), 4000); };
+      if (!toast._bound) {
+        toast._bound = true;
+        toast.addEventListener("mouseenter", () => clearTimeout(toast._timer));
+        toast.addEventListener("focusin", () => clearTimeout(toast._timer));
+        toast.addEventListener("mouseleave", hideLater);
+        toast.addEventListener("focusout", hideLater);
+        // Un clic dans la fenêtre ne doit jamais ouvrir la carte produit placée dessous
+        toast.addEventListener("click", (e) => e.stopPropagation());
+      }
+      hideLater();
     };
 
     initCartBadge();

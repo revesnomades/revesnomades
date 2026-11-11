@@ -2342,6 +2342,8 @@ footer.band.cream{
 .cart-toast.show {
   opacity: 1;
   transform: translateY(0);
+  /* Visible : le lien « Voir le panier » doit recevoir le clic (sinon il traverse vers la carte dessous) */
+  pointer-events: auto;
 }
 .cart-empty {
   text-align: center;
