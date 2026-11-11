@@ -168,7 +168,8 @@
 
               <!-- Sélecteur point relais Mondial Relay -->
               <div id="relayZone" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;">
-                <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Choisis ton point relais :</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text);">Choisis ton point relais Mondial Relay</div>
+                <div id="relayRef" style="font-size:12px; color:var(--muted); margin:2px 0 8px;" aria-live="polite"></div>
                 <div id="relayLoading" style="display:none; font-size:13px; color:var(--muted);">Recherche en cours…</div>
                 <div id="relayList" style="display:none;"></div>
                 <button type="button" id="relayMore" class="cart-link-btn" style="display:none; margin-top:8px;"></button>
@@ -1151,51 +1152,91 @@
       radios.forEach((radio, i) => radio.addEventListener("change", () => choose(i)));
     }
 
+    // ── Points relais Mondial Relay proches de l'adresse saisie ──
+    const escHtml = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const RELAY_DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    let lastRelayKey = "";   // adresse de la dernière recherche
+    let relayRequest = 0;    // seule la réponse de la dernière recherche est affichée
+    const relayKey = () => { const a = getShippingAddress(); return [a.line1, a.postal_code, a.city, a.country].join("|").toLowerCase(); };
+
+    function relayDistance(m) {
+      if (m == null) return "";
+      return m < 950 ? `${Math.max(50, Math.round(m / 50) * 50)} m` : `${(m / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km`;
+    }
+    function relayHours(p) {
+      if (!Array.isArray(p.opening_times)) return "";
+      const rows = p.opening_times.map((slots, d) =>
+        `<div style="display:flex; gap:8px;"><span style="width:30px; flex-shrink:0;">${RELAY_DAYS[d]}</span><span>${slots.length ? slots.map(escHtml).join(", ") : "fermé"}</span></div>`).join("");
+      return `<details style="margin-top:4px;"><summary class="txt-hint" style="cursor:pointer; text-decoration:underline;">Horaires</summary><div class="txt-hint" style="margin-top:4px; line-height:1.5;">${rows}</div></details>`;
+    }
+
     async function fetchRelayPoints() {
-      const postalInput = document.getElementById("shipPostal");
-      const countryInput = document.getElementById("shipCountry");
-      const postal = (postalInput?.value || "").trim();
-      if (!postal) {
-        document.getElementById("relayMsg").style.display = "block";
-        document.getElementById("relayMsg").textContent = "Renseigne ton code postal pour afficher les points relais.";
-        document.getElementById("relayList").style.display = "none";
-        return;
-      }
+      const addr = getShippingAddress();
       const relayLoading = document.getElementById("relayLoading");
       const relayList = document.getElementById("relayList");
       const relayMsg = document.getElementById("relayMsg");
+      const relayRef = document.getElementById("relayRef");
+      const relayMore = document.getElementById("relayMore");
+      const showMsg = (text, error) => {
+        relayLoading.style.display = "none";
+        relayList.style.display = "none";
+        if (relayMore) relayMore.style.display = "none";
+        relayMsg.style.display = "block";
+        relayMsg.style.color = error ? "#c00" : "var(--muted)";
+        relayMsg.textContent = text;
+      };
+      if (!addr.postal_code) {
+        if (relayRef) relayRef.textContent = "";
+        showMsg("Renseigne ton code postal pour afficher les points relais.", false);
+        return;
+      }
+      const request = ++relayRequest;
+      lastRelayKey = relayKey();
       relayMsg.style.display = "none";
       relayList.style.display = "none";
+      if (relayMore) relayMore.style.display = "none";
+      if (relayRef) relayRef.textContent = "";
       relayLoading.style.display = "block";
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/get-service-points`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ postal_code: postal, country: countryInput?.value || "FR" }),
+          body: JSON.stringify({ line1: addr.line1, postal_code: addr.postal_code, city: addr.city, country: addr.country }),
         });
         const data = await res.json();
+        if (request !== relayRequest) return; // l'adresse a changé entre-temps
         if (!res.ok || data.error) throw new Error(data.error || "Erreur");
+        if (data.reason === "sendcloud_auth" || data.reason === "sendcloud_error") throw new Error(data.reason);
         const points = data.points || [];
         relayLoading.style.display = "none";
         if (!points.length) {
-          relayMsg.style.display = "block";
-          relayMsg.style.color = "var(--muted)";
-          relayMsg.textContent = "Aucun point relais trouvé pour ce code postal.";
+          selectedRelayPoint = null;
+          showMsg("Aucun point relais Mondial Relay à moins de 50 km de cette adresse. Choisis la livraison à domicile.", false);
+          renderCart();
           return;
         }
+        if (relayRef) relayRef.textContent = `Les plus proches de : ${data.reference || [addr.postal_code, addr.city].filter(Boolean).join(" ")}`;
         const RELAY_STEP = 5;
         let relayShown = Math.min(RELAY_STEP, points.length);
-        const relayMore = document.getElementById("relayMore");
         const relayItem = (p, i) => {
-          const addr = [p.street, p.house_number].filter(Boolean).join(" ");
-          const dist = p.distance != null ? ` · ${(p.distance / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km` : "";
-          return `<label style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; font-size:13px;">
-            <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;">
-            <span class="grow">
-              <span style="font-weight:600;">${p.name}</span><span class="txt-muted">${dist}</span><br>
-              <span class="txt-hint">${[addr, p.postal_code, p.city].filter(Boolean).join(", ")}</span>
-            </span>
-          </label>`;
+          const street = [p.house_number, p.street].filter(Boolean).join(" ");
+          const dist = relayDistance(p.distance);
+          const map = p.latitude != null && p.longitude != null
+            ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.latitude + "," + p.longitude)}" target="_blank" rel="noopener" style="text-decoration:underline;">Voir sur la carte</a>`
+            : "";
+          return `<div style="padding:8px 0; border-bottom:1px solid var(--line); font-size:13px;">
+            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+              <input type="radio" name="relayPoint" value="${i}" style="flex-shrink:0; margin-top:3px;">
+              <span class="grow" style="min-width:0;">
+                <span style="display:flex; justify-content:space-between; gap:8px;">
+                  <span style="font-weight:600; overflow-wrap:anywhere;">${escHtml(p.name)}${p.locker ? ` <span class="txt-hint" style="font-weight:400;">(consigne automatique)</span>` : ""}</span>
+                  ${dist ? `<span style="white-space:nowrap; color:var(--muted);">${dist}</span>` : ""}
+                </span>
+                <span class="txt-hint">${escHtml([street, [p.postal_code, p.city].filter(Boolean).join(" ")].filter(Boolean).join(", "))}</span>
+              </span>
+            </label>
+            <div style="margin-left:26px;" class="txt-hint">${relayHours(p)}${map ? `<div style="margin-top:3px;">${map}</div>` : ""}</div>
+          </div>`;
         };
         const drawRelays = () => {
           relayList.innerHTML = points.slice(0, relayShown).map(relayItem).join("");
@@ -1213,17 +1254,18 @@
         let savedRelay = null;
         try { savedRelay = JSON.parse(sessionStorage.getItem("rn_ship") || "null")?.relay ?? null; } catch {}
         const savedRelayIdx = savedRelay != null ? points.findIndex(p => String(p.id ?? p.name) === String(savedRelay)) : -1;
+        // Par défaut : le plus proche (la liste est triée par distance)
         selectedRelayPoint = points[savedRelayIdx >= 0 ? savedRelayIdx : 0];
         if (savedRelayIdx >= RELAY_STEP) relayShown = Math.min(points.length, Math.ceil((savedRelayIdx + 1) / RELAY_STEP) * RELAY_STEP);
         drawRelays();
         relayList.style.display = "block";
         renderCart();
       } catch (e) {
-        relayLoading.style.display = "none";
-        relayMsg.style.display = "block";
-        relayMsg.style.color = "#c00";
+        if (request !== relayRequest) return;
         console.warn("Points relais indisponibles:", e);
-        relayMsg.textContent = "Les points relais ne s'affichent pas pour le moment. Choisis la livraison à domicile ou réessaie dans un instant.";
+        selectedRelayPoint = null;
+        showMsg("Les points relais ne s'affichent pas pour le moment. Choisis la livraison à domicile ou réessaie dans un instant.", true);
+        renderCart();
       }
     }
 
@@ -1324,7 +1366,12 @@
         if (!getCart().some(i => i.type === "product") || !addressReady()) { renderCart(); return; }
         const a = getShippingAddress();
         const key = [a.postal_code, a.city, a.country, getProductsTotal() >= FREE_SHIPPING_THRESHOLD, getTotalWeightGrams()].join("|");
-        if (!force && key === lastRatesKey) { renderCart(); return; }
+        if (!force && key === lastRatesKey) {
+          // Mêmes tarifs, mais la rue a changé : on recherche les points relais proches de la nouvelle adresse
+          if (selectedShipping && isRelayMethod(selectedShipping) && relayKey() !== lastRelayKey) fetchRelayPoints();
+          renderCart();
+          return;
+        }
         lastRatesKey = key;
         fetchShippingRates();
       }, 700);
@@ -1520,11 +1567,11 @@
         if (hasProducts) {
           if (selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint) {
             // Use relay point address for Stripe
-            const relayStreet = [selectedRelayPoint.street, selectedRelayPoint.house_number].filter(Boolean).join(" ");
+            const relayStreet = [selectedRelayPoint.house_number, selectedRelayPoint.street].filter(Boolean).join(" ");
             shippingAddr = {
               name: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || user?.email || "",
               line1: relayStreet || selectedRelayPoint.name,
-              line2: `Point relais : ${selectedRelayPoint.name}${selectedRelayPoint.id ? " (n° " + selectedRelayPoint.id + ")" : ""}`,
+              line2: `Point relais : ${selectedRelayPoint.name}${selectedRelayPoint.code || selectedRelayPoint.id ? " (n° " + (selectedRelayPoint.code || selectedRelayPoint.id) + ")" : ""}`,
               postal_code: selectedRelayPoint.postal_code,
               city: selectedRelayPoint.city,
               country: selectedRelayPoint.country || "FR",
