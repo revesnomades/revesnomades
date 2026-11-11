@@ -54,6 +54,20 @@
     .em-aud label { display: flex; gap: 10px; align-items: center; font-size: 14px; cursor: pointer; }
     .em-aud input { width: 18px; height: 18px; accent-color: #1e1f22; }
     .em-total { font-size: 14px; font-variant-numeric: tabular-nums; }
+    .em-drop {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      border: 1px dashed var(--line); padding: 12px; background: rgba(255,255,255,.5);
+    }
+    .em-drop.over { border-color: #cc6f53; background: rgba(204,111,83,.08); }
+    .em-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+    .em-photos:empty { display: none; }
+    .em-photo { border: 1px solid var(--line); background: #fff; padding: 6px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .em-photo-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+    .em-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; }
+    .em-photo input { width: 100%; box-sizing: border-box; font: inherit; font-size: 12.5px; padding: 6px 8px; border: 1px solid var(--line); }
+    .em-photo-del { background: none; border: none; padding: 2px 4px; font-size: 12px; text-decoration: underline; cursor: pointer; color: var(--muted); }
+    .em-check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+    .em-check input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: #1e1f22; }
     .btn-danger { background: #cc6f53 !important; color: #fff !important; border-color: #cc6f53 !important; }
     .is-loading { opacity: .6; pointer-events: none; }
     [hidden] { display: none !important; }
@@ -81,11 +95,25 @@
               <label class="em-label" for="prompt" id="promptLabel">Décrivez l'email à rédiger</label>
               <textarea id="prompt" class="input" placeholder="Ex : Annonce du séjour Pilates & randonnée dans les Cévennes en mai, places limitées, mettre en avant la nature et le repos, avec un bouton vers la page du séjour."></textarea>
             </div>
+            <div id="photoZone">
+              <span class="em-label">Photos à placer dans l'email (facultatif)</span>
+              <div class="em-drop" id="photoDrop">
+                <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+                <button type="button" class="btn tiny on-light" id="btnAddPhotos">Importer des photos</button>
+                <span class="em-hint">ou glissez-les ici · 10 photos maximum</span>
+              </div>
+              <div class="em-photos" id="photoList"></div>
+              <div class="em-status" id="photoStatus" aria-live="polite"></div>
+            </div>
+            <label class="em-check">
+              <input type="checkbox" id="siteVisuals">
+              <span>Utiliser aussi des photos de mon site <span class="em-hint" style="display:block;">Séjours, produits, galerie d'accueil : l'IA les regarde et choisit les plus adaptées.</span></span>
+            </label>
             <div class="em-row">
               <button type="button" class="btn on-light" id="btnGenerate">Générer l'email</button>
               <button type="button" class="btn tiny" id="btnReset" hidden style="background:transparent;">Recommencer</button>
             </div>
-            <p class="em-hint">L'IA connaît vos séjours publiés et les produits du shop (noms, prix, liens, photos). La rédaction prend en général entre 20 secondes et 1 minute.</p>
+            <p class="em-hint">L'IA connaît vos séjours publiés et les produits du shop (noms, prix, liens, photos). Elle voit les photos importées : désignez-les par leur numéro, par exemple « mets la photo 2 après l'introduction ». La rédaction prend en général entre 20 secondes et 1 minute, un peu plus avec des photos.</p>
             <div class="em-status" id="genStatus" aria-live="polite"></div>
           </div>
 
@@ -146,6 +174,10 @@
     let versions = [];
     let current = null;
     let audienceTotal = 0;
+    // Photos importées pour cet email : { n: numéro stable, url, note }
+    const MAX_PHOTOS = 10;
+    let photos = [];
+    let photoSeq = 0;
 
     async function checkAdmin() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -184,12 +216,19 @@
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({
           turns, versions, subject: $("subject").value, preheader: $("preheader").value,
+          photos, photoSeq, siteVisuals: $("siteVisuals").checked,
         }));
       } catch {}
     }
     function loadDraft() {
       try {
         const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+        if (Array.isArray(d?.photos)) {
+          photos = d.photos.filter(p => p && typeof p.url === "string" && p.url.startsWith("https://"));
+          photoSeq = Math.max(Number(d.photoSeq) || 0, ...photos.map(p => Number(p.n) || 0));
+          renderPhotos();
+        }
+        $("siteVisuals").checked = d?.siteVisuals === true;
         if (!d?.versions?.length) return;
         turns = d.turns || [];
         versions = d.versions;
@@ -264,6 +303,110 @@
       setStatus($("genStatus"), `Retour à la version ${vIdx + 1}. Les modifications suivantes partiront de celle-ci.`);
     }
 
+    // ── Photos importées ──
+    function renderPhotos() {
+      const list = $("photoList");
+      list.innerHTML = "";
+      photos.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "em-photo";
+        const top = document.createElement("div");
+        top.className = "em-photo-top";
+        const label = document.createElement("span");
+        label.textContent = `Photo ${p.n}`;
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "em-photo-del";
+        del.textContent = "Retirer";
+        del.setAttribute("aria-label", `Retirer la photo ${p.n}`);
+        del.addEventListener("click", () => {
+          // Le fichier reste en ligne : un email déjà envoyé peut l'afficher
+          photos = photos.filter(x => x !== p);
+          renderPhotos();
+          saveDraft();
+        });
+        top.append(label, del);
+        const img = document.createElement("img");
+        img.src = p.url;
+        img.alt = `Photo ${p.n}`;
+        img.loading = "lazy";
+        const note = document.createElement("input");
+        note.type = "text";
+        note.maxLength = 200;
+        note.placeholder = "Précision pour l'IA (facultatif)";
+        note.setAttribute("aria-label", `Précision pour la photo ${p.n}`);
+        note.value = p.note || "";
+        note.addEventListener("input", () => { p.note = note.value; saveDraft(); });
+        card.append(top, img, note);
+        list.appendChild(card);
+      });
+      $("btnAddPhotos").disabled = photos.length >= MAX_PHOTOS;
+    }
+
+    // Redimensionne (1400 px maximum) et convertit en JPEG : léger, et affiché par toutes les messageries
+    function toEmailJpeg(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, 1400 / Math.max(img.naturalWidth, img.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff"; // fond blanc sous les PNG transparents
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error("conversion impossible")), "image/jpeg", 0.86);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("format non lisible par le navigateur")); };
+        img.src = url;
+      });
+    }
+
+    async function addPhotos(fileList) {
+      const files = [...fileList].filter(f => f.type.startsWith("image/"));
+      if (!files.length) { setStatus($("photoStatus"), "Aucune image dans la sélection.", "err"); return; }
+      const room = MAX_PHOTOS - photos.length;
+      if (room <= 0) { setStatus($("photoStatus"), `Maximum ${MAX_PHOTOS} photos par email : retirez-en une d'abord.`, "err"); return; }
+      const batch = files.slice(0, room);
+      const failed = [];
+      $("btnAddPhotos").disabled = true;
+      for (let i = 0; i < batch.length; i++) {
+        setStatus($("photoStatus"), `Import de la photo ${i + 1} sur ${batch.length}…`);
+        try {
+          const blob = await toEmailJpeg(batch[i]);
+          const path = `emails/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+          const { error } = await supabase.storage.from("stays").upload(path, blob, { cacheControl: "31536000", upsert: false, contentType: "image/jpeg" });
+          if (error) throw error;
+          const { data } = supabase.storage.from("stays").getPublicUrl(path);
+          photos.push({ n: ++photoSeq, url: data.publicUrl, note: "" });
+          renderPhotos();
+          saveDraft();
+        } catch (e) {
+          console.warn("Import photo:", e);
+          failed.push(`${batch[i].name} (${e.message || "erreur"})`);
+        }
+      }
+      renderPhotos();
+      const skipped = files.length - batch.length;
+      const ok = batch.length - failed.length;
+      const parts = [];
+      if (ok) parts.push(`${ok} photo${ok > 1 ? "s importées" : " importée"}.`);
+      if (failed.length) parts.push(`Non importée${failed.length > 1 ? "s" : ""} : ${failed.join(", ")}.`);
+      if (skipped) parts.push(`${skipped} en trop ignorée${skipped > 1 ? "s" : ""} (maximum ${MAX_PHOTOS}).`);
+      setStatus($("photoStatus"), parts.join(" "), failed.length ? "err" : "ok");
+    }
+
+    $("btnAddPhotos").addEventListener("click", () => $("photoInput").click());
+    $("photoInput").addEventListener("change", async (e) => { await addPhotos(e.target.files); e.target.value = ""; });
+    const drop = $("photoDrop");
+    ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+    drop.addEventListener("drop", (e) => { if (e.dataTransfer?.files?.length) addPhotos(e.dataTransfer.files); });
+    $("siteVisuals").addEventListener("change", saveDraft);
+
     // ── Génération / modification ──
     $("btnGenerate").addEventListener("click", async () => {
       const text = $("prompt").value.trim();
@@ -277,19 +420,31 @@
         if (notes.length) content = `(À noter : ${notes.join(" et ")} — garde ces versions sauf demande contraire.)\n\n${text}`;
       }
 
-      const pending = [...turns, { role: "user", content, display: text }];
+      const sentPhotos = photos.map(p => ({ n: p.n, url: p.url, note: (p.note || "").trim() }));
+      const siteVisuals = $("siteVisuals").checked;
+      const extras = [];
+      if (sentPhotos.length) extras.push(`photo${sentPhotos.length > 1 ? "s" : ""} ${sentPhotos.map(p => p.n).join(", ")}`);
+      if (siteVisuals) extras.push("visuels du site");
+      const display = extras.length ? `${text}\n[Avec : ${extras.join(" + ")}]` : text;
+      const pending = [...turns, { role: "user", content, display }];
       $("btnGenerate").disabled = true;
       $("briefPanel").classList.add("is-loading");
-      setStatus($("genStatus"), "Rédaction en cours… (jusqu'à une minute)");
+      setStatus($("genStatus"), photos.length || $("siteVisuals").checked ? "Rédaction en cours… l'IA regarde les photos (jusqu'à deux minutes)" : "Rédaction en cours… (jusqu'à une minute)");
       try {
-        const email = await callApi({ action: "generate", turns: pending.map(({ role, content }) => ({ role, content })) });
+        const email = await callApi({
+          action: "generate",
+          turns: pending.map(({ role, content }) => ({ role, content })),
+          photos: sentPhotos,
+          site_visuals: siteVisuals,
+        });
         turns = [...pending, { role: "assistant", content: email.raw }];
         current = { subject: email.subject, preheader: email.preheader, body_html: email.body_html, notes: email.notes, preview_html: email.preview_html };
         versions.push(current);
         $("prompt").value = "";
         renderAll();
         saveDraft();
-        setStatus($("genStatus"), "Email prêt. Relisez l'aperçu, puis demandez des modifications si besoin.", "ok");
+        const seen = email.site_visuals_shown ? ` L'IA a regardé ${email.site_visuals_shown} visuel${email.site_visuals_shown > 1 ? "s" : ""} du site.` : "";
+        setStatus($("genStatus"), `Email prêt.${seen} Relisez l'aperçu, puis demandez des modifications si besoin.`, "ok");
       } catch (e) {
         setStatus($("genStatus"), e.message, "err");
       } finally {
@@ -301,6 +456,9 @@
     $("btnReset").addEventListener("click", () => {
       if (!confirm("Effacer cet email et recommencer depuis zéro ?")) return;
       turns = []; versions = []; current = null;
+      photos = []; photoSeq = 0; renderPhotos();
+      $("siteVisuals").checked = false;
+      setStatus($("photoStatus"), "");
       $("subject").value = ""; $("preheader").value = "";
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
       renderAll();
