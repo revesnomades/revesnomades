@@ -7,8 +7,24 @@ const ADMIN_EMAILS = new Set(["contact@amesnomades.com", "sarnelli.ap@gmail.com"
 const BREVO_BATCH_SIZE = 100;
 const MAX_TURNS = 40;
 // Photos importées par l'admin pour un email (bucket public « stays », dossier « emails/ »)
-const STORAGE_PUBLIC = `${Deno.env.get("SUPABASE_URL") ?? ""}/storage/v1/object/public/`;
-const UPLOADS_PREFIX = `${STORAGE_PUBLIC}stays/emails/`;
+const UPLOADS_PATH = "/storage/v1/object/public/stays/emails/";
+// Hôtes de stockage acceptés : celui du projet (adresse publique utilisée par le site) et celui que la fonction connaît
+const STORAGE_HOSTS = new Set(["qxrxwgrgjvesevjkjmry.supabase.co"]);
+try { STORAGE_HOSTS.add(new URL(Deno.env.get("SUPABASE_URL") ?? "").hostname); } catch { /* adresse absente */ }
+// Image du stockage public du projet (photos de séjours, de produits, photos importées)
+function isStoredImage(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && STORAGE_HOSTS.has(u.hostname) && u.pathname.startsWith("/storage/v1/object/public/");
+  } catch { return false; }
+}
+function isUploadedPhoto(url: string): boolean {
+  if (/[\s"'<>]/.test(url)) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && STORAGE_HOSTS.has(u.hostname) && u.pathname.startsWith(UPLOADS_PATH) && !u.pathname.includes("..") && isImage(u.pathname);
+  } catch { return false; }
+}
 const MAX_PHOTOS = 10;
 // Visuels du site montrés à l'IA quand l'admin le demande (les autres restent listés en texte)
 const SITE_VISION_MAX = 12;
@@ -230,7 +246,7 @@ function dropUnknownImages(html: string, allowed: Set<string>) {
   const out = html.replace(/<img\b[^>]*>/gi, (tag) => {
     const m = tag.match(/\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
     const src = (m?.[1] ?? m?.[2] ?? "").replace(/&amp;/g, "&").trim();
-    const ok = !!src && (allowed.has(src) || src.startsWith(`${SITE_URL}/`) || (STORAGE_PUBLIC.startsWith("http") && src.startsWith(STORAGE_PUBLIC)));
+    const ok = !!src && (allowed.has(src) || src.startsWith(`${SITE_URL}/`) || isStoredImage(src));
     if (ok) return tag;
     removed++;
     return "";
@@ -335,8 +351,10 @@ async function generateEmail(supabase: SupabaseClient, turns: Turn[], opts: Gene
   email.body_html = checked.html;
   if (checked.removed) email.notes += ` (${checked.removed} image${checked.removed > 1 ? "s ont été retirées" : " a été retirée"} : adresse inconnue.)`;
   if (unseen) email.notes += " (L'IA n'a pas pu voir les photos cette fois : elle les a placées d'après leurs descriptions. Vérifiez l'aperçu.)";
+  // Photos importées réellement présentes dans l'email (la page signale celles qui manquent)
+  const placed = opts.photos.filter(p => checked.html.includes(p.url)).map(p => p.n);
   // « raw » repart dans l'historique : il doit refléter l'email réellement affiché
-  return { ...email, raw: JSON.stringify(email), site_visuals_shown: shown.length };
+  return { ...email, raw: JSON.stringify(email), site_visuals_shown: shown.length, photos_placed: placed };
 }
 
 // ─── Envoi Brevo ───────────────────────────────────────────────────────────
@@ -395,17 +413,19 @@ Deno.serve(async (req) => {
         return json(req, { error: "Conversation invalide" }, 400);
       }
       // Photos importées : uniquement celles déposées dans notre dossier de stockage
-      const photos: Photo[] = (Array.isArray(body.photos) ? body.photos : [])
+      const sentPhotos: Photo[] = (Array.isArray(body.photos) ? body.photos : [])
         .map((p: Record<string, unknown>) => ({
           n: Math.max(1, Math.floor(Number(p?.n) || 0)),
           url: String(p?.url || "").trim(),
           note: String(p?.note || "").replace(/\s+/g, " ").trim().slice(0, 200),
-        }))
-        .filter((p: Photo) => UPLOADS_PREFIX.startsWith("http") && p.url.startsWith(UPLOADS_PREFIX) && isImage(p.url) && !/[\s"'<>]/.test(p.url))
-        .slice(0, MAX_PHOTOS);
+        }));
+      const photos = sentPhotos.filter((p: Photo) => isUploadedPhoto(p.url)).slice(0, MAX_PHOTOS);
+      // Rien n'est écarté en silence : la page affiche ce compte et les numéros refusés
+      const rejected = sentPhotos.filter((p: Photo) => !photos.includes(p)).map((p: Photo) => p.n);
+      if (rejected.length) console.warn("admin-email : photos refusées :", JSON.stringify(sentPhotos.filter((p: Photo) => rejected.includes(p.n)).map((p: Photo) => p.url.slice(0, 120))));
       const email = await generateEmail(supabase, turns, { photos, siteVisuals: body.site_visuals === true });
       const preview = wrapEmail(email.body_html, email.preheader, "Bonjour Marie,", "#");
-      return json(req, { ...email, preview_html: preview });
+      return json(req, { ...email, preview_html: preview, photos_received: photos.length, photos_rejected: rejected });
     }
 
     if (action === "preview") {

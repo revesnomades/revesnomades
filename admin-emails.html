@@ -444,7 +444,34 @@
         renderAll();
         saveDraft();
         const seen = email.site_visuals_shown ? ` L'IA a regardé ${email.site_visuals_shown} visuel${email.site_visuals_shown > 1 ? "s" : ""} du site.` : "";
-        setStatus($("genStatus"), `Email prêt.${seen} Relisez l'aperçu, puis demandez des modifications si besoin.`, "ok");
+        // Les photos importées sont-elles bien arrivées jusqu'à l'IA, puis dans l'email ?
+        const list = nums => nums.join(", ");
+        let photoProblem = "", photoPartial = false;
+        if (sentPhotos.length) {
+          if (typeof email.photos_received !== "number") {
+            photoProblem = "Vos photos n'ont pas été transmises à l'IA : la fonction admin-email en ligne sur Supabase est une ancienne version, qui ne connaît pas les photos. Redéployez-la avec le dernier code, puis relancez la demande.";
+          } else if (email.photos_received === 0) {
+            photoProblem = "Vos photos ont été refusées par la fonction admin-email (adresse de stockage non reconnue) : l'IA ne les a pas reçues. Retirez-les, importez-les à nouveau, puis relancez la demande.";
+          } else if (Array.isArray(email.photos_rejected) && email.photos_rejected.length) {
+            const many = email.photos_rejected.length > 1;
+            photoPartial = true;
+            photoProblem = many
+              ? `Les photos ${list(email.photos_rejected)} ont été refusées (adresse non reconnue) : l'IA ne les a pas reçues. Retirez-les et importez-les à nouveau.`
+              : `La photo ${list(email.photos_rejected)} a été refusée (adresse non reconnue) : l'IA ne l'a pas reçue. Retirez-la et importez-la à nouveau.`;
+          }
+        }
+        if (photoProblem) {
+          setStatus($("genStatus"), `${photoPartial ? "Email prêt, mais il manque des photos." : "Email prêt, mais sans vos photos."} ${photoProblem}`, "err");
+        } else {
+          const missing = sentPhotos.length && Array.isArray(email.photos_placed)
+            ? sentPhotos.map(p => p.n).filter(n => !email.photos_placed.includes(n)) : [];
+          const placed = sentPhotos.length && Array.isArray(email.photos_placed)
+            ? (missing.length
+              ? ` L'IA a reçu vos ${sentPhotos.length} photo${sentPhotos.length > 1 ? "s" : ""} mais n'a pas placé ${missing.length > 1 ? "les photos" : "la photo"} ${list(missing)} : demandez-lui de ${missing.length > 1 ? "les" : "l'"}ajouter.`
+              : ` Vos ${sentPhotos.length > 1 ? `${sentPhotos.length} photos sont` : "photo est"} dans l'email.`)
+            : "";
+          setStatus($("genStatus"), `Email prêt.${seen}${placed} Relisez l'aperçu, puis demandez des modifications si besoin.`, missing.length ? "err" : "ok");
+        }
       } catch (e) {
         setStatus($("genStatus"), e.message, "err");
       } finally {
