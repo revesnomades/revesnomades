@@ -1,3 +1,9 @@
+# Étape de construction : le site est statique, il n'y a rien à construire. Mais sans cette étape,
+# Netlify publie les fichiers sans empaqueter les fonctions du dossier netlify/edge-functions
+# (titres et aperçus propres à chaque séjour et produit, plan du site automatique).
+[build]
+  command = "echo 'Site statique : rien a construire'"
+
 [[headers]]
   for = "/*"
   [headers.values]

@@ -3,6 +3,7 @@
 import { applyMeta, buildSitemap, clearMemory, metaForUrl, nextDate, plain, productMeta, slugify, stayMeta, STATIC_PAGES } from "../lib/seo.ts";
 import seoHandler from "../edge-functions/seo.ts";
 import sitemapHandler from "../edge-functions/sitemap.ts";
+import checkHandler from "../edge-functions/seo-check.ts";
 
 function assert(cond: unknown, msg = "condition fausse"): asserts cond { if (!cond) throw new Error(msg); }
 function assertEquals(a: unknown, b: unknown, msg = "") { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`${msg}\n  obtenu  : ${JSON.stringify(a)}\n  attendu : ${JSON.stringify(b)}`); }
@@ -244,6 +245,8 @@ Deno.test("fonction plan du site : à jour depuis la base, partiel si une lectur
     const xml = await res.text();
     assert(xml.includes("sejour.html?slug=cevennes") && xml.includes("produit.html?id=p1") && xml.includes("/guides.html"));
     assertEquals(res.headers.get("content-type"), "application/xml; charset=utf-8");
+    assert(xml.includes("<!-- Plan généré automatiquement : 1 séjour(s) publié(s), 1 produit(s) -->"), "repère de génération");
+    assert(xml.indexOf("<!--") > xml.indexOf("?>") && xml.indexOf("<!--") < xml.indexOf("<urlset"), "repère placé avant la liste");
   });
   await withFetch(fakeDb({ stays: [{ slug: "cevennes", published: true }] }).fetcher, async () => {
     const xml = await (await sitemapHandler(new Request("https://amesnomades.com/sitemap.xml"), { next: fallback })).text();
@@ -252,5 +255,18 @@ Deno.test("fonction plan du site : à jour depuis la base, partiel si une lectur
   await withFetch(fakeDb({}).fetcher, async () => {
     const xml = await (await sitemapHandler(new Request("https://amesnomades.com/sitemap.xml"), { next: fallback })).text();
     assertEquals(xml, "<urlset>secours</urlset>");
+  });
+});
+
+Deno.test("page de contrôle : dit si les fonctions tournent et si la base répond", async () => {
+  await withFetch(fakeDb({ stays: [{ slug: "cevennes" }, { slug: "luberon" }], products: [{ id: "p1" }] }).fetcher, async () => {
+    const res = await checkHandler(new Request("https://amesnomades.com/seo-check"));
+    const text = await res.text();
+    assert(text.includes("Fonctions Netlify : actives") && text.includes("Séjours publiés lus dans la base : 2") && text.includes("Produits lus dans la base : 1"), text);
+    assertEquals([res.status, res.headers.get("x-robots-tag")], [200, "noindex"]);
+  });
+  await withFetch(fakeDb({ stays: 401 }).fetcher, async () => {
+    const text = await (await checkHandler(new Request("https://amesnomades.com/seo-check"))).text();
+    assert(text.includes("Fonctions Netlify : actives") && text.includes("Séjours publiés : lecture impossible (lecture stays : 401)") && text.includes("Produits : lecture impossible"), text);
   });
 });

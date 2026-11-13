@@ -12,10 +12,11 @@ export default async function handler(request: Request, context: Context): Promi
   ]);
   if (stays.status === "rejected" && products.status === "rejected") return context.next();
 
-  const xml = buildSitemap(
-    stays.status === "fulfilled" ? stays.value : [],
-    products.status === "fulfilled" ? products.value : [],
-  );
+  const stayRows = stays.status === "fulfilled" ? stays.value : [];
+  const productRows = products.status === "fulfilled" ? products.value : [];
+  // Repère visible en ouvrant le fichier : prouve que le plan vient de la base, pas du fichier de secours
+  const note = `<!-- Plan généré automatiquement : ${stayRows.length} séjour(s) publié(s), ${productRows.length} produit(s)${stays.status === "rejected" ? " — séjours illisibles" : ""}${products.status === "rejected" ? " — produits illisibles" : ""} -->`;
+  const xml = buildSitemap(stayRows, productRows).replace("?>\n", `?>\n${note}\n`);
   return new Response(xml, {
     status: 200,
     headers: {
