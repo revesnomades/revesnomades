@@ -114,6 +114,17 @@
         </div>
 
         <div class="account-card" style="margin-top:24px; padding:20px; background:rgba(0,0,0,0.02);">
+          <h3 style="margin:0; font-size:18px;">Bilan quotidien</h3>
+          <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
+            Chaque matin à 6 h, vous recevez par e-mail les chiffres de la veille : visites, commandes, réservations, inscriptions, messages.
+          </p>
+          <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+            <button class="btn on-light" id="btnDailyReport" type="button" style="padding:8px 16px;">Recevoir le bilan maintenant</button>
+            <span id="dailyReportMsg" role="status" aria-live="polite" style="color:var(--muted); font-size:13px;"></span>
+          </div>
+        </div>
+
+        <div class="account-card" style="margin-top:24px; padding:20px; background:rgba(0,0,0,0.02);">
           <h3 style="margin:0; font-size:18px;">🏠 Bandeaux de la page d'accueil (index.html)</h3>
           <p style="margin:6px 0 14px; color:var(--muted); font-size:13.5px;">
             Gérez l'affichage des rubriques sous le séjour principal. Au lancement (1 seul séjour), désactivez "5 séjours" et activez "Shop Vedette".
@@ -199,7 +210,7 @@
 
   <script src="assets/js/main.js?v=3"></script>
   <script type="module">
-    import { supabase } from "./assets/js/supabaseClient.js?v=3";
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
     import { initCartBadge } from "./assets/js/cart.js?v=3";
     initCartBadge();
 
@@ -225,6 +236,8 @@
         return;
       }
       adminStatus.textContent = `Connecté (Admin: ${session.user.email})`;
+      // Mes propres visites ne sont pas comptées dans les statistiques du site
+      try { localStorage.setItem("an_admin", "1"); } catch (e) {}
       loadCounts();
     }
 
@@ -235,6 +248,40 @@
       priorityCount.textContent = priorityTotal ?? "0";
       await loadHomepageBandsConfig();
     }
+
+    // ─── Bilan quotidien : envoi immédiat du bilan de la veille ─────────────
+    const btnDailyReport = document.getElementById("btnDailyReport");
+    const dailyReportMsg = document.getElementById("dailyReportMsg");
+    btnDailyReport?.addEventListener("click", async () => {
+      btnDailyReport.disabled = true;
+      dailyReportMsg.style.color = "var(--muted)";
+      dailyReportMsg.textContent = "Préparation du bilan…";
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/daily-report`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session?.access_token || ""}` },
+          body: JSON.stringify({ action: "send_now" }),
+        });
+        const data = await res.json().catch(() => null);
+        if (res.status === 404) throw new Error("La fonction daily-report n'est pas encore déployée sur Supabase.");
+        if (!data) throw new Error(`Erreur ${res.status}`);
+        if (data.status === "sent") {
+          dailyReportMsg.style.color = "#2e7d4f";
+          dailyReportMsg.textContent = "Bilan envoyé. Vérifiez votre boîte mail (et les spams)." + (data.missing?.length ? ` Données indisponibles : ${data.missing.join(", ")}.` : "");
+        } else if (data.status === "simulated") {
+          dailyReportMsg.style.color = "#b3261e";
+          dailyReportMsg.textContent = "Bilan préparé mais non envoyé : ajoutez DAILY_REPORT_EMAIL (et BREVO_API_KEY) dans les secrets des fonctions Supabase.";
+        } else {
+          throw new Error(data.error || "Envoi impossible");
+        }
+      } catch (e) {
+        dailyReportMsg.style.color = "#b3261e";
+        dailyReportMsg.textContent = "Le bilan n'a pas pu être envoyé : " + (e.message || e);
+      } finally {
+        btnDailyReport.disabled = false;
+      }
+    });
 
     async function loadHomepageBandsConfig() {
       if (!chkShowStaysBand || !chkShowBoutiqueBand) return;

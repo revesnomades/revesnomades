@@ -15,3 +15,9 @@ verify_jwt = false
 
 [functions.email-unsubscribe]
 verify_jwt = false
+
+[functions.track-visit]
+verify_jwt = false
+
+[functions.daily-report]
+verify_jwt = false

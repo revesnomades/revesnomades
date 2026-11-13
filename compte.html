@@ -1630,6 +1630,8 @@
       // Afficher le bouton admin si nécessaire
       const adminAccessBtn = document.getElementById("adminAccessBtn");
       if (adminAccessBtn) adminAccessBtn.style.display = isAdmin ? "block" : "none";
+      // Compte administrateur : ses visites ne sont pas comptées dans les statistiques du site
+      if (isAdmin) { try { localStorage.setItem("an_admin", "1"); } catch (e) {} }
 
       // Même affichage pour tous : réservations + achats + newsletter
       if (perksBox) perksBox.style.display = "none";
@@ -2118,5 +2120,6 @@
     setupMobileCarousel("compteSejours", "compteSejoursDots", "78vw");
   </script>
 
+  <script src="/assets/js/visits.js" defer></script>
 </body>
 </html>
