@@ -4,6 +4,8 @@ import { applyMeta, buildSitemap, clearMemory, metaForUrl, nextDate, plain, prod
 import seoHandler from "../edge-functions/seo.ts";
 import sitemapHandler from "../edge-functions/sitemap.ts";
 import checkHandler from "../edge-functions/seo-check.ts";
+import { onRequest as pagesMiddleware } from "../../functions/_middleware.ts";
+import { handlePage } from "../lib/seo.ts";
 
 function assert(cond: unknown, msg = "condition fausse"): asserts cond { if (!cond) throw new Error(msg); }
 function assertEquals(a: unknown, b: unknown, msg = "") { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`${msg}\n  obtenu  : ${JSON.stringify(a)}\n  attendu : ${JSON.stringify(b)}`); }
@@ -243,14 +245,14 @@ Deno.test("fonction plan du site : à jour depuis la base, partiel si une lectur
   await withFetch(fakeDb({ stays: [{ slug: "cevennes", published: true }], products: [{ id: "p1" }] }).fetcher, async () => {
     const res = await sitemapHandler(new Request("https://amesnomades.com/sitemap.xml"), { next: fallback });
     const xml = await res.text();
-    assert(xml.includes("sejour.html?slug=cevennes") && xml.includes("produit.html?id=p1") && xml.includes("/guides.html"));
+    assert(xml.includes("/sejour?slug=cevennes") && xml.includes("/produit?id=p1") && xml.includes("/guides</loc>") && !xml.includes(".html"), "adresses sans « .html »");
     assertEquals(res.headers.get("content-type"), "application/xml; charset=utf-8");
     assert(xml.includes("<!-- Plan généré automatiquement : 1 séjour(s) publié(s), 1 produit(s) -->"), "repère de génération");
     assert(xml.indexOf("<!--") > xml.indexOf("?>") && xml.indexOf("<!--") < xml.indexOf("<urlset"), "repère placé avant la liste");
   });
   await withFetch(fakeDb({ stays: [{ slug: "cevennes", published: true }] }).fetcher, async () => {
     const xml = await (await sitemapHandler(new Request("https://amesnomades.com/sitemap.xml"), { next: fallback })).text();
-    assert(xml.includes("sejour.html?slug=cevennes") && !xml.includes("produit.html?id="), "séjours présents malgré l'échec des produits");
+    assert(xml.includes("/sejour?slug=cevennes") && !xml.includes("/produit?id="), "séjours présents malgré l'échec des produits");
   });
   await withFetch(fakeDb({}).fetcher, async () => {
     const xml = await (await sitemapHandler(new Request("https://amesnomades.com/sitemap.xml"), { next: fallback })).text();
@@ -268,5 +270,50 @@ Deno.test("page de contrôle : dit si les fonctions tournent et si la base répo
   await withFetch(fakeDb({ stays: 401 }).fetcher, async () => {
     const text = await (await checkHandler(new Request("https://amesnomades.com/seo-check"))).text();
     assert(text.includes("Fonctions Netlify : actives") && text.includes("Séjours publiés : lecture impossible (lecture stays : 401)") && text.includes("Produits : lecture impossible"), text);
+  });
+});
+
+Deno.test("adresses sans « .html » quand l'hébergeur redirige /page.html vers /page", async () => {
+  assertEquals(stayMeta(STAY, [], "2026-11-13", true).url, "https://amesnomades.com/sejour?slug=pilates-rando-cevennes");
+  assertEquals(productMeta(PRODUCT, true).url, "https://amesnomades.com/produit?id=p1");
+  assertEquals((productMeta(PRODUCT, true).jsonLd.offers as Record<string, string>).url, "https://amesnomades.com/produit?id=p1");
+  const locs = [...buildSitemap([{ slug: "cevennes", published: true }], [{ id: "p1" }], STATIC_PAGES, true).matchAll(/<loc>([^<]*)<\/loc>/g)].map(m => m[1]);
+  assert(!locs.some(l => l.includes(".html")), "aucune adresse en .html");
+  assert(locs.includes("https://amesnomades.com/") && locs.includes("https://amesnomades.com/boutique") && locs.includes("https://amesnomades.com/sejour?slug=cevennes"));
+
+  // La forme est déduite de l'adresse réellement servie
+  const db = fakeDb({ stays: [STAY], stay_dates: [] });
+  await withFetch(db.fetcher, async () => {
+    const clean = await (await handlePage(new Request("https://amesnomades.com/sejour?slug=pilates-rando-cevennes"), staticPage("sejour.html"))).text();
+    assertEquals(attr(head(clean), "pageCanonical", "href"), "https://amesnomades.com/sejour?slug=pilates-rando-cevennes");
+    const html = await (await handlePage(new Request("https://amesnomades.com/sejour.html?slug=pilates-rando-cevennes"), staticPage("sejour.html"))).text();
+    assertEquals(attr(head(html), "pageCanonical", "href"), "https://amesnomades.com/sejour.html?slug=pilates-rando-cevennes");
+  });
+});
+
+Deno.test("Cloudflare Pages : séjour, redirection laissée intacte, plan du site, contrôle, panne", async () => {
+  const db = fakeDb({ stays: [STAY], stay_dates: [], products: [PRODUCT] });
+  await withFetch(db.fetcher, async () => {
+    const env = {};
+    const page1 = await pagesMiddleware({ request: new Request("https://amesnomades.com/sejour?slug=pilates-rando-cevennes"), env, next: staticPage("sejour.html") });
+    assert((await page1.text()).includes('<title id="pageTitle">Pilates &amp; randonnée en Cévennes — Âmes Nomades</title>'));
+    // /sejour.html est redirigé par l'hébergeur : la redirection passe telle quelle
+    const redirect = await pagesMiddleware({ request: new Request("https://amesnomades.com/sejour.html?slug=pilates-rando-cevennes"), env, next: () => Promise.resolve(new Response(null, { status: 308, headers: { location: "/sejour?slug=pilates-rando-cevennes" } })) });
+    assertEquals([redirect.status, redirect.headers.get("location")], [308, "/sejour?slug=pilates-rando-cevennes"]);
+    const map = await (await pagesMiddleware({ request: new Request("https://amesnomades.com/sitemap.xml"), env, next: () => Promise.resolve(new Response("secours")) })).text();
+    assert(map.includes("/sejour?slug=pilates-rando-cevennes") && map.includes("/produit?id=p1") && !map.includes(".html"));
+    const check = await (await pagesMiddleware({ request: new Request("https://amesnomades.com/seo-check"), env, next: () => Promise.resolve(new Response("accueil")) })).text();
+    assert(check.startsWith("Fonctions Cloudflare Pages : actives"), check);
+    // Une autre adresse (si jamais elle arrivait jusqu'ici) n'est pas touchée
+    assertEquals(await (await pagesMiddleware({ request: new Request("https://amesnomades.com/boutique"), env, next: () => Promise.resolve(new Response("boutique")) })).text(), "boutique");
+  });
+  // Base en panne : la page d'origine, et la suite de la chaîne n'est appelée qu'une fois
+  await withFetch(fakeDb({}).fetcher, async () => {
+    let calls = 0;
+    const next = () => { calls++; return Promise.resolve(new Response(page("sejour.html"), { status: 200, headers: { "content-type": "text/html" } })); };
+    const res = await pagesMiddleware({ request: new Request("https://amesnomades.com/sejour?slug=pilates-rando-cevennes"), env: {}, next });
+    assertEquals([await res.text() === page("sejour.html"), calls], [true, 1]);
+    const map = await pagesMiddleware({ request: new Request("https://amesnomades.com/sitemap.xml"), env: {}, next: () => Promise.resolve(new Response("secours")) });
+    assertEquals(await map.text(), "secours");
   });
 });

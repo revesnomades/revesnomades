@@ -6,72 +6,72 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/boutique.html</loc>
+    <loc>https://amesnomades.com/boutique</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/bon-cadeau.html</loc>
+    <loc>https://amesnomades.com/bon-cadeau</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guides.html</loc>
+    <loc>https://amesnomades.com/guides</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guide-retraite-pilates.html</loc>
+    <loc>https://amesnomades.com/guide-retraite-pilates</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guide-partir-seule.html</loc>
+    <loc>https://amesnomades.com/guide-partir-seule</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guide-valise-retraite.html</loc>
+    <loc>https://amesnomades.com/guide-valise-retraite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guide-offrir-sejour.html</loc>
+    <loc>https://amesnomades.com/guide-offrir-sejour</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/faq.html</loc>
+    <loc>https://amesnomades.com/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/event-sommieres.html</loc>
+    <loc>https://amesnomades.com/event-sommieres</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/guide-cadeau.html</loc>
+    <loc>https://amesnomades.com/guide-cadeau</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/cgv.html</loc>
+    <loc>https://amesnomades.com/cgv</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/politique-retours.html</loc>
+    <loc>https://amesnomades.com/politique-retours</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/mentions-legales.html</loc>
+    <loc>https://amesnomades.com/mentions-legales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://amesnomades.com/politique-confidentialite.html</loc>
+    <loc>https://amesnomades.com/politique-confidentialite</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>

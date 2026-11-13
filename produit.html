@@ -708,7 +708,8 @@
       document.getElementById("pageTitle").textContent = `${p.name} — Âmes Nomades`;
       if (p.description) document.getElementById("pageDesc").setAttribute("content", p.description.slice(0, 160));
       // Adresse officielle et aperçu de partage (déjà écrits côté serveur quand c'est possible ; complétés ici sinon)
-      const productPageUrl = `https://amesnomades.com/produit.html?id=${encodeURIComponent(id)}`;
+      const productPagePath = /^\/produit\/?$/i.test(location.pathname) ? "/produit" : "/produit.html"; // l'hébergeur peut servir la page sans « .html »
+      const productPageUrl = `https://amesnomades.com${productPagePath}?id=${encodeURIComponent(id)}`;
       document.querySelectorAll('link[rel="canonical"]').forEach(el => el.remove());
       const canonicalEl = document.createElement("link");
       canonicalEl.rel = "canonical";

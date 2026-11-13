@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/sejour", "/sejour.html", "/produit", "/produit.html", "/sitemap.xml", "/seo-check"],
+  "exclude": []
+}

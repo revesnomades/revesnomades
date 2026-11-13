@@ -63,8 +63,9 @@ export type PageMeta = {
 // deno-lint-ignore no-explicit-any
 type Row = Record<string, any>;
 
-export const stayUrl = (slug: string) => `${SITE}/sejour.html?slug=${encodeURIComponent(slug)}`;
-export const productUrl = (id: string) => `${SITE}/produit.html?id=${encodeURIComponent(id)}`;
+// Forme des adresses : avec « .html », ou sans quand l'hébergeur redirige /page.html vers /page (`clean`)
+export const stayUrl = (slug: string, clean = false) => `${SITE}/sejour${clean ? "" : ".html"}?slug=${encodeURIComponent(slug)}`;
+export const productUrl = (id: string, clean = false) => `${SITE}/produit${clean ? "" : ".html"}?id=${encodeURIComponent(id)}`;
 
 /** Même phrase que celle écrite par la page séjour une fois chargée. */
 export function stayDescription(stay: Row): string {
@@ -84,10 +85,10 @@ export function nextDate(dates: Row[], today: string): Row | null {
   return upcoming[0] || null;
 }
 
-export function stayMeta(stay: Row, dates: Row[] = [], today = new Date().toISOString().slice(0, 10)): PageMeta {
+export function stayMeta(stay: Row, dates: Row[] = [], today = new Date().toISOString().slice(0, 10), clean = false): PageMeta {
   const name = plain(stay.title, 120) || "Séjour";
   const description = stayDescription(stay);
-  const url = stayUrl(String(stay.slug));
+  const url = stayUrl(String(stay.slug), clean);
   const image = absolute(stay.hero_image) || DEFAULT_IMAGE;
   const organizer = { "@type": "Organization", name: BRAND, url: SITE };
   const date = nextDate(dates, today);
@@ -114,10 +115,10 @@ export function stayMeta(stay: Row, dates: Row[] = [], today = new Date().toISOS
   return { title: `${name} — ${BRAND}`, description, url, image, type: "website", jsonLd, jsonLdId: "staySchema" };
 }
 
-export function productMeta(p: Row): PageMeta {
+export function productMeta(p: Row, clean = false): PageMeta {
   const name = plain(p.name, 120) || "Produit";
   const description = plain(p.description, 160) || plain(p.description_longue, 160) || `${name} : à retrouver dans le shop ${BRAND}.`;
-  const url = productUrl(String(p.id));
+  const url = productUrl(String(p.id), clean);
   const images: string[] = (Array.isArray(p.image_urls) && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []))
     .map((u: unknown) => String(u || "")).filter((u: string) => u && !isVideo(u)).map(absolute);
   const image = images[0] || DEFAULT_IMAGE;
@@ -231,7 +232,8 @@ export const STATIC_PAGES: SitemapEntry[] = [
   { path: "/politique-confidentialite.html", changefreq: "yearly", priority: "0.2" },
 ];
 
-export function buildSitemap(stays: Row[] = [], products: Row[] = [], pages: SitemapEntry[] = STATIC_PAGES): string {
+export function buildSitemap(stays: Row[] = [], products: Row[] = [], pages: SitemapEntry[] = STATIC_PAGES, clean = false): string {
+  const pagePath = (path: string) => clean ? path.replace(/\.html$/, "") : path;
   const seen = new Set<string>();
   const url = (loc: string, changefreq: string, priority: string) => {
     if (seen.has(loc)) return "";
@@ -241,14 +243,14 @@ export function buildSitemap(stays: Row[] = [], products: Row[] = [], pages: Sit
   let body = "";
   const home = pages.filter(p => p.path === "/"), rest = pages.filter(p => p.path !== "/");
   for (const p of home) body += url(`${SITE}${p.path}`, p.changefreq, p.priority);
-  for (const s of stays) if (s?.slug && s.published !== false) body += url(stayUrl(String(s.slug)), "weekly", "0.9");
-  for (const p of rest) body += url(`${SITE}${p.path}`, p.changefreq, p.priority);
-  for (const p of products) if (p?.id) body += url(productUrl(String(p.id)), "weekly", "0.6");
+  for (const s of stays) if (s?.slug && s.published !== false) body += url(stayUrl(String(s.slug), clean), "weekly", "0.9");
+  for (const p of rest) body += url(`${SITE}${pagePath(p.path)}`, p.changefreq, p.priority);
+  for (const p of products) if (p?.id) body += url(productUrl(String(p.id), clean), "weekly", "0.6");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}</urlset>\n`;
 }
 
 // ─── Lecture de la base (avec délai court et mémoire de quelques minutes) ──
-type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
+export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
 const memory = new Map<string, { at: number; rows: Row[] }>();
 const MEMORY_MS = 5 * 60 * 1000;
 
@@ -273,7 +275,7 @@ export async function readRows(query: string, fetcher: Fetcher = fetch, now = Da
 const SAFE_ID = /^[A-Za-z0-9_\-.]{1,80}$/;
 
 /** Ce que la page demandée doit annoncer, ou null si elle doit rester telle quelle. */
-export async function metaForUrl(url: URL, fetcher: Fetcher = fetch, now = Date.now()): Promise<PageMeta | null> {
+export async function metaForUrl(url: URL, fetcher: Fetcher = fetch, now = Date.now(), clean = false): Promise<PageMeta | null> {
   const page = url.pathname.replace(/\.html$/i, "").toLowerCase();
   if (url.searchParams.get("preview") === "1") return null; // aperçu d'un séjour non publié : rien n'est annoncé
 
@@ -292,14 +294,86 @@ export async function metaForUrl(url: URL, fetcher: Fetcher = fetch, now = Date.
     try {
       dates = await readRows(`stay_dates?select=start_date,end_date&stay_id=eq.${encodeURIComponent(String(stay.id))}&order=start_date.asc&limit=50`, fetcher, now);
     } catch { /* sans date, le séjour est annoncé quand même */ }
-    return stayMeta(stay, dates, new Date(now).toISOString().slice(0, 10));
+    return stayMeta(stay, dates, new Date(now).toISOString().slice(0, 10), clean);
   }
 
   if (page === "/produit") {
     const id = (url.searchParams.get("id") || "").trim();
     if (!SAFE_ID.test(id)) return null;
     const rows = await readRows(`products?select=*&id=eq.${encodeURIComponent(id)}&limit=1`, fetcher, now);
-    return rows[0] ? productMeta(rows[0]) : null;
+    return rows[0] ? productMeta(rows[0], clean) : null;
   }
   return null;
+}
+
+// ─── Traitements communs (Netlify et Cloudflare Pages appellent ces trois fonctions) ───
+type Next = () => Promise<Response>;
+export type HostOptions = { fetcher?: Fetcher; clean?: boolean };
+
+/** Pages séjour et produit : renvoie la page avec les informations du séjour ou du produit, ou telle quelle. */
+export async function handlePage(request: Request, next: Next, opts: HostOptions = {}): Promise<Response> {
+  if (request.method !== "GET") return next();
+  const url = new URL(request.url);
+  // Sans « .html » dans l'adresse servie : c'est la forme officielle chez cet hébergeur
+  const clean = opts.clean ?? !/\.html$/i.test(url.pathname);
+
+  // La page et les informations du séjour ou du produit sont demandées en même temps
+  const [response, meta] = await Promise.all([
+    next(),
+    metaForUrl(url, opts.fetcher, Date.now(), clean).catch((e): PageMeta | null => {
+      console.error("seo :", e instanceof Error ? e.message : e);
+      return null;
+    }),
+  ]);
+  if (!meta || response.status !== 200) return response;
+  if (!(response.headers.get("content-type") || "").includes("text/html")) return response;
+
+  const original = await response.text();
+  let html = original;
+  try { html = applyMeta(original, meta); } catch (e) { console.error("seo :", e instanceof Error ? e.message : e); }
+
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  // La page dépend maintenant de la base : les repères « inchangée depuis… » du fichier ne valent plus
+  headers.delete("etag");
+  headers.delete("last-modified");
+  return new Response(html, { status: 200, headers });
+}
+
+/** Plan du site depuis la base ; le fichier sitemap.xml du site si la base ne répond pas du tout. */
+export async function handleSitemap(request: Request, next: Next, opts: HostOptions = {}): Promise<Response> {
+  if (request.method !== "GET") return next();
+  const [stays, products] = await Promise.allSettled([
+    readRows("stays?select=slug,published&published=eq.true&order=created_at.desc&limit=500", opts.fetcher),
+    readRows("products?select=id&order=created_at.desc&limit=1000", opts.fetcher),
+  ]);
+  if (stays.status === "rejected" && products.status === "rejected") return next();
+
+  const stayRows = stays.status === "fulfilled" ? stays.value : [];
+  const productRows = products.status === "fulfilled" ? products.value : [];
+  // Repère visible en ouvrant le fichier : prouve que le plan vient de la base, pas du fichier de secours
+  const note = `<!-- Plan généré automatiquement : ${stayRows.length} séjour(s) publié(s), ${productRows.length} produit(s)${stays.status === "rejected" ? " — séjours illisibles" : ""}${products.status === "rejected" ? " — produits illisibles" : ""} -->`;
+  const xml = buildSitemap(stayRows, productRows, STATIC_PAGES, opts.clean ?? false).replace("?>\n", `?>\n${note}\n`);
+  return new Response(xml, {
+    status: 200,
+    headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600", "x-robots-tag": "noindex" },
+  });
+}
+
+/** Page de contrôle : dit quel hébergeur fait tourner les fonctions et si la base répond. */
+export async function handleCheck(host: string, opts: HostOptions = {}): Promise<Response> {
+  const [stays, products] = await Promise.allSettled([
+    readRows("stays?select=slug&published=eq.true&limit=500", opts.fetcher),
+    readRows("products?select=id&limit=1000", opts.fetcher),
+  ]);
+  const why = (r: PromiseRejectedResult) => r.reason instanceof Error ? r.reason.message : String(r.reason);
+  const lines = [
+    `Fonctions ${host} : actives`,
+    stays.status === "fulfilled" ? `Séjours publiés lus dans la base : ${stays.value.length}` : `Séjours publiés : lecture impossible (${why(stays)})`,
+    products.status === "fulfilled" ? `Produits lus dans la base : ${products.value.length}` : `Produits : lecture impossible (${why(products)})`,
+  ];
+  return new Response(lines.join("\n") + "\n", {
+    status: 200,
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex" },
+  });
 }

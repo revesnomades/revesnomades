@@ -1599,7 +1599,8 @@
         const metaDesc = buildStayMetaDescription(stay);
         if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
         // Adresse officielle et aperçu de partage (déjà écrits côté serveur quand c'est possible ; complétés ici sinon)
-        const stayUrl = `https://amesnomades.com/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+        const stayPagePath = /^\/sejour\/?$/i.test(location.pathname) ? "/sejour" : "/sejour.html"; // l'hébergeur peut servir la page sans « .html »
+        const stayUrl = `https://amesnomades.com${stayPagePath}?slug=${encodeURIComponent(stay.slug)}`;
         const stayFullTitle = `${stay.title || "Séjour"} — Âmes Nomades`;
         document.querySelectorAll('link[rel="canonical"]').forEach(el => el.remove());
         const canonicalEl = document.createElement("link");

@@ -7,6 +7,8 @@
     try { if (localStorage.getItem("an_admin") === "1") return; } catch (e) {}
     if (navigator.webdriver) return; // navigateur piloté par un robot
     var path = location.pathname || "/";
+    // L'hébergeur sert « /boutique » pour « /boutique.html » : on garde un seul nom par page
+    if (path !== "/" && !/\.[a-z0-9]+$/i.test(path)) path = path.replace(/\/+$/, "") + ".html";
     if (/^\/(admin-|acces-admin)/i.test(path)) return;
 
     var query = new URLSearchParams(location.search);

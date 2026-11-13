@@ -1,3 +1,6 @@
 
 # Fichiers temporaires du serveur de prévisualisation impeccable
 .impeccable/live/
+
+# Essais locaux Cloudflare Pages
+.wrangler/
