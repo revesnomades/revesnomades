@@ -70,6 +70,24 @@
     .em-check input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: #1e1f22; }
     .btn-danger { background: #cc6f53 !important; color: #fff !important; border-color: #cc6f53 !important; }
     .is-loading { opacity: .6; pointer-events: none; }
+    .em-history { margin-top: 24px; }
+    .em-history-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .em-table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+    .em-table th { text-align: left; font-weight: 600; font-size: 12px; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .em-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .em-table th.num, .em-table td.num { text-align: right; white-space: nowrap; }
+    .em-table .em-subj { font-weight: 600; word-break: break-word; }
+    .em-table .em-pct { display: block; font-size: 12px; color: var(--muted); }
+    .em-table .em-warn { display: block; font-size: 12px; color: #b3261e; margin-top: 4px; font-weight: 400; }
+    @media (max-width: 760px) {
+      .em-table thead { display: none; }
+      .em-table, .em-table tbody, .em-table tr, .em-table td { display: block; width: 100%; box-sizing: border-box; }
+      .em-table tr { border: 1px solid var(--line); background: #fff; padding: 6px 0; margin-bottom: 10px; }
+      .em-table td { border: none; padding: 4px 12px; }
+      .em-table td.num { display: flex; justify-content: space-between; gap: 12px; text-align: right; }
+      .em-table td.num::before { content: attr(data-label); color: var(--muted); text-align: left; }
+      .em-table td.num .em-pct { display: inline; margin-left: 8px; }
+    }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -158,6 +176,15 @@
           <iframe class="em-preview" id="preview" title="Aperçu de l'email" sandbox="" hidden></iframe>
           <p class="em-hint">Dans l'aperçu, « Bonjour Marie, » est remplacé à l'envoi par le prénom de chaque destinataire (ou « Bonjour, » si on ne le connaît pas).</p>
         </div>
+      </div>
+
+      <div class="em-panel em-history" id="historyPanel">
+        <div class="em-history-head">
+          <h2>4. Derniers envois</h2>
+          <button type="button" class="btn tiny on-light" id="btnHistory">Actualiser</button>
+        </div>
+        <div id="historyBody"><p class="em-hint">Chargement…</p></div>
+        <p class="em-hint">Chiffres de Brevo, en personnes : « Lu » compte celles qui ont ouvert l'email au moins une fois, « Cliqué » celles qui ont cliqué sur au moins un lien. Les pourcentages portent sur les emails reçus. Les ouvertures sont approximatives : certaines messageries (Apple Mail notamment) ouvrent les emails toutes seules, d'autres bloquent ce comptage. Les clics sont plus fiables.</p>
       </div>
     </div>
   </section>
@@ -565,6 +592,7 @@
         const failed = r.failures?.length ? ` Échecs : ${r.failures.join(", ")}.` : "";
         setStatus($("sendStatus"), `Email envoyé à ${r.sent} personne${r.sent > 1 ? "s" : ""} sur ${r.total}.${failed}`, failed ? "err" : "ok");
         if (!failed) { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
+        loadHistory();
       } catch (e) {
         setStatus($("sendStatus"), e.message, "err");
       } finally {
@@ -572,6 +600,58 @@
         resetConfirm();
       }
     });
+
+    // ── Derniers envois ──
+    const AUDIENCE_LABEL = { newsletter: "Newsletter", priority: "Prioritaires" };
+    const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmtNum = n => new Intl.NumberFormat("fr-FR").format(n);
+    const fmtDate = iso => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(new Date(iso));
+    const pct = (part, whole) => whole > 0 ? `${Math.round(part / whole * 100)} %` : "";
+
+    function historyRow(c) {
+      const s = c.stats;
+      const base = s && s.delivered != null ? s.delivered : c.recipients;
+      const cell = (label, value, share) => `<td class="num" data-label="${label}"><span>${value}${share ? `<span class="em-pct">${share}</span>` : ""}</span></td>`;
+      const dash = "—";
+      const lists = (c.audiences || []).map(a => AUDIENCE_LABEL[a] || a).join(" + ") || dash;
+      const warn = c.stats_error ? `<span class="em-warn">${esc(s ? `Chiffres du ${fmtDate(c.stats_at)} (relecture impossible : ${c.stats_error})` : `Statistiques indisponibles : ${c.stats_error}`)}</span>` : "";
+      const bounced = s && s.bounced ? `<span class="em-pct">${fmtNum(s.bounced)} non distribué${s.bounced > 1 ? "s" : ""}</span>` : "";
+      return `<tr>
+        <td><span class="em-subj">${esc(c.subject)}</span><span class="em-pct">${esc(fmtDate(c.created_at))} · ${esc(lists)}</span>${warn}</td>
+        ${cell("Envoyé à", fmtNum(c.recipients))}
+        <td class="num" data-label="Reçu"><span>${s && s.delivered != null ? fmtNum(s.delivered) : dash}${bounced}</span></td>
+        ${cell("Lu", s ? fmtNum(s.opened) : dash, s ? pct(s.opened, base) : "")}
+        ${cell("Cliqué", s ? fmtNum(s.clicked) : dash, s ? pct(s.clicked, base) : "")}
+      </tr>`;
+    }
+
+    async function loadHistory() {
+      const box = $("historyBody");
+      $("btnHistory").disabled = true;
+      if (!box.querySelector("table")) box.innerHTML = `<p class="em-hint">Chargement des chiffres chez Brevo…</p>`;
+      try {
+        const r = await callApi({ action: "history" });
+        const list = Array.isArray(r.campaigns) ? r.campaigns : null;
+        if (!list) {
+          box.innerHTML = `<p class="em-status err">La fonction admin-email en ligne est une ancienne version : redéployez-la pour voir les statistiques.</p>`;
+        } else if (!list.length) {
+          box.innerHTML = `<p class="em-hint">Aucun email envoyé pour l'instant.</p>`;
+        } else {
+          box.innerHTML = `<table class="em-table">
+            <thead><tr><th>Email</th><th class="num">Envoyé à</th><th class="num">Reçu</th><th class="num">Lu</th><th class="num">Cliqué</th></tr></thead>
+            <tbody>${list.map(historyRow).join("")}</tbody>
+          </table>`;
+        }
+      } catch (e) {
+        const msg = e.message === "Action inconnue"
+          ? "La fonction admin-email en ligne est une ancienne version : redéployez-la pour voir les statistiques."
+          : e.message;
+        box.innerHTML = `<p class="em-status err">${esc(msg)}</p>`;
+      } finally {
+        $("btnHistory").disabled = false;
+      }
+    }
+    $("btnHistory").addEventListener("click", loadHistory);
 
     // ── Démarrage ──
     const user = await checkAdmin();
@@ -587,6 +667,7 @@
         $("cntNewsletter").textContent = $("cntPriority").textContent = "";
         setStatus($("sendStatus"), e.message, "err");
       });
+      loadHistory();
     }
   </script>
 </body>

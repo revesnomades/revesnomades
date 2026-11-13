@@ -363,17 +363,120 @@ async function sendBatch(
   subject: string,
   htmlContent: string,
   versions: { to: { email: string; name?: string }[]; params: Record<string, string> }[],
+  tag?: string,
 ) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "accept": "application/json", "content-type": "application/json", "api-key": brevoApiKey },
-    body: JSON.stringify({ sender: SENDER, replyTo: SENDER, subject, htmlContent, messageVersions: versions }),
+    // L'étiquette regroupe chez Brevo tous les emails d'un même envoi : elle sert à lire ses statistiques
+    body: JSON.stringify({ sender: SENDER, replyTo: SENDER, subject, htmlContent, messageVersions: versions, ...(tag ? { tags: [tag] } : {}) }),
   });
   if (!res.ok) throw new Error(`Brevo ${res.status} ${await res.text().catch(() => "")}`);
 }
 
 function brevoHtml(bodyHtml: string, preheader: string) {
   return wrapEmail(bodyHtml, preheader, "{{ params.salutation }}", "{{ params.unsubscribe_url }}");
+}
+
+// ─── Statistiques des envois (lues chez Brevo) ─────────────────────────────
+type CampaignStats = { delivered: number | null; opened: number; clicked: number; bounced: number; source: "tag" | "subject" };
+const STATS_FRESH_MS = 10 * 60 * 1000;      // relues au plus toutes les 10 minutes
+const STATS_WINDOW_DAYS = 90;               // Brevo ne donne pas plus de 90 jours d'historique par demande
+const HISTORY_LIMIT = 20;
+
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+const num = (v: unknown) => Number.isFinite(Number(v)) ? Number(v) : 0;
+
+/** Période lue chez Brevo : du jour de l'envoi à aujourd'hui, 90 jours au plus. */
+function statsWindow(sentAt: string, now = new Date()) {
+  const start = new Date(sentAt);
+  const end = new Date(Math.min(now.getTime(), start.getTime() + (STATS_WINDOW_DAYS - 1) * 86400000));
+  return { startDate: isoDay(start), endDate: isoDay(end < start ? start : end) };
+}
+
+async function brevoGet(apiKey: string, path: string) {
+  const res = await fetch(`https://api.brevo.com/v3${path}`, { headers: { accept: "application/json", "api-key": apiKey } });
+  if (!res.ok) throw new Error(`Brevo ${res.status} ${(await res.text().catch(() => "")).slice(0, 160)}`);
+  return await res.json();
+}
+
+/** Envois étiquetés : totaux calculés par Brevo pour cette étiquette (personnes uniques). */
+async function statsByTag(apiKey: string, tag: string, sentAt: string): Promise<CampaignStats> {
+  const { startDate, endDate } = statsWindow(sentAt);
+  const r = await brevoGet(apiKey, `/smtp/statistics/aggregatedReport?startDate=${startDate}&endDate=${endDate}&tag=${encodeURIComponent(tag)}`);
+  const clicked = num(r?.uniqueClicks);
+  return {
+    delivered: r?.delivered == null ? null : num(r.delivered),
+    opened: Math.max(num(r?.uniqueOpens), clicked), // cliquer suppose d'avoir ouvert
+    clicked,
+    bounced: num(r?.hardBounces) + num(r?.softBounces),
+    source: "tag",
+  };
+}
+
+/** Envois antérieurs à l'étiquette : événements de la période, retrouvés par leur objet exact. */
+async function statsBySubject(apiKey: string, subject: string, sentAt: string): Promise<CampaignStats> {
+  const { startDate, endDate } = statsWindow(sentAt);
+  const people = { delivered: new Set<string>(), opened: new Set<string>(), clicked: new Set<string>(), bounced: new Set<string>() };
+  const kinds: Array<[string, keyof typeof people]> = [["delivered", "delivered"], ["opened", "opened"], ["clicks", "clicked"], ["hardBounces", "bounced"], ["softBounces", "bounced"]];
+  let limit = 1000;
+  for (const [event, key] of kinds) {
+    for (let page = 0, offset = 0; page < 20; page++) {
+      let r;
+      try {
+        r = await brevoGet(apiKey, `/smtp/statistics/events?event=${event}&startDate=${startDate}&endDate=${endDate}&limit=${limit}&offset=${offset}&sort=desc`);
+      } catch (e) {
+        // Taille de page refusée : on réessaie avec des pages plus petites
+        if (limit > 100 && e instanceof Error && e.message.startsWith("Brevo 400")) { limit = 100; page--; continue; }
+        throw e;
+      }
+      const list = Array.isArray(r?.events) ? r.events : [];
+      for (const ev of list) {
+        if (ev?.subject !== subject || !ev?.email) continue;
+        if (key === "clicked" && /desinscription/i.test(String(ev.link || ""))) continue; // un clic pour se désinscrire n'est pas un intérêt
+        people[key].add(String(ev.email).toLowerCase());
+      }
+      if (list.length < limit) break;
+      offset += limit;
+    }
+  }
+  for (const e of people.clicked) people.opened.add(e);
+  return { delivered: people.delivered.size, opened: people.opened.size, clicked: people.clicked.size, bounced: people.bounced.size, source: "subject" };
+}
+
+// deno-lint-ignore no-explicit-any
+async function campaignHistory(supabase: SupabaseClient, apiKey: string | undefined, now = new Date()): Promise<any[]> {
+  const { data, error } = await supabase.from("email_campaigns").select("*").order("created_at", { ascending: false }).limit(HISTORY_LIMIT);
+  if (error) throw new Error(`Historique des envois illisible : ${error.message}`);
+  const rows = data || [];
+  // deno-lint-ignore no-explicit-any
+  const one = async (c: any) => {
+    const base = { id: c.id, created_at: c.created_at, subject: c.subject, audiences: c.audiences || [], recipients: num(c.recipients_count) };
+    const stored = c.stats && typeof c.stats === "object" ? c.stats as CampaignStats : null;
+    const age = now.getTime() - new Date(c.created_at).getTime();
+    const fresh = c.stats_at && now.getTime() - new Date(c.stats_at).getTime() < STATS_FRESH_MS;
+    // Au-delà de 90 jours, Brevo ne répond plus : on garde les derniers chiffres relevés
+    if (stored && (fresh || age > STATS_WINDOW_DAYS * 86400000)) return { ...base, stats: stored, stats_at: c.stats_at };
+    if (!apiKey) return { ...base, stats: stored, stats_at: c.stats_at ?? null, stats_error: "Secret BREVO_API_KEY manquant dans Supabase" };
+    if (age > STATS_WINDOW_DAYS * 86400000) return { ...base, stats: null, stats_error: "Envoi trop ancien : Brevo ne garde pas ces chiffres au-delà de 90 jours." };
+    try {
+      const stats = c.brevo_tag ? await statsByTag(apiKey, c.brevo_tag, c.created_at) : await statsBySubject(apiKey, c.subject, c.created_at);
+      const stats_at = now.toISOString();
+      // Gardés en base : disponibles même quand Brevo ne les donne plus (colonnes ajoutées par le script SQL)
+      await supabase.from("email_campaigns").update({ stats, stats_at }).eq("id", c.id).then(() => {}, () => {});
+      return { ...base, stats, stats_at };
+    } catch (e) {
+      console.error("admin-email : statistiques", c.id, e);
+      return { ...base, stats: stored, stats_at: c.stats_at ?? null, stats_error: e instanceof Error ? e.message : "Erreur inconnue" };
+    }
+  };
+  // Trois lectures à la fois : Brevo limite le nombre de demandes par seconde
+  const out: unknown[] = new Array(rows.length);
+  for (let i = 0; i < rows.length; i += 3) {
+    const part = await Promise.all(rows.slice(i, i + 3).map(one));
+    part.forEach((r, j) => out[i + j] = r);
+  }
+  return out;
 }
 
 const salutationFor = (firstname: string) => firstname ? `Bonjour ${escapeHtml(firstname)},` : "Bonjour,";
@@ -428,6 +531,11 @@ Deno.serve(async (req) => {
       return json(req, { ...email, preview_html: preview, photos_received: photos.length, photos_rejected: rejected });
     }
 
+    if (action === "history") {
+      const campaigns = await campaignHistory(supabase, Deno.env.get("BREVO_API_KEY"));
+      return json(req, { campaigns });
+    }
+
     if (action === "preview") {
       const preview = wrapEmail(String(body.body_html || ""), String(body.preheader || ""), "Bonjour Marie,", "#");
       return json(req, { preview_html: preview });
@@ -456,6 +564,7 @@ Deno.serve(async (req) => {
       const { recipients } = await loadRecipients(supabase, audiences);
       if (!recipients.length) return json(req, { error: "Aucun destinataire dans ces listes" }, 400);
 
+      const tag = `an-campagne-${crypto.randomUUID()}`;
       let sent = 0;
       const failures: string[] = [];
       for (let i = 0; i < recipients.length; i += BREVO_BATCH_SIZE) {
@@ -465,7 +574,7 @@ Deno.serve(async (req) => {
           params: { salutation: salutationFor(r.firstname), unsubscribe_url: await unsubscribeUrl(r.email) },
         })));
         try {
-          await sendBatch(brevoApiKey, subject, html, versions);
+          await sendBatch(brevoApiKey, subject, html, versions, tag);
           sent += chunk.length;
         } catch (e) {
           console.error("Lot Brevo en échec:", e);
@@ -473,9 +582,13 @@ Deno.serve(async (req) => {
         }
       }
 
-      await supabase.from("email_campaigns").insert({
-        subject, preheader, body_html: bodyHtml, audiences, recipients_count: sent, sent_by: admin.id,
-      });
+      const record = { subject, preheader, body_html: bodyHtml, audiences, recipients_count: sent, sent_by: admin.id };
+      const { error: recordError } = await supabase.from("email_campaigns").insert({ ...record, brevo_tag: tag });
+      // Script SQL des statistiques pas encore lancé : l'envoi est enregistré quand même (chiffres retrouvés par l'objet)
+      if (recordError) {
+        console.warn("admin-email : enregistrement sans étiquette :", recordError.message);
+        await supabase.from("email_campaigns").insert(record);
+      }
 
       return json(req, { sent, total: recipients.length, failures });
     }
