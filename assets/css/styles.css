@@ -3043,3 +3043,37 @@ footer.band.cream{
 
 /* Page bon cadeau : titre en Sego, comme « Shop » et « Ton panier » */
 .gc-head h1 { font-family: 'SegoCustom', serif; font-weight: 400; font-size: clamp(34px, 5vw, 42px); text-transform: none; letter-spacing: 0; line-height: 1.1; }
+
+/* ── Pages guides (articles) ── */
+.guide-page { padding-top: 130px; padding-bottom: 80px; }
+.guide-inner { max-width: 720px; }
+.guide-crumb { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.guide-crumb a { text-decoration: underline; text-underline-offset: 3px; }
+.guide-title { font-family: 'SegoCustom', serif; font-weight: 400; font-size: clamp(34px, 5vw, 42px); text-transform: none; letter-spacing: 0; line-height: 1.15; margin: 14px 0 0; text-wrap: balance; }
+.guide-lead { font-size: 18px; line-height: 1.6; margin: 18px 0 0; }
+.guide-body { margin-top: 12px; font-size: 16px; }
+.guide-body h2 { font-family: 'SegoCustom', serif; font-weight: 400; font-size: 26px; text-transform: none; letter-spacing: 0; line-height: 1.2; margin: 44px 0 0; text-wrap: balance; }
+.guide-body p { margin: 14px 0 0; }
+.guide-body ul { margin: 14px 0 0; padding-left: 20px; }
+.guide-body li { margin-top: 6px; }
+.guide-body a { text-decoration: underline; text-underline-offset: 3px; }
+.guide-cta { margin-top: 48px; padding: 28px; background: var(--cream); border: 1px solid var(--line); }
+.guide-cta h2 { margin-top: 0; }
+.guide-cta .btn { margin-top: 18px; background: var(--text); color: var(--white); border-color: var(--text); padding: 14px 24px; min-height: 44px; text-decoration: none; }
+.guide-cta .btn:hover { background: transparent; color: var(--text); border-color: var(--text); }
+.guide-more { margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--line); }
+.guide-more ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.guide-more li { margin-top: 8px; }
+.guide-more a { text-decoration: underline; text-underline-offset: 3px; }
+.guide-list { list-style: none; margin: 36px 0 0; padding: 0; }
+.guide-list li { border-top: 1px solid var(--line); }
+.guide-list li:last-child { border-bottom: 1px solid var(--line); }
+.guide-list a { display: block; padding: 24px 0; }
+.guide-list h2 { font-family: 'SegoCustom', serif; font-weight: 400; font-size: 26px; text-transform: none; letter-spacing: 0; line-height: 1.2; margin: 0; }
+.guide-list p { margin: 8px 0 0; color: var(--muted); }
+.guide-list a:hover h2 { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 600px) {
+  .guide-page { padding-top: 110px; padding-bottom: 60px; }
+  .guide-body h2, .guide-list h2 { font-size: 22px; }
+  .guide-cta { padding: 22px 18px; }
+}

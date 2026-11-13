@@ -7,6 +7,8 @@ Site internet officiel d'Âmes Nomades (https://amesnomades.com) — retraites e
 - [Page Séjour](/sejour.html) : Affichage d'un séjour spécifique avec son programme heure par heure, l'intervenant, l'hébergement, les inclusions/exclusions et l'inscription.
 - [Page FAQ](/faq.html) : FAQ moderne interactive expliquant le fonctionnement des inscriptions, logistique et politique de remboursement.
 - [Page Administration](/admin-stays.html) : Interface administrative sécurisée pour la gestion des séjours (Wizard étape par étape).
+- [Guides](/guides.html) : Guides pratiques pour préparer un séjour bien-être (retraite Pilates, partir seule, valise, offrir un séjour).
+- [Bon cadeau](/bon-cadeau.html) : Bon cadeau valable 12 mois sur les séjours et le shop.
 - [Page Boutique / Shop](/boutique.html) : Boutique en ligne de produits éco-responsables et accessoires de sport.
 
 ## Stack technique

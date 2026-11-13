@@ -18,6 +18,16 @@
   <link rel="manifest" href="/assets/img/site.webmanifest">
   <link rel="icon" href="/assets/img/favicon.ico">
   <meta id="stayMetaDescription" name="description" content="D&eacute;couvre un s&eacute;jour bien-&ecirc;tre avec &Acirc;mes Nomades. Une exp&eacute;rience pour ralentir, se reconnecter &agrave; soi et vivre une parenth&egrave;se de douceur.">
+  <meta property="og:type" id="ogType" content="website">
+  <meta property="og:site_name" id="ogSiteName" content="Âmes Nomades">
+  <meta property="og:locale" id="ogLocale" content="fr_FR">
+  <meta property="og:title" id="ogTitle" content="Séjour — Âmes Nomades">
+  <meta property="og:description" id="ogDescription" content="Découvre un séjour bien-être avec Âmes Nomades. Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.">
+  <meta property="og:image" id="ogImage" content="https://amesnomades.com/assets/img/hero-1.webp">
+  <meta name="twitter:card" id="twitterCard" content="summary_large_image">
+  <meta name="twitter:title" id="twitterTitle" content="Séjour — Âmes Nomades">
+  <meta name="twitter:description" id="twitterDescription" content="Découvre un séjour bien-être avec Âmes Nomades. Une expérience pour ralentir, se reconnecter à soi et vivre une parenthèse de douceur.">
+  <meta name="twitter:image" id="twitterImage" content="https://amesnomades.com/assets/img/hero-1.webp">
   <meta name="theme-color" content="#0e0f11">
 
   <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co" crossorigin>
@@ -375,7 +385,7 @@
       <div class="legal reveal" data-delay="2">
         <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
-          <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/bon-cadeau.html">Bon cadeau</a> · <a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+          <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/bon-cadeau.html">Bon cadeau</a> · <a href="/guides.html">Guides</a> · <a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
         </div>
       </div>
     </div>
@@ -1588,20 +1598,31 @@
         pageTitle.textContent = `${stay.title || "Séjour"} — Âmes Nomades`;
         const metaDesc = buildStayMetaDescription(stay);
         if (stayMetaDescription) stayMetaDescription.setAttribute("content", metaDesc);
-        const stayUrl = `https://amesnomades.com/sejour/${encodeURIComponent(stay.slug)}`;
-        const canonicalEl = document.getElementById("stayCanonical");
-        if (canonicalEl) canonicalEl.setAttribute("href", stayUrl);
-        const ogTitleEl = document.getElementById("ogTitle");
-        if (ogTitleEl) ogTitleEl.setAttribute("content", `${stay.title || "Séjour"} — Âmes Nomades`);
-        const ogDescEl = document.getElementById("ogDescription");
-        if (ogDescEl) ogDescEl.setAttribute("content", metaDesc);
-        if (stay.hero_image) {
-          const ogImgEl = document.getElementById("ogImage");
-          if (ogImgEl) ogImgEl.setAttribute("content", stay.hero_image);
-        }
+        // Adresse officielle et aperçu de partage (déjà écrits côté serveur quand c'est possible ; complétés ici sinon)
+        const stayUrl = `https://amesnomades.com/sejour.html?slug=${encodeURIComponent(stay.slug)}`;
+        const stayFullTitle = `${stay.title || "Séjour"} — Âmes Nomades`;
+        document.querySelectorAll('link[rel="canonical"]').forEach(el => el.remove());
+        const canonicalEl = document.createElement("link");
+        canonicalEl.rel = "canonical";
+        canonicalEl.id = "pageCanonical";
+        canonicalEl.href = stayUrl;
+        document.head.appendChild(canonicalEl);
+        const setShareTag = (id, property, value) => {
+          if (!value) return;
+          let el = document.getElementById(id);
+          if (!el) { el = document.createElement("meta"); el.id = id; el.setAttribute("property", property); document.head.appendChild(el); }
+          el.setAttribute("content", value);
+        };
+        setShareTag("ogTitle", "og:title", stayFullTitle);
+        setShareTag("twitterTitle", "twitter:title", stayFullTitle);
+        setShareTag("ogDescription", "og:description", metaDesc);
+        setShareTag("twitterDescription", "twitter:description", metaDesc);
+        setShareTag("ogUrl", "og:url", stayUrl);
+        setShareTag("ogImage", "og:image", stay.hero_image);
+        setShareTag("twitterImage", "twitter:image", stay.hero_image);
 
         const existingSchema = document.getElementById("staySchema");
-        if (existingSchema) existingSchema.remove();
+        if (!existingSchema) {
         const schemaScript = document.createElement("script");
         schemaScript.type = "application/ld+json";
         schemaScript.id = "staySchema";
@@ -1619,6 +1640,7 @@
           }
         });
         document.head.appendChild(schemaScript);
+        }
 
         const durationText = getDurationLabel(firstDate?.start_date, firstDate?.end_date, stay?.is_single_day);
         stayMeta.textContent = durationText;

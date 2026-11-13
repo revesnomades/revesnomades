@@ -12,7 +12,16 @@
   <title id="pageTitle">Produit — Âmes Nomades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" id="pageDesc" content="Produit Âmes Nomades">
-  <link rel="canonical" id="pageCanonical" href="https://amesnomades.com/produit.html">
+  <meta property="og:type" id="ogType" content="product">
+  <meta property="og:site_name" id="ogSiteName" content="Âmes Nomades">
+  <meta property="og:locale" id="ogLocale" content="fr_FR">
+  <meta property="og:title" id="ogTitle" content="Produit — Âmes Nomades">
+  <meta property="og:description" id="ogDescription" content="Le shop Âmes Nomades : tapis de yoga, bougies, carnets et objets bien-être éco-responsables.">
+  <meta property="og:image" id="ogImage" content="https://amesnomades.com/assets/img/hero-1.webp">
+  <meta name="twitter:card" id="twitterCard" content="summary_large_image">
+  <meta name="twitter:title" id="twitterTitle" content="Produit — Âmes Nomades">
+  <meta name="twitter:description" id="twitterDescription" content="Le shop Âmes Nomades : tapis de yoga, bougies, carnets et objets bien-être éco-responsables.">
+  <meta name="twitter:image" id="twitterImage" content="https://amesnomades.com/assets/img/hero-1.webp">
 
   <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
@@ -629,7 +638,7 @@
         <div class="legal-row">
           <div>Copyright © 2026 Âmes Nomades</div>
           <div>
-            <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/bon-cadeau.html">Bon cadeau</a> · <a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
+            <div class="legal-col"><span><a href="/mentions-legales.html">Mentions légales</a> · <a href="/politique-confidentialite.html">Politique de confidentialité</a></span><span><a href="/bon-cadeau.html">Bon cadeau</a> · <a href="/guides.html">Guides</a> · <a href="/faq.html">FAQ</a> · <a href="/cgv.html">CGV</a> · <a href="/politique-retours.html">Retours</a></span></div>
           </div>
         </div>
       </div>
@@ -698,7 +707,27 @@
       // Met à jour les metas
       document.getElementById("pageTitle").textContent = `${p.name} — Âmes Nomades`;
       if (p.description) document.getElementById("pageDesc").setAttribute("content", p.description.slice(0, 160));
-      document.getElementById("pageCanonical").setAttribute("href", `https://amesnomades.com/produit.html?id=${id}`);
+      // Adresse officielle et aperçu de partage (déjà écrits côté serveur quand c'est possible ; complétés ici sinon)
+      const productPageUrl = `https://amesnomades.com/produit.html?id=${encodeURIComponent(id)}`;
+      document.querySelectorAll('link[rel="canonical"]').forEach(el => el.remove());
+      const canonicalEl = document.createElement("link");
+      canonicalEl.rel = "canonical";
+      canonicalEl.id = "pageCanonical";
+      canonicalEl.href = productPageUrl;
+      document.head.appendChild(canonicalEl);
+      const setShareTag = (tagId, value) => {
+        if (!value) return;
+        let el = document.getElementById(tagId);
+        if (!el) { el = document.createElement("meta"); el.id = tagId; el.setAttribute("property", "og:url"); document.head.appendChild(el); }
+        el.setAttribute("content", value);
+      };
+      const shareImage = ((p.image_urls && p.image_urls.length ? p.image_urls : [p.image_url]) || []).find(u => u && !/\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(u));
+      setShareTag("ogTitle", `${p.name} — Âmes Nomades`);
+      setShareTag("twitterTitle", `${p.name} — Âmes Nomades`);
+      if (p.description) { setShareTag("ogDescription", p.description.slice(0, 160)); setShareTag("twitterDescription", p.description.slice(0, 160)); }
+      setShareTag("ogUrl", productPageUrl);
+      setShareTag("ogImage", shareImage);
+      setShareTag("twitterImage", shareImage);
 
       // Images
       const images = (p.image_urls && p.image_urls.length > 0)
