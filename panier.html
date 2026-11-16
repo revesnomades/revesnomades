@@ -1642,6 +1642,8 @@
         }
 
         checkoutLoading.style.display = "none";
+        // Meta : début du paiement (une fois par ouverture du formulaire de paiement)
+        if (window.MetaPixel) window.MetaPixel.trackInitiateCheckout(lastToPay);
         embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.client_secret });
         embeddedCheckout.mount("#checkout");
       } catch (err) {

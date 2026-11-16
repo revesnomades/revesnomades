@@ -767,6 +767,8 @@
       }
       if (promo?.badge_text) promoBadgeText = promo.badge_text;
       const displayPrice = promoPrice !== null ? promoPrice : p.price;
+      // Meta : vue d'un produit (sert à optimiser les pubs et à recibler les visiteurs)
+      if (window.MetaPixel) window.MetaPixel.trackViewContent(p.name, "Shop", p.id, displayPrice);
 
       // Rendu galerie
       const thumbsHtml = images.length > 1
