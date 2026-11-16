@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Devis &amp; factures — Âmes Nomades</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+  <link rel="icon" href="/assets/img/favicon.ico">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://qxrxwgrgjvesevjkjmry.supabase.co">
+  <link rel="stylesheet" href="assets/css/styles.css?v=15" />
+  <style>
+    button, .btn, select, input, textarea { border-radius: 6px !important; }
+    .bl-wrap { padding: 120px 0 60px; }
+    .bl-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+    .bl-head h1 { margin: 0; }
+    .bl-sub { color: var(--muted); margin: 8px 0 0; max-width: 62ch; }
+    .bl-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .bl-section { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-top: 20px; min-width: 0; }
+    .bl-section h2 { margin: 0; font-size: 16px; }
+    .bl-section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .bl-note { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+    .bl-msg { margin-top: 12px; font-size: 13px; min-height: 1.2em; }
+    .bl-msg.err { color: #a33; } .bl-msg.ok { color: #2e7d4f; }
+    .bl-banner { margin-top: 16px; padding: 12px 14px; border-radius: 8px; background: #fff3cd; color: #6b4f00; font-size: 13.5px; }
+    .bl-banner button { margin-left: 8px; }
+
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 20px; }
+    .kpi { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+    .kpi-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+    .kpi-value { font-size: 24px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .filters select, .filters input { padding: 7px 10px; border: 1px solid var(--line); font: inherit; font-size: 13px; background: #fff; }
+    .filters input { min-width: 200px; flex: 1; max-width: 320px; }
+    .tbl-wrap { overflow-x: auto; margin-top: 12px; }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .tbl th { text-align: left; padding: 9px 10px; background: #f8f6f0; color: #666; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+    .tbl td { padding: 10px; border-bottom: 1px solid rgba(0,0,0,.06); vertical-align: middle; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: #fbfaf6; }
+    .tbl .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tbl .muted { color: var(--muted); font-size: 12px; }
+    .empty { color: var(--muted); font-size: 13.5px; padding: 18px 0; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+    .b-brouillon { background: #f0efe9; color: #555; }
+    .b-emis { background: #e8f4fd; color: #1a6fa8; }
+    .b-accepte, .b-payee { background: #e8f8f0; color: #1a7a40; }
+    .b-refuse, .b-annulee { background: #f3f3f3; color: #777; }
+    .b-retard { background: #fdece8; color: #a33; }
+    .k-devis { color: #6a4fa0; } .k-facture { color: #1e1f22; } .k-avoir { color: #a33; }
+
+    .ed-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    @media (max-width: 860px) { .ed-grid { grid-template-columns: 1fr; } }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .fields .full { grid-column: 1 / -1; }
+    @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .field label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+    .field input, .field select, .field textarea { padding: 8px 10px; border: 1px solid var(--line); background: #fff; font: inherit; font-size: 14px; width: 100%; box-sizing: border-box; }
+    .field textarea { resize: vertical; min-height: 64px; }
+    .field .hint { font-size: 12px; color: var(--muted); }
+    .locked input, .locked select, .locked textarea { background: #f8f6f0; color: #333; }
+    .locked ::placeholder, .line [disabled]::placeholder { color: transparent; }
+
+    .lines { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .line { display: grid; grid-template-columns: minmax(0, 1fr) 80px 110px 110px 90px 100px 36px; gap: 8px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fffdf8; }
+    .line.no-vat { grid-template-columns: minmax(0, 1fr) 80px 110px 110px 100px 36px; }
+    .line textarea, .line input, .line select { padding: 7px 8px; border: 1px solid var(--line); font: inherit; font-size: 13.5px; width: 100%; box-sizing: border-box; background: #fff; }
+    .line textarea { min-height: 38px; resize: vertical; }
+    .line .lt { text-align: right; font-variant-numeric: tabular-nums; padding-top: 8px; font-weight: 600; white-space: nowrap; }
+    .line .del { background: none; border: 1px solid transparent; color: #a33; font-size: 18px; line-height: 1; padding: 6px; cursor: pointer; }
+    .line-head { display: grid; grid-template-columns: minmax(0, 1fr) 80px 110px 110px 90px 100px 36px; gap: 8px; padding: 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+    .line-head.no-vat { grid-template-columns: minmax(0, 1fr) 80px 110px 110px 100px 36px; }
+    .line-head span:nth-child(n+2) { text-align: left; }
+    .mlabel { display: none; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+    @media (max-width: 760px) {
+      .line-head { display: none; }
+      .line, .line.no-vat { grid-template-columns: 1fr 1fr; }
+      .line .c-desc { grid-column: 1 / -1; }
+      .line .lt { text-align: left; }
+      .mlabel { display: block; }
+    }
+    .totals { margin-top: 14px; margin-left: auto; width: min(340px, 100%); font-variant-numeric: tabular-nums; }
+    .totals div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 14px; }
+    .totals .big { border-top: 1px solid #1e1f22; margin-top: 4px; padding-top: 8px; font-weight: 700; font-size: 16px; }
+    .totals .muted { color: var(--muted); font-size: 13px; }
+
+    .bar { position: sticky; bottom: 0; background: rgba(250,245,220,.96); backdrop-filter: blur(6px); border-top: 1px solid var(--line); padding: 12px 0; margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; z-index: 5; }
+    .btn.dark { background: #1e1f22; color: #fffdf3; border-color: #1e1f22; }
+    .btn.dark:hover { background: #3a3b40; color: #fff; }
+    .btn.danger { color: #a33; border-color: rgba(170,51,51,.4); }
+    .btn:disabled { opacity: .5; }
+    .ro-note { margin-top: 12px; padding: 10px 12px; border-radius: 6px; background: #e8f4fd; color: #134d75; font-size: 13.5px; }
+    .send-box { margin-top: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #fffdf8; }
+    .inline-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-top: 10px; }
+    .inline-form .field { min-width: 150px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body class="on-light">
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html"><span>Âmes Nomades</span></a>
+      <div class="nav-links nav-links-desktop">
+        <a href="/admin-comptabilite.html">Comptabilité</a>
+        <a href="/admin-bookings.html">Réservations</a>
+        <a href="/admin-dashboard.html">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="band cream">
+    <div class="container bl-wrap">
+      <!-- ═════ Liste ═════ -->
+      <div id="viewList">
+        <div class="bl-head">
+          <div>
+            <h1>Devis &amp; factures</h1>
+            <p class="bl-sub">Créez vos devis, transformez-les en factures, envoyez-les par email en PDF. Une fois validé, un document est numéroté et ne peut plus être modifié : une facture se corrige par un avoir.</p>
+          </div>
+          <div class="bl-actions">
+            <button class="btn dark" type="button" id="btnNewQuote">+ Nouveau devis</button>
+            <button class="btn dark" type="button" id="btnNewInvoice">+ Nouvelle facture</button>
+            <button class="btn on-light" type="button" id="btnSettings">Réglages</button>
+          </div>
+        </div>
+        <div id="adminStatus" class="bl-note"></div>
+        <div id="setupBanner" class="bl-banner" hidden></div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Facturé <span id="kYear"></span></div><div class="kpi-value" id="kBilled">—</div><div class="kpi-sub" id="kBilledSub">factures émises, avoirs déduits</div></div>
+          <div class="kpi"><div class="kpi-label">Encaissé</div><div class="kpi-value" id="kPaid">—</div><div class="kpi-sub">factures payées</div></div>
+          <div class="kpi"><div class="kpi-label">À encaisser</div><div class="kpi-value" id="kDue">—</div><div class="kpi-sub" id="kDueSub">&nbsp;</div></div>
+          <div class="kpi"><div class="kpi-label">Devis en attente</div><div class="kpi-value" id="kQuotes">—</div><div class="kpi-sub" id="kQuotesSub">&nbsp;</div></div>
+        </div>
+
+        <div class="bl-section">
+          <div class="bl-section-head"><h2>Documents</h2></div>
+          <div class="filters">
+            <select id="fKind" aria-label="Type"><option value="">Tous les types</option><option value="devis">Devis</option><option value="facture">Factures</option><option value="avoir">Avoirs</option></select>
+            <select id="fStatus" aria-label="Statut"><option value="">Tous les statuts</option><option value="brouillon">Brouillons</option><option value="ouvert">À traiter (devis validés, factures à payer)</option><option value="retard">Factures en retard</option><option value="payee">Factures payées</option></select>
+            <select id="fYear" aria-label="Année"></select>
+            <input id="fSearch" type="search" placeholder="Rechercher : client, numéro…" aria-label="Rechercher">
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th><th class="num">Montant</th><th>Statut</th></tr></thead>
+              <tbody id="docRows"><tr><td colspan="6" class="empty">Chargement…</td></tr></tbody>
+            </table>
+          </div>
+          <div id="listMsg" class="bl-msg"></div>
+        </div>
+      </div>
+
+      <!-- ═════ Réglages ═════ -->
+      <div id="viewSettings" hidden>
+        <div class="bl-head">
+          <div><h1>Réglages</h1><p class="bl-sub">Coordonnées et conditions imprimées sur vos devis et factures. Elles sont figées sur chaque document au moment de sa validation.</p></div>
+          <div class="bl-actions"><button class="btn on-light" type="button" data-back>← Retour</button></div>
+        </div>
+        <div class="bl-section">
+          <h2>Entreprise</h2>
+          <div class="fields" id="settingsFields"></div>
+        </div>
+        <div class="bl-section">
+          <h2>TVA et conditions</h2>
+          <div class="fields" id="settingsTerms"></div>
+          <p class="bl-note">En franchise en base de TVA (micro-entreprise sous les seuils), les documents portent la mention « TVA non applicable, art. 293 B du CGI » et aucune TVA n'est ajoutée. Si vous facturez la TVA, choisissez « Assujettie à la TVA ». En cas de doute, vérifiez avec votre comptable.</p>
+        </div>
+        <div class="bar">
+          <button class="btn dark" type="button" id="btnSaveSettings">Enregistrer les réglages</button>
+          <span id="settingsMsg" class="bl-msg" style="margin:0;"></span>
+        </div>
+      </div>
+
+      <!-- ═════ Éditeur ═════ -->
+      <div id="viewEditor" hidden>
+        <div class="bl-head">
+          <div>
+            <h1 id="edTitle">Document</h1>
+            <p class="bl-sub" id="edSub"></p>
+          </div>
+          <div class="bl-actions"><button class="btn on-light" type="button" data-back>← Retour à la liste</button></div>
+        </div>
+        <div id="edReadOnly" class="ro-note" hidden></div>
+
+        <div class="ed-grid" id="edForm">
+          <div class="bl-section" style="margin-top:20px;">
+            <div class="bl-section-head"><h2>Client</h2>
+              <select id="clientPick" aria-label="Reprendre un client" style="padding:6px 8px; border:1px solid var(--line); font:inherit; font-size:13px; max-width:100%;"><option value="">Reprendre un client…</option></select>
+            </div>
+            <div class="fields">
+              <div class="field full"><label for="c_name">Nom ou raison sociale *</label><input id="c_name" data-client="name" autocomplete="off"></div>
+              <div class="field"><label for="c_contact">À l'attention de</label><input id="c_contact" data-client="contact"></div>
+              <div class="field"><label for="c_email">Email</label><input id="c_email" type="email" data-client="email"></div>
+              <div class="field full"><label for="c_address">Adresse</label><input id="c_address" data-client="address"></div>
+              <div class="field"><label for="c_postal">Code postal</label><input id="c_postal" data-client="postal_code"></div>
+              <div class="field"><label for="c_city">Ville</label><input id="c_city" data-client="city"></div>
+              <div class="field"><label for="c_country">Pays</label><input id="c_country" data-client="country" placeholder="France"></div>
+              <div class="field"><label for="c_phone">Téléphone</label><input id="c_phone" data-client="phone"></div>
+              <div class="field"><label for="c_siren">SIREN (client professionnel)</label><input id="c_siren" data-client="siren"></div>
+              <div class="field"><label for="c_vat">N° TVA du client</label><input id="c_vat" data-client="vat_number"></div>
+            </div>
+          </div>
+
+          <div class="bl-section" style="margin-top:20px;">
+            <h2>Document</h2>
+            <div class="fields">
+              <div class="field"><label for="d_nature">Nature de l'opération</label>
+                <select id="d_nature"><option value="services">Prestation de services</option><option value="biens">Vente de biens</option><option value="mixte">Services et biens</option></select></div>
+              <div class="field"><label for="d_vat">TVA</label>
+                <select id="d_vat"><option value="franchise">Franchise (art. 293 B)</option><option value="assujetti">Assujettie à la TVA</option></select></div>
+              <div class="field full"><label for="d_service">Date ou période de la prestation</label><input id="d_service" placeholder="Ex : du 13 au 16 mai 2027"></div>
+              <div class="field"><label for="d_due" id="d_due_label">Échéance</label><input id="d_due" type="date"><span class="hint" id="d_due_hint"></span></div>
+              <div class="field" id="f_deposit"><label for="d_deposit">Acompte demandé (%)</label><input id="d_deposit" type="number" min="0" max="100" step="1"></div>
+              <div class="field" id="f_paid"><label for="d_paid">Acompte déjà reçu (€)</label><input id="d_paid" type="number" min="0" step="0.01"></div>
+              <div class="field full"><label for="d_notes">Message sur le document</label><textarea id="d_notes" placeholder="Ex : Merci pour votre confiance !"></textarea></div>
+              <div class="field full"><label for="d_terms">Conditions particulières</label><textarea id="d_terms" placeholder="Ex : annulation gratuite jusqu'à 30 jours avant le séjour."></textarea></div>
+              <div class="field full"><label for="d_internal">Note privée (jamais imprimée)</label><textarea id="d_internal"></textarea></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bl-section">
+          <div class="bl-section-head"><h2>Lignes</h2>
+            <div class="bl-actions">
+              <select id="catalogPick" aria-label="Ajouter un séjour ou un produit du site" style="padding:6px 8px; border:1px solid var(--line); font:inherit; font-size:13px; max-width:100%;"><option value="">Ajouter un séjour ou un produit du site…</option></select>
+              <button class="btn on-light" type="button" id="btnAddLine">+ Ligne libre</button>
+            </div>
+          </div>
+          <div class="line-head" id="lineHead"><span>Désignation</span><span>Quantité</span><span>Unité</span><span>Prix unitaire</span><span class="vatcol">TVA</span><span>Total</span><span></span></div>
+          <div class="lines" id="lines"></div>
+          <div class="totals" id="totals"></div>
+        </div>
+
+        <div class="send-box" id="sendBox" hidden>
+          <h2 style="margin:0; font-size:15px;">Envoyer par email</h2>
+          <div class="fields">
+            <div class="field"><label for="s_to">Destinataire</label><input id="s_to" type="email"></div>
+            <div class="field"><label for="s_subject">Objet</label><input id="s_subject"></div>
+            <div class="field full"><label for="s_message">Message</label><textarea id="s_message" style="min-height:120px;"></textarea></div>
+            <label class="full" style="display:flex; gap:8px; align-items:center; font-size:13.5px;"><input type="checkbox" id="s_copy" checked> M'envoyer une copie (contact@amesnomades.com)</label>
+          </div>
+          <div class="bl-actions" style="margin-top:10px;">
+            <button class="btn dark" type="button" id="btnSendNow">Envoyer avec le PDF</button>
+            <button class="btn tiny" type="button" id="btnSendCancel" style="background:transparent;">Annuler</button>
+          </div>
+        </div>
+
+        <div class="send-box" id="payBox" hidden>
+          <h2 style="margin:0; font-size:15px;">Enregistrer le paiement</h2>
+          <div class="inline-form">
+            <div class="field"><label for="p_date">Date du paiement</label><input id="p_date" type="date"></div>
+            <div class="field"><label for="p_method">Moyen</label><select id="p_method"><option>Virement</option><option>Carte bancaire</option><option>Chèque</option><option>Espèces</option><option>Autre</option></select></div>
+            <button class="btn dark" type="button" id="btnPayNow">Marquer comme payée</button>
+            <button class="btn tiny" type="button" id="btnPayCancel" style="background:transparent;">Annuler</button>
+          </div>
+        </div>
+
+        <div class="bar" id="edBar"></div>
+        <div id="edMsg" class="bl-msg" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="assets/js/main.js?v=3"></script>
+  <script type="module">
+    import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "./assets/js/supabaseClient.js?v=3";
+    import { addDays, amountDue, computeTotals, dateFr, depositAmount, euro, KIND_LABEL, lineCents, qtyLabel, statusLabel, todayParis } from "./assets/js/billing-calc.js?v=1";
+    import { downloadPdf, openPdf, pdfBase64, pdfFileName } from "./assets/js/billing-pdf.js?v=1";
+
+    const $ = id => document.getElementById(id);
+    const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const num = v => { const n = Number(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
+    const ADMIN_EMAILS = ["contact@amesnomades.com", "sarnelli.ap@gmail.com", "revesnomades@gmail.com"];
+    const UNITS = ["forfait", "personne", "jour", "nuit", "séance", "heure", "unité", "lot"];
+    const VAT_RATES = [20, 10, 5.5, 2.1, 0];
+
+    const DEFAULT_SETTINGS = {
+      name: "Appoline Sarnelli", trade_name: "Âmes Nomades", legal_form: "Entrepreneur individuel (EI)",
+      address: "", postal_code: "", city: "Montpellier", country: "France", siret: "892 077 835 00023", vat_number: "FR25892077835",
+      email: "contact@amesnomades.com", phone: "+33 6 58 03 87 70", website: "amesnomades.com", iban: "", bic: "",
+      vat_mode: "franchise", default_vat_rate: 20, payment_days: 30, quote_validity_days: 30, deposit_percent: 30,
+      payment_methods: "Virement bancaire", extra_mentions: "",
+    };
+
+    let settings = { ...DEFAULT_SETTINGS };
+    let docs = [];
+    let current = null;     // document ouvert
+    let catalog = [];       // séjours et produits du site
+    let busy = false;
+
+    // ─── Accès ────────────────────────────────────────────────────────────
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { location.href = "/compte.html?redirect=" + encodeURIComponent(location.pathname); return null; }
+      const email = (user.email || "").toLowerCase();
+      let role = null;
+      try { ({ data: { role } = {} } = await supabase.from("profiles").select("role").eq("id", user.id).single()); } catch {}
+      if (!ADMIN_EMAILS.includes(email) && role !== "admin") { $("adminStatus").textContent = "Accès refusé."; return null; }
+      $("adminStatus").textContent = `Connectée : ${user.email}`;
+      return user;
+    }
+
+    // Table absente : le script SQL n'a pas encore été lancé
+    const missingTable = err => /does not exist|could not find the table|schema cache|PGRST205|42P01/i.test(`${err?.message || ""} ${err?.code || ""}`);
+    function explain(err) {
+      if (missingTable(err)) return "Les tables des devis et factures n'existent pas encore : lancez le script supabase/sql/billing.sql dans Supabase (SQL Editor).";
+      return err?.message || String(err);
+    }
+    const setMsg = (el, text, kind = "") => { el.textContent = text; el.className = `bl-msg ${kind}`; };
+
+    // ─── Données ──────────────────────────────────────────────────────────
+    async function loadSettings() {
+      const { data, error } = await supabase.from("billing_settings").select("data").eq("id", 1).maybeSingle();
+      if (error) throw error;
+      settings = { ...DEFAULT_SETTINGS, ...(data?.data || {}) };
+    }
+    async function loadDocs() {
+      const { data, error } = await supabase.from("billing_documents").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      docs = data || [];
+    }
+    async function loadCatalog() {
+      try {
+        const [{ data: stays }, { data: products }] = await Promise.all([
+          supabase.from("stays").select("id, title, extra_options, published").order("created_at", { ascending: false }),
+          supabase.from("products").select("id, name, price").order("created_at", { ascending: false }),
+        ]);
+        catalog = [];
+        for (const s of stays || []) {
+          if (s.published === false) continue;
+          const opts = (Array.isArray(s.extra_options) ? s.extra_options : []).filter(o => o && Number(o.price) > 0);
+          for (const o of opts.length ? opts : [{ label: "", price: 0 }]) catalog.push({ group: "Séjours", label: `${s.title}${o.label ? ` — ${o.label}` : ""}`, price: Number(o.price) || 0, unit: "personne", nature: "services" });
+        }
+        for (const p of products || []) catalog.push({ group: "Shop", label: p.name, price: Number(p.price) || 0, unit: "unité", nature: "biens" });
+        const pick = $("catalogPick");
+        pick.innerHTML = `<option value="">Ajouter un séjour ou un produit du site…</option>` + ["Séjours", "Shop"].map(g => {
+          const items = catalog.map((c, i) => ({ c, i })).filter(x => x.c.group === g);
+          return items.length ? `<optgroup label="${g}">${items.map(x => `<option value="${x.i}">${esc(x.c.label)}${x.c.price ? ` — ${euro(x.c.price)}` : ""}</option>`).join("")}</optgroup>` : "";
+        }).join("");
+      } catch (e) { console.warn("Catalogue indisponible :", e); }
+    }
+
+    function settingsComplete() { return !!(String(settings.address || "").trim() && String(settings.siret || "").trim()); }
+    function renderBanner() {
+      const missing = [];
+      if (!String(settings.address || "").trim()) missing.push("l'adresse de l'entreprise");
+      if (!String(settings.iban || "").trim()) missing.push("l'IBAN (pour les paiements par virement)");
+      const b = $("setupBanner");
+      b.hidden = !missing.length;
+      if (missing.length) b.innerHTML = `À compléter dans les réglages : ${missing.join(" et ")}.${!String(settings.address || "").trim() ? " Sans adresse, aucun document ne peut être validé." : ""} <button class="btn tiny on-light" type="button" id="bannerSettings">Ouvrir les réglages</button>`;
+      $("bannerSettings")?.addEventListener("click", () => show("settings"));
+    }
+
+    // ─── Vues ─────────────────────────────────────────────────────────────
+    function show(view) {
+      $("viewList").hidden = view !== "list";
+      $("viewSettings").hidden = view !== "settings";
+      $("viewEditor").hidden = view !== "editor";
+      if (view === "settings") renderSettings();
+      if (view === "list") renderList();
+      window.scrollTo({ top: 0 });
+    }
+    document.querySelectorAll("[data-back]").forEach(b => b.addEventListener("click", () => show("list")));
+
+    // ─── Liste ────────────────────────────────────────────────────────────
+    const overdue = d => d.kind === "facture" && d.status === "emis" && d.due_date && d.due_date < todayParis();
+    const docYear = d => (d.issue_date || d.created_at || "").slice(0, 4);
+    function badge(d) {
+      if (overdue(d)) return `<span class="badge b-retard">En retard</span>`;
+      return `<span class="badge b-${d.status}">${esc(statusLabel(d.kind, d.status))}</span>`;
+    }
+
+    function renderList() {
+      const year = $("fYear").value, kind = $("fKind").value, st = $("fStatus").value, q = $("fSearch").value.trim().toLowerCase();
+      const list = docs.filter(d => {
+        if (kind && d.kind !== kind) return false;
+        if (year && docYear(d) !== year) return false;
+        if (st === "brouillon" && d.status !== "brouillon") return false;
+        if (st === "ouvert" && !((d.kind === "devis" && d.status === "emis") || (d.kind === "facture" && d.status === "emis"))) return false;
+        if (st === "retard" && !overdue(d)) return false;
+        if (st === "payee" && d.status !== "payee") return false;
+        if (q && !`${d.number || ""} ${d.client?.name || ""} ${d.client?.email || ""} ${d.client?.contact || ""}`.toLowerCase().includes(q)) return false;
+        return true;
+      });
+      $("docRows").innerHTML = list.length ? list.map(d => `
+        <tr data-id="${d.id}" tabindex="0">
+          <td><strong>${esc(d.number || "—")}</strong>${d.sent_at ? `<div class="muted">envoyé le ${dateFr(d.sent_at.slice(0, 10))}</div>` : ""}</td>
+          <td class="k-${d.kind}">${KIND_LABEL[d.kind]}</td>
+          <td>${esc(d.client?.name || "—")}${d.client?.contact ? `<div class="muted">${esc(d.client.contact)}</div>` : ""}</td>
+          <td>${d.issue_date ? dateFr(d.issue_date) : `<span class="muted">créé le ${dateFr(d.created_at?.slice(0, 10))}</span>`}</td>
+          <td class="num">${d.kind === "avoir" ? "− " : ""}${euro(d.total_ttc)}</td>
+          <td>${badge(d)}</td>
+        </tr>`).join("") : `<tr><td colspan="6" class="empty">${docs.length ? "Aucun document ne correspond à ces filtres." : "Aucun document pour l'instant. Commencez par un devis ou une facture."}</td></tr>`;
+      $("docRows").querySelectorAll("tr[data-id]").forEach(tr => {
+        const open = () => openDoc(docs.find(d => d.id === tr.dataset.id));
+        tr.addEventListener("click", open);
+        tr.addEventListener("keydown", e => { if (e.key === "Enter") open(); });
+      });
+      renderKpis();
+    }
+
+    function renderKpis() {
+      const year = $("fYear").value || String(new Date().getFullYear());
+      $("kYear").textContent = year;
+      const inYear = docs.filter(d => d.status !== "brouillon" && docYear(d) === year);
+      const invoices = inYear.filter(d => d.kind === "facture" && d.status !== "annulee");
+      const credits = inYear.filter(d => d.kind === "avoir");
+      const sum = arr => arr.reduce((s, d) => s + Number(d.total_ttc || 0), 0);
+      // Factures annulées : comptées puis compensées par leurs avoirs
+      const billed = sum(inYear.filter(d => d.kind === "facture")) - sum(credits);
+      $("kBilled").textContent = euro(billed);
+      $("kBilledSub").textContent = `${invoices.length} facture${invoices.length > 1 ? "s" : ""}${credits.length ? `, ${credits.length} avoir${credits.length > 1 ? "s" : ""}` : ""}`;
+      $("kPaid").textContent = euro(sum(inYear.filter(d => d.kind === "facture" && d.status === "payee")));
+      const open = docs.filter(d => d.kind === "facture" && d.status === "emis");
+      const due = open.reduce((s, d) => s + amountDue(d.total_ttc, d.already_paid), 0);
+      const late = open.filter(overdue);
+      $("kDue").textContent = euro(due);
+      $("kDueSub").textContent = late.length ? `dont ${late.length} en retard` : `${open.length} facture${open.length > 1 ? "s" : ""} en attente`;
+      const quotes = docs.filter(d => d.kind === "devis" && d.status === "emis");
+      $("kQuotes").textContent = String(quotes.length);
+      $("kQuotesSub").textContent = quotes.length ? euro(sum(quotes)) : "aucun";
+    }
+
+    function fillYears() {
+      const years = new Set([String(new Date().getFullYear()), ...docs.map(docYear).filter(Boolean)]);
+      const sel = $("fYear"), keep = sel.value;
+      sel.innerHTML = `<option value="">Toutes les années</option>` + [...years].sort().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
+      sel.value = keep && years.has(keep) ? keep : String(new Date().getFullYear());
+    }
+    ["fKind", "fStatus", "fYear"].forEach(id => $(id).addEventListener("change", renderList));
+    $("fSearch").addEventListener("input", renderList);
+
+    // ─── Réglages ─────────────────────────────────────────────────────────
+    const SETTINGS_FIELDS = [
+      ["name", "Nom (personne ou société) *"], ["trade_name", "Nom commercial"], ["legal_form", "Forme juridique", "Ex : Entrepreneur individuel (EI)"],
+      ["siret", "SIRET *"], ["vat_number", "N° de TVA intracommunautaire"], ["address", "Adresse *", "", true],
+      ["postal_code", "Code postal"], ["city", "Ville"], ["country", "Pays"], ["email", "Email"], ["phone", "Téléphone"], ["website", "Site"],
+    ];
+    const TERMS_FIELDS = [
+      ["vat_mode", "Régime de TVA par défaut", "select"], ["default_vat_rate", "Taux de TVA par défaut (%)", "number"],
+      ["payment_days", "Délai de paiement des factures (jours)", "number"], ["quote_validity_days", "Validité des devis (jours)", "number"],
+      ["deposit_percent", "Acompte proposé sur les devis (%)", "number"], ["payment_methods", "Moyens de paiement acceptés", "text"],
+      ["iban", "IBAN", "text"], ["bic", "BIC", "text"], ["extra_mentions", "Mentions complémentaires (bas de page)", "textarea"],
+    ];
+    function renderSettings() {
+      $("settingsFields").innerHTML = SETTINGS_FIELDS.map(([k, label, ph, full]) => `
+        <div class="field${full ? " full" : ""}"><label for="st_${k}">${label}</label><input id="st_${k}" data-setting="${k}" value="${esc(settings[k])}" placeholder="${esc(ph || "")}"></div>`).join("");
+      $("settingsTerms").innerHTML = TERMS_FIELDS.map(([k, label, type]) => {
+        if (type === "select") return `<div class="field"><label for="st_${k}">${label}</label><select id="st_${k}" data-setting="${k}"><option value="franchise"${settings[k] === "franchise" ? " selected" : ""}>Franchise en base (pas de TVA)</option><option value="assujetti"${settings[k] === "assujetti" ? " selected" : ""}>Assujettie à la TVA</option></select></div>`;
+        if (type === "textarea") return `<div class="field full"><label for="st_${k}">${label}</label><textarea id="st_${k}" data-setting="${k}" placeholder="Ex : Dispensé d'immatriculation au RCS et au RM">${esc(settings[k])}</textarea></div>`;
+        return `<div class="field"><label for="st_${k}">${label}</label><input id="st_${k}" data-setting="${k}" type="${type}" value="${esc(settings[k])}"${type === "number" ? ' min="0" step="any"' : ""}></div>`;
+      }).join("");
+      setMsg($("settingsMsg"), "");
+    }
+    $("btnSettings").addEventListener("click", () => show("settings"));
+    $("btnSaveSettings").addEventListener("click", async () => {
+      const next = { ...settings };
+      document.querySelectorAll("[data-setting]").forEach(el => {
+        const k = el.dataset.setting;
+        next[k] = el.type === "number" ? num(el.value) : el.value.trim();
+      });
+      if (!next.name || !next.siret || !next.address) { setMsg($("settingsMsg"), "Le nom, le SIRET et l'adresse sont obligatoires sur une facture.", "err"); return; }
+      $("btnSaveSettings").disabled = true;
+      const { error } = await supabase.from("billing_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+      $("btnSaveSettings").disabled = false;
+      if (error) { setMsg($("settingsMsg"), explain(error), "err"); return; }
+      settings = next;
+      renderBanner();
+      setMsg($("settingsMsg"), "Réglages enregistrés.", "ok");
+    });
+
+    // ─── Éditeur ──────────────────────────────────────────────────────────
+    const editable = () => current && current.status === "brouillon";
+    const blankLine = () => ({ description: "", quantity: 1, unit: "forfait", unit_price: 0, vat_rate: Number(settings.default_vat_rate) || 20 });
+
+    function newDoc(kind, base = {}) {
+      return {
+        id: null, kind, status: "brouillon", number: null, issue_date: null, due_date: null, service_date: "",
+        nature: "services", client: {}, lines: [blankLine()], vat_mode: settings.vat_mode || "franchise",
+        deposit_percent: kind === "devis" ? Number(settings.deposit_percent) || 0 : 0, already_paid: 0,
+        notes: "", terms: "", internal_note: "", source_id: null, ...base,
+      };
+    }
+
+    function openDoc(doc) {
+      current = JSON.parse(JSON.stringify(doc));
+      if (!Array.isArray(current.lines)) current.lines = [];
+      $("sendBox").hidden = true; $("payBox").hidden = true;
+      setMsg($("edMsg"), "");
+      fillClientPick();
+      renderEditor();
+      show("editor");
+    }
+
+    function sourceDoc() { return current?.source_id ? docs.find(d => d.id === current.source_id) || null : null; }
+
+    function renderEditor() {
+      const d = current, ro = !editable();
+      const NEW_TITLE = { devis: "Nouveau devis", facture: "Nouvelle facture", avoir: "Nouvel avoir" };
+      $("edTitle").textContent = d.number ? `${KIND_LABEL[d.kind]} ${d.number}` : d.id ? `${KIND_LABEL[d.kind]} (brouillon)` : NEW_TITLE[d.kind];
+      const src = sourceDoc();
+      const parts = [];
+      if (d.status !== "brouillon") parts.push(statusLabel(d.kind, d.status) + (overdue(d) ? " — en retard" : ""));
+      if (d.issue_date) parts.push(`${d.kind === "facture" ? "émise" : "émis"} le ${dateFr(d.issue_date)}`);
+      if (d.sent_at) parts.push(`envoyé à ${d.sent_to} le ${dateFr(d.sent_at.slice(0, 10))}`);
+      if (d.status === "payee" && d.paid_at) parts.push(`payée le ${dateFr(d.paid_at)}${d.payment_method ? ` (${d.payment_method})` : ""}`);
+      if (src) parts.push(`${d.kind === "avoir" ? "sur la facture" : "issu du devis"} ${src.number || ""}`);
+      const linked = docs.filter(x => x.source_id && x.source_id === d.id && d.id);
+      if (linked.length) parts.push(linked.map(x => `${KIND_LABEL[x.kind].toLowerCase()} ${x.number || "(brouillon)"}`).join(", "));
+      $("edSub").textContent = parts.join(" · ") || "Brouillon : rien n'est numéroté ni envoyé tant que vous ne validez pas.";
+
+      $("edReadOnly").hidden = !ro;
+      $("edReadOnly").textContent = ro ? (d.kind === "facture"
+        ? "Cette facture est validée : son contenu ne peut plus être modifié. Pour la corriger ou l'annuler, créez un avoir, puis une nouvelle facture si besoin."
+        : "Ce document est validé : son contenu ne peut plus être modifié. Vous pouvez le dupliquer pour en faire une nouvelle version.") : "";
+      $("edForm").classList.toggle("locked", ro);
+
+      document.querySelectorAll("[data-client]").forEach(el => { el.value = d.client?.[el.dataset.client] || ""; el.disabled = ro; });
+      $("clientPick").disabled = ro;
+      $("d_nature").value = d.nature || "services";
+      $("d_vat").value = d.vat_mode || "franchise";
+      $("d_service").value = d.service_date || "";
+      $("d_due").value = d.due_date || "";
+      $("d_deposit").value = d.deposit_percent ?? 0;
+      $("d_paid").value = d.already_paid ?? 0;
+      $("d_notes").value = d.notes || "";
+      $("d_terms").value = d.terms || "";
+      $("d_internal").value = d.internal_note || "";
+      ["d_nature", "d_vat", "d_service", "d_due", "d_deposit", "d_paid", "d_notes", "d_terms"].forEach(id => $(id).disabled = ro);
+      $("d_internal").disabled = false; // la note privée reste modifiable
+
+      $("f_deposit").hidden = d.kind !== "devis";
+      $("f_paid").hidden = d.kind !== "facture";
+      $("d_due_label").textContent = d.kind === "devis" ? "Valable jusqu'au" : "Échéance";
+      $("d_due").parentElement.hidden = d.kind === "avoir";
+      const days = d.kind === "devis" ? settings.quote_validity_days : settings.payment_days;
+      $("d_due_hint").textContent = ro ? "" : `Laisser vide : ${days || 30} jours après la validation.`;
+
+      $("catalogPick").disabled = ro; $("btnAddLine").hidden = ro; $("catalogPick").hidden = ro;
+      renderLines();
+      renderBar();
+    }
+
+    function renderLines() {
+      const d = current, ro = !editable(), vat = d.vat_mode === "assujetti";
+      $("lineHead").classList.toggle("no-vat", !vat);
+      $("lineHead").querySelector(".vatcol").hidden = !vat;
+      $("lineHead").children[3].textContent = vat ? "Prix unit. HT" : "Prix unitaire";
+      $("lineHead").children[5].textContent = vat ? "Total HT" : "Total";
+      $("lines").innerHTML = d.lines.map((l, i) => `
+        <div class="line${vat ? "" : " no-vat"}" data-i="${i}">
+          <div class="c-desc"><span class="mlabel">Désignation</span><textarea data-k="description" rows="1" ${ro ? "disabled" : ""} placeholder="Ex : Séjour Pilates & randonnée, 4 jours">${esc(l.description)}</textarea></div>
+          <div><span class="mlabel">Quantité</span><input data-k="quantity" type="number" min="0" step="any" value="${esc(l.quantity)}" ${ro ? "disabled" : ""}></div>
+          <div><span class="mlabel">Unité</span><input data-k="unit" list="unitList" value="${esc(l.unit || "")}" ${ro ? "disabled" : ""}></div>
+          <div><span class="mlabel">${vat ? "Prix unit. HT" : "Prix unitaire"}</span><input data-k="unit_price" type="number" step="0.01" value="${esc(l.unit_price)}" ${ro ? "disabled" : ""}></div>
+          ${vat ? `<div><span class="mlabel">TVA</span><select data-k="vat_rate" ${ro ? "disabled" : ""}>${VAT_RATES.map(r => `<option value="${r}"${num(l.vat_rate) === r ? " selected" : ""}>${qtyLabel(r)} %</option>`).join("")}</select></div>` : ""}
+          <div class="lt"><span class="mlabel">Total</span>${euro(lineCents(l) / 100)}</div>
+          <div>${ro ? "" : `<button type="button" class="del" data-del="${i}" aria-label="Supprimer la ligne ${i + 1}">×</button>`}</div>
+        </div>`).join("") + `<datalist id="unitList">${UNITS.map(u => `<option value="${u}">`).join("")}</datalist>`;
+      $("lines").querySelectorAll(".line").forEach(row => {
+        const i = Number(row.dataset.i);
+        row.querySelectorAll("[data-k]").forEach(el => el.addEventListener("input", () => {
+          const k = el.dataset.k;
+          current.lines[i][k] = ["quantity", "unit_price", "vat_rate"].includes(k) ? el.value : el.value;
+          row.querySelector(".lt").innerHTML = `<span class="mlabel">Total</span>${euro(lineCents(current.lines[i]) / 100)}`;
+          renderTotals();
+        }));
+      });
+      $("lines").querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+        current.lines.splice(Number(b.dataset.del), 1);
+        renderLines();
+      }));
+      renderTotals();
+    }
+
+    function renderTotals() {
+      const d = current, t = computeTotals(d.lines, d.vat_mode), vat = d.vat_mode === "assujetti";
+      const rows = [];
+      if (vat) {
+        rows.push(`<div><span>Total HT</span><span>${euro(t.ht)}</span></div>`);
+        for (const r of t.byRate) rows.push(`<div class="muted"><span>TVA ${qtyLabel(r.rate)} %</span><span>${euro(r.tva)}</span></div>`);
+      }
+      rows.push(`<div class="big"><span>${d.kind === "avoir" ? "Montant de l'avoir" : vat ? "Total TTC" : "Total"}</span><span>${euro(t.ttc)}</span></div>`);
+      if (!vat) rows.push(`<div class="muted"><span>TVA non applicable, art. 293 B du CGI</span><span></span></div>`);
+      if (d.kind === "devis" && num(d.deposit_percent) > 0) rows.push(`<div class="muted"><span>Acompte (${qtyLabel(d.deposit_percent)} %)</span><span>${euro(depositAmount(t.ttc, d.deposit_percent))}</span></div>`);
+      if (d.kind === "facture" && num(d.already_paid) > 0) rows.push(`<div><span>Reste à payer</span><span>${euro(amountDue(t.ttc, d.already_paid))}</span></div>`);
+      $("totals").innerHTML = rows.join("");
+    }
+
+    // Lecture du formulaire dans le document courant
+    function readForm() {
+      if (!editable()) { current.internal_note = $("d_internal").value; return; }
+      const c = {};
+      document.querySelectorAll("[data-client]").forEach(el => { const v = el.value.trim(); if (v) c[el.dataset.client] = v; });
+      current.client = c;
+      current.nature = $("d_nature").value;
+      current.vat_mode = $("d_vat").value;
+      current.service_date = $("d_service").value.trim();
+      current.due_date = $("d_due").value || null;
+      current.deposit_percent = current.kind === "devis" ? Math.min(100, Math.max(0, num($("d_deposit").value))) : 0;
+      current.already_paid = current.kind === "facture" ? Math.max(0, num($("d_paid").value)) : 0;
+      current.notes = $("d_notes").value.trim();
+      current.terms = $("d_terms").value.trim();
+      current.internal_note = $("d_internal").value;
+      current.lines = current.lines
+        .map(l => ({ description: String(l.description || "").trim(), quantity: num(l.quantity), unit: String(l.unit || "").trim(), unit_price: num(l.unit_price), vat_rate: num(l.vat_rate) }))
+        .filter(l => l.description || l.unit_price || l.quantity !== 1);
+    }
+
+    $("d_vat").addEventListener("change", () => { current.vat_mode = $("d_vat").value; renderLines(); });
+    ["d_deposit", "d_paid"].forEach(id => $(id).addEventListener("input", () => { readForm(); renderTotals(); }));
+    $("btnAddLine").addEventListener("click", () => { current.lines.push(blankLine()); renderLines(); $("lines").querySelector(".line:last-child textarea")?.focus(); });
+    $("catalogPick").addEventListener("change", () => {
+      const item = catalog[Number($("catalogPick").value)];
+      $("catalogPick").value = "";
+      if (!item) return;
+      // Prix du site TTC : en régime de TVA, on retrouve le prix HT au taux par défaut
+      const rate = Number(settings.default_vat_rate) || 20;
+      const price = current.vat_mode === "assujetti" ? Math.round(item.price / (1 + rate / 100) * 100) / 100 : item.price;
+      const empty = current.lines.length === 1 && !current.lines[0].description && !num(current.lines[0].unit_price);
+      const line = { description: item.label, quantity: 1, unit: item.unit, unit_price: price, vat_rate: rate };
+      if (empty) current.lines[0] = line; else current.lines.push(line);
+      renderLines();
+    });
+
+    // Clients déjà facturés, pour ne pas tout ressaisir
+    function fillClientPick() {
+      const seen = new Map();
+      for (const d of docs) {
+        const c = d.client || {};
+        if (!c.name) continue;
+        const key = `${c.name}|${c.email || ""}`.toLowerCase();
+        if (!seen.has(key)) seen.set(key, c);
+      }
+      const list = [...seen.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+      $("clientPick").innerHTML = `<option value="">Reprendre un client…</option>` + list.map((c, i) => `<option value="${i}">${esc(c.name)}${c.email ? ` — ${esc(c.email)}` : ""}</option>`).join("");
+      $("clientPick").onchange = () => {
+        const c = list[Number($("clientPick").value)];
+        if (!c) return;
+        document.querySelectorAll("[data-client]").forEach(el => { el.value = c[el.dataset.client] || ""; });
+        $("clientPick").value = "";
+      };
+    }
+
+    // ─── Enregistrement et actions ────────────────────────────────────────
+    const DOC_COLUMNS = ["kind", "service_date", "nature", "client", "lines", "vat_mode", "deposit_percent", "already_paid", "notes", "terms", "internal_note", "source_id", "due_date"];
+    async function saveDraft({ quiet = false } = {}) {
+      readForm();
+      const row = Object.fromEntries(DOC_COLUMNS.map(k => [k, current[k] ?? null]));
+      const q = current.id
+        ? supabase.from("billing_documents").update(row).eq("id", current.id).select().single()
+        : supabase.from("billing_documents").insert(row).select().single();
+      const { data, error } = await q;
+      if (error) throw error;
+      current = { ...current, ...data };
+      upsertLocal(current);
+      if (!quiet) setMsg($("edMsg"), "Brouillon enregistré.", "ok");
+      return current;
+    }
+    function upsertLocal(d) {
+      const i = docs.findIndex(x => x.id === d.id);
+      if (i >= 0) docs[i] = { ...d }; else docs.unshift({ ...d });
+    }
+    async function refreshCurrent() {
+      const { data, error } = await supabase.from("billing_documents").select("*").eq("id", current.id).single();
+      if (error) throw error;
+      current = data; upsertLocal(data);
+    }
+
+    async function run(label, fn) {
+      if (busy) return;
+      busy = true;
+      document.querySelectorAll("#edBar button").forEach(b => b.disabled = true);
+      setMsg($("edMsg"), `${label}…`);
+      try { await fn(); }
+      catch (e) { console.error(e); setMsg($("edMsg"), explain(e), "err"); }
+      finally { busy = false; document.querySelectorAll("#edBar button").forEach(b => b.disabled = false); }
+    }
+
+    function validateBeforeFinalize() {
+      readForm();
+      if (!current.client?.name) return "Indiquez le nom du client.";
+      if (!current.lines.length) return "Ajoutez au moins une ligne.";
+      if (current.lines.some(l => !l.description)) return "Chaque ligne doit avoir une désignation.";
+      if (current.lines.some(l => l.quantity <= 0)) return "Les quantités doivent être supérieures à zéro.";
+      if (!settingsComplete()) return "Complétez d'abord l'adresse et le SIRET de l'entreprise dans les réglages.";
+      if (current.kind === "facture" && current.already_paid > computeTotals(current.lines, current.vat_mode).ttc) return "L'acompte déjà reçu dépasse le total de la facture.";
+      return "";
+    }
+
+    async function finalize() {
+      const problem = validateBeforeFinalize();
+      if (problem) { setMsg($("edMsg"), problem, "err"); return; }
+      const what = { devis: "ce devis", facture: "cette facture", avoir: "cet avoir" }[current.kind];
+      if (!confirm(`Valider ${what} ? Il recevra un numéro définitif et son contenu ne pourra plus être modifié.`)) return;
+      await run("Validation", async () => {
+        await saveDraft({ quiet: true });
+        const { data, error } = await supabase.rpc("billing_finalize", { p_id: current.id });
+        if (error) throw error;
+        await refreshCurrent();
+        if (current.kind === "avoir" && current.source_id) await reloadOne(current.source_id);
+        renderEditor();
+        setMsg($("edMsg"), `${KIND_LABEL[current.kind]} validé${current.kind === "facture" ? "e" : ""} : ${current.number || data?.number || ""}.`, "ok");
+      });
+    }
+    async function reloadOne(id) {
+      const { data } = await supabase.from("billing_documents").select("*").eq("id", id).maybeSingle();
+      if (data) upsertLocal(data);
+    }
+
+    async function setStatus(fields, okText) {
+      await run("Enregistrement", async () => {
+        const { error } = await supabase.from("billing_documents").update(fields).eq("id", current.id);
+        if (error) throw error;
+        await refreshCurrent();
+        renderEditor();
+        setMsg($("edMsg"), okText, "ok");
+      });
+    }
+
+    async function createFrom(kind, extra = {}) {
+      const src = current;
+      const copy = newDoc(kind, {
+        client: { ...(src.client || {}) }, lines: JSON.parse(JSON.stringify(src.lines || [])), vat_mode: src.vat_mode, nature: src.nature,
+        service_date: src.service_date || "", notes: kind === src.kind ? src.notes || "" : "", terms: src.terms || "", ...extra,
+      });
+      openDoc(copy);
+      await run("Création", async () => { await saveDraft({ quiet: true }); renderEditor(); setMsg($("edMsg"), "Brouillon créé : vérifiez-le, puis validez-le.", "ok"); });
+    }
+
+    function pdfExtra() { return { source: sourceDoc() }; }
+
+    function renderBar() {
+      const d = current, bar = $("edBar"), b = [];
+      const btn = (id, label, cls = "on-light") => `<button class="btn ${cls}" type="button" id="${id}">${label}</button>`;
+      if (d.status === "brouillon") {
+        b.push(btn("aSave", "Enregistrer le brouillon"), btn("aPreview", "Aperçu PDF"), btn("aFinalize", `Valider et numéroter`, "dark"));
+        if (d.id) b.push(btn("aDelete", "Supprimer le brouillon", "danger"));
+      } else {
+        b.push(btn("aPdf", "Télécharger le PDF", "dark"), btn("aSend", d.sent_at ? "Renvoyer par email" : "Envoyer par email"));
+        if (d.kind === "devis") {
+          if (d.status !== "accepte") b.push(btn("aAccept", "Marquer accepté"));
+          if (d.status === "emis") b.push(btn("aRefuse", "Marquer refusé"));
+          if (d.status !== "refuse") b.push(btn("aToInvoice", "Transformer en facture"));
+        }
+        if (d.kind === "facture") {
+          if (d.status === "emis") b.push(btn("aPay", "Enregistrer le paiement"));
+          if (d.status === "payee") b.push(btn("aUnpay", "Annuler le paiement"));
+          if (d.status !== "annulee") b.push(btn("aCredit", "Créer un avoir"));
+        }
+        b.push(btn("aSaveNote", "Enregistrer la note privée"));
+      }
+      if (d.id && d.kind !== "avoir") b.push(btn("aDup", "Dupliquer"));
+      bar.innerHTML = b.join("");
+
+      const on = (id, fn) => $(id)?.addEventListener("click", fn);
+      on("aSave", () => run("Enregistrement", async () => { await saveDraft(); renderEditor(); }));
+      on("aPreview", () => run("Préparation du PDF", async () => { readForm(); await openPdf(current, settings, pdfExtra()); setMsg($("edMsg"), "Aperçu ouvert dans un nouvel onglet (si rien ne s'ouvre, autorisez les fenêtres pour ce site).", "ok"); }));
+      on("aFinalize", finalize);
+      on("aDelete", async () => {
+        if (!confirm("Supprimer ce brouillon ? Cette action est définitive.")) return;
+        await run("Suppression", async () => {
+          const { error } = await supabase.from("billing_documents").delete().eq("id", current.id);
+          if (error) throw error;
+          docs = docs.filter(x => x.id !== current.id);
+          show("list");
+        });
+      });
+      on("aPdf", () => run("Préparation du PDF", async () => { await downloadPdf(current, settings, pdfExtra()); setMsg($("edMsg"), `PDF téléchargé : ${pdfFileName(current)}`, "ok"); }));
+      on("aSend", openSend);
+      on("aAccept", () => setStatus({ status: "accepte", accepted_at: new Date().toISOString() }, "Devis marqué comme accepté."));
+      on("aRefuse", () => setStatus({ status: "refuse" }, "Devis marqué comme refusé."));
+      on("aToInvoice", async () => {
+        if (d.status === "emis") await setStatus({ status: "accepte", accepted_at: new Date().toISOString() }, "Devis accepté.");
+        // Acompte du devis : à reporter dans « Acompte déjà reçu » une fois encaissé
+        await createFrom("facture", { source_id: d.id, already_paid: 0, notes: `Facture établie d'après le devis ${d.number}.` });
+      });
+      on("aPay", () => { $("payBox").hidden = false; $("p_date").value = todayParis(); $("p_date").focus(); });
+      on("aUnpay", () => { if (confirm("Remettre cette facture « à payer » ?")) setStatus({ status: "emis", paid_at: null, payment_method: null }, "Paiement annulé : la facture est de nouveau à payer."); });
+      on("aCredit", () => { if (confirm(`Créer un avoir sur la facture ${d.number} ? Vous pourrez ajuster le montant avant de le valider (avoir partiel ou total).`)) createFrom("avoir", { source_id: d.id, notes: `Avoir sur la facture ${d.number} du ${dateFr(d.issue_date)}.`, terms: "", service_date: d.service_date || "" }); });
+      on("aSaveNote", () => setStatus({ internal_note: $("d_internal").value }, "Note privée enregistrée."));
+      on("aDup", () => createFrom(d.kind, { notes: d.notes || "" }));
+    }
+
+    $("btnPayNow").addEventListener("click", () => {
+      if (!$("p_date").value) { setMsg($("edMsg"), "Indiquez la date du paiement.", "err"); return; }
+      $("payBox").hidden = true;
+      setStatus({ status: "payee", paid_at: $("p_date").value, payment_method: $("p_method").value }, "Facture marquée comme payée.");
+    });
+    $("btnPayCancel").addEventListener("click", () => { $("payBox").hidden = true; });
+
+    // ─── Envoi par email ──────────────────────────────────────────────────
+    function openSend() {
+      const d = current, c = d.client || {};
+      const what = { devis: "votre devis", facture: "votre facture", avoir: "votre avoir" }[d.kind];
+      const greet = c.contact || c.name ? `Bonjour ${c.contact || c.name},` : "Bonjour,";
+      const body = {
+        devis: `Veuillez trouver ci-joint ${what} n° ${d.number}${d.service_date ? ` (${d.service_date})` : ""}, d'un montant de ${euro(d.total_ttc)}.\n\nIl est valable jusqu'au ${dateFr(d.due_date)}. Pour l'accepter, il suffit de me le retourner signé avec la mention « Bon pour accord ».`,
+        facture: `Veuillez trouver ci-joint ${what} n° ${d.number}, d'un montant de ${euro(amountDue(d.total_ttc, d.already_paid))}${d.status === "payee" ? ", réglée — merci !" : `, à régler avant le ${dateFr(d.due_date)}.`}`,
+        avoir: `Veuillez trouver ci-joint ${what} n° ${d.number}, d'un montant de ${euro(d.total_ttc)}.`,
+      }[d.kind];
+      $("s_to").value = c.email || "";
+      $("s_subject").value = `${KIND_LABEL[d.kind]} ${d.number} — Âmes Nomades`;
+      $("s_message").value = `${greet}\n\n${body}\n\nJe reste à votre disposition pour toute question.\n\nBelle journée,\n${settings.name || "Âmes Nomades"}\nÂmes Nomades`;
+      $("sendBox").hidden = false;
+      $("s_to").focus();
+    }
+    $("btnSendCancel").addEventListener("click", () => { $("sendBox").hidden = true; });
+    $("btnSendNow").addEventListener("click", () => run("Envoi", async () => {
+      const to = $("s_to").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) throw new Error("Adresse email du destinataire invalide.");
+      const pdf = await pdfBase64(current, settings, pdfExtra());
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/billing-send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session?.access_token || ""}` },
+        body: JSON.stringify({ id: current.id, to, subject: $("s_subject").value, message: $("s_message").value, copy_me: $("s_copy").checked, pdf_base64: pdf, file_name: pdfFileName(current) }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.status === 404 && !data?.error) throw new Error("La fonction billing-send n'est pas encore déployée sur Supabase.");
+      if (!res.ok || !data?.sent) throw new Error(data?.error || `Erreur ${res.status}`);
+      $("sendBox").hidden = true;
+      await refreshCurrent();
+      renderEditor();
+      setMsg($("edMsg"), `Envoyé à ${to}${$("s_copy").checked ? " (copie à contact@amesnomades.com)" : ""}.`, "ok");
+    }));
+
+    $("btnNewQuote").addEventListener("click", () => openDoc(newDoc("devis")));
+    $("btnNewInvoice").addEventListener("click", () => openDoc(newDoc("facture")));
+
+    // ─── Démarrage ────────────────────────────────────────────────────────
+    const user = await checkAdmin();
+    if (user) {
+      try {
+        await Promise.all([loadSettings(), loadDocs()]);
+        renderBanner();
+        fillYears();
+        renderList();
+      } catch (e) {
+        $("docRows").innerHTML = `<tr><td colspan="6" class="empty">${esc(explain(e))}</td></tr>`;
+        setMsg($("listMsg"), "", "");
+      }
+      loadCatalog();
+    }
+  </script>
+</body>
+</html>

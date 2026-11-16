@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.daily-report]
 verify_jwt = false
+
+[functions.billing-send]
+verify_jwt = false
