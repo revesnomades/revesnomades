@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.11.0?target=deno&no-check=true";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { recordPaidOrder, type GiftItem, type OrderItem, type PaidOrder } from "../_shared/order.ts";
+import { inBackground, sendMetaPurchase } from "../_shared/meta.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2022-11-15",
@@ -90,6 +91,28 @@ serve(async (req) => {
       };
 
       await recordPaidOrder(supabase, order);
+
+      // Achat déclaré à Meta depuis le serveur (Conversions API). Même identifiant que le pixel
+      // de la page merci (l'identifiant de la session Stripe) : Meta ne le compte qu'une fois.
+      const address = session.customer_details?.address || shipping?.address;
+      await inBackground(sendMetaPurchase({
+        eventId: session.id,
+        orderId: session.id,
+        eventTime: event.created || Date.now() / 1000,
+        value: amount,
+        email: customerEmail,
+        phone: order.customerPhone,
+        name: customerName,
+        city: address?.city || "",
+        zip: address?.postal_code || "",
+        country: address?.country || "FR",
+        externalId: meta.user_id || "",
+        ip: meta.meta_ip || "",
+        userAgent: meta.meta_ua || "",
+        fbp: meta.meta_fbp || "",
+        fbc: meta.meta_fbc || "",
+        items: order.items.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
+      }));
     }
 
     return new Response(JSON.stringify({ received: true }), {

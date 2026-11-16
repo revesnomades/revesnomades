@@ -405,6 +405,10 @@
     let giftCard = null;
     let giftUse = 0;
     let lastToPay = 0;
+    // Lecture d'un cookie (ceux du pixel Meta : _fbp, _fbc)
+    const readCookie = name => {
+      try { return decodeURIComponent((document.cookie.split("; ").find(c => c.startsWith(name + "=")) || "").slice(name.length + 1)); } catch { return ""; }
+    };
     const escGift = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const isEmailLike = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
     const giftEmailValue = () => (document.getElementById("giftEmail")?.value || "").trim();
@@ -1621,6 +1625,8 @@
             customerName: shipName || user?.user_metadata?.full_name || user?.user_metadata?.firstname || "",
             shippingAddress: shippingAddr,
             return_url: `${location.origin}/merci.html?session_id={CHECKOUT_SESSION_ID}&type=cart`,
+            // Cookies du pixel Meta : permettent à Meta de reconnaître l'achat envoyé par le serveur
+            meta: { fbp: readCookie("_fbp"), fbc: readCookie("_fbc") },
           }),
         });
 

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.11.0?target=deno&no-check=true";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { recordPaidOrder, type GiftItem, type PaidOrder } from "../_shared/order.ts";
+import { cleanFbCookie, clientIpFrom, inBackground, sendMetaPurchase } from "../_shared/meta.ts";
 
 // Bons cadeaux : montants fixes proposés, et bornes du montant libre
 const GIFT_FIXED_AMOUNTS = [50, 100, 150, 200];
@@ -461,6 +462,12 @@ serve(async (req) => {
       giftCents = Math.min(balanceCents, orderTotalCents);
     }
 
+    // Pour l'envoi de l'achat à Meta depuis le serveur (Conversions API) : cookies du pixel, adresse IP, navigateur
+    const metaFbp = cleanFbCookie(body.meta?.fbp);
+    const metaFbc = cleanFbCookie(body.meta?.fbc);
+    const metaIp = clientIpFrom(req.headers).slice(0, 64);
+    const metaUa = String(req.headers.get("user-agent") || "").slice(0, 480);
+
     // Commande entièrement réglée par le bon cadeau : pas de passage par Stripe
     if (giftCode && giftCents >= orderTotalCents) {
       const customerEmail = String(bookingUser?.email || body.userEmail || body.customerEmail || "").trim().toLowerCase();
@@ -486,6 +493,14 @@ serve(async (req) => {
         legacy: null,
       };
       await recordPaidOrder(supabase, order);
+      // Achat déclaré à Meta depuis le serveur (même identifiant que le pixel de la page merci : le n° de commande)
+      await inBackground(sendMetaPurchase({
+        eventId: orderRef, orderId: orderRef, eventTime: Date.now() / 1000, value: 0,
+        email: customerEmail, phone: customerPhone, name: customerName,
+        city: order.shipping?.city, zip: order.shipping?.postal_code, country: order.shipping?.country,
+        externalId: order.userId, ip: metaIp, userAgent: metaUa, fbp: metaFbp, fbc: metaFbc,
+        items: cartMeta.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
+      }));
       return json({ paid: true, order_ref: orderRef, gift_amount: giftCents / 100 });
     }
 
@@ -547,6 +562,11 @@ serve(async (req) => {
         user_id: bookingUser?.id || body.userId || "",
         user_email: bookingUser?.email || body.userEmail || "",
         ...(customerPhone ? { customer_phone: customerPhone } : {}),
+        // Repris par stripe-webhook pour déclarer l'achat à Meta (Conversions API)
+        ...(metaFbp ? { meta_fbp: metaFbp } : {}),
+        ...(metaFbc ? { meta_fbc: metaFbc } : {}),
+        ...(metaIp ? { meta_ip: metaIp } : {}),
+        ...(metaUa ? { meta_ua: metaUa } : {}),
       },
     };
 
