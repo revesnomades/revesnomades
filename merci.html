@@ -26,6 +26,10 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="assets/css/styles.css?v=14" />
+  <!-- Meta Pixel Code -->
+  <script src="/assets/js/metaPixel.js?v=4" defer></script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel Code -->
 </head>
 
 <body class="on-light">
@@ -165,13 +169,6 @@
       el.textContent = "Ta carte cadeau sera envoyée par email après le paiement.";
     }
 
-    // Meta Pixel Purchase Event Tracking
-    if (window.MetaPixel) {
-      const session_id = p.get("session_id") || p.get("id") || "";
-      const price = Number(p.get("price") || p.get("amount") || localStorage.getItem("last_cart_total") || 0);
-      window.MetaPixel.trackPurchase(price, session_id);
-      localStorage.removeItem("last_cart_total");
-    }
   </script>
 
   <script type="module">
@@ -195,6 +192,18 @@
     if (sessionId || paidByGift) {
       let order = null;
       try { order = JSON.parse(sessionStorage.getItem("rn_last_order") || "null"); } catch {}
+
+      // Achat déclaré à Meta une seule fois par commande (pas à chaque rechargement de la page)
+      const purchaseId = sessionId || (paidByGift ? params.get("ref") : "") || "";
+      const sentKey = `rn_purchase_sent_${purchaseId}`;
+      let alreadySent = false;
+      try { alreadySent = !!localStorage.getItem(sentKey); } catch {}
+      if (purchaseId && !alreadySent && window.MetaPixel) {
+        const recent = order && Date.now() - order.at < 6 * 3600 * 1000 ? order : null;
+        const value = recent && typeof recent.value === "number" ? recent.value : null;
+        window.MetaPixel.trackPurchase(value, purchaseId, recent ? recent.items : null);
+        try { localStorage.setItem(sentKey, String(Date.now())); } catch {}
+      }
       if (order && Date.now() - order.at < 6 * 3600 * 1000) {
         const hasProducts = order.items.some(i => i.type === "product");
         const hasStays = order.items.some(i => i.type === "sejour");

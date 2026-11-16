@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="assets/css/styles.css?v=14" />
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Meta Pixel Code -->
-  <script src="/assets/js/metaPixel.js?v=3" defer></script>
+  <script src="/assets/js/metaPixel.js?v=4" defer></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=27710195578608730&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
 </head>
@@ -1586,8 +1586,9 @@
           const productDays = cart.filter(i => i.type === "product").map(i => Number(i.deliveryDays) || 5);
           sessionStorage.setItem("rn_last_order", JSON.stringify({
             at: Date.now(),
-            items: cart.map(i => ({ name: i.name, qty: i.quantity, price: Number(i.price) || 0, type: i.type, image: i.image || null })),
+            items: cart.map(i => ({ id: i.id, name: i.name, qty: i.quantity, price: Number(i.price) || 0, type: i.type, image: i.image || null })),
             total: cartTotalDisplayEl.textContent,
+            value: Math.round(lastToPay * 100) / 100, // montant payé, pour le suivi des achats (Meta)
             shipping: hasProducts && selectedShipping ? (selectedShipping.price === 0 ? "Livraison offerte" : `${selectedShipping.name} · ${formatPrice(selectedShipping.price)}`) : null,
             relay: hasProducts && selectedShipping && isRelayMethod(selectedShipping) && selectedRelayPoint ? selectedRelayPoint.name : null,
             deliveryDays: productDays.length ? Math.max(...productDays) : null,

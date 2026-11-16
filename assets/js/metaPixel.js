@@ -35,9 +35,10 @@
 
   // Expose helper methods globally
   window.MetaPixel = {
-    track: function(eventName, params) {
+    track: function(eventName, params, eventId) {
       if (typeof window.fbq === 'function') {
-        window.fbq('track', eventName, params);
+        if (eventId) window.fbq('track', eventName, params, { eventID: String(eventId) });
+        else window.fbq('track', eventName, params);
       }
     },
     trackViewContent: function(name, category, id, value) {
@@ -65,12 +66,18 @@
         currency: 'EUR'
       });
     },
-    trackPurchase: function(value, transactionId) {
-      this.track('Purchase', {
-        value: Number(value) || 0,
-        currency: 'EUR',
-        transaction_id: transactionId
-      });
+    // value : montant payé (null si inconnu) ; orderId : identifiant unique de la commande
+    trackPurchase: function(value, orderId, items) {
+      const params = { currency: 'EUR' };
+      if (value != null && Number.isFinite(Number(value))) params.value = Number(value);
+      if (Array.isArray(items) && items.length) {
+        params.contents = items.map(function (i) { return { id: String(i.id || i.name), quantity: Number(i.qty) || 1, item_price: Number(i.price) || 0 }; });
+        params.content_ids = params.contents.map(function (c) { return c.id; });
+        params.content_type = 'product';
+        params.num_items = params.contents.reduce(function (n, c) { return n + c.quantity; }, 0);
+      }
+      if (orderId) params.order_id = String(orderId);
+      this.track('Purchase', params, orderId);
     },
     trackContact: function(method = 'Formulaire de contact') {
       this.track('Contact', {
