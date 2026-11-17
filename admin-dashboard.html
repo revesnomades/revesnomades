@@ -121,8 +121,11 @@
           </p>
           <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
             <button class="btn on-light" id="btnDailyReport" type="button" style="padding:8px 16px;">Recevoir le bilan maintenant</button>
+            <button class="btn on-light" id="btnReportCheck" type="button" style="padding:8px 16px;">Vérifier l'envoi automatique</button>
+            <button class="btn on-light" id="btnReportTest" type="button" style="padding:8px 16px;">Tester l'envoi de 6 h</button>
             <span id="dailyReportMsg" role="status" aria-live="polite" style="color:var(--muted); font-size:13px;"></span>
           </div>
+          <div id="reportCheck" hidden style="margin-top:14px; font-size:13.5px; line-height:1.5;"></div>
         </div>
 
         <div class="account-card" style="margin-top:24px; padding:20px; background:rgba(0,0,0,0.02);">
@@ -281,6 +284,67 @@
         dailyReportMsg.textContent = "Le bilan n'a pas pu être envoyé : " + (e.message || e);
       } finally {
         btnDailyReport.disabled = false;
+      }
+    });
+
+    // ─── Bilan quotidien : diagnostic et test de l'envoi automatique de 6 h ──
+    const reportCheck = document.getElementById("reportCheck");
+    const escR = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    async function reportApi(action) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/daily-report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session?.access_token || ""}` },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.status === 404 && !data?.error) throw new Error("La fonction daily-report n'est pas déployée sur Supabase.");
+      if (!res.ok) throw new Error(data?.error || `Erreur ${res.status}`);
+      return data;
+    }
+    const OUTCOME = { sent: "envoyé", simulated: "préparé, non envoyé", skipped_hour: "ignoré (pas 6 h à Paris)", already_sent: "déjà envoyé ce jour", error: "échec", refused: "refusé" };
+    const SOURCE = { cron: "automatique", test: "test", manuel: "bouton" };
+    document.getElementById("btnReportCheck")?.addEventListener("click", async () => {
+      reportCheck.hidden = false;
+      reportCheck.innerHTML = "Vérification en cours…";
+      try {
+        const data = await reportApi("status");
+        if (!Array.isArray(data.checks)) throw new Error("La fonction daily-report en ligne est une ancienne version : redéployez-la avec le dernier code.");
+        const icon = ok => ok === true ? "✅" : ok === false ? "❌" : "ℹ️";
+        const runs = (data.runs || []).filter(r => r.source !== "manuel").slice(0, 6);
+        reportCheck.innerHTML = `<ul style="list-style:none; margin:0; padding:0; display:grid; gap:6px;">${data.checks.map(c =>
+          `<li><span aria-hidden="true">${icon(c.ok)}</span> <strong>${escR(c.label)}</strong>${c.help ? `<br><span style="color:var(--muted);">${escR(c.help)}</span>` : ""}</li>`).join("")}</ul>` +
+          (runs.length ? `<p style="margin:12px 0 4px; color:var(--muted);">Derniers passages :</p><ul style="margin:0; padding-left:18px; color:var(--muted);">${runs.map(r =>
+            `<li>${new Date(r.created_at).toLocaleString("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${SOURCE[r.source] || r.source} · ${OUTCOME[r.outcome] || r.outcome}${r.detail ? ` (${escR(r.detail)})` : ""}</li>`).join("")}</ul>` : "");
+      } catch (e) {
+        reportCheck.innerHTML = `<span style="color:#b3261e;">${escR(e.message || e)}</span>`;
+      }
+    });
+    document.getElementById("btnReportTest")?.addEventListener("click", async () => {
+      const btn = document.getElementById("btnReportTest");
+      btn.disabled = true;
+      reportCheck.hidden = false;
+      reportCheck.innerHTML = "La base appelle la fonction exactement comme à 6 h… (jusqu'à 30 secondes)";
+      try {
+        const data = await reportApi("selftest");
+        const r = data.response;
+        let out;
+        if (!r) out = ["❌", "Pas de réponse en 25 secondes : la base n'a pas pu joindre la fonction (extension pg_net, ou fonction daily-report non déployée)."];
+        else {
+          let content = null; try { content = JSON.parse(r.content || "null"); } catch {}
+          if (r.status_code === 200 && content?.status === "sent") out = ["✅", `Tout fonctionne : le bilan du ${content.date} vient de partir. L'envoi de 6 h suivra le même chemin.`];
+          else if (r.status_code === 200 && content?.status === "already_sent") out = ["✅", `Tout fonctionne : le chemin de 6 h est bon, et le bilan du ${content.date} était déjà parti aujourd'hui (un seul envoi par jour).`];
+          else if (r.status_code === 200 && content?.status === "simulated") out = ["❌", "Le chemin de 6 h fonctionne, mais le bilan n'est pas envoyé : ajoutez DAILY_REPORT_EMAIL (et vérifiez BREVO_API_KEY) dans les secrets des fonctions."];
+          else if (r.status_code === 401) out = ["❌", content?.error || "La fonction refuse l'appel de la base : le secret CRON_SECRET ne correspond pas à celui du coffre."];
+          else if (r.status_code === 404) out = ["❌", "La base ne trouve pas la fonction daily-report : vérifiez son nom et qu'elle est bien déployée."];
+          else if (r.timed_out) out = ["❌", "La fonction a mis trop de temps à répondre."];
+          else out = ["❌", `Réponse inattendue (${r.status_code}) : ${content?.error || r.content || r.error || ""}`];
+        }
+        reportCheck.innerHTML = `<p style="margin:0;"><span aria-hidden="true">${out[0]}</span> ${escR(out[1])}</p>`;
+      } catch (e) {
+        reportCheck.innerHTML = `<span style="color:#b3261e;">${escR(e.message || e)}</span>`;
+      } finally {
+        btn.disabled = false;
       }
     });
 

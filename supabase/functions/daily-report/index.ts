@@ -23,6 +23,7 @@ const json = (req: Request, body: Record<string, unknown>, status = 200) => new 
 
 // Comparaison à durée constante : ne révèle rien du secret par le temps de réponse
 function sameSecret(a: string, b: string) {
+  a = String(a || "").trim(); b = String(b || "").trim(); // un espace ou un retour à la ligne collé avec la valeur ne compte pas
   if (!a || !b) return false;
   const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
   let diff = x.length ^ y.length;
@@ -171,6 +172,78 @@ async function sendMail(mail: Mail) {
   return { simulated: false };
 }
 
+// ─── Journal et diagnostic de l'envoi automatique ──────────────────────────
+type RunSource = "cron" | "test" | "manuel";
+async function logRun(db: SupabaseClient, source: RunSource, outcome: string, detail = "") {
+  try {
+    const { error } = await db.from("daily_report_runs").insert({ source, outcome, detail: detail.slice(0, 500) });
+    if (error) console.warn("daily-report : journal indisponible :", error.message);
+  } catch { /* le journal ne doit jamais bloquer le bilan */ }
+}
+
+const recipients = () => (Deno.env.get("DAILY_REPORT_EMAIL") || "").split(",").map(s => s.trim()).filter(s => s.includes("@"));
+const cronSecret = () => (Deno.env.get("CRON_SECRET") || "").trim();
+
+type Check = { ok: boolean | null; label: string; help?: string };
+
+// deno-lint-ignore no-explicit-any
+function diagnose(dbStatus: any, runs: any[] | null, runsError: string): Check[] {
+  const checks: Check[] = [];
+  const job = dbStatus?.job;
+  if (dbStatus?.missing) {
+    checks.push({ ok: null, label: "Diagnostic de la base", help: "Lancez le script supabase/sql/daily_report_check.sql dans Supabase (SQL Editor) pour voir l'état de la tâche planifiée." });
+  } else if (dbStatus?.cron_error) {
+    checks.push({ ok: false, label: "Tâche planifiée", help: `Lecture impossible (${dbStatus.cron_error}). Activez l'extension pg_cron (Database → Extensions), puis lancez supabase/sql/daily_report.sql.` });
+  } else if (!job) {
+    checks.push({ ok: false, label: "Tâche planifiée", help: "La tâche « bilan-quotidien-ames-nomades » n'existe pas : lancez supabase/sql/daily_report.sql dans Supabase (SQL Editor)." });
+  } else {
+    checks.push({ ok: !!job.active, label: `Tâche planifiée (${job.schedule}, heure UTC)`, help: job.active ? undefined : "La tâche existe mais elle est désactivée." });
+    if (!job.uses_secret || !job.url_ok) checks.push({ ok: false, label: "Commande de la tâche", help: "La tâche n'appelle pas la fonction comme prévu : relancez supabase/sql/daily_report.sql." });
+  }
+  if (dbStatus && !dbStatus.missing) {
+    if (dbStatus.vault_error) checks.push({ ok: false, label: "Secret de la tâche dans le coffre (Vault)", help: `Lecture impossible : ${dbStatus.vault_error}` });
+    else checks.push({ ok: !!dbStatus.vault_secret, label: "Secret de la tâche dans le coffre (Vault)", help: dbStatus.vault_secret ? undefined : "Absent : relancez supabase/sql/daily_report.sql, qui le crée et l'affiche." });
+  }
+  const secret = cronSecret();
+  checks.push({ ok: !!secret, label: "Secret CRON_SECRET dans les secrets des fonctions", help: secret ? undefined : "Absent : la tâche de 6 h est refusée. Ajoutez-le dans Supabase → Edge Functions → Secrets, avec la valeur affichée à la fin du script daily_report.sql." });
+  const to = recipients();
+  checks.push({ ok: to.length > 0, label: to.length ? `Destinataire : ${to.join(", ")}` : "Destinataire (DAILY_REPORT_EMAIL)", help: to.length ? undefined : "Absent : le bilan est préparé mais pas envoyé. Ajoutez DAILY_REPORT_EMAIL dans Supabase → Edge Functions → Secrets." });
+  const brevo = !!Deno.env.get("BREVO_API_KEY");
+  checks.push({ ok: brevo, label: "Clé d'envoi Brevo (BREVO_API_KEY)", help: brevo ? undefined : "Absente : aucun email ne peut partir." });
+
+  const cronRuns = Array.isArray(dbStatus?.runs) ? dbStatus.runs : [];
+  if (job && cronRuns.length === 0) checks.push({ ok: false, label: "Déclenchements de la tâche", help: "La tâche n'a encore jamais tourné. Elle tourne chaque jour à 4 h et 5 h UTC ; si elle a été créée aujourd'hui, attendez demain matin." });
+  else if (cronRuns.length) {
+    const last = cronRuns[0];
+    checks.push({ ok: last.status === "succeeded", label: `Dernier déclenchement : ${new Date(last.start_time).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, help: last.status === "succeeded" ? undefined : `Échec de la tâche : ${last.message || last.status}` });
+  }
+
+  if (runsError) {
+    checks.push({ ok: null, label: "Journal des bilans", help: runsError });
+  } else if (runs) {
+    const fromCron = runs.filter(r => r.source === "cron");
+    const sentRecently = fromCron.find(r => r.outcome === "sent" || r.outcome === "already_sent");
+    const refused = fromCron.find(r => r.outcome === "refused");
+    const lastCron = fromCron[0];
+    if (!lastCron) {
+      checks.push({ ok: cronRuns.length ? false : null, label: "Réception par la fonction", help: cronRuns.length
+        ? "La tâche tourne mais la fonction n'a rien noté : la fonction daily-report en ligne est sans doute une ancienne version. Redéployez-la avec le dernier code."
+        : "Aucun appel automatique reçu pour l'instant." });
+    } else if (refused && (!sentRecently || new Date(refused.created_at) > new Date(sentRecently.created_at))) {
+      checks.push({ ok: false, label: "Réception par la fonction", help: `Appel de 6 h refusé : ${refused.detail}` });
+    } else if (lastCron.outcome === "simulated") {
+      checks.push({ ok: false, label: "Dernier bilan automatique", help: "Préparé mais pas envoyé : DAILY_REPORT_EMAIL ou BREVO_API_KEY manquait à ce moment-là." });
+    } else if (lastCron.outcome === "error") {
+      checks.push({ ok: false, label: "Dernier bilan automatique", help: `L'envoi a échoué : ${lastCron.detail}` });
+    } else if (sentRecently) {
+      checks.push({ ok: true, label: `Dernier bilan automatique envoyé le ${new Date(sentRecently.created_at).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}` });
+    } else {
+      checks.push({ ok: null, label: "Réception par la fonction", help: "Appels reçus, mais pas encore à 6 h (heure de Paris)." });
+    }
+  }
+  return checks;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
   if (req.method !== "POST" && req.method !== "GET") return json(req, { error: "Méthode non autorisée" }, 405);
@@ -182,25 +255,74 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const auth = req.headers.get("authorization") ?? "";
-    const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-    const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+    const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+    const headerSecret = (req.headers.get("x-cron-secret") || "").trim();
+    // deno-lint-ignore no-explicit-any
+    const body: any = req.method === "POST" ? await req.json().catch(() => ({})) : {};
 
-    // 1. Tâche planifiée : secret dans « Authorization: Bearer … » (ou « x-cron-secret », quand Supabase
-    //    exige déjà son propre jeton dans Authorization)
-    const secret = Deno.env.get("CRON_SECRET") || "";
-    const isCron = sameSecret(bearer, secret) || sameSecret(req.headers.get("x-cron-secret") || "", secret);
+    // 1. Tâche planifiée : secret dans « x-cron-secret » (Supabase garde Authorization pour son propre jeton),
+    //    ou dans « Authorization: Bearer … »
+    const secret = cronSecret();
+    const isCron = sameSecret(bearer, secret) || sameSecret(headerSecret, secret);
+    if (!isCron && headerSecret) {
+      // Appel de la tâche avec un secret faux ou sans CRON_SECRET configuré : noté pour le diagnostic
+      const why = secret
+        ? "le secret envoyé par la tâche (coffre de la base) est différent de CRON_SECRET. Recopiez dans CRON_SECRET la valeur affichée à la fin du script daily_report.sql."
+        : "CRON_SECRET n'est pas enregistré dans les secrets des fonctions.";
+      await logRun(db, url.searchParams.get("source") === "test" ? "test" : "cron", "refused", why);
+      return json(req, { error: `Accès refusé : ${why}` }, 401);
+    }
+
     let opts: { force?: boolean; manual?: boolean };
+    let source: RunSource;
     if (isCron) {
       opts = { force: url.searchParams.get("force") === "1" || body?.force === true };
+      source = url.searchParams.get("source") === "test" ? "test" : "cron";
     } else {
-      // 2. Bouton de l'administration : compte admin connecté, envoi immédiat
+      // 2. Administration : compte admin connecté
       const admin = await requireAdmin(bearer, db);
       if (!admin) return json(req, { error: "Accès refusé" }, 401);
+
+      if (body?.action === "status") {
+        // deno-lint-ignore no-explicit-any
+        let dbStatus: any = null;
+        const st = await db.rpc("daily_report_status");
+        if (st.error) dbStatus = /does not exist|could not find|PGRST202|42883/i.test(`${st.error.message} ${st.error.code}`) ? { missing: true } : { cron_error: st.error.message };
+        else dbStatus = st.data;
+        const { data: runs, error: runsErr } = await db.from("daily_report_runs").select("created_at, source, outcome, detail").order("created_at", { ascending: false }).limit(15);
+        const runsError = runsErr ? "Journal indisponible : lancez supabase/sql/daily_report_check.sql." : "";
+        const { data: sent } = await db.from("daily_reports").select("report_date, status, sent_at").order("report_date", { ascending: false }).limit(7);
+        return json(req, { checks: diagnose(dbStatus, runs, runsError), runs: runs || [], cron_runs: dbStatus?.runs || [], sent: sent || [] });
+      }
+
+      if (body?.action === "selftest") {
+        const start = await db.rpc("daily_report_selftest");
+        if (start.error) {
+          const missing = /does not exist|could not find|PGRST202|42883/i.test(`${start.error.message} ${start.error.code}`);
+          return json(req, { error: missing ? "Lancez d'abord le script supabase/sql/daily_report_check.sql dans Supabase (SQL Editor)." : start.error.message }, 400);
+        }
+        const requestId = Number(start.data);
+        // La base envoie la requête quelques instants plus tard : on attend sa réponse (25 s au plus)
+        for (let i = 0; i < 25; i++) {
+          await new Promise(r => setTimeout(r, 1000));
+          const st = await db.rpc("daily_report_status", { p_request_id: requestId });
+          const resp = st.data?.response;
+          if (resp) return json(req, { request_id: requestId, response: resp });
+        }
+        return json(req, { request_id: requestId, response: null });
+      }
+
       opts = { manual: true };
+      source = "manuel";
     }
 
     const result = await runDailyReport({ now: new Date(), source: makeSource(db), lock: makeLock(db), send: sendMail }, opts);
-    console.log("daily-report :", JSON.stringify(result));
+    console.log("daily-report :", source, JSON.stringify(result));
+    const detail = result.status === "error" ? result.error
+      : result.status === "skipped_hour" ? `il était ${result.parisHour} h à Paris`
+      : "date" in result ? `bilan du ${result.date}` : "";
+    // Les passages de 4 h ou 5 h qui ne sont pas « 6 h à Paris » sont normaux : notés quand même, pour le suivi
+    await logRun(db, source, result.status, detail);
     return json(req, result, result.status === "error" ? 502 : 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erreur inconnue";
