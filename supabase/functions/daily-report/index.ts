@@ -199,6 +199,11 @@ function diagnose(dbStatus: any, runs: any[] | null, runsError: string): Check[]
   } else {
     checks.push({ ok: !!job.active, label: `Tâche planifiée (${job.schedule}, heure UTC)`, help: job.active ? undefined : "La tâche existe mais elle est désactivée." });
     if (!job.uses_secret || !job.url_ok) checks.push({ ok: false, label: "Commande de la tâche", help: "La tâche n'appelle pas la fonction comme prévu : relancez supabase/sql/daily_report.sql." });
+    else if (job.auth_is_key === false || job.secret_from_vault === false) {
+      checks.push({ ok: false, label: "Commande de la tâche modifiée à la main", help: job.auth_is_key === false
+        ? "L'en-tête Authorization de la tâche ne contient plus la clé publique de Supabase (par exemple si le secret y a été collé) : Supabase refuse alors l'appel avant la fonction. Relancez supabase/sql/daily_report.sql pour recréer la tâche telle quelle ; le secret du coffre et CRON_SECRET ne changent pas."
+        : "La tâche n'envoie plus le secret lu dans le coffre (Vault). Relancez supabase/sql/daily_report.sql pour la recréer telle quelle." });
+    }
   }
   if (dbStatus && !dbStatus.missing) {
     if (dbStatus.vault_error) checks.push({ ok: false, label: "Secret de la tâche dans le coffre (Vault)", help: `Lecture impossible : ${dbStatus.vault_error}` });

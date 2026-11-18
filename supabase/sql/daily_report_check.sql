@@ -27,7 +27,11 @@ begin
   begin
     r := r || jsonb_build_object('job', (
       select jsonb_build_object('schedule', schedule, 'active', active, 'uses_secret', command like '%x-cron-secret%',
-                                'url_ok', command like '%/functions/v1/daily-report%')
+                                'url_ok', command like '%/functions/v1/daily-report%',
+                                -- Authorization doit contenir la clé publique de Supabase (un jeton « eyJ… »), pas le secret
+                                'auth_is_key', command ~ '''Authorization''\s*,\s*''Bearer eyJ',
+                                -- le secret doit être lu dans le coffre, pas écrit en clair dans la commande
+                                'secret_from_vault', command like '%decrypted_secrets%' and command like '%cron_secret%')
         from cron.job where jobname = 'bilan-quotidien-ames-nomades'));
     r := r || jsonb_build_object('runs', coalesce((
       select jsonb_agg(x order by x.start_time desc) from (
