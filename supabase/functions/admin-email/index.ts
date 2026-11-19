@@ -102,6 +102,83 @@ async function loadRecipients(supabase: SupabaseClient, audiences: Audience[]) {
   return { recipients: [...byEmail.values()], counts };
 }
 
+// ─── Carnet de contacts : listes et participants des séjours ──────────────
+type Group = { id: string; kind: "list" | "stay"; label: string; detail?: string; count: number };
+type Contact = { email: string; firstname: string; name: string; groups: string[]; unsubscribed: boolean };
+
+const firstWord = (v: unknown) => String(v || "").trim().split(/\s+/)[0] || "";
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const dateLabel = (iso: string) => { const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number); return y && m && d ? `${d} ${MONTHS[m - 1]} ${y}` : ""; };
+
+// deno-lint-ignore no-explicit-any
+type Row = Record<string, any>;
+
+async function loadContacts(supabase: SupabaseClient) {
+  const byEmail = new Map<string, Contact>();
+  const groups = new Map<string, Group>();
+  const { data: unsubs } = await supabase.from("email_unsubscribes").select("email");
+  const unsubscribed = new Set((unsubs || []).map((u: Row) => String(u.email).toLowerCase()));
+
+  const add = (groupId: string, email: unknown, firstname: unknown, name?: unknown) => {
+    const e = String(email || "").trim().toLowerCase();
+    if (!e || !e.includes("@")) return;
+    let c = byEmail.get(e);
+    if (!c) { c = { email: e, firstname: "", name: "", groups: [], unsubscribed: unsubscribed.has(e) }; byEmail.set(e, c); }
+    if (!c.firstname) c.firstname = firstWord(firstname) || firstWord(name);
+    if (!c.name && name) c.name = String(name).trim().slice(0, 80);
+    if (!c.groups.includes(groupId)) c.groups.push(groupId);
+  };
+
+  groups.set("newsletter", { id: "newsletter", kind: "list", label: "Newsletter", count: 0 });
+  groups.set("priority", { id: "priority", kind: "list", label: "Inscrits prioritaires", count: 0 });
+  const { data: news, error: newsErr } = await supabase.from("newsletter").select("*");
+  if (newsErr) throw newsErr;
+  (news || []).forEach((r: Row) => add("newsletter", r.email, r.firstname || r.name, r.name || [r.firstname, r.lastname].filter(Boolean).join(" ")));
+  const { data: prio, error: prioErr } = await supabase.from("priority_waitlist").select("*");
+  if (prioErr) throw prioErr;
+  (prio || []).filter((r: Row) => !r.status || r.status === "active").forEach((r: Row) => add("priority", r.email, r.firstname, [r.firstname, r.lastname].filter(Boolean).join(" ")));
+
+  // Participants des séjours (réservations non annulées), groupés par séjour
+  const [{ data: bookings }, { data: stays }, { data: dates }] = await Promise.all([
+    supabase.from("bookings").select("stay_id, stay_title, customer_name, customer_email, status"),
+    supabase.from("stays").select("id, title, published"),
+    supabase.from("stay_dates").select("stay_id, start_date, end_date"),
+  ]);
+  const stayTitle = new Map<string, string>((stays || []).map((s: Row) => [String(s.id), String(s.title || "Séjour")]));
+  const stayDate = new Map<string, string>();
+  for (const d of (dates || []) as Row[]) {
+    const id = String(d.stay_id), cur = stayDate.get(id);
+    if (d.start_date && (!cur || String(d.start_date) < cur)) stayDate.set(id, String(d.start_date));
+  }
+  for (const b of (bookings || []) as Row[]) {
+    if (String(b.status || "").toLowerCase() === "cancelled") continue;
+    const id = b.stay_id ? `stay:${b.stay_id}` : `stay-title:${String(b.stay_title || "Séjour").slice(0, 80)}`;
+    if (!groups.has(id)) {
+      const sid = b.stay_id ? String(b.stay_id) : "";
+      const title = (sid && stayTitle.get(sid)) || String(b.stay_title || "Séjour").replace(/\s*\(.*\)\s*$/, "");
+      groups.set(id, { id, kind: "stay", label: title, detail: sid && stayDate.get(sid) ? dateLabel(stayDate.get(sid)!) : "", count: 0 });
+    }
+    add(id, b.customer_email, b.customer_name, b.customer_name);
+  }
+  // Inscriptions aux événements (ancien format), si la table existe
+  try {
+    const { data: regs } = await supabase.from("event_registrations").select("email, firstname, lastname, event_name, status");
+    for (const r of (regs || []) as Row[]) {
+      if (String(r.status || "").toLowerCase() === "cancelled") continue;
+      const id = `event:${String(r.event_name || "Événement").slice(0, 80)}`;
+      if (!groups.has(id)) groups.set(id, { id, kind: "stay", label: String(r.event_name || "Événement"), count: 0 });
+      add(id, r.email, r.firstname, [r.firstname, r.lastname].filter(Boolean).join(" "));
+    }
+  } catch { /* table absente */ }
+
+  const contacts = [...byEmail.values()];
+  for (const c of contacts) for (const g of c.groups) { const grp = groups.get(g); if (grp) grp.count++; }
+  return { contacts, groups: [...groups.values()] };
+}
+
+/** Peut recevoir cet envoi : un désinscrit des actualités reste joignable pour un séjour auquel il participe. */
+const canReceive = (c: Contact) => !c.unsubscribed || c.groups.some(g => !["newsletter", "priority"].includes(g));
+
 // ─── Désinscription ────────────────────────────────────────────────────────
 const b64url = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -129,7 +206,8 @@ function sanitizeBody(html: string) {
     .replace(/\{%/g, "{ %").replace(/%\}/g, "% }");
 }
 
-function wrapEmail(bodyHtml: string, preheader: string, salutation: string, unsubUrl: string) {
+const REASON_NEWS = "Tu reçois cet email car tu es inscrit(e) à nos actualités.";
+function wrapEmail(bodyHtml: string, preheader: string, salutation: string, unsubUrl: string, reason = REASON_NEWS) {
   const body = sanitizeBody(bodyHtml).replace(/%%SALUTATION%%/g, salutation);
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Âmes Nomades</title></head>
@@ -147,7 +225,7 @@ ${body}
       <tr><td align="center" style="padding:20px 24px 26px; border-top:1px solid #e6dfc4; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:1.6; color:#6c7078;">
         Âmes Nomades — Retraites &amp; séjours bien-être<br>
         <a href="${SITE_URL}" style="color:#6c7078;">amesnomades.com</a> · <a href="https://instagram.com/amesnomades_retreat" style="color:#6c7078;">Instagram</a><br><br>
-        Tu reçois cet email car tu es inscrit(e) à nos actualités.<br>
+        ${escapeHtml(reason)}<br>
         <a href="${unsubUrl}" style="color:#6c7078;">Se désinscrire</a>
       </td></tr>
     </table>
@@ -374,8 +452,8 @@ async function sendBatch(
   if (!res.ok) throw new Error(`Brevo ${res.status} ${await res.text().catch(() => "")}`);
 }
 
-function brevoHtml(bodyHtml: string, preheader: string) {
-  return wrapEmail(bodyHtml, preheader, "{{ params.salutation }}", "{{ params.unsubscribe_url }}");
+function brevoHtml(bodyHtml: string, preheader: string, reason = REASON_NEWS) {
+  return wrapEmail(bodyHtml, preheader, "{{ params.salutation }}", "{{ params.unsubscribe_url }}", reason);
 }
 
 // ─── Statistiques des envois (lues chez Brevo) ─────────────────────────────
@@ -502,6 +580,12 @@ Deno.serve(async (req) => {
       return json(req, { counts: all.counts, total_unique: all.recipients.length });
     }
 
+    if (action === "contacts") {
+      const { contacts, groups } = await loadContacts(supabase);
+      contacts.sort((a, b) => (a.firstname || a.email).localeCompare(b.firstname || b.email, "fr"));
+      return json(req, { contacts, groups });
+    }
+
     if (action === "audience") {
       const { recipients, counts } = await loadRecipients(supabase, audiences);
       return json(req, { counts, total_unique: recipients.length });
@@ -560,9 +644,43 @@ Deno.serve(async (req) => {
         return json(req, { sent: 1, to });
       }
 
-      if (!audiences.length) return json(req, { error: "Choisissez au moins une liste" }, 400);
-      const { recipients } = await loadRecipients(supabase, audiences);
-      if (!recipients.length) return json(req, { error: "Aucun destinataire dans ces listes" }, 400);
+      // Destinataires : sélection précise (contacts cochés dans la page), ou listes entières (ancien envoi)
+      let recipients: Recipient[];
+      let recordAudiences: string[] = audiences;
+      let reason = REASON_NEWS;
+      let skipped = 0;
+      if (Array.isArray(body.recipients)) {
+        const wanted = [...new Set((body.recipients as unknown[]).map(e => String(e || "").trim().toLowerCase()).filter(Boolean))];
+        if (!wanted.length) return json(req, { error: "Sélectionnez au moins un destinataire" }, 400);
+        const { contacts, groups } = await loadContacts(supabase);
+        const known = new Map(contacts.map(c => [c.email, c]));
+        // Seules les adresses connues (listes, participants) sont acceptées ; les désinscrits des actualités sont écartés
+        recipients = [];
+        for (const e of wanted) {
+          const c = known.get(e);
+          if (c && canReceive(c)) recipients.push({ email: c.email, firstname: c.firstname });
+          else skipped++;
+        }
+        if (!recipients.length) return json(req, { error: "Aucun destinataire valide dans la sélection" }, 400);
+        const picked = (Array.isArray(body.groups) ? body.groups : []).map(String);
+        const groupById = new Map(groups.map(g => [g.id, g]));
+        const pickedGroups = picked.map((id: string) => groupById.get(id)).filter(Boolean) as Group[];
+        recordAudiences = pickedGroups.map(g => g.kind === "list" ? g.id : `Séjour : ${g.label}`);
+        if (body.manual) recordAudiences.push(`Sélection (${recipients.length})`);
+        const stayGroups = pickedGroups.filter(g => g.kind === "stay");
+        if (stayGroups.length && stayGroups.length === pickedGroups.length && !body.manual) {
+          reason = stayGroups.length === 1
+            ? `Tu reçois cet email car tu participes au séjour « ${stayGroups[0].label} ».`
+            : "Tu reçois cet email car tu participes à l'un de nos séjours.";
+        } else if (stayGroups.length || body.manual) {
+          reason = "Tu reçois cet email car tu es en contact avec Âmes Nomades (actualités ou séjour).";
+        }
+      } else {
+        if (!audiences.length) return json(req, { error: "Choisissez au moins une liste" }, 400);
+        ({ recipients } = await loadRecipients(supabase, audiences));
+        if (!recipients.length) return json(req, { error: "Aucun destinataire dans ces listes" }, 400);
+      }
+      const sendHtml = brevoHtml(bodyHtml, preheader, reason);
 
       const tag = `an-campagne-${crypto.randomUUID()}`;
       let sent = 0;
@@ -574,7 +692,7 @@ Deno.serve(async (req) => {
           params: { salutation: salutationFor(r.firstname), unsubscribe_url: await unsubscribeUrl(r.email) },
         })));
         try {
-          await sendBatch(brevoApiKey, subject, html, versions, tag);
+          await sendBatch(brevoApiKey, subject, sendHtml, versions, tag);
           sent += chunk.length;
         } catch (e) {
           console.error("Lot Brevo en échec:", e);
@@ -582,7 +700,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      const record = { subject, preheader, body_html: bodyHtml, audiences, recipients_count: sent, sent_by: admin.id };
+      const record = { subject, preheader, body_html: bodyHtml, audiences: recordAudiences, recipients_count: sent, sent_by: admin.id };
       const { error: recordError } = await supabase.from("email_campaigns").insert({ ...record, brevo_tag: tag });
       // Script SQL des statistiques pas encore lancé : l'envoi est enregistré quand même (chiffres retrouvés par l'objet)
       if (recordError) {
@@ -590,7 +708,7 @@ Deno.serve(async (req) => {
         await supabase.from("email_campaigns").insert(record);
       }
 
-      return json(req, { sent, total: recipients.length, failures });
+      return json(req, { sent, total: recipients.length, failures, skipped });
     }
 
     return json(req, { error: "Action inconnue" }, 400);

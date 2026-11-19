@@ -53,7 +53,22 @@
     .em-aud { display: flex; flex-direction: column; gap: 8px; }
     .em-aud label { display: flex; gap: 10px; align-items: center; font-size: 14px; cursor: pointer; }
     .em-aud input { width: 18px; height: 18px; accent-color: #1e1f22; }
-    .em-total { font-size: 14px; font-variant-numeric: tabular-nums; }
+    .em-total { font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .em-groups { display: flex; flex-direction: column; gap: 6px; }
+    .em-groups label { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; line-height: 1.35; }
+    .em-groups input, .em-contact input { width: 18px; height: 18px; accent-color: #1e1f22; flex-shrink: 0; margin-top: 1px; }
+    .em-groups .em-hint { display: inline; }
+    .em-sub-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin: 6px 0 2px; }
+    .em-picker { border: 1px solid var(--line); background: #fff; }
+    .em-picker summary { cursor: pointer; padding: 10px 12px; font-size: 14px; list-style-position: inside; }
+    .em-picker-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 0 12px 10px; }
+    .em-picker-tools input { flex: 1; min-width: 160px; padding: 7px 9px; border: 1px solid var(--line); font: inherit; font-size: 13.5px; }
+    .em-picker-tools button { background: none; border: none; padding: 4px; font: inherit; font-size: 12.5px; text-decoration: underline; cursor: pointer; color: var(--text); }
+    .em-contacts { max-height: 320px; overflow-y: auto; border-top: 1px solid var(--line); }
+    .em-contact { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,.05); font-size: 13.5px; cursor: pointer; }
+    .em-contact.off { opacity: .55; cursor: not-allowed; }
+    .em-contact .who { min-width: 0; word-break: break-word; }
+    .em-contact .tags { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
     .em-drop {
       display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
       border: 1px dashed var(--line); padding: 12px; background: rgba(255,255,255,.5);
@@ -137,12 +152,25 @@
 
           <div class="em-panel" id="sendPanel">
             <h2>3. Envoi</h2>
-            <div class="em-aud">
-              <label><input type="checkbox" id="audNewsletter" value="newsletter"> Newsletter <span class="em-hint" id="cntNewsletter">(…)</span></label>
-              <label><input type="checkbox" id="audPriority" value="priority"> Inscrits prioritaires <span class="em-hint" id="cntPriority">(…)</span></label>
+            <div>
+              <div class="em-sub-label">Listes</div>
+              <div class="em-groups" id="audLists"><span class="em-hint">Chargement des contacts…</span></div>
             </div>
-            <div class="em-total" id="audTotal">Aucune liste sélectionnée.</div>
-            <p class="em-hint">Les doublons sont retirés et les personnes désinscrites ne reçoivent rien.</p>
+            <div>
+              <div class="em-sub-label">Participants des séjours</div>
+              <div class="em-groups" id="audStays"></div>
+            </div>
+            <details class="em-picker" id="audPicker">
+              <summary>Choisir les contacts un par un</summary>
+              <div class="em-picker-tools">
+                <input type="search" id="contactSearch" placeholder="Rechercher un nom ou une adresse…" aria-label="Rechercher un contact">
+                <button type="button" id="pickAll">Tout cocher (liste affichée)</button>
+                <button type="button" id="pickNone">Tout décocher</button>
+              </div>
+              <div class="em-contacts" id="contactList"></div>
+            </details>
+            <div class="em-total" id="audTotal">Aucun destinataire sélectionné.</div>
+            <p class="em-hint">Cochez une liste ou un séjour pour ajouter tous ses membres, puis décochez ou ajoutez des personnes une à une. Les doublons sont retirés. Les personnes désinscrites des actualités ne reçoivent rien, sauf les emails d'un séjour auquel elles participent.</p>
 
             <div>
               <label class="em-label" for="testEmail">Envoyer d'abord un test à</label>
@@ -521,25 +549,95 @@
 
     ["subject", "preheader"].forEach(id => $(id).addEventListener("input", saveDraft));
 
-    // ── Listes ──
-    const selectedAudiences = () => [$("audNewsletter"), $("audPriority")].filter(c => c.checked).map(c => c.value);
+    // ── Destinataires : listes, séjours, contacts un par un ──
+    let contacts = [];          // { email, firstname, name, groups[], unsubscribed }
+    let groups = [];            // { id, kind: "list" | "stay", label, detail, count }
+    const selected = new Set(); // adresses cochées
+    const isNews = g => g === "newsletter" || g === "priority";
+    // Un désinscrit des actualités reste joignable pour un séjour auquel il participe
+    const eligible = c => !c.unsubscribed || c.groups.some(g => !isNews(g));
+    const eligibleFor = (c, groupId) => !c.unsubscribed || !isNews(groupId);
+    const membersOf = id => contacts.filter(c => c.groups.includes(id) && eligibleFor(c, id));
+    const escA = v => String(v ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 
-    async function refreshAudience() {
-      const aud = selectedAudiences();
-      resetConfirm();
-      if (!aud.length) { audienceTotal = 0; $("audTotal").textContent = "Aucune liste sélectionnée."; updateSendButton(); return; }
-      $("audTotal").textContent = "Calcul…";
+    async function loadContacts() {
       try {
-        const r = await callApi({ action: "audience", audiences: aud });
-        audienceTotal = r.total_unique;
-        $("audTotal").textContent = `${audienceTotal} destinataire${audienceTotal > 1 ? "s" : ""} unique${audienceTotal > 1 ? "s" : ""}.`;
+        const r = await callApi({ action: "contacts" });
+        if (!Array.isArray(r.contacts)) throw new Error("La fonction admin-email en ligne est une ancienne version : redéployez-la pour choisir les destinataires.");
+        contacts = r.contacts; groups = r.groups || [];
+        renderGroups(); renderContacts(); refreshAudience();
       } catch (e) {
-        audienceTotal = 0;
-        $("audTotal").textContent = e.message;
+        const msg = /Action inconnue/.test(e.message) ? "La fonction admin-email en ligne est une ancienne version : redéployez-la pour choisir les destinataires." : e.message;
+        $("audLists").innerHTML = `<span class="em-status err">${escA(msg)}</span>`;
       }
+    }
+
+    function groupLine(g) {
+      const members = membersOf(g.id);
+      const on = members.filter(c => selected.has(c.email)).length;
+      const hidden = g.count - members.length;
+      return `<label><input type="checkbox" data-group="${escA(g.id)}" ${members.length && on === members.length ? "checked" : ""} ${members.length ? "" : "disabled"}>
+        <span>${escA(g.label)}${g.detail ? ` <span class="em-hint">· ${escA(g.detail)}</span>` : ""}
+        <span class="em-hint">(${members.length}${hidden > 0 ? `, ${hidden} désinscrit${hidden > 1 ? "s" : ""}` : ""})</span></span></label>`;
+    }
+    function renderGroups() {
+      const lists = groups.filter(g => g.kind === "list"), stays = groups.filter(g => g.kind === "stay");
+      $("audLists").innerHTML = lists.map(groupLine).join("") || `<span class="em-hint">Aucune liste.</span>`;
+      $("audStays").innerHTML = stays.map(groupLine).join("") || `<span class="em-hint">Aucun participant pour l'instant.</span>`;
+      document.querySelectorAll("[data-group]").forEach(box => {
+        const members = membersOf(box.dataset.group);
+        const on = members.filter(c => selected.has(c.email)).length;
+        box.indeterminate = on > 0 && on < members.length;
+        box.addEventListener("change", () => {
+          for (const c of members) box.checked ? selected.add(c.email) : selected.delete(c.email);
+          renderGroups(); renderContacts(); refreshAudience();
+        });
+      });
+    }
+
+    function tagsOf(c) {
+      const names = c.groups.map(id => groups.find(g => g.id === id)?.label || id);
+      return names.join(" · ") + (c.unsubscribed ? " · désinscrit(e) des actualités" : "");
+    }
+    function visibleContacts() {
+      const q = $("contactSearch").value.trim().toLowerCase();
+      return contacts.filter(c => !q || `${c.email} ${c.firstname} ${c.name} ${tagsOf(c)}`.toLowerCase().includes(q));
+    }
+    function renderContacts() {
+      const list = visibleContacts();
+      $("contactList").innerHTML = list.length ? list.map(c => `
+        <label class="em-contact${eligible(c) ? "" : " off"}">
+          <input type="checkbox" data-email="${escA(c.email)}" ${selected.has(c.email) ? "checked" : ""} ${eligible(c) ? "" : "disabled"}>
+          <span class="who"><strong>${escA(c.name || c.firstname || c.email)}</strong>${c.name || c.firstname ? ` <span class="em-hint">${escA(c.email)}</span>` : ""}
+            <span class="tags">${escA(tagsOf(c))}${eligible(c) ? "" : " — ne peut pas recevoir d'envoi"}</span></span>
+        </label>`).join("") : `<div class="em-contact"><span class="em-hint">Aucun contact ne correspond.</span></div>`;
+      $("contactList").querySelectorAll("[data-email]").forEach(box => box.addEventListener("change", () => {
+        box.checked ? selected.add(box.dataset.email) : selected.delete(box.dataset.email);
+        renderGroups(); refreshAudience();
+      }));
+    }
+    $("contactSearch").addEventListener("input", renderContacts);
+    $("pickAll").addEventListener("click", () => { visibleContacts().filter(eligible).forEach(c => selected.add(c.email)); renderGroups(); renderContacts(); refreshAudience(); });
+    $("pickNone").addEventListener("click", () => { selected.clear(); renderGroups(); renderContacts(); refreshAudience(); });
+
+    // Groupes entièrement cochés (pour l'historique et le texte de bas d'email)
+    function fullGroups() {
+      return groups.filter(g => { const m = membersOf(g.id); return m.length && m.every(c => selected.has(c.email)); }).map(g => g.id);
+    }
+    // Sélection qui ne correspond pas exactement à des groupes entiers
+    function isManualSelection() {
+      const covered = new Set(fullGroups().flatMap(id => membersOf(id).map(c => c.email)));
+      return [...selected].some(e => !covered.has(e));
+    }
+
+    function refreshAudience() {
+      resetConfirm();
+      audienceTotal = selected.size;
+      const summary = $("audPicker").querySelector("summary");
+      summary.textContent = `Choisir les contacts un par un (${selected.size} sélectionné${selected.size > 1 ? "s" : ""} sur ${contacts.filter(eligible).length})`;
+      $("audTotal").textContent = audienceTotal ? `${audienceTotal} destinataire${audienceTotal > 1 ? "s" : ""}.` : "Aucun destinataire sélectionné.";
       updateSendButton();
     }
-    [$("audNewsletter"), $("audPriority")].forEach(c => c.addEventListener("change", refreshAudience));
 
     function updateSendButton() {
       const ready = !!current && audienceTotal > 0;
@@ -579,7 +677,9 @@
       $("btnConfirm").hidden = false;
       $("btnCancelSend").hidden = false;
       $("btnConfirm").textContent = `Confirmer l'envoi à ${audienceTotal} personne${audienceTotal > 1 ? "s" : ""}`;
-      setStatus($("sendStatus"), `Objet : « ${$("subject").value.trim()} ». L'envoi est définitif.`);
+      const names = fullGroups().map(id => groups.find(g => g.id === id)?.label).filter(Boolean);
+      const who = names.length ? `${names.join(" + ")}${isManualSelection() ? " + personnes choisies" : ""}` : "personnes choisies une à une";
+      setStatus($("sendStatus"), `Objet : « ${$("subject").value.trim()} » · Destinataires : ${who}. L'envoi est définitif.`);
     });
     $("btnCancelSend").addEventListener("click", () => { resetConfirm(); setStatus($("sendStatus"), ""); });
 
@@ -588,9 +688,10 @@
       $("btnCancelSend").hidden = true;
       setStatus($("sendStatus"), "Envoi en cours… ne fermez pas la page.");
       try {
-        const r = await callApi({ action: "send", audiences: selectedAudiences(), ...emailPayload() });
+        const r = await callApi({ action: "send", recipients: [...selected], groups: fullGroups(), manual: isManualSelection(), ...emailPayload() });
         const failed = r.failures?.length ? ` Échecs : ${r.failures.join(", ")}.` : "";
-        setStatus($("sendStatus"), `Email envoyé à ${r.sent} personne${r.sent > 1 ? "s" : ""} sur ${r.total}.${failed}`, failed ? "err" : "ok");
+        const skipped = r.skipped ? ` ${r.skipped} adresse${r.skipped > 1 ? "s" : ""} écartée${r.skipped > 1 ? "s" : ""} (désinscription ou contact inconnu).` : "";
+        setStatus($("sendStatus"), `Email envoyé à ${r.sent} personne${r.sent > 1 ? "s" : ""} sur ${r.total}.${failed}${skipped}`, failed ? "err" : "ok");
         if (!failed) { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
         loadHistory();
       } catch (e) {
@@ -660,13 +761,7 @@
     } else {
       $("testEmail").value = user.email || "";
       loadDraft();
-      callApi({ action: "counts" }).then(r => {
-        $("cntNewsletter").textContent = `(${r.counts.newsletter})`;
-        $("cntPriority").textContent = `(${r.counts.priority})`;
-      }).catch(e => {
-        $("cntNewsletter").textContent = $("cntPriority").textContent = "";
-        setStatus($("sendStatus"), e.message, "err");
-      });
+      loadContacts();
       loadHistory();
     }
   </script>
