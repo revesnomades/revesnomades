@@ -226,10 +226,8 @@ export const STATIC_PAGES: SitemapEntry[] = [
   { path: "/faq.html", changefreq: "monthly", priority: "0.6" },
   { path: "/event-sommieres.html", changefreq: "monthly", priority: "0.5" },
   { path: "/guide-cadeau.html", changefreq: "monthly", priority: "0.4" },
-  { path: "/cgv.html", changefreq: "yearly", priority: "0.2" },
-  { path: "/politique-retours.html", changefreq: "yearly", priority: "0.2" },
-  { path: "/mentions-legales.html", changefreq: "yearly", priority: "0.2" },
-  { path: "/politique-confidentialite.html", changefreq: "yearly", priority: "0.2" },
+  // CGV, mentions légales, confidentialité, retours : exclues de Google (balise noindex), donc absentes du plan
+  // du site. Les y laisser déclenche l'alerte « Exclue par la balise noindex » dans la Search Console.
 ];
 
 export function buildSitemap(stays: Row[] = [], products: Row[] = [], pages: SitemapEntry[] = STATIC_PAGES, clean = false): string {

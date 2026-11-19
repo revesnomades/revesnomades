@@ -55,24 +55,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
-  <url>
-    <loc>https://amesnomades.com/cgv</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://amesnomades.com/politique-retours</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://amesnomades.com/mentions-legales</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://amesnomades.com/politique-confidentialite</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
 </urlset>

@@ -317,3 +317,11 @@ Deno.test("Cloudflare Pages : séjour, redirection laissée intacte, plan du sit
     assertEquals(await map.text(), "secours");
   });
 });
+
+Deno.test("plan du site : aucune page exclue de Google (noindex) n'y figure", () => {
+  for (const p of STATIC_PAGES) {
+    const file = p.path === "/" ? "index.html" : p.path.slice(1);
+    const html = page(file);
+    if (/<meta[^>]+name=["']robots["'][^>]+noindex/i.test(html)) throw new Error(`${file} porte une balise noindex mais figure dans le plan du site`);
+  }
+});
