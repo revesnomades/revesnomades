@@ -207,7 +207,55 @@ function sanitizeBody(html: string) {
 }
 
 const REASON_NEWS = "Tu reçois cet email car tu es inscrit(e) à nos actualités.";
-function wrapEmail(bodyHtml: string, preheader: string, salutation: string, unsubUrl: string, reason = REASON_NEWS) {
+
+// Mise en page : « newsletter » (bandeau, boutons, photos) ou « lettre » (message simple, comme écrit à la main).
+// Gmail range plus souvent la seconde dans « Principale » plutôt que dans « Promotions ».
+type Layout = "newsletter" | "lettre";
+const layoutOf = (v: unknown): Layout => v === "lettre" ? "lettre" : "newsletter";
+
+// Lettre : les boutons deviennent de simples liens soulignés, les titres du texte en gras
+function letterBody(html: string) {
+  return html
+    .replace(/<a\b([^>]*?)\sstyle\s*=\s*"[^"]*background[^"]*"([^>]*)>/gi, '<a$1 style="color:#cc6f53; text-decoration:underline;"$2>')
+    .replace(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi, '<p style="margin:22px 0 8px;"><strong>$1</strong></p>');
+}
+
+/** Version texte de l'email : envoyée avec le HTML, elle aide les messageries à le traiter comme un vrai message. */
+function htmlToText(html: string) {
+  const decode = (s: string) => s.replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&rsquo;/g, "’").replace(/&eacute;/g, "é");
+  return decode(html
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<img\b[^>]*>/gi, "")
+    .replace(/<a\b[^>]*href\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, label: string) => {
+      const text = label.replace(/<[^>]+>/g, "").trim();
+      return /^https?:/i.test(href) && href !== text ? `${text} : ${href}` : text;
+    })
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|ul|ol|tr|table)>/gi, "\n\n")
+    .replace(/<li\b[^>]*>/gi, "- ")
+    .replace(/<[^>]+>/g, ""))
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function wrapLetter(bodyHtml: string, preheader: string, salutation: string, unsubUrl: string, reason: string) {
+  const body = letterBody(sanitizeBody(bodyHtml)).replace(/%%SALUTATION%%/g, salutation);
+  return `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Âmes Nomades</title></head>
+<body style="margin:0; padding:0; background:#ffffff;">
+<div style="display:none; max-height:0; overflow:hidden; opacity:0;">${escapeHtml(preheader)}</div>
+<div style="max-width:580px; padding:20px 16px; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:1.6; color:#1e1f22;">
+${body}
+<p style="margin-top:32px; font-size:12px; line-height:1.5; color:#80848c;">Âmes Nomades · <a href="${SITE_URL}" style="color:#80848c;">amesnomades.com</a><br>${escapeHtml(reason)} <a href="${unsubUrl}" style="color:#80848c;">Ne plus recevoir ces emails</a></p>
+</div>
+</body></html>`;
+}
+
+function wrapEmail(bodyHtml: string, preheader: string, salutation: string, unsubUrl: string, reason = REASON_NEWS, layout: Layout = "newsletter") {
+  if (layout === "lettre") return wrapLetter(bodyHtml, preheader, salutation, unsubUrl, reason);
   const body = sanitizeBody(bodyHtml).replace(/%%SALUTATION%%/g, salutation);
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Âmes Nomades</title></head>
@@ -359,7 +407,14 @@ Objet : accrocheur, 70 caractères maximum, un emoji au plus. Preheader : compl�
 const anthropic = new Anthropic({ apiKey: Deno.env.get("ANTHROPIC_API_KEY") });
 
 type Turn = { role: "user" | "assistant"; content: string };
-type GenerateOptions = { photos: Photo[]; siteVisuals: boolean };
+type GenerateOptions = { photos: Photo[]; siteVisuals: boolean; layout?: Layout };
+
+const LETTER_PROMPT = `Mise en page choisie par l'admin : « lettre simple ». L'email doit ressembler à un message personnel écrit à une personne, pas à une newsletter :
+- pas de bouton : les liens sont écrits dans une phrase (« toutes les infos sont sur la page du séjour »), deux ou trois liens au plus ;
+- pas de titre ni de mise en forme décorative, pas de tableau ; des paragraphes courts ;
+- une photo au plus, et seulement si l'admin en a importé une ou le demande ;
+- pas de vocabulaire publicitaire (« offre », « promo », « dernière chance », « gratuit », majuscules, points d'exclamation en série) ;
+- invite la personne à répondre directement à cet email si elle a une question.`;
 
 async function generateEmail(supabase: SupabaseClient, turns: Turn[], opts: GenerateOptions) {
   const { text: context, library } = await siteContext(supabase);
@@ -397,6 +452,7 @@ async function generateEmail(supabase: SupabaseClient, turns: Turn[], opts: Gene
       system: [
         { type: "text", text: SYSTEM_PROMPT },
         { type: "text", text: `Contexte actuel du site (à utiliser pour les liens, images, noms et prix) :\n\n${context}` },
+        ...(opts.layout === "lettre" ? [{ type: "text", text: LETTER_PROMPT }] : []),
       ],
       messages: buildMessages(withImages),
       // deno-lint-ignore no-explicit-any
@@ -442,18 +498,25 @@ async function sendBatch(
   htmlContent: string,
   versions: { to: { email: string; name?: string }[]; params: Record<string, string> }[],
   tag?: string,
+  textContent?: string,
 ) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "accept": "application/json", "content-type": "application/json", "api-key": brevoApiKey },
     // L'étiquette regroupe chez Brevo tous les emails d'un même envoi : elle sert à lire ses statistiques
-    body: JSON.stringify({ sender: SENDER, replyTo: SENDER, subject, htmlContent, messageVersions: versions, ...(tag ? { tags: [tag] } : {}) }),
+    body: JSON.stringify({ sender: SENDER, replyTo: SENDER, subject, htmlContent, ...(textContent ? { textContent } : {}), messageVersions: versions, ...(tag ? { tags: [tag] } : {}) }),
   });
   if (!res.ok) throw new Error(`Brevo ${res.status} ${await res.text().catch(() => "")}`);
 }
 
-function brevoHtml(bodyHtml: string, preheader: string, reason = REASON_NEWS) {
-  return wrapEmail(bodyHtml, preheader, "{{ params.salutation }}", "{{ params.unsubscribe_url }}", reason);
+function brevoHtml(bodyHtml: string, preheader: string, reason = REASON_NEWS, layout: Layout = "newsletter") {
+  return wrapEmail(bodyHtml, preheader, "{{ params.salutation }}", "{{ params.unsubscribe_url }}", reason, layout);
+}
+
+/** Version texte pour Brevo : même contenu, prénom et lien de désinscription remplis par Brevo. */
+function brevoText(bodyHtml: string, reason = REASON_NEWS) {
+  const body = htmlToText(sanitizeBody(bodyHtml).replace(/%%SALUTATION%%/g, "{{ params.salutation_text }}"));
+  return `${body}\n\n--\nÂmes Nomades · ${SITE_URL}\n${reason}\nNe plus recevoir ces emails : {{ params.unsubscribe_url }}`;
 }
 
 // ─── Statistiques des envois (lues chez Brevo) ─────────────────────────────
@@ -558,6 +621,7 @@ async function campaignHistory(supabase: SupabaseClient, apiKey: string | undefi
 }
 
 const salutationFor = (firstname: string) => firstname ? `Bonjour ${escapeHtml(firstname)},` : "Bonjour,";
+const salutationText = (firstname: string) => firstname ? `Bonjour ${firstname.replace(/[{}<>]/g, "")},` : "Bonjour,";
 
 // ─── Routeur ───────────────────────────────────────────────────────────────
 Deno.serve(async (req) => {
@@ -610,8 +674,9 @@ Deno.serve(async (req) => {
       // Rien n'est écarté en silence : la page affiche ce compte et les numéros refusés
       const rejected = sentPhotos.filter((p: Photo) => !photos.includes(p)).map((p: Photo) => p.n);
       if (rejected.length) console.warn("admin-email : photos refusées :", JSON.stringify(sentPhotos.filter((p: Photo) => rejected.includes(p.n)).map((p: Photo) => p.url.slice(0, 120))));
-      const email = await generateEmail(supabase, turns, { photos, siteVisuals: body.site_visuals === true });
-      const preview = wrapEmail(email.body_html, email.preheader, "Bonjour Marie,", "#");
+      const layout = layoutOf(body.layout);
+      const email = await generateEmail(supabase, turns, { photos, siteVisuals: body.site_visuals === true, layout });
+      const preview = wrapEmail(email.body_html, email.preheader, "Bonjour Marie,", "#", REASON_NEWS, layout);
       return json(req, { ...email, preview_html: preview, photos_received: photos.length, photos_rejected: rejected });
     }
 
@@ -621,7 +686,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "preview") {
-      const preview = wrapEmail(String(body.body_html || ""), String(body.preheader || ""), "Bonjour Marie,", "#");
+      const preview = wrapEmail(String(body.body_html || ""), String(body.preheader || ""), "Bonjour Marie,", "#", REASON_NEWS, layoutOf(body.layout));
       return json(req, { preview_html: preview });
     }
 
@@ -632,15 +697,16 @@ Deno.serve(async (req) => {
       const preheader = String(body.preheader || "").trim();
       const bodyHtml = String(body.body_html || "");
       if (!subject || !bodyHtml.trim()) return json(req, { error: "Objet ou contenu manquant" }, 400);
-      const html = brevoHtml(bodyHtml, preheader);
+      const layout = layoutOf(body.layout);
+      const html = brevoHtml(bodyHtml, preheader, REASON_NEWS, layout);
 
       if (action === "test") {
         const to = String(body.test_email || admin.email || "").trim().toLowerCase();
         if (!to.includes("@")) return json(req, { error: "Adresse de test invalide" }, 400);
         await sendBatch(brevoApiKey, `[TEST] ${subject}`, html, [{
           to: [{ email: to }],
-          params: { salutation: salutationFor("Marie"), unsubscribe_url: await unsubscribeUrl(to) },
-        }]);
+          params: { salutation: salutationFor("Marie"), salutation_text: salutationText("Marie"), unsubscribe_url: await unsubscribeUrl(to) },
+        }], undefined, brevoText(bodyHtml));
         return json(req, { sent: 1, to });
       }
 
@@ -680,7 +746,8 @@ Deno.serve(async (req) => {
         ({ recipients } = await loadRecipients(supabase, audiences));
         if (!recipients.length) return json(req, { error: "Aucun destinataire dans ces listes" }, 400);
       }
-      const sendHtml = brevoHtml(bodyHtml, preheader, reason);
+      const sendHtml = brevoHtml(bodyHtml, preheader, reason, layout);
+      const sendText = brevoText(bodyHtml, reason);
 
       const tag = `an-campagne-${crypto.randomUUID()}`;
       let sent = 0;
@@ -689,10 +756,10 @@ Deno.serve(async (req) => {
         const chunk = recipients.slice(i, i + BREVO_BATCH_SIZE);
         const versions = await Promise.all(chunk.map(async r => ({
           to: [{ email: r.email, ...(r.firstname ? { name: r.firstname } : {}) }],
-          params: { salutation: salutationFor(r.firstname), unsubscribe_url: await unsubscribeUrl(r.email) },
+          params: { salutation: salutationFor(r.firstname), salutation_text: salutationText(r.firstname), unsubscribe_url: await unsubscribeUrl(r.email) },
         })));
         try {
-          await sendBatch(brevoApiKey, subject, sendHtml, versions, tag);
+          await sendBatch(brevoApiKey, subject, sendHtml, versions, tag, sendText);
           sent += chunk.length;
         } catch (e) {
           console.error("Lot Brevo en échec:", e);

@@ -83,6 +83,7 @@
     .em-photo-del { background: none; border: none; padding: 2px 4px; font-size: 12px; text-decoration: underline; cursor: pointer; color: var(--muted); }
     .em-check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
     .em-check input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: #1e1f22; }
+    .em-layout { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .btn-danger { background: #cc6f53 !important; color: #fff !important; border-color: #cc6f53 !important; }
     .is-loading { opacity: .6; pointer-events: none; }
     .em-history { margin-top: 24px; }
@@ -142,6 +143,11 @@
               <input type="checkbox" id="siteVisuals">
               <span>Utiliser aussi des photos de mon site <span class="em-hint" style="display:block;">Séjours, produits, galerie d'accueil : l'IA les regarde et choisit les plus adaptées.</span></span>
             </label>
+            <fieldset class="em-layout">
+              <legend class="em-label">Mise en page</legend>
+              <label class="em-check"><input type="radio" name="layout" value="newsletter" checked><span>Newsletter <span class="em-hint" style="display:block;">Bandeau, boutons, photos. Gmail la range souvent dans « Promotions ».</span></span></label>
+              <label class="em-check"><input type="radio" name="layout" value="lettre"><span>Lettre simple <span class="em-hint" style="display:block;">Comme un message écrit à la main : liens dans le texte, une photo au plus. Arrive plus souvent dans « Principale » — conseillée pour les participants d'un séjour.</span></span></label>
+            </fieldset>
             <div class="em-row">
               <button type="button" class="btn on-light" id="btnGenerate">Générer l'email</button>
               <button type="button" class="btn tiny" id="btnReset" hidden style="background:transparent;">Recommencer</button>
@@ -266,12 +272,16 @@
       el.className = `em-status ${kind}`;
     }
 
+    // ── Mise en page (newsletter ou lettre simple) ──
+    const layout = () => document.querySelector('input[name="layout"]:checked')?.value === "lettre" ? "lettre" : "newsletter";
+    const setLayout = v => { const el = document.querySelector(`input[name="layout"][value="${v === "lettre" ? "lettre" : "newsletter"}"]`); if (el) el.checked = true; };
+
     // ── Brouillon local ──
     function saveDraft() {
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({
           turns, versions, subject: $("subject").value, preheader: $("preheader").value,
-          photos, photoSeq, siteVisuals: $("siteVisuals").checked,
+          photos, photoSeq, siteVisuals: $("siteVisuals").checked, layout: layout(),
         }));
       } catch {}
     }
@@ -284,6 +294,7 @@
           renderPhotos();
         }
         $("siteVisuals").checked = d?.siteVisuals === true;
+        setLayout(d?.layout);
         if (!d?.versions?.length) return;
         turns = d.turns || [];
         versions = d.versions;
@@ -461,6 +472,20 @@
     ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
     drop.addEventListener("drop", (e) => { if (e.dataTransfer?.files?.length) addPhotos(e.dataTransfer.files); });
     $("siteVisuals").addEventListener("change", saveDraft);
+    // Changer de mise en page : l'aperçu est refait tout de suite, la prochaine rédaction de l'IA suit le nouveau style
+    document.querySelectorAll('input[name="layout"]').forEach(r => r.addEventListener("change", async () => {
+      saveDraft();
+      if (!current) return;
+      try {
+        const r2 = await callApi({ action: "preview", layout: layout(), body_html: current.body_html, preheader: $("preheader").value.trim() });
+        current.preview_html = r2.preview_html;
+        renderPreview();
+        saveDraft();
+        setStatus($("genStatus"), layout() === "lettre"
+          ? "Aperçu en lettre simple. Pour un texte vraiment adapté (sans boutons ni titres), demandez à l'IA : « réécris-le en lettre simple »."
+          : "Aperçu en newsletter.", "ok");
+      } catch (e) { setStatus($("genStatus"), e.message, "err"); }
+    }));
 
     // ── Génération / modification ──
     $("btnGenerate").addEventListener("click", async () => {
@@ -491,6 +516,7 @@
           turns: pending.map(({ role, content }) => ({ role, content })),
           photos: sentPhotos,
           site_visuals: siteVisuals,
+          layout: layout(),
         });
         turns = [...pending, { role: "assistant", content: email.raw }];
         current = { subject: email.subject, preheader: email.preheader, body_html: email.body_html, notes: email.notes, preview_html: email.preview_html };
@@ -540,6 +566,7 @@
       turns = []; versions = []; current = null;
       photos = []; photoSeq = 0; renderPhotos();
       $("siteVisuals").checked = false;
+      setLayout("newsletter");
       setStatus($("photoStatus"), "");
       $("subject").value = ""; $("preheader").value = "";
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
@@ -646,7 +673,7 @@
     }
 
     function emailPayload() {
-      return { subject: $("subject").value.trim(), preheader: $("preheader").value.trim(), body_html: current?.body_html || "" };
+      return { subject: $("subject").value.trim(), preheader: $("preheader").value.trim(), body_html: current?.body_html || "", layout: layout() };
     }
 
     // ── Test ──
